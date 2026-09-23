@@ -11,3 +11,5 @@ This block is written and re-added by `next dev` — verify at `node_modules/nex
 ## Product priority
 
 Forma is primarily a professor-controlled university lecture tool. Prioritize visible anatomy, readable projected controls, questions before answers, deterministic replay, and quick comparison. Keep Try Mode available for free exploration and guided examples optional. The AI interprets bounded commands; geometry and authored demonstrations determine the displayed change. Synthetic anatomy and illustrative movement are not patient-specific predictions. Never imply clinical review has occurred when it has not.
+
+Keep the experience cohesive: one central model workspace, one active playback bar and one context-sensitive task panel. Prefer a focused library or advanced-tool drawer over adding a new top-level mode. Reduce duplicate controls and keep the professor’s current setup and return path clear. See `docs/PRODUCT_DIRECTION.md` for the proposed consolidation pass; it is not a statement of shipped functionality.
