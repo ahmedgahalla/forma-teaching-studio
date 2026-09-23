@@ -1,0 +1,15 @@
+node_modules/
+.next/
+out/
+*.tsbuildinfo
+.env
+.env.local
+.venv/
+__pycache__/
+.pytest_cache/
+
+.test-tmp/
+.env.*
+!.env.example
+*.log
+*.blend1

@@ -1,0 +1,1674 @@
+{
+  "version": 1,
+  "asset": {
+    "file": "public/models/forma-teaching-v1.glb",
+    "sha256": "fec670745185b169e519dc0260f701dc3e6f109871a67369131c1286ef11e710",
+    "metadataSha256": "70acb54816a4a996fdc83facd2f8e3613b8060050a8bfa280955248fe1039dac"
+  },
+  "caseSourceSha256": "b0e5b83ef4359f2492efe2aa064982ad411866d798c036a5f3c7987742c92250",
+  "referenceShiftMm": 1.6,
+  "method": "Exact triangle-surface intersections at nine uniformly spaced poses plus every authored keyframe; unchanged pairs reuse their measured registered-reference result.",
+  "limitation": "Not swept collision detection. Crossings between samples, enclosed volumes, crown–root pairs, gingiva, bone and biological limits are not assessed. Empty pairs do not validate a movement or bite.",
+  "samples": [
+    0,
+    0.125,
+    0.25,
+    0.375,
+    0.5,
+    0.625,
+    0.75,
+    0.875,
+    1
+  ],
+  "reference": {
+    "crownPairs": [],
+    "rootPairs": []
+  },
+  "cases": {
+    "reference-occlusion": {
+      "baseline": {
+        "crownPairs": [],
+        "rootPairs": []
+      },
+      "variants": {
+        "inspect-reference": {
+          "sampleCount": 9,
+          "frames": [
+            {
+              "progress": 0,
+              "crownPairs": [],
+              "rootPairs": [],
+              "newCrownPairs": [],
+              "newRootPairs": []
+            },
+            {
+              "progress": 0.125,
+              "crownPairs": [],
+              "rootPairs": [],
+              "newCrownPairs": [],
+              "newRootPairs": []
+            },
+            {
+              "progress": 0.25,
+              "crownPairs": [],
+              "rootPairs": [],
+              "newCrownPairs": [],
+              "newRootPairs": []
+            },
+            {
+              "progress": 0.375,
+              "crownPairs": [],
+              "rootPairs": [],
+              "newCrownPairs": [],
+              "newRootPairs": []
+            },
+            {
+              "progress": 0.5,
+              "crownPairs": [],
+              "rootPairs": [],
+              "newCrownPairs": [],
+              "newRootPairs": []
+            },
+            {
+              "progress": 0.625,
+              "crownPairs": [],
+              "rootPairs": [],
+              "newCrownPairs": [],
+              "newRootPairs": []
+            },
+            {
+              "progress": 0.75,
+              "crownPairs": [],
+              "rootPairs": [],
+              "newCrownPairs": [],
+              "newRootPairs": []
+            },
+            {
+              "progress": 0.875,
+              "crownPairs": [],
+              "rootPairs": [],
+              "newCrownPairs": [],
+              "newRootPairs": []
+            },
+            {
+              "progress": 1,
+              "crownPairs": [],
+              "rootPairs": [],
+              "newCrownPairs": [],
+              "newRootPairs": []
+            }
+          ]
+        }
+      }
+    },
+    "movement-types": {
+      "baseline": {
+        "crownPairs": [],
+        "rootPairs": []
+      },
+      "variants": {
+        "translation": {
+          "sampleCount": 9,
+          "frames": [
+            {
+              "progress": 0,
+              "crownPairs": [],
+              "rootPairs": [],
+              "newCrownPairs": [],
+              "newRootPairs": []
+            },
+            {
+              "progress": 0.125,
+              "crownPairs": [],
+              "rootPairs": [],
+              "newCrownPairs": [],
+              "newRootPairs": []
+            },
+            {
+              "progress": 0.25,
+              "crownPairs": [],
+              "rootPairs": [],
+              "newCrownPairs": [],
+              "newRootPairs": []
+            },
+            {
+              "progress": 0.375,
+              "crownPairs": [],
+              "rootPairs": [],
+              "newCrownPairs": [],
+              "newRootPairs": []
+            },
+            {
+              "progress": 0.5,
+              "crownPairs": [],
+              "rootPairs": [],
+              "newCrownPairs": [],
+              "newRootPairs": []
+            },
+            {
+              "progress": 0.625,
+              "crownPairs": [],
+              "rootPairs": [],
+              "newCrownPairs": [],
+              "newRootPairs": []
+            },
+            {
+              "progress": 0.75,
+              "crownPairs": [],
+              "rootPairs": [],
+              "newCrownPairs": [],
+              "newRootPairs": []
+            },
+            {
+              "progress": 0.875,
+              "crownPairs": [],
+              "rootPairs": [],
+              "newCrownPairs": [],
+              "newRootPairs": []
+            },
+            {
+              "progress": 1,
+              "crownPairs": [],
+              "rootPairs": [],
+              "newCrownPairs": [],
+              "newRootPairs": []
+            }
+          ]
+        },
+        "tip": {
+          "sampleCount": 9,
+          "frames": [
+            {
+              "progress": 0,
+              "crownPairs": [],
+              "rootPairs": [],
+              "newCrownPairs": [],
+              "newRootPairs": []
+            },
+            {
+              "progress": 0.125,
+              "crownPairs": [],
+              "rootPairs": [],
+              "newCrownPairs": [],
+              "newRootPairs": []
+            },
+            {
+              "progress": 0.25,
+              "crownPairs": [],
+              "rootPairs": [],
+              "newCrownPairs": [],
+              "newRootPairs": []
+            },
+            {
+              "progress": 0.375,
+              "crownPairs": [],
+              "rootPairs": [],
+              "newCrownPairs": [],
+              "newRootPairs": []
+            },
+            {
+              "progress": 0.5,
+              "crownPairs": [],
+              "rootPairs": [],
+              "newCrownPairs": [],
+              "newRootPairs": []
+            },
+            {
+              "progress": 0.625,
+              "crownPairs": [],
+              "rootPairs": [],
+              "newCrownPairs": [],
+              "newRootPairs": []
+            },
+            {
+              "progress": 0.75,
+              "crownPairs": [],
+              "rootPairs": [],
+              "newCrownPairs": [],
+              "newRootPairs": []
+            },
+            {
+              "progress": 0.875,
+              "crownPairs": [],
+              "rootPairs": [],
+              "newCrownPairs": [],
+              "newRootPairs": []
+            },
+            {
+              "progress": 1,
+              "crownPairs": [],
+              "rootPairs": [],
+              "newCrownPairs": [],
+              "newRootPairs": []
+            }
+          ]
+        },
+        "torque": {
+          "sampleCount": 9,
+          "frames": [
+            {
+              "progress": 0,
+              "crownPairs": [],
+              "rootPairs": [],
+              "newCrownPairs": [],
+              "newRootPairs": []
+            },
+            {
+              "progress": 0.125,
+              "crownPairs": [],
+              "rootPairs": [],
+              "newCrownPairs": [],
+              "newRootPairs": []
+            },
+            {
+              "progress": 0.25,
+              "crownPairs": [],
+              "rootPairs": [],
+              "newCrownPairs": [],
+              "newRootPairs": []
+            },
+            {
+              "progress": 0.375,
+              "crownPairs": [],
+              "rootPairs": [],
+              "newCrownPairs": [],
+              "newRootPairs": []
+            },
+            {
+              "progress": 0.5,
+              "crownPairs": [],
+              "rootPairs": [],
+              "newCrownPairs": [],
+              "newRootPairs": []
+            },
+            {
+              "progress": 0.625,
+              "crownPairs": [],
+              "rootPairs": [],
+              "newCrownPairs": [],
+              "newRootPairs": []
+            },
+            {
+              "progress": 0.75,
+              "crownPairs": [],
+              "rootPairs": [],
+              "newCrownPairs": [],
+              "newRootPairs": []
+            },
+            {
+              "progress": 0.875,
+              "crownPairs": [],
+              "rootPairs": [],
+              "newCrownPairs": [],
+              "newRootPairs": []
+            },
+            {
+              "progress": 1,
+              "crownPairs": [],
+              "rootPairs": [],
+              "newCrownPairs": [],
+              "newRootPairs": []
+            }
+          ]
+        },
+        "axial-rotation": {
+          "sampleCount": 9,
+          "frames": [
+            {
+              "progress": 0,
+              "crownPairs": [],
+              "rootPairs": [],
+              "newCrownPairs": [],
+              "newRootPairs": []
+            },
+            {
+              "progress": 0.125,
+              "crownPairs": [],
+              "rootPairs": [],
+              "newCrownPairs": [],
+              "newRootPairs": []
+            },
+            {
+              "progress": 0.25,
+              "crownPairs": [],
+              "rootPairs": [],
+              "newCrownPairs": [],
+              "newRootPairs": []
+            },
+            {
+              "progress": 0.375,
+              "crownPairs": [],
+              "rootPairs": [],
+              "newCrownPairs": [],
+              "newRootPairs": []
+            },
+            {
+              "progress": 0.5,
+              "crownPairs": [],
+              "rootPairs": [],
+              "newCrownPairs": [],
+              "newRootPairs": []
+            },
+            {
+              "progress": 0.625,
+              "crownPairs": [],
+              "rootPairs": [],
+              "newCrownPairs": [],
+              "newRootPairs": []
+            },
+            {
+              "progress": 0.75,
+              "crownPairs": [],
+              "rootPairs": [],
+              "newCrownPairs": [],
+              "newRootPairs": []
+            },
+            {
+              "progress": 0.875,
+              "crownPairs": [],
+              "rootPairs": [],
+              "newCrownPairs": [],
+              "newRootPairs": []
+            },
+            {
+              "progress": 1,
+              "crownPairs": [],
+              "rootPairs": [],
+              "newCrownPairs": [],
+              "newRootPairs": []
+            }
+          ]
+        }
+      }
+    },
+    "crowding": {
+      "baseline": {
+        "crownPairs": [
+          {
+            "a": "11",
+            "b": "21"
+          },
+          {
+            "a": "31",
+            "b": "32"
+          }
+        ],
+        "rootPairs": []
+      },
+      "variants": {
+        "position-then-rotation": {
+          "sampleCount": 10,
+          "frames": [
+            {
+              "progress": 0,
+              "crownPairs": [
+                {
+                  "a": "11",
+                  "b": "21"
+                },
+                {
+                  "a": "31",
+                  "b": "32"
+                }
+              ],
+              "rootPairs": [],
+              "newCrownPairs": [],
+              "newRootPairs": []
+            },
+            {
+              "progress": 0.125,
+              "crownPairs": [
+                {
+                  "a": "11",
+                  "b": "21"
+                },
+                {
+                  "a": "31",
+                  "b": "32"
+                }
+              ],
+              "rootPairs": [],
+              "newCrownPairs": [],
+              "newRootPairs": []
+            },
+            {
+              "progress": 0.25,
+              "crownPairs": [
+                {
+                  "a": "31",
+                  "b": "32"
+                }
+              ],
+              "rootPairs": [],
+              "newCrownPairs": [],
+              "newRootPairs": []
+            },
+            {
+              "progress": 0.375,
+              "crownPairs": [],
+              "rootPairs": [],
+              "newCrownPairs": [],
+              "newRootPairs": []
+            },
+            {
+              "progress": 0.45,
+              "crownPairs": [],
+              "rootPairs": [],
+              "newCrownPairs": [],
+              "newRootPairs": []
+            },
+            {
+              "progress": 0.5,
+              "crownPairs": [],
+              "rootPairs": [],
+              "newCrownPairs": [],
+              "newRootPairs": []
+            },
+            {
+              "progress": 0.625,
+              "crownPairs": [],
+              "rootPairs": [],
+              "newCrownPairs": [],
+              "newRootPairs": []
+            },
+            {
+              "progress": 0.75,
+              "crownPairs": [],
+              "rootPairs": [],
+              "newCrownPairs": [],
+              "newRootPairs": []
+            },
+            {
+              "progress": 0.875,
+              "crownPairs": [],
+              "rootPairs": [],
+              "newCrownPairs": [],
+              "newRootPairs": []
+            },
+            {
+              "progress": 1,
+              "crownPairs": [],
+              "rootPairs": [],
+              "newCrownPairs": [],
+              "newRootPairs": []
+            }
+          ]
+        }
+      }
+    },
+    "midline-diastema": {
+      "baseline": {
+        "crownPairs": [],
+        "rootPairs": []
+      },
+      "variants": {
+        "symmetric-closure": {
+          "sampleCount": 9,
+          "frames": [
+            {
+              "progress": 0,
+              "crownPairs": [],
+              "rootPairs": [],
+              "newCrownPairs": [],
+              "newRootPairs": []
+            },
+            {
+              "progress": 0.125,
+              "crownPairs": [],
+              "rootPairs": [],
+              "newCrownPairs": [],
+              "newRootPairs": []
+            },
+            {
+              "progress": 0.25,
+              "crownPairs": [],
+              "rootPairs": [],
+              "newCrownPairs": [],
+              "newRootPairs": []
+            },
+            {
+              "progress": 0.375,
+              "crownPairs": [],
+              "rootPairs": [],
+              "newCrownPairs": [],
+              "newRootPairs": []
+            },
+            {
+              "progress": 0.5,
+              "crownPairs": [],
+              "rootPairs": [],
+              "newCrownPairs": [],
+              "newRootPairs": []
+            },
+            {
+              "progress": 0.625,
+              "crownPairs": [],
+              "rootPairs": [],
+              "newCrownPairs": [],
+              "newRootPairs": []
+            },
+            {
+              "progress": 0.75,
+              "crownPairs": [],
+              "rootPairs": [],
+              "newCrownPairs": [],
+              "newRootPairs": []
+            },
+            {
+              "progress": 0.875,
+              "crownPairs": [],
+              "rootPairs": [],
+              "newCrownPairs": [],
+              "newRootPairs": []
+            },
+            {
+              "progress": 1,
+              "crownPairs": [],
+              "rootPairs": [],
+              "newCrownPairs": [],
+              "newRootPairs": []
+            }
+          ]
+        },
+        "offset-closure": {
+          "sampleCount": 9,
+          "frames": [
+            {
+              "progress": 0,
+              "crownPairs": [],
+              "rootPairs": [],
+              "newCrownPairs": [],
+              "newRootPairs": []
+            },
+            {
+              "progress": 0.125,
+              "crownPairs": [],
+              "rootPairs": [],
+              "newCrownPairs": [],
+              "newRootPairs": []
+            },
+            {
+              "progress": 0.25,
+              "crownPairs": [],
+              "rootPairs": [],
+              "newCrownPairs": [],
+              "newRootPairs": []
+            },
+            {
+              "progress": 0.375,
+              "crownPairs": [],
+              "rootPairs": [],
+              "newCrownPairs": [],
+              "newRootPairs": []
+            },
+            {
+              "progress": 0.5,
+              "crownPairs": [],
+              "rootPairs": [],
+              "newCrownPairs": [],
+              "newRootPairs": []
+            },
+            {
+              "progress": 0.625,
+              "crownPairs": [],
+              "rootPairs": [],
+              "newCrownPairs": [],
+              "newRootPairs": []
+            },
+            {
+              "progress": 0.75,
+              "crownPairs": [],
+              "rootPairs": [],
+              "newCrownPairs": [],
+              "newRootPairs": []
+            },
+            {
+              "progress": 0.875,
+              "crownPairs": [],
+              "rootPairs": [],
+              "newCrownPairs": [],
+              "newRootPairs": []
+            },
+            {
+              "progress": 1,
+              "crownPairs": [],
+              "rootPairs": [],
+              "newCrownPairs": [],
+              "newRootPairs": []
+            }
+          ]
+        }
+      }
+    },
+    "increased-overjet": {
+      "baseline": {
+        "crownPairs": [],
+        "rootPairs": []
+      },
+      "variants": {
+        "segment-retraction": {
+          "sampleCount": 9,
+          "frames": [
+            {
+              "progress": 0,
+              "crownPairs": [],
+              "rootPairs": [],
+              "newCrownPairs": [],
+              "newRootPairs": []
+            },
+            {
+              "progress": 0.125,
+              "crownPairs": [],
+              "rootPairs": [],
+              "newCrownPairs": [],
+              "newRootPairs": []
+            },
+            {
+              "progress": 0.25,
+              "crownPairs": [],
+              "rootPairs": [],
+              "newCrownPairs": [],
+              "newRootPairs": []
+            },
+            {
+              "progress": 0.375,
+              "crownPairs": [],
+              "rootPairs": [],
+              "newCrownPairs": [],
+              "newRootPairs": []
+            },
+            {
+              "progress": 0.5,
+              "crownPairs": [],
+              "rootPairs": [],
+              "newCrownPairs": [],
+              "newRootPairs": []
+            },
+            {
+              "progress": 0.625,
+              "crownPairs": [],
+              "rootPairs": [],
+              "newCrownPairs": [],
+              "newRootPairs": []
+            },
+            {
+              "progress": 0.75,
+              "crownPairs": [],
+              "rootPairs": [],
+              "newCrownPairs": [],
+              "newRootPairs": []
+            },
+            {
+              "progress": 0.875,
+              "crownPairs": [],
+              "rootPairs": [],
+              "newCrownPairs": [],
+              "newRootPairs": []
+            },
+            {
+              "progress": 1,
+              "crownPairs": [],
+              "rootPairs": [],
+              "newCrownPairs": [],
+              "newRootPairs": []
+            }
+          ]
+        },
+        "inclination-comparison": {
+          "sampleCount": 9,
+          "frames": [
+            {
+              "progress": 0,
+              "crownPairs": [],
+              "rootPairs": [],
+              "newCrownPairs": [],
+              "newRootPairs": []
+            },
+            {
+              "progress": 0.125,
+              "crownPairs": [],
+              "rootPairs": [],
+              "newCrownPairs": [],
+              "newRootPairs": []
+            },
+            {
+              "progress": 0.25,
+              "crownPairs": [],
+              "rootPairs": [],
+              "newCrownPairs": [],
+              "newRootPairs": []
+            },
+            {
+              "progress": 0.375,
+              "crownPairs": [],
+              "rootPairs": [],
+              "newCrownPairs": [],
+              "newRootPairs": []
+            },
+            {
+              "progress": 0.5,
+              "crownPairs": [],
+              "rootPairs": [],
+              "newCrownPairs": [],
+              "newRootPairs": []
+            },
+            {
+              "progress": 0.625,
+              "crownPairs": [],
+              "rootPairs": [],
+              "newCrownPairs": [],
+              "newRootPairs": []
+            },
+            {
+              "progress": 0.75,
+              "crownPairs": [],
+              "rootPairs": [],
+              "newCrownPairs": [],
+              "newRootPairs": []
+            },
+            {
+              "progress": 0.875,
+              "crownPairs": [],
+              "rootPairs": [],
+              "newCrownPairs": [],
+              "newRootPairs": []
+            },
+            {
+              "progress": 1,
+              "crownPairs": [],
+              "rootPairs": [],
+              "newCrownPairs": [],
+              "newRootPairs": []
+            }
+          ]
+        }
+      }
+    },
+    "anterior-crossbite": {
+      "baseline": {
+        "crownPairs": [],
+        "rootPairs": []
+      },
+      "variants": {
+        "local-repositioning": {
+          "sampleCount": 9,
+          "frames": [
+            {
+              "progress": 0,
+              "crownPairs": [],
+              "rootPairs": [],
+              "newCrownPairs": [],
+              "newRootPairs": []
+            },
+            {
+              "progress": 0.125,
+              "crownPairs": [],
+              "rootPairs": [],
+              "newCrownPairs": [],
+              "newRootPairs": []
+            },
+            {
+              "progress": 0.25,
+              "crownPairs": [],
+              "rootPairs": [],
+              "newCrownPairs": [],
+              "newRootPairs": []
+            },
+            {
+              "progress": 0.375,
+              "crownPairs": [],
+              "rootPairs": [],
+              "newCrownPairs": [],
+              "newRootPairs": []
+            },
+            {
+              "progress": 0.5,
+              "crownPairs": [],
+              "rootPairs": [],
+              "newCrownPairs": [],
+              "newRootPairs": []
+            },
+            {
+              "progress": 0.625,
+              "crownPairs": [],
+              "rootPairs": [],
+              "newCrownPairs": [],
+              "newRootPairs": []
+            },
+            {
+              "progress": 0.75,
+              "crownPairs": [],
+              "rootPairs": [],
+              "newCrownPairs": [],
+              "newRootPairs": []
+            },
+            {
+              "progress": 0.875,
+              "crownPairs": [],
+              "rootPairs": [],
+              "newCrownPairs": [],
+              "newRootPairs": []
+            },
+            {
+              "progress": 1,
+              "crownPairs": [],
+              "rootPairs": [],
+              "newCrownPairs": [],
+              "newRootPairs": []
+            }
+          ]
+        }
+      }
+    },
+    "deepbite": {
+      "baseline": {
+        "crownPairs": [],
+        "rootPairs": []
+      },
+      "variants": {
+        "anterior-intrusion": {
+          "sampleCount": 9,
+          "frames": [
+            {
+              "progress": 0,
+              "crownPairs": [],
+              "rootPairs": [],
+              "newCrownPairs": [],
+              "newRootPairs": []
+            },
+            {
+              "progress": 0.125,
+              "crownPairs": [],
+              "rootPairs": [],
+              "newCrownPairs": [],
+              "newRootPairs": []
+            },
+            {
+              "progress": 0.25,
+              "crownPairs": [],
+              "rootPairs": [],
+              "newCrownPairs": [],
+              "newRootPairs": []
+            },
+            {
+              "progress": 0.375,
+              "crownPairs": [],
+              "rootPairs": [],
+              "newCrownPairs": [],
+              "newRootPairs": []
+            },
+            {
+              "progress": 0.5,
+              "crownPairs": [],
+              "rootPairs": [],
+              "newCrownPairs": [],
+              "newRootPairs": []
+            },
+            {
+              "progress": 0.625,
+              "crownPairs": [],
+              "rootPairs": [],
+              "newCrownPairs": [],
+              "newRootPairs": []
+            },
+            {
+              "progress": 0.75,
+              "crownPairs": [],
+              "rootPairs": [],
+              "newCrownPairs": [],
+              "newRootPairs": []
+            },
+            {
+              "progress": 0.875,
+              "crownPairs": [],
+              "rootPairs": [],
+              "newCrownPairs": [],
+              "newRootPairs": []
+            },
+            {
+              "progress": 1,
+              "crownPairs": [],
+              "rootPairs": [],
+              "newCrownPairs": [],
+              "newRootPairs": []
+            }
+          ]
+        },
+        "posterior-extrusion": {
+          "sampleCount": 9,
+          "frames": [
+            {
+              "progress": 0,
+              "crownPairs": [],
+              "rootPairs": [],
+              "newCrownPairs": [],
+              "newRootPairs": []
+            },
+            {
+              "progress": 0.125,
+              "crownPairs": [],
+              "rootPairs": [],
+              "newCrownPairs": [],
+              "newRootPairs": []
+            },
+            {
+              "progress": 0.25,
+              "crownPairs": [],
+              "rootPairs": [],
+              "newCrownPairs": [],
+              "newRootPairs": []
+            },
+            {
+              "progress": 0.375,
+              "crownPairs": [
+                {
+                  "a": "17",
+                  "b": "47"
+                },
+                {
+                  "a": "27",
+                  "b": "37"
+                }
+              ],
+              "rootPairs": [],
+              "newCrownPairs": [
+                {
+                  "a": "17",
+                  "b": "47"
+                },
+                {
+                  "a": "27",
+                  "b": "37"
+                }
+              ],
+              "newRootPairs": []
+            },
+            {
+              "progress": 0.5,
+              "crownPairs": [
+                {
+                  "a": "17",
+                  "b": "47"
+                },
+                {
+                  "a": "26",
+                  "b": "36"
+                },
+                {
+                  "a": "27",
+                  "b": "37"
+                }
+              ],
+              "rootPairs": [],
+              "newCrownPairs": [
+                {
+                  "a": "17",
+                  "b": "47"
+                },
+                {
+                  "a": "26",
+                  "b": "36"
+                },
+                {
+                  "a": "27",
+                  "b": "37"
+                }
+              ],
+              "newRootPairs": []
+            },
+            {
+              "progress": 0.625,
+              "crownPairs": [
+                {
+                  "a": "17",
+                  "b": "47"
+                },
+                {
+                  "a": "26",
+                  "b": "36"
+                },
+                {
+                  "a": "27",
+                  "b": "37"
+                }
+              ],
+              "rootPairs": [],
+              "newCrownPairs": [
+                {
+                  "a": "17",
+                  "b": "47"
+                },
+                {
+                  "a": "26",
+                  "b": "36"
+                },
+                {
+                  "a": "27",
+                  "b": "37"
+                }
+              ],
+              "newRootPairs": []
+            },
+            {
+              "progress": 0.75,
+              "crownPairs": [
+                {
+                  "a": "16",
+                  "b": "46"
+                },
+                {
+                  "a": "17",
+                  "b": "47"
+                },
+                {
+                  "a": "26",
+                  "b": "36"
+                },
+                {
+                  "a": "27",
+                  "b": "37"
+                }
+              ],
+              "rootPairs": [],
+              "newCrownPairs": [
+                {
+                  "a": "16",
+                  "b": "46"
+                },
+                {
+                  "a": "17",
+                  "b": "47"
+                },
+                {
+                  "a": "26",
+                  "b": "36"
+                },
+                {
+                  "a": "27",
+                  "b": "37"
+                }
+              ],
+              "newRootPairs": []
+            },
+            {
+              "progress": 0.875,
+              "crownPairs": [
+                {
+                  "a": "16",
+                  "b": "46"
+                },
+                {
+                  "a": "17",
+                  "b": "47"
+                },
+                {
+                  "a": "26",
+                  "b": "36"
+                },
+                {
+                  "a": "27",
+                  "b": "37"
+                }
+              ],
+              "rootPairs": [],
+              "newCrownPairs": [
+                {
+                  "a": "16",
+                  "b": "46"
+                },
+                {
+                  "a": "17",
+                  "b": "47"
+                },
+                {
+                  "a": "26",
+                  "b": "36"
+                },
+                {
+                  "a": "27",
+                  "b": "37"
+                }
+              ],
+              "newRootPairs": []
+            },
+            {
+              "progress": 1,
+              "crownPairs": [
+                {
+                  "a": "16",
+                  "b": "46"
+                },
+                {
+                  "a": "17",
+                  "b": "47"
+                },
+                {
+                  "a": "26",
+                  "b": "36"
+                },
+                {
+                  "a": "27",
+                  "b": "37"
+                }
+              ],
+              "rootPairs": [],
+              "newCrownPairs": [
+                {
+                  "a": "16",
+                  "b": "46"
+                },
+                {
+                  "a": "17",
+                  "b": "47"
+                },
+                {
+                  "a": "26",
+                  "b": "36"
+                },
+                {
+                  "a": "27",
+                  "b": "37"
+                }
+              ],
+              "newRootPairs": []
+            }
+          ]
+        }
+      }
+    },
+    "openbite": {
+      "baseline": {
+        "crownPairs": [],
+        "rootPairs": []
+      },
+      "variants": {
+        "anterior-extrusion": {
+          "sampleCount": 9,
+          "frames": [
+            {
+              "progress": 0,
+              "crownPairs": [],
+              "rootPairs": [],
+              "newCrownPairs": [],
+              "newRootPairs": []
+            },
+            {
+              "progress": 0.125,
+              "crownPairs": [],
+              "rootPairs": [],
+              "newCrownPairs": [],
+              "newRootPairs": []
+            },
+            {
+              "progress": 0.25,
+              "crownPairs": [],
+              "rootPairs": [],
+              "newCrownPairs": [],
+              "newRootPairs": []
+            },
+            {
+              "progress": 0.375,
+              "crownPairs": [],
+              "rootPairs": [],
+              "newCrownPairs": [],
+              "newRootPairs": []
+            },
+            {
+              "progress": 0.5,
+              "crownPairs": [],
+              "rootPairs": [],
+              "newCrownPairs": [],
+              "newRootPairs": []
+            },
+            {
+              "progress": 0.625,
+              "crownPairs": [],
+              "rootPairs": [],
+              "newCrownPairs": [],
+              "newRootPairs": []
+            },
+            {
+              "progress": 0.75,
+              "crownPairs": [],
+              "rootPairs": [],
+              "newCrownPairs": [],
+              "newRootPairs": []
+            },
+            {
+              "progress": 0.875,
+              "crownPairs": [],
+              "rootPairs": [],
+              "newCrownPairs": [],
+              "newRootPairs": []
+            },
+            {
+              "progress": 1,
+              "crownPairs": [],
+              "rootPairs": [],
+              "newCrownPairs": [],
+              "newRootPairs": []
+            }
+          ]
+        }
+      }
+    },
+    "posterior-crossbite": {
+      "baseline": {
+        "crownPairs": [
+          {
+            "a": "23",
+            "b": "24"
+          }
+        ],
+        "rootPairs": []
+      },
+      "variants": {
+        "dental-uprighting": {
+          "sampleCount": 10,
+          "frames": [
+            {
+              "progress": 0,
+              "crownPairs": [
+                {
+                  "a": "23",
+                  "b": "24"
+                }
+              ],
+              "rootPairs": [],
+              "newCrownPairs": [],
+              "newRootPairs": []
+            },
+            {
+              "progress": 0.125,
+              "crownPairs": [
+                {
+                  "a": "23",
+                  "b": "24"
+                }
+              ],
+              "rootPairs": [],
+              "newCrownPairs": [],
+              "newRootPairs": []
+            },
+            {
+              "progress": 0.25,
+              "crownPairs": [
+                {
+                  "a": "23",
+                  "b": "24"
+                }
+              ],
+              "rootPairs": [],
+              "newCrownPairs": [],
+              "newRootPairs": []
+            },
+            {
+              "progress": 0.375,
+              "crownPairs": [
+                {
+                  "a": "23",
+                  "b": "24"
+                }
+              ],
+              "rootPairs": [],
+              "newCrownPairs": [],
+              "newRootPairs": []
+            },
+            {
+              "progress": 0.5,
+              "crownPairs": [],
+              "rootPairs": [],
+              "newCrownPairs": [],
+              "newRootPairs": []
+            },
+            {
+              "progress": 0.6,
+              "crownPairs": [],
+              "rootPairs": [],
+              "newCrownPairs": [],
+              "newRootPairs": []
+            },
+            {
+              "progress": 0.625,
+              "crownPairs": [],
+              "rootPairs": [],
+              "newCrownPairs": [],
+              "newRootPairs": []
+            },
+            {
+              "progress": 0.75,
+              "crownPairs": [],
+              "rootPairs": [],
+              "newCrownPairs": [],
+              "newRootPairs": []
+            },
+            {
+              "progress": 0.875,
+              "crownPairs": [],
+              "rootPairs": [],
+              "newCrownPairs": [],
+              "newRootPairs": []
+            },
+            {
+              "progress": 1,
+              "crownPairs": [],
+              "rootPairs": [],
+              "newCrownPairs": [],
+              "newRootPairs": []
+            }
+          ]
+        }
+      }
+    },
+    "anchorage-space-closure": {
+      "baseline": {
+        "crownPairs": [],
+        "rootPairs": []
+      },
+      "variants": {
+        "posterior-held": {
+          "sampleCount": 9,
+          "frames": [
+            {
+              "progress": 0,
+              "crownPairs": [],
+              "rootPairs": [],
+              "newCrownPairs": [],
+              "newRootPairs": []
+            },
+            {
+              "progress": 0.125,
+              "crownPairs": [],
+              "rootPairs": [],
+              "newCrownPairs": [],
+              "newRootPairs": []
+            },
+            {
+              "progress": 0.25,
+              "crownPairs": [],
+              "rootPairs": [],
+              "newCrownPairs": [],
+              "newRootPairs": []
+            },
+            {
+              "progress": 0.375,
+              "crownPairs": [],
+              "rootPairs": [],
+              "newCrownPairs": [],
+              "newRootPairs": []
+            },
+            {
+              "progress": 0.5,
+              "crownPairs": [],
+              "rootPairs": [],
+              "newCrownPairs": [],
+              "newRootPairs": []
+            },
+            {
+              "progress": 0.625,
+              "crownPairs": [],
+              "rootPairs": [],
+              "newCrownPairs": [],
+              "newRootPairs": []
+            },
+            {
+              "progress": 0.75,
+              "crownPairs": [],
+              "rootPairs": [],
+              "newCrownPairs": [],
+              "newRootPairs": []
+            },
+            {
+              "progress": 0.875,
+              "crownPairs": [],
+              "rootPairs": [],
+              "newCrownPairs": [],
+              "newRootPairs": []
+            },
+            {
+              "progress": 1,
+              "crownPairs": [],
+              "rootPairs": [],
+              "newCrownPairs": [],
+              "newRootPairs": []
+            }
+          ]
+        },
+        "shared-space-use": {
+          "sampleCount": 9,
+          "frames": [
+            {
+              "progress": 0,
+              "crownPairs": [],
+              "rootPairs": [],
+              "newCrownPairs": [],
+              "newRootPairs": []
+            },
+            {
+              "progress": 0.125,
+              "crownPairs": [],
+              "rootPairs": [],
+              "newCrownPairs": [],
+              "newRootPairs": []
+            },
+            {
+              "progress": 0.25,
+              "crownPairs": [],
+              "rootPairs": [],
+              "newCrownPairs": [],
+              "newRootPairs": []
+            },
+            {
+              "progress": 0.375,
+              "crownPairs": [],
+              "rootPairs": [],
+              "newCrownPairs": [],
+              "newRootPairs": []
+            },
+            {
+              "progress": 0.5,
+              "crownPairs": [],
+              "rootPairs": [],
+              "newCrownPairs": [],
+              "newRootPairs": []
+            },
+            {
+              "progress": 0.625,
+              "crownPairs": [],
+              "rootPairs": [],
+              "newCrownPairs": [],
+              "newRootPairs": []
+            },
+            {
+              "progress": 0.75,
+              "crownPairs": [],
+              "rootPairs": [],
+              "newCrownPairs": [],
+              "newRootPairs": []
+            },
+            {
+              "progress": 0.875,
+              "crownPairs": [],
+              "rootPairs": [],
+              "newCrownPairs": [],
+              "newRootPairs": []
+            },
+            {
+              "progress": 1,
+              "crownPairs": [],
+              "rootPairs": [],
+              "newCrownPairs": [],
+              "newRootPairs": []
+            }
+          ]
+        }
+      }
+    },
+    "occlusal-finishing": {
+      "baseline": {
+        "crownPairs": [],
+        "rootPairs": []
+      },
+      "variants": {
+        "staged-refinement": {
+          "sampleCount": 11,
+          "frames": [
+            {
+              "progress": 0,
+              "crownPairs": [],
+              "rootPairs": [],
+              "newCrownPairs": [],
+              "newRootPairs": []
+            },
+            {
+              "progress": 0.125,
+              "crownPairs": [],
+              "rootPairs": [],
+              "newCrownPairs": [],
+              "newRootPairs": []
+            },
+            {
+              "progress": 0.25,
+              "crownPairs": [],
+              "rootPairs": [],
+              "newCrownPairs": [],
+              "newRootPairs": []
+            },
+            {
+              "progress": 0.35,
+              "crownPairs": [],
+              "rootPairs": [],
+              "newCrownPairs": [],
+              "newRootPairs": []
+            },
+            {
+              "progress": 0.375,
+              "crownPairs": [],
+              "rootPairs": [],
+              "newCrownPairs": [],
+              "newRootPairs": []
+            },
+            {
+              "progress": 0.5,
+              "crownPairs": [],
+              "rootPairs": [],
+              "newCrownPairs": [],
+              "newRootPairs": []
+            },
+            {
+              "progress": 0.625,
+              "crownPairs": [],
+              "rootPairs": [],
+              "newCrownPairs": [],
+              "newRootPairs": []
+            },
+            {
+              "progress": 0.7,
+              "crownPairs": [],
+              "rootPairs": [],
+              "newCrownPairs": [],
+              "newRootPairs": []
+            },
+            {
+              "progress": 0.75,
+              "crownPairs": [],
+              "rootPairs": [],
+              "newCrownPairs": [],
+              "newRootPairs": []
+            },
+            {
+              "progress": 0.875,
+              "crownPairs": [],
+              "rootPairs": [],
+              "newCrownPairs": [],
+              "newRootPairs": []
+            },
+            {
+              "progress": 1,
+              "crownPairs": [],
+              "rootPairs": [],
+              "newCrownPairs": [],
+              "newRootPairs": []
+            }
+          ]
+        }
+      }
+    },
+    "removable-retention": {
+      "baseline": {
+        "crownPairs": [],
+        "rootPairs": []
+      },
+      "variants": {
+        "passive-hold": {
+          "sampleCount": 9,
+          "frames": [
+            {
+              "progress": 0,
+              "crownPairs": [],
+              "rootPairs": [],
+              "newCrownPairs": [],
+              "newRootPairs": []
+            },
+            {
+              "progress": 0.125,
+              "crownPairs": [],
+              "rootPairs": [],
+              "newCrownPairs": [],
+              "newRootPairs": []
+            },
+            {
+              "progress": 0.25,
+              "crownPairs": [],
+              "rootPairs": [],
+              "newCrownPairs": [],
+              "newRootPairs": []
+            },
+            {
+              "progress": 0.375,
+              "crownPairs": [],
+              "rootPairs": [],
+              "newCrownPairs": [],
+              "newRootPairs": []
+            },
+            {
+              "progress": 0.5,
+              "crownPairs": [],
+              "rootPairs": [],
+              "newCrownPairs": [],
+              "newRootPairs": []
+            },
+            {
+              "progress": 0.625,
+              "crownPairs": [],
+              "rootPairs": [],
+              "newCrownPairs": [],
+              "newRootPairs": []
+            },
+            {
+              "progress": 0.75,
+              "crownPairs": [],
+              "rootPairs": [],
+              "newCrownPairs": [],
+              "newRootPairs": []
+            },
+            {
+              "progress": 0.875,
+              "crownPairs": [],
+              "rootPairs": [],
+              "newCrownPairs": [],
+              "newRootPairs": []
+            },
+            {
+              "progress": 1,
+              "crownPairs": [],
+              "rootPairs": [],
+              "newCrownPairs": [],
+              "newRootPairs": []
+            }
+          ]
+        }
+      }
+    }
+  }
+}

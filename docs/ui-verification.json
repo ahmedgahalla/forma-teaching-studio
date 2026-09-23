@@ -1,0 +1,87 @@
+{
+  "version": "0.11.0",
+  "stylesheetsParsed": 10,
+  "undefinedThemeTokens": [],
+  "contrasts": {
+    "midnight": {
+      "text/panel": 15.28,
+      "muted/raised": 6.79,
+      "accent-text/accent": 11.48,
+      "warning/warning-bg": 8.68,
+      "error/error-bg": 8.41,
+      "preview/preview-bg": 9.28
+    },
+    "clinical": {
+      "text/panel": 13.25,
+      "muted/raised": 5.02,
+      "accent-text/accent": 5.83,
+      "warning/warning-bg": 6.19,
+      "error/error-bg": 6.55,
+      "preview/preview-bg": 5.56
+    }
+  },
+  "localAssets": [
+    {
+      "path": "/_next/static/chunks/0lrmos1sftgim.css",
+      "status": 200,
+      "bytes": 79620,
+      "contentType": "text/css"
+    },
+    {
+      "path": "/_next/static/chunks/1b6_ftq4xjp6_.css",
+      "status": 200,
+      "bytes": 75581,
+      "contentType": "text/css"
+    },
+    {
+      "path": "/_next/static/chunks/1inwntv0b4r-7.js",
+      "status": 200,
+      "bytes": 20714,
+      "contentType": "text/javascript"
+    },
+    {
+      "path": "/_next/static/chunks/1scs3-v_g4tkg.js",
+      "status": 200,
+      "bytes": 178603,
+      "contentType": "text/javascript"
+    },
+    {
+      "path": "/_next/static/chunks/27t_qfc-3_lzs.js",
+      "status": 200,
+      "bytes": 229156,
+      "contentType": "text/javascript"
+    },
+    {
+      "path": "/_next/static/chunks/turbopack-0fek01jmc0cqy.js",
+      "status": 200,
+      "bytes": 9688,
+      "contentType": "text/javascript"
+    },
+    {
+      "path": "/_next/static/chunks/0pnw-qgj3f2-m.js",
+      "status": 200,
+      "bytes": 19021,
+      "contentType": "text/javascript"
+    },
+    {
+      "path": "/_next/static/chunks/3t_7jyfr7-ii_.js",
+      "status": 200,
+      "bytes": 1209649,
+      "contentType": "text/javascript"
+    },
+    {
+      "path": "/_next/static/chunks/0cz1d0mv5g_q7.js",
+      "status": 200,
+      "bytes": 112594,
+      "contentType": "text/javascript"
+    },
+    {
+      "path": "/models/forma-teaching-v1.glb",
+      "status": 200,
+      "bytes": 2986404,
+      "contentType": "model/gltf-binary"
+    }
+  ],
+  "browserRendered": true,
+  "browserVerification": "Manual connected-browser pass; see docs/VERIFICATION.md for scope"
+}
