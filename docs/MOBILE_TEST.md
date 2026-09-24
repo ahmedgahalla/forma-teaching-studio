@@ -15,6 +15,8 @@ The phone discovers the authenticated same-origin AI service automatically. If y
 
 ## Temporary AI connection
 
+The 24 September hosted connection repair fixes an incompatible redirect option that caused immediate AI errors. Verified on the actual private website with a natural-language scene change and a prerequisite clarification. Refresh the page if it still shows the earlier error. The API key and model configuration are unchanged.
+
 The host computer, local backend, phone bridge and tunnel must remain on. The OpenRouter key remains on that computer. The private Site stores a separate bridge credential as a server secret; it is never sent to the browser. Only command text and minimal scene context go through this connection. No file, mesh-upload or arbitrary proxy route is exposed.
 
 Stopping the computer or tunnel disconnects online AI; built-in commands and loaded models continue working. Restarting the temporary tunnel requires updating the bridge URL in Sites and redeploying its environment revision. This is a test connection, not a permanent independent backend.
@@ -35,9 +37,9 @@ The earlier phone publication passed six private-gateway tests for identity, ori
 ## Published identity
 
 - Site: `appgprj_6ab39ed0b82881919f49cba3045245ce`
-- Version: `appgprj_6ab39ed0b82881919f49cba3045245ce~appgver_928a60f20a3c8191b0e1a6b49e46b9ef`
-- Deployment: `appgdep_6ab4e3d5133c8191a02d693198755117`
-- Site source commit: `9af5d4dcf4a76f53539592c458d060a9289f1b71`
+- Version: `appgprj_6ab39ed0b82881919f49cba3045245ce~appgver_137307362fc481918897e0347be4c326`
+- Deployment: `appgdep_6ab4f77c8cd08191b589f69d200cd71b`
+- Site source commit: `24d2be74b690335c86fda71ea0c478f9c8caaa1c`
 - Environment revision: `1`
 
 Keep this Site identity and owner-only access. The hosted Worker source is maintained in the separate `../forma-mobile` Site checkout. See [backend setup](../backend/README.md) and [conversational commands](CONVERSATIONAL_COMMANDS.md).

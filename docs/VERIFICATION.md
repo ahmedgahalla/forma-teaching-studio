@@ -1,3 +1,14 @@
+# Hosted AI connection repair · 24 September 2026
+
+- Reproduced the user's production failure: authenticated POST `/api/interpret-teaching` returned 503 in 1–2 ms. The local backend and authenticated public bridge remained reachable; a real interpretation through the bridge returned the expected root-visibility action.
+- Root cause: the hosted Worker used `redirect: 'error'`, which Cloudflare's workerd request constructor rejects before sending a request. Node's mocked-fetch tests had accepted this unsupported option. Changed to `manual` and explicitly reject all 300–399 responses, preserving credential isolation.
+- Added a redirect regression test and fixed-code-only diagnostics; errors no longer assert that the host computer is offline. **8 gateway tests passed**, including identity, origin, request bounds, analysis routing and redirect rejection. No API key or access-policy change.
+- Private deployment succeeded at the existing phone URL, environment revision 1, source `24d2be74b690335c86fda71ea0c478f9c8caaa1c`.
+- Verified in the user's actual signed-in hosted page: `wire in all teeth` now receives an AI clarification about prerequisite brackets; `Please reveal the roots so I can explain them to my class.` applied root visibility and displayed the AI reply. One Undo restored the prior model. This is an end-to-end hosted desktop-browser check, not a physical-phone or microphone test.
+- Hosted Analyze initially received a provider 429; a later retry succeeded with `openai/gpt-6-luna`, correctly reporting no configured appliances or calculated response. Provider key status confirmed available quota. This distinguishes a transient provider limit from the repaired immediate gateway failure. Left Ask AI enabled with the original model restored.
+
+---
+
 # Current verification appendix · 24 September 2026 · broader language and Analyze
 
 This update broadens bounded classroom wording and adds a separate read-only AI explanation mode. The initial-response solver and clinical limitations are unchanged.
