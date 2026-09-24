@@ -13,3 +13,4 @@ __pycache__/
 !.env.example
 *.log
 *.blend1
+/public/workers/mechanics.js

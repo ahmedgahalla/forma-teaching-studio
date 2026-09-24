@@ -3,6 +3,9 @@ import { normalizeSpeechCommand, parseTeachingCommand, type TeachingAction } fro
 import { WORKFLOWS } from './workflows';
 import { validateTryAction, type TryAction } from './try-mode';
 import { TEACHING_CASES } from './teaching-cases';
+import { advanceMechanicsContext, isMechanicsClause, planMechanicsClause, sameMechanicsIntent, type MechanicsCommandContext, type PointedReference } from './mechanics-commands';
+import { validateMechanicsAction } from './mechanics/validation';
+import type { MechanicsAction } from './mechanics/types';
 
 export type TeachingContext = {
   mode: 'case' | 'workflow'; workflowId: string | null; stepIndex: number;
@@ -17,6 +20,7 @@ export type TeachingContext = {
   tryMode?: boolean; lockedIds?: string[]; tryPreview?: boolean; tryLastMovement?: boolean; tryLastIds?: string[];
   savedArrangementNames?: string[];
   tryArchTargets?: Partial<Record<'upper' | 'lower', { width: number; depth: number }>>;
+  pointed?: PointedReference; mechanics?: MechanicsCommandContext; autoApply?: boolean;
 };
 export type TeachingPlan = { actions: TeachingAction[]; summary: string; clarification: string | null };
 export type PlanValidationOptions = { sourceText?: string; expectedRevision?: number; allowLocalActions?: boolean };
@@ -48,6 +52,8 @@ function toothIds(value: unknown, context: TeachingContext): string[] {
 function validateAction(value: unknown, context: TeachingContext): TeachingAction {
   const action = record(value), only = (...names: string[]) => fields(action, ['kind', ...names]);
   switch (action.kind) {
+    case 'mechanics': only('action'); return { kind: 'mechanics', action: validateMechanicsAction(action.action) };
+    case 'dental-arrangement': only('id'); return { kind: 'dental-arrangement', id: oneOf(action.id, ['dental-class-i', 'dental-class-ii-division-1', 'dental-class-ii-division-2', 'dental-class-iii'] as const) };
     case 'case': {
       if (action.action === 'load' || action.action === 'variant') {
         only('action', 'id');
@@ -148,7 +154,8 @@ function copyContext(context: TeachingContext): TeachingContext {
     if (!count || !Number.isInteger(context.stepIndex) || context.stepIndex < 0 || context.stepIndex >= count) throw new Error('The workflow context is stale or unsupported.');
   }
   if (context.lockedIds && (context.lockedIds.some(id => !context.availableIds.includes(id)) || new Set(context.lockedIds).size !== context.lockedIds.length)) throw new Error('The locked tooth selection is stale.');
-  return { ...context, selectedIds: [...context.selectedIds], availableIds: [...context.availableIds], layers: { ...context.layers }, lockedIds: [...(context.lockedIds || [])], tryLastIds: context.tryLastIds && [...context.tryLastIds], savedArrangementNames: [...(context.savedArrangementNames || [])], tryArchTargets: { ...context.tryArchTargets } };
+  if (context.pointed && (!context.availableIds.includes(context.pointed.tooth) || (context.pointed.surface !== undefined && !['crown', 'root', 'gingiva'].includes(context.pointed.surface)) || [context.pointed.localPoint, context.pointed.worldPoint].some(point => !Array.isArray(point) || point.length !== 3 || point.some(value => !Number.isFinite(value))))) throw new Error('Point to a valid location in the current model.');
+  return { ...context, selectedIds: [...context.selectedIds], availableIds: [...context.availableIds], layers: { ...context.layers }, lockedIds: [...(context.lockedIds || [])], tryLastIds: context.tryLastIds && [...context.tryLastIds], savedArrangementNames: [...(context.savedArrangementNames || [])], tryArchTargets: { ...context.tryArchTargets }, ...(context.pointed ? { pointed: structuredClone(context.pointed) } : {}), ...(context.mechanics ? { mechanics: structuredClone(context.mechanics) } : {}) };
 }
 
 type Overrides = { arch: boolean; view: boolean; selection: boolean };
@@ -174,7 +181,12 @@ function advance(context: TeachingContext, action: TeachingAction, overrides: Ov
     if (locked.length) throw new Error(`Unlock ${locked.join(', ')} before changing its pose.`);
     select(ids); context.tryLastIds = [...ids]; context.stage = 0;
   };
-  if (action.kind === 'case') {
+  if (action.kind === 'dental-arrangement') {
+    if (context.mode === 'case' && context.tryPreview) throw new Error('Apply or discard the preview before loading a dental arrangement.');
+    context.mode = 'case'; context.synthetic = true; context.availableIds = [...DEMO_IDS]; context.workflowId = null; context.playing = false;
+  } else if (action.kind === 'mechanics') {
+    advanceMechanicsContext(context, action.action);
+  } else if (action.kind === 'case') {
     if (action.action !== 'pause' && context.tryPreview) throw new Error('Apply or discard the preview before changing the prepared case.');
     if (action.action === 'load') {
       const definition = TEACHING_CASES.find(item => item.id === action.id);
@@ -346,27 +358,50 @@ export function validateTeachingPlan(value: unknown, context: TeachingContext, o
     return { actions: [], summary: plan.summary, clarification: plan.clarification as string };
   }
   if (!plan.actions.length) throw new Error('A classroom plan needs at least one action.');
+  const automatic = new Set<unknown>();
+  let requestedActions = plan.actions;
+  // Only text/voice requests opt in. Numeric controls and explicit previews remain reviewable.
+  if (context.autoApply && context.mode === 'case' && context.tryMode && options.sourceText !== undefined && !clauses(normalizeSpeechCommand(options.sourceText)).some(clause => /^preview\b/.test(clause))) {
+    requestedActions = [];
+    for (const [index, raw] of plan.actions.entries()) {
+      requestedActions.push(raw);
+      const movement = raw?.kind === 'dental' && ['move', 'move_group', 'rotate', 'rotate_group', 'orthodontic', 'reset'].includes(raw.command?.type) || raw?.kind === 'try' && ['preview', 'revise'].includes(raw.action?.type);
+      const applied = plan.actions[index + 1]?.kind === 'try' && plan.actions[index + 1]?.action?.type === 'apply';
+      if (movement && !applied) { const apply = { kind: 'try', action: { type: 'apply' } }; requestedActions.push(apply); automatic.add(apply); }
+    }
+    if (requestedActions.length > 8) throw new Error('Use at most eight actions in one classroom request, including movement application.');
+  }
   const next = copyContext(context), overrides = { arch: false, view: false, selection: false }, actions: TeachingAction[] = [];
-  for (const [index, raw] of plan.actions.entries()) {
+  const mechanicsClauses = options.sourceText === undefined || options.allowLocalActions ? [] : clauses(normalizeSpeechCommand(options.sourceText)).filter(isMechanicsClause);
+  let mechanicsCursor = 0;
+  let expectedMechanics: MechanicsAction[] = [];
+  for (const [index, raw] of requestedActions.entries()) {
     const action = validateAction(raw, next);
-    if (['case', 'try', 'history', 'try-display', 'try-playback', 'workspace', 'appliance-display'].includes(action.kind) && !options.allowLocalActions) throw new Error('Prepared cases, Try Mode mechanics, workspace transfers, appliance placement and counted history use local commands only.');
+    if (action.kind === 'mechanics' && action.action.type === 'stage' && requestedActions.length !== 1) throw new Error('Recall an experiment stage as a separate request, then give instructions for its setup.');
+    if (action.kind === 'mechanics' && options.sourceText !== undefined && !options.allowLocalActions) {
+      if (!expectedMechanics.length) expectedMechanics = planMechanicsClause(mechanicsClauses[mechanicsCursor++] || '', next) || [];
+      if (!sameMechanicsIntent(expectedMechanics.shift(), action.action)) throw new Error('The appliance action must match the requested targets, explicit values or visible preset.');
+    }
+    if (['case', 'dental-arrangement', 'try', 'history', 'try-display', 'try-playback', 'workspace', 'appliance-display'].includes(action.kind) && !options.allowLocalActions && !automatic.has(raw)) throw new Error('Prepared cases, Try Mode mechanics, workspace transfers, appliance placement and counted history use local commands only.');
+    if (action.kind === 'dental-arrangement' && requestedActions.length !== 1) throw new Error('Load a dental arrangement as a separate request, then give commands for its model.');
     if (action.kind === 'case' && plan.actions.length !== 1) throw new Error('Use a prepared case command as a separate request, then give commands for its arrangement.');
     if (action.kind === 'workspace' && plan.actions.length !== 1) throw new Error('Change workspaces as a separate request, then give commands for the destination model.');
     if (action.kind === 'history' && plan.actions.length !== 1) throw new Error('Use counted undo or redo as a separate request.');
     if (action.kind === 'dental' && ['undo', 'redo'].includes(action.command.type) && plan.actions.length !== 1) throw new Error('Use undo or redo as a separate request.');
     if (action.kind === 'replay' && plan.actions.length !== 1) throw new Error('Use replay as a separate request; say “repeat that more slowly” to change its speed.');
-    const enteringTry = action.kind === 'workflow' && action.action === 'exit' && index === plan.actions.length - 2 && plan.actions[index + 1]?.kind === 'try' && plan.actions[index + 1]?.action?.type === 'enter';
-    if ((action.kind === 'return-lesson' || action.kind === 'workflow' && action.action === 'exit') && index !== plan.actions.length - 1 && !enteringTry) throw new Error('Return to the lesson or case before giving another request.');
+    const enteringTry = action.kind === 'workflow' && action.action === 'exit' && index === requestedActions.length - 2 && requestedActions[index + 1]?.kind === 'try' && requestedActions[index + 1]?.action?.type === 'enter';
+    if ((action.kind === 'return-lesson' || action.kind === 'workflow' && action.action === 'exit') && index !== requestedActions.length - 1 && !enteringTry) throw new Error('Return to the lesson or case before giving another request.');
     advance(next, action, overrides); actions.push(action);
   }
+  if (expectedMechanics.length || mechanicsCursor < mechanicsClauses.length && context.mode !== 'workflow') throw new Error('The plan omitted part of the requested appliance instructions.');
   if (options.sourceText !== undefined) auditNumbers(options.sourceText, actions);
   return { actions, summary: plan.summary, clarification: null };
 }
 
-const VERBS = '(?:load|choose|show|hide|highlight|select|focus|zoom|move|rotate|tip|torque|intrude|extrude|retract|protract|expand|constrict|distali[sz]e|mesiali[sz]e|reset|start|open|isolate|switch|install|bond|insert|engage|fit|activate|demonstrate|compare|play|animate|pause|stop|next|previous|restart|create|generate|add|remove|set|make|turn|repeat|replay|do|undo|redo|explain|narrate|read|reveal|return|go|back|lecture|enter|exit|end|leave|lock|unlock|close|change|increase|decrease|save|apply|accept|discard|cancel|try|explore|restore|place)';
+const VERBS = '(?:load|choose|show|hide|highlight|select|focus|zoom|move|rotate|tip|torque|intrude|extrude|retract|protract|expand|constrict|distali[sz]e|mesiali[sz]e|reset|start|open|isolate|switch|install|bond|insert|engage|fit|activate|demonstrate|compare|play|animate|pause|stop|next|previous|restart|create|generate|add|remove|set|make|turn|repeat|replay|do|undo|redo|explain|narrate|read|reveal|return|go|back|lecture|enter|exit|end|leave|lock|unlock|close|change|increase|decrease|save|apply|accept|discard|cancel|try|explore|restore|place|put|connect|use|calculate|solve|fix|release|widen|attach|run|thread|replace|preview)';
 function clauses(text: string): string[] {
   // Split only before an action verb: commas/"and" inside tooth lists and appliance names stay intact.
-  return text.split(new RegExp(`(?:,\\s*(?:(?:and|then)\\s+)?|\\s+(?:and then|and|then)\\s+|;\\s*)(?=${VERBS}\\b)`, 'i')).map(part => part.trim()).filter(Boolean);
+  return text.split(new RegExp(`(?:,\\s*(?:(?:and|then)\\s+)?|\\s+(?:and then|and|then)\\s+|[;.]\\s+)(?=${VERBS}\\b)`, 'i')).map(part => part.trim()).filter(Boolean);
 }
 
 const caseName = (text: string) => text.toLowerCase().replace(/[-·]/g, ' ').replace(/\s+/g, ' ').trim();
@@ -407,15 +442,15 @@ function parseCaseAction(text: string, context: TeachingContext): Extract<Teachi
 
 /** Destination routing and interpreter context are shared with the provider and unit-tested. */
 export function teachingActionMode(action: TeachingAction, current: TeachingContext['mode']): TeachingContext['mode'] {
-  if (action.kind === 'case' || action.kind === 'workflow' && action.action === 'exit') return 'case';
+  if (action.kind === 'case' || action.kind === 'dental-arrangement' || action.kind === 'workflow' && action.action === 'exit') return 'case';
   if (action.kind === 'anatomy-lesson' || action.kind === 'workflow' && action.action === 'start') return 'workflow';
   return current;
 }
 
 export function interpreterTeachingContext(context: TeachingContext): TeachingContext {
   const wire = { ...context };
-  for (const field of ['caseId', 'caseVariantId', 'caseExploring', 'tryMode', 'lockedIds', 'tryPreview', 'tryLastMovement', 'tryLastIds', 'savedArrangementNames', 'tryArchTargets', 'canRestoreWorkspace', 'hasWorkflowOrigin'] as const) delete wire[field];
-  if (wire.lastActions?.some(action => ['case', 'try', 'history', 'try-display', 'try-playback', 'workspace', 'appliance-display'].includes(action.kind))) delete wire.lastActions;
+  for (const field of ['caseId', 'caseVariantId', 'caseExploring', 'tryMode', 'lockedIds', 'tryPreview', 'tryLastMovement', 'tryLastIds', 'savedArrangementNames', 'tryArchTargets', 'canRestoreWorkspace', 'hasWorkflowOrigin', 'autoApply'] as const) delete wire[field];
+  if (wire.lastActions?.some(action => ['case', 'dental-arrangement', 'try', 'history', 'try-display', 'try-playback', 'workspace', 'appliance-display'].includes(action.kind))) delete wire.lastActions;
   return wire;
 }
 
@@ -508,7 +543,17 @@ function parseTryActions(text: string, context: TeachingContext): TeachingAction
 /** Local English planner. Unknown wording throws without applying any part of a request. */
 function buildTeachingPlan(text: string, context: TeachingContext): TeachingPlan {
   if (typeof text !== 'string' || !text.trim() || text.length > 1500) throw new Error('Give a classroom request of at most 1500 characters.');
-  const source = normalizeSpeechCommand(text), next = copyContext(context), overrides = { arch: false, view: false, selection: false }, actions: TeachingAction[] = [];
+  const normalized = normalizeSpeechCommand(text);
+  const source = /^(?:stop|pause)(?:[.;,]| and| then)\s*(?:undo|redo)(?: that)?$/.test(normalized) ? normalized.match(/(?:undo|redo)(?: that)?$/)![0] : normalized;
+  const next = copyContext(context), overrides = { arch: false, view: false, selection: false }, actions: TeachingAction[] = [];
+  if (isDentalArrangementClause(source)) {
+    const match = source.match(/^(?:load|open|show) (?:the )?(?:dental )?class (i|ii|iii|1|2|3)(?: (?:division|div) (1|2))?(?: arrangement)?$/);
+    if (!match || (match[1] === 'ii' || match[1] === '2') && !match[2]) throw new CommandValidationError('Choose dental Class I, Class II division 1, Class II division 2, or Class III as a separate request.');
+    if (match[2] && !['ii', '2'].includes(match[1])) throw new CommandValidationError('Divisions 1 and 2 belong to the dental Class II examples.');
+    const id = ['i', '1'].includes(match[1]) ? 'dental-class-i' : ['iii', '3'].includes(match[1]) ? 'dental-class-iii' : match[2] === '1' ? 'dental-class-ii-division-1' : 'dental-class-ii-division-2';
+    return validateTeachingPlan({ actions: [{ kind: 'dental-arrangement', id }], summary: source, clarification: null }, context, { allowLocalActions: true });
+  }
+  if (clauses(source).some(isDentalArrangementClause)) throw new CommandValidationError('Load a dental arrangement as a separate request, then give commands for its model.');
   // Match complete catalog titles before splitting their commas and conjunctions.
   const caseAction = parseCaseAction(source, context);
   if (caseAction) {
@@ -523,6 +568,11 @@ function buildTeachingPlan(text: string, context: TeachingContext): TeachingPlan
     catch (error) { throw new CommandValidationError(error instanceof Error ? error.message : 'This action is unavailable in the current scene.'); }
   };
   for (let clause of clauses(source)) {
+    const mechanicsActions = planMechanicsClause(clause, next);
+    if (mechanicsActions) {
+      mechanicsActions.forEach(action => append({ kind: 'mechanics', action }));
+      continue;
+    }
     if (clause === 'compare translation and tipping') {
       for (const action of ['translation', 'tipping'] as const) { append({ kind: 'anatomy-lesson', action }); append({ kind: 'workflow', action: 'play' }); }
       continue;
@@ -538,8 +588,17 @@ function buildTeachingPlan(text: string, context: TeachingContext): TeachingPlan
     if (/^(?:demonstrate|show) expansion(?: slowly)?$/.test(clause)) throw new Error('Name palatal expansion or archwire expansion.');
     if (/\bthem\b/.test(clause)) { if (!next.selectedIds.length) throw new CommandValidationError('Select a tooth group before referring to them.'); clause = clause.replace(/\bthem\b/g, 'selected teeth'); }
     if (next.arch !== 'both' && !/^(?:save (?:arrangement|group)|compare (?:with )?(?:saved|arrangement))\b/.test(clause)) clause = clause.replace(/\b(?:incisors?|canines?|premolars?|molars?|anterior teeth|posterior teeth)\b/g, (family, offset: number, full: string) => /(?:upper|lower|maxillary|mandibular)(?: (?:left|right))?\s+$/.test(full.slice(0, offset)) ? family : `${next.arch} ${family}`);
+    const explicitPreview = /^preview /.test(clause);
+    if (explicitPreview) clause = clause.slice(8);
+    const replacement = clause.match(/^make (?:that|it) ([+-]?(?:\d+(?:\.\d+)?|\.\d+))(?: (mm|degrees))?(?: instead)?$/);
+    if (replacement && next.tryLastMovement && !replacement[2]) {
+      append({ kind: 'try', action: { type: 'revise', amount: Number(replacement[1]) } });
+      if (next.autoApply && !explicitPreview) append({ kind: 'try', action: { type: 'apply' } });
+      continue;
+    }
+    if (replacement && next.tryLastMovement) clause = `change last movement to ${replacement[1]} ${replacement[2]}`;
     const tryActions = parseTryActions(clause, next);
-    if (tryActions) { tryActions.forEach(append); continue; }
+    if (tryActions) { tryActions.forEach(append); if (next.autoApply && !explicitPreview && tryActions.some(action => action.kind === 'try' && ['preview', 'revise'].includes(action.action.type))) append({ kind: 'try', action: { type: 'apply' } }); continue; }
     if (/^(?:move|intrude|extrude|retract|protract|expand|constrict|distali[sz]e|mesiali[sz]e|rotate|tip|torque)\b/.test(clause) && !/\b(?:mm|cm|degrees?|deg)\b|°/.test(clause)) {
       const angular = /^(?:rotate|tip|torque)\b/.test(clause);
       try {
@@ -551,6 +610,7 @@ function buildTeachingPlan(text: string, context: TeachingContext): TeachingPlan
     }
     const action = parseTeachingCommand(clause, next.selected, next.availableIds, next.selectedIds);
     append(action.kind === 'return-lesson' && next.mode === 'case' && next.hasWorkflowOrigin ? { kind: 'workspace', action: 'lesson' } : action);
+    if (next.autoApply && !explicitPreview && next.tryMode && action.kind === 'dental' && ['move', 'move_group', 'rotate', 'rotate_group', 'orthodontic', 'reset'].includes(action.command.type)) append({ kind: 'try', action: { type: 'apply' } });
   }
   try { return validateTeachingPlan({ actions, summary: actions.length === 1 ? source : `${actions.length} classroom actions`, clarification: null }, context, { sourceText: source, allowLocalActions: true }); }
   catch (error) { throw new CommandValidationError(error instanceof Error ? error.message : 'The local command is invalid.'); }
@@ -560,7 +620,9 @@ export function parseTeachingPlan(text: string, context: TeachingContext): Teach
   try { return buildTeachingPlan(text, context); }
   catch (error) {
     // New mechanics stay deterministic and local, including useful validation errors.
-    if (context.tryMode && error instanceof CommandValidationError || typeof text === 'string' && clauses(normalizeSpeechCommand(text)).some(clause => isCaseClause(clause, context) || isTryClause(clause) || isWorkspaceClause(clause, context) || isApplianceClause(clause) || /^(?:undo|redo) (?:the )?(?:last )?\d/.test(clause) || /^(?:show|reveal|hide) (?:the )?(?:answer|explanation)$/.test(clause))) return { actions: [], summary: '', clarification: error instanceof Error ? error.message : 'Specify an explicit local classroom command.' };
+    if (context.tryMode && error instanceof CommandValidationError || typeof text === 'string' && clauses(normalizeSpeechCommand(text)).some(clause => isDentalArrangementClause(clause) || isMechanicsClause(clause) || isCaseClause(clause, context) || isTryClause(clause) || isWorkspaceClause(clause, context) || isApplianceClause(clause) || /^(?:undo|redo) (?:the )?(?:last )?\d/.test(clause) || /^(?:show|reveal|hide) (?:the )?(?:answer|explanation)$/.test(clause))) return { actions: [], summary: '', clarification: error instanceof Error ? error.message : 'Specify an explicit local classroom command.' };
     throw error;
   }
 }
+
+function isDentalArrangementClause(text: string): boolean { return /^(?:load|open|show) (?:the )?(?:dental )?class\b/.test(text); }

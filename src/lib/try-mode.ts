@@ -38,9 +38,9 @@ export type TryPreview = {
 };
 export type TrySession = {
   active: boolean; lockedIds: string[]; unrestricted: boolean; archTargets: Record<'upper' | 'lower', ArchTarget>;
-  snapshots: TrySnapshot[]; groups: TryGroup[]; comparisonName: string | null;
+  snapshots: TrySnapshot[]; groups: TryGroup[]; comparisonName: string | null; original?: Transforms;
 };
-export type TryState = TrySession & { active: boolean; current: Transforms; pending: TryPreview | null; lastEdit: TryPreview | null };
+export type TryState = TrySession & { active: boolean; current: Transforms; original: Transforms; pending: TryPreview | null; lastEdit: TryPreview | null };
 export const TRY_MAX_PATH_SAMPLES = 33;
 export const TRY_LIMITS = { movement: 10, rotation: 180, span: 10, gap: 10, width: { min: 10, max: 120 }, depth: { min: 5, max: 80 }, snapshots: 10, groups: 10 } as const;
 export const TRY_COLLISION_LIMITATION = 'Bounded sampled crown-surface checks; crossings between samples, enclosed volumes, roots, gums, and biological limits are not assessed.';
@@ -53,8 +53,8 @@ const axisVector = (axis: Axis) => new Vector3(axis === 'x' ? 1 : 0, axis === 'y
 const archOf = (id: string) => /^[12]/.test(id) ? 'upper' : 'lower';
 const pairKey = (pair: SurfaceIntersection) => [pair.a, pair.b].sort().join('/');
 
-export function createTryState(current: Transforms = {}): TryState {
-  return { active: true, current: clone(current), lockedIds: [], unrestricted: false, pending: null, lastEdit: null,
+export function createTryState(current: Transforms = {}, original: Transforms = {}): TryState {
+  return { active: true, current: clone(current), original: clone(original), lockedIds: [], unrestricted: false, pending: null, lastEdit: null,
     archTargets: { upper: { width: 54, depth: 34 }, lower: { width: 49.6, depth: 32 } }, snapshots: [], groups: [], comparisonName: null };
 }
 export function assertTryUnlocked(state: Pick<TryState, 'lockedIds'>, ids: readonly string[]) {
@@ -124,7 +124,11 @@ function editPoses(model: DentalCase, state: TryState, from: Transforms, edit: T
   let to = clone(from), motion: Motion = { type: 'linear' }, label: string;
   if (edit.type === 'dental') {
     const command = edit.command;
-    to = applyDentalCommand(from, model.teeth, command);
+    if (command.type === 'reset') for (const id of command.teeth) {
+      const original = state.original?.[id];
+      if (original) to[id] = clone(original); else delete to[id];
+    }
+    else to = applyDentalCommand(from, model.teeth, command);
     const change = command.type === 'move' || command.type === 'move_group' ? `${command.direction} ${command.amount} mm per tooth`
       : command.type === 'rotate' || command.type === 'rotate_group' ? `case ${command.axis.toUpperCase()} rotation ${command.amount}° per tooth`
         : command.type === 'orthodontic' ? `${command.movement} ${command.amount}° per tooth` : 'restore original poses';
@@ -289,7 +293,7 @@ export function transitionTryMode(model: DentalCase, state: TryState, rawAction:
   if (action.type !== 'preview-original' && action.type !== 'preview-snapshot') throw new Error('Unsupported Try Mode action.');
   if (state.pending) throw new Error('Apply or cancel the pending preview before restoring a snapshot.');
   const snapshotName = 'name' in action ? action.name : '';
-  const snapshot = action.type === 'preview-original' ? {} : state.snapshots.find(item => item.name.toLowerCase() === snapshotName.toLowerCase())?.transforms;
+  const snapshot = action.type === 'preview-original' ? state.original || {} : state.snapshots.find(item => item.name.toLowerCase() === snapshotName.toLowerCase())?.transforms;
   if (!snapshot) throw new Error(`Comparison snapshot “${snapshotName}” was not found.`);
   const changed = model.teeth.filter(tooth => !samePoses({ [tooth.id]: state.current[tooth.id] || emptyPose() }, { [tooth.id]: snapshot[tooth.id] || emptyPose() }));
   if (!changed.length) throw new Error('This snapshot already matches the committed arrangement.');
@@ -340,9 +344,10 @@ export function validateTryAction(value: unknown, availableIds: readonly string[
 }
 
 /** Persistence intentionally excludes pending geometry work and stale last-edit previews. */
-export function serializeTrySession(state: TryState): TrySession { return clone({ active: state.active, lockedIds: state.lockedIds, unrestricted: state.unrestricted, archTargets: state.archTargets, snapshots: state.snapshots, groups: state.groups, comparisonName: state.comparisonName }); }
+export function serializeTrySession(state: TryState): TrySession { return clone({ active: state.active, original: state.original || {}, lockedIds: state.lockedIds, unrestricted: state.unrestricted, archTargets: state.archTargets, snapshots: state.snapshots, groups: state.groups, comparisonName: state.comparisonName }); }
 export function validateTrySession(value: unknown, availableIds: readonly string[]): TrySession {
-  const session = object(value); keys(session, ['active', 'lockedIds', 'unrestricted', 'archTargets', 'snapshots', 'groups', 'comparisonName']);
+  const session = object(value); keys(session, ['active', 'lockedIds', 'unrestricted', 'archTargets', 'snapshots', 'groups', 'comparisonName', ...(Object.hasOwn(session, 'original') ? ['original'] : [])]);
+  const original = Object.hasOwn(session, 'original') ? poses(session.original, availableIds) : {};
   const lockedIds = Array.isArray(session.lockedIds) && session.lockedIds.length === 0 ? [] : ids(session.lockedIds, availableIds);
   if (typeof session.unrestricted !== 'boolean' || typeof session.active !== 'boolean') throw new Error('Invalid Try Mode state.');
   const targets = object(session.archTargets); keys(targets, ['upper', 'lower']);
@@ -352,5 +357,5 @@ export function validateTrySession(value: unknown, availableIds: readonly string
   for (const collection of [snapshots, groups]) if (new Set(collection.map(item => item.name.toLowerCase())).size !== collection.length) throw new Error('Saved names must be unique.');
   const comparisonName = session.comparisonName === null ? null : name(session.comparisonName);
   if (comparisonName !== null && !snapshots.some(item => item.name === comparisonName)) throw new Error('The comparison snapshot does not exist.');
-  return { active: session.active, lockedIds, unrestricted: session.unrestricted, archTargets: { upper: archTarget(targets.upper), lower: archTarget(targets.lower) }, snapshots, groups, comparisonName };
+  return { active: session.active, original, lockedIds, unrestricted: session.unrestricted, archTargets: { upper: archTarget(targets.upper), lower: archTarget(targets.lower) }, snapshots, groups, comparisonName };
 }

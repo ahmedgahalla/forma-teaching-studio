@@ -52,11 +52,44 @@ function setup(inWorkflow = false) {
 afterEach(() => { controllers.splice(0).forEach(controller => controller.dispose()); vi.useRealTimers(); });
 
 describe('classroom request execution', () => {
+  it('awaits an asynchronous host action before executing the next instruction', async () => {
+    const { host, scene } = setup(), pending = deferred<void>(), baseApply = host.apply.getMockImplementation()!;
+    const asyncApply = vi.fn(async (action: TeachingAction, signal?: AbortSignal) => {
+      if (action.kind === 'view') { await pending.promise; if (signal?.aborted) return; }
+      baseApply(action);
+    });
+    const runtime = createTeachingRuntime({ ...host, apply: asyncApply }); controllers.push(runtime);
+    const work = runtime.submit('show front view then hide gums'); await flush();
+    expect(scene().gums).toBe(true); expect(scene().context.view).toBe('perspective');
+    expect(asyncApply).toHaveBeenCalledTimes(1);
+    pending.resolve(); await work;
+    expect(scene().context.view).toBe('front'); expect(scene().gums).toBe(false);
+    await runtime.submit('undo'); expect(scene().context.view).toBe('perspective'); expect(scene().gums).toBe(true);
+  });
+
+  it('aborts a pending asynchronous action and cannot execute its trailing instruction', async () => {
+    const { host, scene } = setup(), pending = deferred<void>();
+    const signals: AbortSignal[] = [];
+    const runtime = createTeachingRuntime({ ...host, apply: async (_action, signal) => { signals.push(signal!); await pending.promise; if (!signal?.aborted) scene().gums = false; } }); controllers.push(runtime);
+    const work = runtime.submit('show front view then hide roots'); await flush(); runtime.cancel(); await work;
+    expect(signals).toHaveLength(1); expect(signals[0].aborted).toBe(true);
+    pending.resolve(); await flush(); expect(scene().gums).toBe(true); expect(scene().roots).toBe(false);
+    expect(runtime.getLastActions()).toBeUndefined();
+  });
+
+  it('stops and undoes the whole previous request from one natural utterance', async () => {
+    const { runtime, scene, host } = setup();
+    await runtime.submit('move tooth 11 x 1 mm and hide gums');
+    expect(scene().distance).toBe(1); expect(scene().gums).toBe(false);
+    await runtime.submit('Stop. Undo that.');
+    expect(scene().distance).toBe(0); expect(scene().gums).toBe(true); expect(host.interpret).not.toHaveBeenCalled();
+  });
+
   it('positions fractional progress immediately and retains whole-request undo without a playback wait', async () => {
     const { runtime, host, scene } = setup(true);
     scene().context.stages = 9; scene().context.stage = 9;
     await runtime.submitActions([{ kind: 'progress', value: .375 }], 'Show demonstration progress');
-    expect(host.apply).toHaveBeenCalledExactlyOnceWith({ kind: 'progress', value: .375 });
+    expect(host.apply).toHaveBeenCalledExactlyOnceWith({ kind: 'progress', value: .375 }, expect.any(AbortSignal));
     expect(scene().context.stage).toBe(3.375); expect(scene().context.playing).toBe(false); expect(runtime.getState().phase).toBe('idle');
     await runtime.submit('undo'); expect(scene().context.stage).toBe(9);
     await runtime.submit('redo'); expect(scene().context.stage).toBe(3.375);
@@ -102,7 +135,7 @@ describe('classroom request execution', () => {
     const action: TeachingAction = { kind: 'appliance-display', preset: 'palatal-expander', progress: .65, palate: true };
     await runtime.submitActions([action], 'Update teaching appliance illustration');
     expect(host.preflight).toHaveBeenCalledExactlyOnceWith([action]);
-    expect(host.apply).toHaveBeenCalledExactlyOnceWith(action);
+    expect(host.apply).toHaveBeenCalledExactlyOnceWith(action, expect.any(AbortSignal));
     expect(scene().applianceDisplay).toEqual({ preset: 'palatal-expander', progress: .65, palate: true });
     expect(scene().distance).toBe(2.25);
     await runtime.submit('undo');
@@ -297,7 +330,7 @@ describe('classroom request execution', () => {
 
   it('falls back to manual case history only when no whole-request undo entry exists', async () => {
     const { runtime, host } = setup(); await runtime.submit('undo');
-    expect(host.apply).toHaveBeenCalledExactlyOnceWith({ kind: 'dental', command: { type: 'undo' } });
+    expect(host.apply).toHaveBeenCalledExactlyOnceWith({ kind: 'dental', command: { type: 'undo' } }, expect.any(AbortSignal));
     const other = setup(true); await other.runtime.submit('undo'); expect(other.host.apply).not.toHaveBeenCalled();
   });
 

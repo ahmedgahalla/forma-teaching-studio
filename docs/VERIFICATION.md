@@ -1,3 +1,40 @@
+# Version 0.12 verification · conversational teaching experiments
+
+Verified locally on 24 September 2026. Forma now supports pointing, typed/hold-to-talk appliance commands and a bounded initial elastic mechanics engine in the existing free workspace. This is a synthetic teaching system; it does not predict treatment time, remodeling or patient outcomes.
+
+## Delivered and automated checks
+
+- Frontend: **1,459 tests passed in 46 files**, zero failures (25.62 s, run started 05:25 UTC). Backend: **335 tests passed in 3 files**, with one existing AnyIO deprecation warning. Later manual-camera callback fixes passed 77 targeted controller/runtime/workflow tests and strict TypeScript. Final optimized static export passed after those fixes and mobile layout changes.
+- Shared worker calculations cover coupled wire beams and ideal bracket engagement, tension-only TAD connections, and compliant expansion. Independent beam, spring, expansion and force/moment balance benchmarks pass. Stage replay uses the unchanged reference; magnification changes display poses only. Worker tests cover timeout, termination, stale replies and synchronous post failures.
+- Whole-request history includes layers, camera, poses, selection, appliances and experiment state. Command tests cover ordered references, replacement, missing-value clarification, preflight, cancellation and provider-output validation. Eight mounted React speech-controller tests use fake recognition; they do not establish real microphone performance.
+- The actual Blender/GLB asset contains **28 differentiated crowns, 28 connected root objects and two gums; 211,452 triangles**. Four synthetic dental Class I/II-1/II-2/III starting arrangements have zero detected crown/root triangle-surface crossings. Dental arrangement and skeletal classification remain separate. Existing authored demonstration crossings remain explicitly reported.
+- Saved-case tests cover v1/v2 compatibility and v3 optional anatomy, original arrangement, mechanics configuration and lecture presentation state. Imported meshes are preserved; saved calculated results are discarded and recomputed from validated inputs. Camera fitting was independently checked against actual model vertices at phone dimensions; the mobile tools were moved to prevent covering posterior teeth.
+- The sampled crown-collision preview for six anterior teeth improved from approximately 8.6 s to **48 ms cold / 16 ms warm** in the local numerical check. These are workstation measurements, not a university-laptop performance guarantee. Collision sampling is not a continuous clearance, root/bone or biological-safety test.
+
+## Connected-browser verification
+
+Performed in the connected Chromium in-app browser, with 1280×720 and 390×844 layouts and both Clinical and Midnight themes:
+
+- Installed brackets on six selected teeth and a wire using a compound instruction. Passive hardware prompted for activation instead of moving teeth. Undo/Redo restored the complete installation request.
+- Activated a 0.016-inch stainless-steel wire by 0.5 mm. The final registered-slot build calculated maximum physical displacement **0.0116 mm** and rotation **0.076°**. Replacement recalculated from the same baseline. The initial response animated and carried a persistent 10× display label with unscaled numeric values.
+- Pointed at gingiva near tooth 23; placed a TAD at the marker and connected six bracket points with 1 N total specified tension. The configured result displayed individual elastic tensions and anchor reaction. Comparing without that TAD preserved the main experiment and its unloaded reference.
+- Added a compliant expander to the wire/TAD configuration with 0.1 mm activation, 10 N/mm appliance stiffness and 20 N/mm declared palate stiffness. The UI displayed force plus dental/support/appliance displacement components. This verifies interaction with the combined engine, not clinical plausibility of the chosen numbers.
+- Stop paused playback and prevented the remaining visibility action. A subsequent camera → roots → halfway compound request completed all three actions. Prediction mode hid the result until Reveal; reveal began animation.
+- Switched to dental Class II division 2, then used one Undo to restore the prior wire experiment at 50%, including roots and front camera. A newly loaded class starts with zero edited teeth relative to its own original arrangement.
+- Downloaded a v3 case, reopened it through the file picker, and verified recalculation restored the same 0.0116 mm / 0.076° result, selected group, wire activation, roots, front camera and 50% stage.
+- Phone layout keeps command entry, microphone and Stop reachable. Opening the inspector resizes the model above the sheet instead of covering it. Temporary viewport overrides are reset at delivery. This is browser viewport testing, not physical phone-touch verification.
+- Connected the local backend to **OpenRouter** and verified its setting survives reload. A real provider request, “Could you conceal the gingiva and reveal the roots for my explanation?”, returned and executed both supported actions. Earlier live provider checks covered appliance actions and clarification. Independent validation rejected a provider-supplied numeric mismatch without moving the model.
+
+## Delivery and remaining checks
+
+The local app runs at `http://127.0.0.1:3000`; the AI backend remains bound to `127.0.0.1:8000`. Credentials stay in the ignored backend environment and are excluded from source, frontend assets and the downloadable package. This local AI connection is not a public/mobile backend deployment.
+
+Actual English microphone capture in Chrome/Edge, physical touch interaction, projector-distance readability, typical classroom laptop frame rate and orthodontic educator review remain **unverified**. Root forms, support matrices, slot behavior and appliances are simplified teaching assumptions. No faculty approval, patient-specific biomechanical validation or learning-outcome claim is made. NiTi hysteresis, biological timelines and remodeling remain deferred.
+
+See [commands](CONVERSATIONAL_COMMANDS.md), [professor guide](PROFESSOR_GUIDE.md) and [release checklist](RELEASE_CHECKLIST_0.12.md) for scope and final packaging evidence. The existing hosted phone site is not updated by this local release.
+
+---
+
 # Version 0.11 verification · interactive university lectures
 
 Verified locally on 23 September 2026. The release improves classroom interaction, renderer readability and selection framing. It leaves source anatomy, authored paths and case-file format unchanged.

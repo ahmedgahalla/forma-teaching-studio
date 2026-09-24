@@ -6,8 +6,10 @@ import { createOrthodonticDemo } from './demo';
 import { getTeachingAssetCase } from './anatomy-assets';
 import { validateSession, type CaseSession } from './planning';
 import { validateAttachment, type AttachmentSpec } from './attachments';
+import { validateRootAnatomy } from './root-anatomy';
+import { validateMechanicsExperiment } from './mechanics/state';
 
-export type DentalTooth = Tooth & { geometry: THREE.BufferGeometry; rootGeometry?: THREE.BufferGeometry; bracketPosition?: Vec3; attachment?: AttachmentSpec };
+export type DentalTooth = Tooth & { geometry: THREE.BufferGeometry; rootGeometry?: THREE.BufferGeometry; rootAnatomy?: import('./root-anatomy').RootAnatomy; bracketPosition?: Vec3; attachment?: AttachmentSpec };
 export type Gum = { id: string; geometry: THREE.BufferGeometry; position: Vec3; arch?: 'upper' | 'lower' };
 export type DentalCase = { name: string; demo: boolean; teeth: DentalTooth[]; gums: Gum[] };
 const names = ['Central incisor', 'Lateral incisor', 'Canine', 'First premolar', 'Second premolar', 'First molar', 'Second molar'];
@@ -64,7 +66,8 @@ export function saveCase(model: DentalCase, transforms: Transforms, session?: Ca
     const tooth = t as DentalTooth;
     return { ...t, geometry: undefined, rootGeometry: undefined, ...serialGeometry(t.geometry), root: tooth.rootGeometry ? serialGeometry(tooth.rootGeometry) : undefined };
   };
-  const contents = new Blob([JSON.stringify({ version: 2, units: 'mm', model: { ...model, teeth: model.teeth.map(encode), gums: model.gums.map(encode) }, transforms, session })], { type: 'application/json' });
+  const version = session?.mechanics || session?.lectureSetup || model.teeth.some(tooth => tooth.rootAnatomy) ? 3 : 2;
+  const contents = new Blob([JSON.stringify({ version, units: 'mm', model: { ...model, teeth: model.teeth.map(encode), gums: model.gums.map(encode) }, transforms, session })], { type: 'application/json' });
   if (contents.size > 100 * 1024 * 1024) throw new Error('Saved case exceeds 100 MB. Use smaller meshes before saving.');
   download('forma-case.json', contents);
 }
@@ -77,7 +80,7 @@ function validMesh(value: SerializedGeometry | undefined): boolean {
 export async function loadCase(file: File): Promise<{ model: DentalCase; transforms: Transforms; session?: CaseSession }> {
   if (file.size > 100 * 1024 * 1024) throw new Error('Case file must be under 100 MB.');
   const data = JSON.parse(await file.text());
-  if (!data || ![1, 2].includes(data.version) || data.units !== 'mm' || !data.model || !Array.isArray(data.model.teeth) || !Array.isArray(data.model.gums) || !data.transforms || typeof data.transforms !== 'object' || Array.isArray(data.transforms)) throw new Error('This is not a supported Forma case.');
+  if (!data || ![1, 2, 3].includes(data.version) || data.units !== 'mm' || !data.model || !Array.isArray(data.model.teeth) || !Array.isArray(data.model.gums) || !data.transforms || typeof data.transforms !== 'object' || Array.isArray(data.transforms)) throw new Error('This is not a supported Forma case.');
   if (typeof data.model.name !== 'string') throw new Error('Invalid case name.');
   if (!data.model.teeth.length || data.model.teeth.length > 32 || data.model.gums.length > 4) throw new Error('Invalid number of models.');
   const ids = new Set<string>(); let count = 0;
@@ -95,6 +98,7 @@ export async function loadCase(file: File): Promise<{ model: DentalCase; transfo
       if (!t.calibrated) throw new Error('An attachment requires a calibrated tooth.');
     }
     if (t.calibrated) anatomicalFrame(t);
+    if (t.rootAnatomy !== undefined) { if (!t.root) throw new Error('Root anatomy metadata requires its registered root mesh.'); t.rootAnatomy = validateRootAnatomy(t.rootAnatomy, t.occlusal); }
     ids.add(t.id);
   }
   for (const gum of data.model.gums) if (gum.arch !== undefined && !['upper', 'lower'].includes(gum.arch)) throw new Error('Invalid gum arch.');
@@ -110,7 +114,9 @@ export async function loadCase(file: File): Promise<{ model: DentalCase; transfo
     const { vertices, normals, indices, root, geometry: _oldGeometry, rootGeometry: _oldRoot, ...rest } = t;
     return { ...rest, geometry: makeGeometry({ vertices: vertices as number[], normals: normals as number[], indices: indices as number[] }), ...(root ? { rootGeometry: makeGeometry(root as SerializedGeometry) } : {}) };
   };
-  return { model: { name: String(data.model.name).slice(0, 80), demo: Boolean(data.model.demo), teeth: data.model.teeth.map(decode), gums: data.model.gums.map(decode) }, transforms: data.transforms, session };
+  const model: DentalCase = { name: String(data.model.name).slice(0, 80), demo: Boolean(data.model.demo), teeth: data.model.teeth.map(decode), gums: data.model.gums.map(decode) };
+  if (session?.mechanics !== undefined) session.mechanics = validateMechanicsExperiment(session.mechanics, model);
+  return { model, transforms: data.transforms, session };
 }
 export function exportSTL(model: DentalCase, transforms: Transforms) {
   const group = new THREE.Group();

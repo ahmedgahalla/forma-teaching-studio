@@ -113,6 +113,48 @@ describe('stage STL geometry', () => {
 });
 
 describe('geometric stage ZIP', () => {
+  it('exports a saved nonzero baseline through checkpoints and freezes it before yielding', async () => {
+    const model = sampleCase(), original = { '11': pose([3, 2, 0], [0, 0, 20]) }, baseline = structuredClone(original);
+    const checkpoints = [{ id: 'a', name: 'Middle', transforms: { '11': pose([5, 4, 0], [0, 0, 40]) } }], final = { '11': pose([9, 6, 0], [0, 0, 80]) };
+    const pending = exportStageSequence(model, final, checkpoints, 4, false, null, undefined, original);
+    original['11'].translation[0] = 99; await pending;
+    const archive = unzipSync(await downloadedBytes()), manifest = JSON.parse(strFromU8(archive['manifest.json']));
+    expect(manifest.original).toEqual(baseline); expect(manifest.interpolation).toMatch(/saved original arrangement/);
+    expectVertices(vertices(archive['stage-000.stl']), vertices(buildStageSTL(model, baseline, false)));
+    expectVertices(vertices(archive['stage-001.stl']), vertices(buildStageSTL(model, { '11': pose([4, 3, 0], [0, 0, 30]) }, false)));
+    expectVertices(vertices(archive['stage-002.stl']), vertices(buildStageSTL(model, checkpoints[0].transforms, false)));
+    expectVertices(vertices(archive['stage-004.stl']), vertices(buildStageSTL(model, final, false)));
+  });
+  it('rejects an invalid baseline before encoding or downloading a sequence', async () => {
+    const encode = vi.spyOn(STLExporter.prototype, 'parse');
+    await expect(exportStageSequence(sampleCase(), {}, [], 2, false, null, undefined, { '11': pose([Infinity, 0, 0]) })).rejects.toThrow(/transforms/);
+    expect(encode).not.toHaveBeenCalled(); expect(download).not.toHaveBeenCalled();
+  });
+  it('exports un-magnified initial response from its own fixed reference and freezes its assumptions', async () => {
+    const model = sampleCase(), from = { '11': pose([2, 0, 0]) }, to = { '11': pose([2.04, .02, 0], [0, 0, 2]) };
+    const expectedFrom = structuredClone(from), expectedTo = structuredClone(to), assumptions = ['Virtual support; no remodeling.'];
+    const pending = exportStageSequence(model, { '11': pose([50, 0, 0]) }, [{ id: 'unrelated', name: 'Unrelated geometric path', transforms: { '11': pose([20, 0, 0]) } }], 2, false, null, { from, to, assumptions }, { '11': pose([60, 0, 0]) });
+    from['11'].translation[0] = 80; to['11'].translation[0] = 90; assumptions[0] = 'Changed later';
+    await pending;
+    const archive = unzipSync(await downloadedBytes()), manifest = JSON.parse(strFromU8(archive['manifest.json']));
+    expect(manifest.initialResponse).toMatchObject({ model: 'reduced-initial-elastic-response', progress: 'presentation-only', magnification: 1, biologicalTime: false, from: expectedFrom, to: expectedTo, assumptions: ['Virtual support; no remodeling.'] });
+    expect(manifest.checkpoints).toEqual([]); expect(manifest.trajectory).toBeUndefined();
+    expect(manifest.interpolation).toMatch(/not separately solved equilibria/);
+    expect(manifest.excluded).toEqual(expect.arrayContaining(['brackets', 'wires', 'TADs', 'elastics', 'expanders', 'display magnification']));
+    expectVertices(vertices(archive['stage-000.stl']), vertices(buildStageSTL(model, expectedFrom, false)));
+    expectVertices(vertices(archive['stage-001.stl']), vertices(buildStageSTL(model, { '11': pose([2.02, .01, 0], [0, 0, 1]) }, false)));
+    expectVertices(vertices(archive['stage-002.stl']), vertices(buildStageSTL(model, expectedTo, false)));
+  });
+
+  it('rejects invalid or competing initial-response paths before encoding', async () => {
+    const model = sampleCase(), preview = transitionTryMode(model, createTryState(), { type: 'preview', edit: { type: 'segment-translate', teeth: ['11'], axis: 'x', amount: 1 } }).pending!;
+    const encode = vi.spyOn(STLExporter.prototype, 'parse');
+    await expect(exportStageSequence(model, {}, [], 2, false, null, { from: {}, to: { '11': pose([Infinity, 0, 0]) }, assumptions: [] })).rejects.toThrow(/transforms/);
+    await expect(exportStageSequence(model, {}, [], 2, false, null, { from: {}, to: {}, assumptions: [''] })).rejects.toThrow(/assumptions/);
+    await expect(exportStageSequence(model, {}, [], 2, false, preview, { from: {}, to: {}, assumptions: [] })).rejects.toThrow(/one geometric path/);
+    expect(encode).not.toHaveBeenCalled(); expect(download).not.toHaveBeenCalled();
+  });
+
   it('exports the displayed rigid segment arc, including a non-original start and exact intermediate manifest poses', async () => {
     const model = sampleCase();
     model.teeth.push({ ...model.teeth[0], id: '21', position: [-10, 20, 30] });

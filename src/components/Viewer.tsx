@@ -11,6 +11,9 @@ import { OutputPass } from 'three/addons/postprocessing/OutputPass.js';
 import { dentalBackdrop, dentalStagePalette, dentalSurface, updateDentalBackdrop } from '@/lib/dental-surface';
 import { download, type DentalCase } from '@/lib/geometry';
 import type { Pose, Transforms, Vec3 } from '@/lib/model';
+import { createMechanicsVisuals } from '@/lib/mechanics-view';
+import type { MechanicsExperiment } from '@/lib/mechanics/types';
+import type { PointedReference } from '@/lib/mechanics-commands';
 import { createAttachmentGeometry } from '@/lib/attachments';
 import { createApplianceKit, orderedArchIds, toothArch, type Landmark } from '@/lib/appliances';
 import { toothMatrix } from '@/lib/analysis';
@@ -39,6 +42,8 @@ type Props = {
   ghostTransforms?: Transforms; lockedIds?: string[];
   traceFrom?: Transforms; archCurve?: Vec3[];
   removableRetainer?: boolean; isolateSelection?: boolean;
+  mechanics?: MechanicsExperiment | null; mechanicsForces?: boolean; mechanicsRevealed?: boolean;
+  pointed?: PointedReference | null; pointing?: boolean; onPoint?: (point: PointedReference | null) => void; onReferenceInteraction?: () => void;
 };
 
 const Viewer = forwardRef<ViewerHandle, Props>(function Viewer(props, ref) {
@@ -107,16 +112,20 @@ const Viewer = forwardRef<ViewerHandle, Props>(function Viewer(props, ref) {
       const outline = new THREE.Mesh(tooth.geometry, contourMaterial); outline.renderOrder = 1; outline.frustumCulled = false; group.add(outline); contours.set(tooth.id, { crown: outline });
       if (tooth.rootGeometry) { const root = new THREE.Mesh(surface(tooth.rootGeometry, tooth.occlusal || [0, -1, 0], 'root'), rootMaterial); root.castShadow = true; root.receiveShadow = true; group.add(root); roots.set(tooth.id, root); const originalRoot = new THREE.Mesh(tooth.rootGeometry, ghostMaterial); scene.add(originalRoot); rootGhosts.set(tooth.id, originalRoot); }
       if (tooth.rootGeometry) { const outline = new THREE.Mesh(tooth.rootGeometry, contourMaterial); outline.renderOrder = 1; outline.frustumCulled = false; group.add(outline); contours.get(tooth.id)!.root = outline; }
-      const bracket = kit.bracket(tooth); if (bracket) { group.add(bracket); brackets.set(tooth.id, bracket); }
+      const bracket = kit.bracket(tooth); if (bracket) { bracket.userData.basePosition = bracket.position.clone(); group.add(bracket); brackets.set(tooth.id, bracket); }
       if (tooth.attachment) { try { const mesh = new THREE.Mesh(createAttachmentGeometry(tooth, tooth.attachment), attachmentMaterial); mesh.castShadow = true; group.add(mesh); attachments.set(tooth.id, mesh); } catch { setError(`Attachment on ${tooth.id} could not be placed. Adjust its position in Appliances.`); } }
       const ghost = new THREE.Mesh(tooth.geometry, ghostMaterial); ghost.position.fromArray(tooth.position); scene.add(ghost); ghosts.set(tooth.id, ghost);
       const label = document.createElement('button'); label.className = 'tooth-label'; label.textContent = tooth.id; label.setAttribute('aria-label', `Select tooth ${tooth.id}`); label.onclick = e => live.current.onSelect(tooth.id, e.shiftKey || e.ctrlKey || e.metaKey); labelContainer.appendChild(label); labels.set(tooth.id, label);
     }
     const gumMeshes = props.model.gums.map(gum => { const mesh = new THREE.Mesh(surface(gum.geometry, [0, gum.arch === 'upper' ? -1 : 1, 0], 'gingiva'), gumMaterial); mesh.position.fromArray(gum.position); mesh.castShadow = true; mesh.receiveShadow = true; scene.add(mesh); return { mesh, gum }; });
     const grid = new THREE.GridHelper(150, 30, palette.gridMajor, palette.gridMinor); grid.position.y = -33; scene.add(grid);
+    const mechanicsKit = createMechanicsVisuals(props.model); scene.add(mechanicsKit.group);
+    let lastMechanics: MechanicsExperiment | null | undefined, lastMechanicsPoses: Transforms | undefined, mechanicsDisplayKey = '';
     const wireMeshes = new Map<string, THREE.Mesh>();
     const markerGeometry = new THREE.SphereGeometry(.55, 16, 10), markerMaterial = new THREE.MeshBasicMaterial({ color: palette.marker, depthTest: false });
     const markers = [new THREE.Mesh(markerGeometry, markerMaterial), new THREE.Mesh(markerGeometry, markerMaterial)]; markers.forEach(m => { m.renderOrder = 4; scene.add(m); });
+    const targetGeometry = new THREE.RingGeometry(.75, 1.05, 32), targetMaterial = new THREE.MeshBasicMaterial({ color: '#18c6b0', side: THREE.DoubleSide, depthTest: false });
+    const targetMarker = new THREE.Mesh(targetGeometry, targetMaterial); targetMarker.renderOrder = 6; scene.add(targetMarker);
     const lineGeometry = new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(), new THREE.Vector3()]);
     const measureLine = new THREE.Line(lineGeometry, new THREE.LineDashedMaterial({ color: palette.measurement, dashSize: .6, gapSize: .35, depthTest: false })); measureLine.renderOrder = 3; scene.add(measureLine);
     const traceGeometry = new THREE.BufferGeometry(); traceGeometry.setAttribute('position', new THREE.BufferAttribute(new Float32Array(props.model.teeth.length * 6), 3));
@@ -142,7 +151,8 @@ const Viewer = forwardRef<ViewerHandle, Props>(function Viewer(props, ref) {
     };
     const previousCamera = savedCamera.current, restoreCamera = previousCamera && sameViewerGeometry(previousCamera.model, props.model);
     let currentView: ViewName = restoreCamera ? previousCamera.view : 'perspective', snapshotRequested = false, disposed = false, pendingCamera: ViewerCamera | null = null;
-    const cancelCameraRestore = () => { pendingCamera = null; }; controls.addEventListener('start', cancelCameraRestore);
+    const cancelCameraRestore = () => { pendingCamera = null; };
+    const onCameraInteraction = () => { cancelCameraRestore(); live.current.onReferenceInteraction?.(); }; controls.addEventListener('start', onCameraInteraction);
     if (restoreCamera) {
       camera.position.copy(previousCamera.position); camera.up.copy(previousCamera.up); camera.aspect = previousCamera.aspect; camera.far = previousCamera.far;
       controls.target.copy(previousCamera.target); controls.maxDistance = previousCamera.maxDistance; camera.updateProjectionMatrix(); controls.update();
@@ -228,10 +238,17 @@ const Viewer = forwardRef<ViewerHandle, Props>(function Viewer(props, ref) {
       if (skipPick) { skipPick = false; return; }
       if (event.button !== 0 || Math.hypot(down.x - event.clientX, down.y - event.clientY) > 5) return;
       const box = renderer.domElement.getBoundingClientRect(); pointer.set((event.clientX - box.left) / box.width * 2 - 1, -(event.clientY - box.top) / box.height * 2 + 1); ray.setFromCamera(pointer, camera);
-      const hit = ray.intersectObjects([...crowns.values()].filter(c => c.parent!.visible))[0]; if (!hit) return;
-      const id = hit.object.userData.tooth;
+      const toothSurfaces = [...crowns.values(), ...roots.values()].filter(c => c.visible && c.parent!.visible);
+      const hit = ray.intersectObjects(live.current.measureMode ? toothSurfaces : [...toothSurfaces, ...gumMeshes.filter(item => item.mesh.visible).map(item => item.mesh)])[0]; if (!hit) { live.current.onPoint?.(null); return; }
+      const gum = gumMeshes.find(item => item.mesh === hit.object)?.gum;
+      const id = gum ? [...groups].filter(([id, group]) => group.visible && toothArch(id) === gum.arch).sort((a, b) => a[1].getWorldPosition(new THREE.Vector3()).distanceToSquared(hit.point) - b[1].getWorldPosition(new THREE.Vector3()).distanceToSquared(hit.point))[0]?.[0] : [...groups].find(([, group]) => group === hit.object.parent)?.[0]; if (!id) return;
       if (live.current.measureMode) { const local = hit.object.worldToLocal(hit.point.clone()); live.current.onLandmark({ tooth: id, local: local.toArray() as Vec3 }); }
-      else live.current.onSelect(id, event.shiftKey || event.ctrlKey || event.metaKey);
+      else {
+        const localPoint = groups.get(id)!.worldToLocal(hit.point.clone()).toArray() as Vec3;
+        const worldPoint = hit.point.clone(); if (toothArch(id) === 'lower') worldPoint.y += live.current.opening;
+        live.current.onPoint?.({ tooth: id, localPoint, worldPoint: worldPoint.toArray() as Vec3, surface: gum ? 'gingiva' : roots.get(id) === hit.object ? 'root' : 'crown' });
+        if (!live.current.pointing) live.current.onSelect(id, event.shiftKey || event.ctrlKey || event.metaKey);
+      }
     };
     const onLost = (event: Event) => { event.preventDefault(); const message = 'Graphics were interrupted. Save your case, then reload the viewer.'; renderBarrier.fail(new Error(message)); setError(message); };
     renderer.domElement.addEventListener('pointerdown', onDown); renderer.domElement.addEventListener('pointerup', onUp); renderer.domElement.addEventListener('pointercancel', cancelDrag); window.addEventListener('blur', cancelDrag); renderer.domElement.addEventListener('webglcontextlost', onLost);
@@ -254,6 +271,7 @@ const Viewer = forwardRef<ViewerHandle, Props>(function Viewer(props, ref) {
       }
       const workflow = props.model.demo ? p.workflow : undefined;
       const fixed = workflowFixedVisibility(workflow, braces);
+      if (p.mechanics) { fixed.brackets = false; fixed.wires = false; }
       kit.update(p.bracketStyle, p.ligatureColor);
       for (const tooth of props.model.teeth) {
         const group = groups.get(tooth.id)!, pose = transforms[tooth.id], isLower = toothArch(tooth.id) === 'lower';
@@ -264,7 +282,7 @@ const Viewer = forwardRef<ViewerHandle, Props>(function Viewer(props, ref) {
         const contour = contours.get(tooth.id)!, highlighted = selectedIds.includes(tooth.id) || (!!cutaway && tooth.id === p.selected);
         contour.crown.visible = highlighted; if (contour.root) contour.root.visible = highlighted && showRoots;
         if (roots.has(tooth.id)) roots.get(tooth.id)!.visible = showRoots;
-        if (brackets.has(tooth.id)) { const bracket = brackets.get(tooth.id)!; bracket.visible = fixed.brackets; bracket.children[6].visible = fixed.ligatures; }
+        if (brackets.has(tooth.id)) { const bracket = brackets.get(tooth.id)!; bracket.visible = p.mechanics ? braces && !!p.mechanics.config.brackets[tooth.id] : fixed.brackets; bracket.children[6].visible = p.mechanics ? true : fixed.ligatures; bracket.position.copy(bracket.userData.basePosition); if (p.mechanics?.config.brackets[tooth.id]) bracket.position.add(new THREE.Vector3(...p.mechanics.config.brackets[tooth.id]).sub(bracket.userData.anchor)); }
         if (attachments.has(tooth.id)) attachments.get(tooth.id)!.visible = p.attachments;
         const original = ghosts.get(tooth.id)!, reference = p.ghostTransforms?.[tooth.id]; original.position.fromArray(tooth.position); original.quaternion.identity(); if (isLower) original.position.y -= opening;
         if (reference) { original.position.add(new THREE.Vector3(...reference.translation)); original.quaternion.setFromEuler(new THREE.Euler(...reference.rotation.map(THREE.MathUtils.degToRad) as Vec3)); }
@@ -315,7 +333,14 @@ const Viewer = forwardRef<ViewerHandle, Props>(function Viewer(props, ref) {
         catch (error) { setError(error instanceof Error ? error.message : 'The clear-retainer illustration could not be displayed.'); }
         lastRemovableTransforms = transforms; removableState = nextRemovableState;
       }
+      const mechanicsKey = `${p.arch}/${opening}/${!!cutaway}/${isolationKey()}/${p.mechanicsForces}/${p.mechanicsRevealed}/${braces}`;
+      if (lastMechanics !== p.mechanics || lastMechanicsPoses !== transforms || mechanicsDisplayKey !== mechanicsKey) {
+        mechanicsKit.update(braces ? p.mechanics : null, transforms, { arch: p.arch, opening, forces: !!p.mechanicsForces, revealed: p.mechanicsRevealed !== false, visible });
+        lastMechanics = p.mechanics; lastMechanicsPoses = transforms; mechanicsDisplayKey = mechanicsKey;
+      }
       const activePoints = p.landmarks.map(l => groups.get(l.tooth)?.localToWorld(new THREE.Vector3(...l.local))).filter((point): point is THREE.Vector3 => !!point);
+      targetMarker.visible = !!p.pointed && visible(p.pointed.tooth);
+      if (p.pointed && groups.has(p.pointed.tooth)) { if (p.pointed.surface === 'gingiva') { targetMarker.position.fromArray(p.pointed.worldPoint); if (toothArch(p.pointed.tooth) === 'lower') targetMarker.position.y -= opening; } else targetMarker.position.copy(groups.get(p.pointed.tooth)!.localToWorld(new THREE.Vector3(...p.pointed.localPoint))); targetMarker.quaternion.copy(camera.quaternion); }
       markers.forEach((marker, i) => { marker.visible = !!activePoints[i] && visible(p.landmarks[i].tooth); if (activePoints[i]) marker.position.copy(activePoints[i]); });
       measureLine.visible = activePoints.length === 2 && markers.every(m => m.visible);
       if (measureLine.visible) { const positions = lineGeometry.getAttribute('position'); activePoints.forEach((point, i) => positions.setXYZ(i, point.x, point.y, point.z)); positions.needsUpdate = true; lineGeometry.computeBoundingSphere(); measureLine.computeLineDistances(); }
@@ -364,9 +389,10 @@ const Viewer = forwardRef<ViewerHandle, Props>(function Viewer(props, ref) {
     render();
     return () => {
       savedCamera.current = { model: props.model, position: camera.position.clone(), target: controls.target.clone(), up: camera.up.clone(), aspect: camera.aspect, far: camera.far, maxDistance: controls.maxDistance, view: currentView };
-      disposed = true; cancelAnimationFrame(frame); observer.disconnect(); controls.removeEventListener('start', cancelCameraRestore); controls.dispose(); renderer.domElement.removeEventListener('pointerdown', onDown); renderer.domElement.removeEventListener('pointerup', onUp); renderer.domElement.removeEventListener('pointercancel', cancelDrag); window.removeEventListener('blur', cancelDrag); renderer.domElement.removeEventListener('webglcontextlost', onLost);
-      gizmo.detach(); gizmo.dispose(); attachments.forEach(mesh => mesh.geometry.dispose()); anatomyKit.dispose(); anatomyOverlay.remove(); workflowKit.dispose(); removableKit.dispose(); kit.dispose(); environment.dispose(); backdrop.dispose(); ao.dispose(); scenePass.dispose(); outputPass.dispose(); composer.dispose(); displayGeometry.forEach(geometry => geometry.dispose()); key.shadow.dispose(); renderer.dispose(); renderer.domElement.remove(); labels.forEach(label => label.remove());
+      disposed = true; cancelAnimationFrame(frame); observer.disconnect(); controls.removeEventListener('start', onCameraInteraction); controls.dispose(); renderer.domElement.removeEventListener('pointerdown', onDown); renderer.domElement.removeEventListener('pointerup', onUp); renderer.domElement.removeEventListener('pointercancel', cancelDrag); window.removeEventListener('blur', cancelDrag); renderer.domElement.removeEventListener('webglcontextlost', onLost);
+      gizmo.detach(); gizmo.dispose(); attachments.forEach(mesh => mesh.geometry.dispose()); anatomyKit.dispose(); anatomyOverlay.remove(); mechanicsKit.dispose(); workflowKit.dispose(); removableKit.dispose(); kit.dispose(); environment.dispose(); backdrop.dispose(); ao.dispose(); scenePass.dispose(); outputPass.dispose(); composer.dispose(); displayGeometry.forEach(geometry => geometry.dispose()); key.shadow.dispose(); renderer.dispose(); renderer.domElement.remove(); labels.forEach(label => label.remove());
       [enamel, contourMaterial, lockedMaterial, contactMaterial, rootMaterial, ghostMaterial, gumMaterial, attachmentMaterial, markerMaterial, measureLine.material as THREE.Material, traceLines.material, curveLine.material, grid.material as THREE.Material].forEach(m => m.dispose());
+      targetGeometry.dispose(); targetMaterial.dispose();
       [grid.geometry, markerGeometry, lineGeometry, traceGeometry, curveGeometry, ...[...wireMeshes.values()].map(m => m.geometry)].forEach(g => g.dispose());
     };
   }, [props.model]);

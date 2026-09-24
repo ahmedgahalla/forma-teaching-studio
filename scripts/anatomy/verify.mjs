@@ -17,14 +17,17 @@ const { createAttachmentGeometry } = await import('../../src/lib/attachments.ts'
 const { createApplianceKit } = await import('../../src/lib/appliances.ts');
 const { createRemovableRetainer } = await import('../../src/lib/removable-retainer.ts');
 const { findSurfaceIntersections } = await import('../../src/lib/analysis.ts');
+const { validateAnatomyMetadata } = await import('../../src/lib/anatomy-assets.ts');
+const { CASE_REFERENCE_SHIFT } = await import('../../src/lib/teaching-cases.ts');
 const meta = JSON.parse(readFileSync(resolve('public/models/forma-teaching-v1.json'), 'utf8'));
+validateAnatomyMetadata(meta);
 const bytes = readFileSync(resolve('public/models/forma-teaching-v1.glb'));
 const gltf = await new GLTFLoader().parseAsync(bytes.buffer.slice(bytes.byteOffset, bytes.byteOffset + bytes.byteLength), '');
 gltf.scene.updateMatrixWorld(true);
 const original = createOrthodonticDemo();
 const meshes = []; gltf.scene.traverse(node => { if (node.isMesh) meshes.push(node); });
 assert.equal(meshes.length, 58); assert.equal(meta.teeth.length, 28); assert.equal(meta.gums.length, 2);
-const report = { units: 'mm', meshes: meshes.length, triangles: 0, closedSurfaces: 0, maxBoundingBoxChangeMm: 0, maxRootBoundingBoxChangeMm: 0, minBracketClearanceMm: Infinity, maxBracketClearanceMm: -Infinity, rootsByTooth: {}, applianceChecks: [], cutawayChecks: [], removableRetainerPockets: 0, originalCrownCrossings: [], referenceOcclusionCrossings: [] };
+const report = { units: 'mm', revision: meta.assetInfo.revision, meshes: meshes.length, triangles: 0, closedSurfaces: 0, maxBoundingBoxChangeMm: 0, maxRootBoundingBoxChangeMm: 0, minBracketClearanceMm: Infinity, maxBracketClearanceMm: -Infinity, rootsByTooth: {}, rootConnectedComponents: {}, applianceChecks: [], cutawayChecks: [], removableRetainerPockets: 0, originalCrownCrossings: [], referenceShiftMm: CASE_REFERENCE_SHIFT, referenceOcclusionCrossings: [] };
 function geometry(name, position) {
   const node = gltf.scene.getObjectByName(name); assert.ok(node?.isMesh, name);
   const g = node.geometry.clone().applyMatrix4(node.matrixWorld).translate(-position[0], -position[1], -position[2]);
@@ -45,7 +48,12 @@ function geometry(name, position) {
   }
   assert.ok([...edges.values()].every(value => value === 2), `${name} closed indexed surface`);
   assert.ok(volume > .1, `${name} outward winding`); report.closedSurfaces++;
-  if (name.startsWith('root_')) report.rootsByTooth[name.slice(5)] = new Set(parent.map((_, i) => find(i))).size;
+  if (name.startsWith('root_')) {
+    const id = name.slice(5), count = new Set(parent.map((_, i) => find(i))).size;
+    report.rootConnectedComponents[id] = count;
+    report.rootsByTooth[id] = meta.teeth.find(tooth => tooth.id === id).rootAnatomy?.branches.length || count;
+    assert.equal(count, 1, `${id} continuous root trunk`);
+  }
   g.computeBoundingBox(); g.computeBoundingSphere(); return g;
 }
 const model = { name: meta.name, demo: true, teeth: meta.teeth.map(tooth => ({ ...tooth, geometry: geometry(tooth.crownMesh, tooth.position), rootGeometry: geometry(tooth.rootMesh, tooth.position) })), gums: meta.gums.map(gum => ({ ...gum, geometry: geometry(gum.mesh, gum.position) })) };
@@ -55,7 +63,7 @@ for (const tooth of model.teeth) {
   for (const key of ['position', 'buccal', 'mesial', 'occlusal', 'bracketPosition']) assert.ok(tooth[key].every((value, i) => value === base[key][i]), `${tooth.id} ${key} registration`);
   base.geometry.computeBoundingBox();
   const change = Math.max(tooth.geometry.boundingBox.min.distanceTo(base.geometry.boundingBox.min), tooth.geometry.boundingBox.max.distanceTo(base.geometry.boundingBox.max));
-  assert.ok(change < .4, `${tooth.id} axis/scale and small silhouette refinement (${change})`); report.maxBoundingBoxChangeMm = Math.max(report.maxBoundingBoxChangeMm, change);
+  assert.ok(change < .65, `${tooth.id} calibrated scale and bounded crown refinement (${change})`); report.maxBoundingBoxChangeMm = Math.max(report.maxBoundingBoxChangeMm, change);
   base.rootGeometry.computeBoundingBox();
   report.maxRootBoundingBoxChangeMm = Math.max(report.maxRootBoundingBoxChangeMm, tooth.rootGeometry.boundingBox.min.distanceTo(base.rootGeometry.boundingBox.min), tooth.rootGeometry.boundingBox.max.distanceTo(base.rootGeometry.boundingBox.max));
   const outward = new THREE.Vector3(...tooth.buccal), anchor = new THREE.Vector3(...tooth.bracketPosition);
@@ -67,8 +75,9 @@ for (const tooth of model.teeth) {
   const attachment = createAttachmentGeometry(tooth, { shape: 'beveled', width: 2.5, height: 3.5, depth: 1, offsetMesial: 0, offsetOcclusal: 0, rotation: 0 }); attachment.dispose();
 }
 assert.equal(report.triangles, meta.assetInfo.triangles.total);
+assert.ok(report.triangles <= 250000, 'Browser triangle budget');
 report.originalCrownCrossings = findSurfaceIntersections(model, {});
-report.referenceOcclusionCrossings = findSurfaceIntersections(model, Object.fromEntries(model.teeth.map(tooth => [tooth.id, { translation: [0, Number(tooth.id[0]) < 3 ? -1.6 : 1.6, 0], rotation: [0, 0, 0] }])));
+report.referenceOcclusionCrossings = findSurfaceIntersections(model, Object.fromEntries(model.teeth.map(tooth => [tooth.id, { translation: [0, Number(tooth.id[0]) < 3 ? -CASE_REFERENCE_SHIFT : CASE_REFERENCE_SHIFT, 0], rotation: [0, 0, 0] }])));
 const fixed = createApplianceKit(); for (const tooth of model.teeth) assert.ok(fixed.bracket(tooth), `${tooth.id} fixed bracket`); fixed.dispose();
 const overlay = createWorkflowAppliances(model);
 for (const appliance of ['braces', 'palatal-expander', 'archwire-expansion']) for (const phase of ['brackets', 'wire', 'retention']) {

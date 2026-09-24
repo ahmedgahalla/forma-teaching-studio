@@ -1,6 +1,22 @@
-# Professor guide · v0.11
+# Professor guide · v0.12
 
-Forma supports an interactive university lecture: observe an arrangement, ask students to predict, demonstrate, pause, explain and compare. Try Mode remains the default for free experiments. Prepared cases and appliance workflows are optional starting points.
+Forma supports an interactive university lecture: observe an arrangement, ask students to predict, demonstrate, pause, explain and compare. Free geometric editing, authored demonstrations and initial elastic mechanics are three distinct ways to use the same workspace. Prepared cases and workflows are optional starting points.
+
+## Build and discuss an appliance
+
+Open **Appliances** in the synthetic free workspace. For a prepared case, first choose **Explore this arrangement**. Select teeth, install brackets, choose the visible wire material/size, connect the brackets and enter a small explicit activation. **Show what happens** calculates the initial elastic response. Installing hardware alone does not calculate movement.
+
+Use **Predict before reveal** to hide the calculated response until students answer. Reveal it, show roots, and compare forces/moments and displacement. **Movement display** can exaggerate the picture up to 50×; the reported numbers remain unscaled. Arrows and arcs indicate force/moment direction, without a length scale.
+
+Three families are available: bracket/archwire beam response, tooth/TAD elastic connections, and a contralateral upper-tooth expander with optional declared supporting-spring compliance. Changing a wire or load recalculates against the same unloaded reference. **Compare without the TAD** shows an alternative without destroying the original configuration. The result is an engineering illustration, not predicted treatment.
+
+Save an **Experiment stage** to recall an appliance configuration. Every stage uses the same unloaded reference; stages do not accumulate biological tooth movement. The ordinary geometric timeline and authored case animation also express presentation progress, not elapsed clinical time. See the [README mechanics bounds](../README.md#declared-mechanics-bounds) and [conversational guide](CONVERSATIONAL_COMMANDS.md) for exact controls and commands.
+
+## Point and speak
+
+Hold Space outside an editable field, or hold the microphone button. Pointing to a model location can update “here” or “these teeth” without canceling capture. Release to submit once. Escape, Stop or loss of window focus discards unfinished speech; starting the microphone interrupts narration. Other manual scene edits cancel unfinished capture or stale requests.
+
+Clear validated voice/text geometric movements execute immediately. Prefix a request with **preview** to inspect it before Apply; manual numeric tools retain their preview decision. **Undo** restores the whole request, including its scene/appliance changes. No recognition service or AI key is required for typed built-in commands.
 
 ## A short lecture
 
@@ -34,12 +50,12 @@ undo that
 
 `reveal answer` and `hide answer` control a prepared case or workflow's stored explanation. A free workspace without one asks you to choose a teaching example. They do not ask AI to invent an answer. `explain this step` requests narration. Camera, display and answer changes submitted as one request undo together.
 
-For Try Mode, select a group and request an explicit movement amount. Review its preview, then Apply. Playback only illustrates the proposed or last applied geometric change. Roots stay linked to crowns; brackets remain attached. Isolation deliberately hides whole-arch hardware and context; turn isolation off for complete wires, expanders and retainers.
+For a reviewed geometric edit, select a group and say `preview move selected teeth buccally 0.5 mm`, then Apply or Discard. Playback illustrates the proposed or last applied geometric change. Roots stay linked to crowns; brackets remain attached. Isolation hides surrounding anatomy and whole-arch display appliances; turn it off when inspecting a complete appliance.
 
 ## What the model means
 
-The 28-tooth model has differentiated synthetic crowns, roots and gingiva. This release changes rendering and framing, not the audited source mesh or path geometry. Selected enamel stays natural; a thin contour marks the selection. Tooth labels are decluttered rather than allowing overlapping numbers.
+The revised Blender model has 28 differentiated permanent crowns, connected root objects with explicit branches, and gingiva. It omits third molars and does not include a primary or mixed-dentition pack. Dental Class I, Class II divisions 1/2 and Class III arrangements illustrate tooth relationships, not skeletal diagnoses. Their approximate molar guides, assumptions and initial surface-crossing checks are exposed for review. Selected enamel stays natural with a thin contour; labels are decluttered.
 
-Cases, movements and appliances are authored illustrations. Neither force response, bone remodelling, clinical timing nor patient outcome is calculated. Source-linked material and existing collision/audit limitations remain available. Draft case explanations and anatomy need orthodontic faculty review before curriculum use.
+Prepared cases and appliance workflows remain authored illustrations. The separate mechanics module calculates an initial elastic response under declared virtual-support and material assumptions. It does not calculate bone remodeling, tissue adaptation, clinical timing or patient outcome. Displayed support tissue is schematic; sampled crown checks do not establish root/bone clearance. Draft morphology, numerical examples and explanations still need orthodontic educator review before curriculum use.
 
 Voice uses the existing hold-to-talk controller where browser support permits. Actual English microphone capture on a real device is a separate manual acceptance check; typed commands do not depend on it.

@@ -2,13 +2,14 @@
 
 Forma now loads an actual Blender-refined GLB into the interactive workspace. The model is original schematic teaching anatomy: 28 separate crowns, 28 separate root objects and two gingival meshes. It is not a patient scan, segmentation result or clinical reconstruction.
 
-The Blender pass refines anterior labial/lingual forms, incisal corners, posterior fissures and fossae, and curved root taper. Surface fairing and decimation reduce the original 406,304 triangles to **163,044** while retaining the tooth frames and bracket anchors used by commands and appliances.
+The second Blender morphology pass refines anterior cingula, marginal ridges and incisal corners, adds distinct posterior cusp/groove patterns, and joins multi-root teeth through continuous cervical trunks and furcations. Surface fairing and decimation reduce the original 406,304 triangles to **211,452** while retaining the tooth frames and bracket anchors used by commands and appliances. The model remains an original teaching illustration pending educator review.
 
 | Deliverable | Location |
 | --- | --- |
 | Editable Blender 5.1 source | [forma-teaching-v1.blend](../assets/anatomy/forma-teaching-v1.blend) |
 | Rendered contact sheet | [forma-teaching-contact-sheet.png](../assets/anatomy/forma-teaching-contact-sheet.png) |
-| Browser model, about 2.99 MB | [forma-teaching-v1.glb](../public/models/forma-teaching-v1.glb) |
+| Fourteen-class detail render | [forma-anatomy-landmarks.png](../assets/anatomy/forma-anatomy-landmarks.png) |
+| Browser model, about 3.86 MB | [forma-teaching-v1.glb](../public/models/forma-teaching-v1.glb) |
 | Mesh names, tooth frames and manifest | [forma-teaching-v1.json](../public/models/forma-teaching-v1.json) |
 | Geometry verification report | [verification.json](../assets/anatomy/verification.json) |
 
@@ -20,7 +21,9 @@ The app's case frame is **+X patient left, +Y superior, +Z anterior**, in millim
 
 Mesh names are `crown_11`, `root_11`, and the corresponding FDI names for the other teeth, plus `gum_upper` and `gum_lower`. The loader applies each node's world matrix, then subtracts the supplied tooth pivot. Crown and root share that original pivot. The axes and bracket anchor must remain paired with the geometry; independently recentering a root or crown breaks registration.
 
-The .blend uses Blender's Z-up authoring frame, mapping case `(x,y,z)` to `(x,-z,y)`. Export returns it to the application's Y-up frame. Prepared cases additionally register the upper and lower tooth/gum origins 1.6 mm toward the occlusal plane; this is authored case registration, not reconstructed patient occlusion.
+The .blend uses Blender's Z-up authoring frame, mapping case `(x,y,z)` to `(x,-z,y)`. Export returns it to the application's Y-up frame. Prepared cases additionally register the upper and lower tooth/gum origins 1.5 mm toward the occlusal plane; this is authored case registration, not reconstructed patient occlusion. The case contact audit was regenerated after this adjustment.
+
+Each new root mesh is a connected surface. Optional `rootAnatomy` metadata supplies separate trunk/branch display envelopes in the same local case frame, so the anatomy view does not confuse a joined three-root tooth with a single root. Older files without this metadata continue to use the existing geometry-based extraction. Supporting bone and PDL are schematic envelopes and stay at the reference pose during tooth movement.
 
 ## Rebuild
 

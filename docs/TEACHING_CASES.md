@@ -8,7 +8,7 @@ Each case includes a learning goal, assumptions, discussion questions, answers a
 
 `createTeachingCase(base, id)` accepts the complete calibrated synthetic adult reference and returns `{model, transforms, selectedIds, definition}`. It copies metadata and poses but borrows the immutable crown, root and gum geometry buffers. The caller retains ownership of those buffers. Supply the original reference, not a previously registered teaching case.
 
-`CASE_REFERENCE_SHIFT` is 1.6 mm: upper tooth and gum origins shift down by this amount and lower origins shift up by the same amount. This brings the arches together for illustration; it is not a reconstructed bite record or evidence of ideal occlusion. Geometry buffers and tooth coordinate axes remain unchanged.
+`CASE_REFERENCE_SHIFT` is 1.5 mm: upper tooth and gum origins shift down by this amount and lower origins shift up by the same amount. The display registration was rechecked against the second Blender morphology revision. This brings the arches together for illustration; it is not a reconstructed bite record or evidence of ideal occlusion. Geometry buffers and tooth coordinate axes remain unchanged.
 
 `sampleCaseDemonstration(caseId, variantId, progress)` returns complete pose offsets relative to that registered model. It always samples the prepared baseline and authored keyframes. Do not add its result to current sandbox offsets. Translation is linear between waypoints; orientation uses quaternion interpolation. Crown and root share the same rigid transform and crown-centred pivot.
 

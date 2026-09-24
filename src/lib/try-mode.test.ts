@@ -203,6 +203,64 @@ describe('sampled path collisions', () => {
 });
 
 describe('noncumulative revision and persistence', () => {
+  it('treats a loaded arrangement as an independent original pose and restores it without mutating source axes', () => {
+    const source = model({ '11': [0, 0, 0], '12': [8, 0, 0] });
+    const original: Transforms = { '11': { translation: [0, 1, 1.5], rotation: [18, 0, 0] }, '12': { translation: [0, 0, 1.5], rotation: [-9, 0, 0] } };
+    const supplied = structuredClone(original), sourceAxes = source.teeth.map(tooth => ({ position: [...tooth.position], buccal: [...tooth.buccal], mesial: [...tooth.mesial], occlusal: [...tooth.occlusal!] }));
+    let state = createTryState(original, original);
+    expect(state.current).toEqual(supplied); expect(state.original).toEqual(supplied); expect(state.current).not.toBe(state.original);
+    original['11'].translation[2] = 100;
+    expect(state.original).toEqual(supplied); expect(state.current).toEqual(supplied);
+    expect(() => transitionTryMode(source, state, { type: 'preview-original' })).toThrow(/already matches/);
+    state = apply(source, preview(source, state, move('11', 1)));
+    const restored = transitionTryMode(source, { ...state, lockedIds: ['12'] }, { type: 'preview-original' });
+    expect(restored.pending!.affectedIds).toEqual(['11']); expect(restored.pending!.to).toEqual(supplied);
+    expect(apply(source, restored).current).toEqual(supplied); expect(state.original).toEqual(supplied);
+    expect(() => transitionTryMode(source, { ...state, lockedIds: ['11'], unrestricted: true }, { type: 'preview-original' })).toThrow(/Unlock 11/);
+    expect(source.teeth.map(tooth => ({ position: tooth.position, buccal: tooth.buccal, mesial: tooth.mesial, occlusal: tooth.occlusal }))).toEqual(sourceAxes);
+  });
+
+  it('resets only requested teeth to their loaded original, with omitted original teeth reset to zero', () => {
+    const source = model({ '11': [0, 0, 0], '12': [8, 0, 0], '21': [16, 0, 0] });
+    const original: Transforms = { '11': { translation: [0, 1, 1.5], rotation: [18, 0, 0] } };
+    const current: Transforms = { '11': { translation: [0, 2, 1.5], rotation: [22, 0, 0] }, '12': { translation: [0, 1, 0], rotation: [3, 0, 0] }, '21': { translation: [0, 0, 2], rotation: [0, 5, 0] } };
+    const state = createTryState(current, original);
+    const reset = preview(source, state, { type: 'dental', command: { type: 'reset', teeth: ['11', '12'] } });
+    expect(reset.pending!.to['11']).toEqual(original['11']); expect(reset.pending!.to['12']).toBeUndefined();
+    expect(reset.pending!.to['21']).toEqual(current['21']); expect(apply(source, reset).original).toEqual(original);
+    expect(state.current).toEqual(current); expect(state.original).toEqual(original);
+    expect(() => preview(source, { ...state, lockedIds: ['11'], unrestricted: true }, { type: 'dental', command: { type: 'reset', teeth: ['11'] } })).toThrow(/Unlock/);
+  });
+
+  it('persists a detached original while keeping named snapshot restore independent', () => {
+    const source = model({ '11': [0, 0, 0] }), original: Transforms = { '11': { translation: [0, 0, 1.5], rotation: [18, 0, 0] } };
+    let state = createTryState(original, original);
+    state = apply(source, preview(source, state, move('11', 1)));
+    state = transitionTryMode(source, state, { type: 'save-snapshot', name: 'Alternative' });
+    const saved = JSON.parse(JSON.stringify(serializeTrySession(state))), session = validateTrySession(saved, ['11']);
+    expect(session.original).toEqual(original); expect(session.snapshots[0].transforms).toEqual(state.current);
+    saved.original['11'].rotation[0] = 99; expect(session.original).toEqual(original); expect(state.original).toEqual(original);
+    const loaded = { ...createTryState(state.current), ...session };
+    const restored = apply(source, transitionTryMode(source, loaded, { type: 'preview-original' }));
+    expect(restored.current).toEqual(original);
+    const snapshot = transitionTryMode(source, restored, { type: 'preview-snapshot', name: 'Alternative' });
+    expect(snapshot.pending!.to).toEqual(state.current); expect(snapshot.original).toEqual(original);
+  });
+
+  it('keeps the zero reference for legacy initialization and saved sessions without original', () => {
+    const source = model({ '11': [0, 0, 0] }), current: Transforms = { '11': { translation: [0, 1, 2], rotation: [18, 0, 0] } };
+    const initial = createTryState(current); expect(initial.original).toEqual({});
+    const saved = serializeTrySession(initial); delete saved.original;
+    const legacy = validateTrySession(saved, ['11']); expect(legacy.original).toEqual({});
+    const loaded = { ...createTryState(current), ...legacy };
+    const reset = apply(source, preview(source, loaded, { type: 'dental', command: { type: 'reset', teeth: ['11'] } }));
+    expect(reset.current).toEqual({}); expect(reset.original).toEqual({});
+  });
+
+  it.each([null, [], { '99': emptyPose() }, { '11': { translation: [Infinity, 0, 0], rotation: [0, 0, 0] } }, { '11': { translation: [0, 0, 0], rotation: [0, 0, 0], extra: true } }, { '11': { translation: [100001, 0, 0], rotation: [0, 0, 0] } }])('rejects an invalid persisted original %#', original => {
+    expect(() => validateTrySession({ ...serializeTrySession(createTryState()), original }, ['11'])).toThrow();
+  });
+
   it('replaces the last edit from its starting state and bases repeated relative revision on the original amount', () => {
     const source = model({ '11': [0, 0, 0] }), original = { '11': { translation: [3, 0, 0], rotation: [0, 0, 0] } as Pose };
     let state = apply(source, preview(source, createTryState(original), move('11', 2))); expect(state.current['11'].translation[0]).toBe(5);

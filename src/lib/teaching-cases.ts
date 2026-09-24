@@ -19,7 +19,7 @@ export type TeachingCaseDefinition = {
 export type PreparedTeachingCase = { model: DentalCase; transforms: Transforms; selectedIds: string[]; definition: TeachingCaseDefinition };
 
 /** Shared metadata registration, applied once to original demo tooth AND gum origins. */
-export const CASE_REFERENCE_SHIFT = 1.6;
+export const CASE_REFERENCE_SHIFT = 1.5;
 export const CASE_REFERENCE_OFFSETS: Readonly<Record<'upper' | 'lower', readonly [number, number, number]>> = Object.freeze({ upper: Object.freeze([0, -CASE_REFERENCE_SHIFT, 0] as const), lower: Object.freeze([0, CASE_REFERENCE_SHIFT, 0] as const) });
 
 const GLOSSARY = { title: 'American Association of Orthodontists: orthodontic terminology', url: 'https://aaoinfo.org/resources/glossary-of-orthodontic-terms/' };
@@ -71,7 +71,7 @@ const RECIPES: Recipe[] = [
     id: 'reference-occlusion', title: 'Reference occlusal relationships', category: 'Foundations', view: 'front', arch: 'both', selectedIds: ['11', '41'], initial: {},
     description: 'A complete 28-tooth reference arrangement for comparing front-to-back, vertical and transverse relationships.',
     learningGoal: 'Distinguish a useful geometric reference from a clinically verified ideal bite.', sources: [GLOSSARY, FINISHING],
-    assumptions: ['Upper and lower model origins are brought 1.6 mm toward the occlusal plane; this is display registration, not bite-record reconstruction.'],
+    assumptions: ['Upper and lower model origins are brought 1.5 mm toward the occlusal plane; this is display registration, not bite-record reconstruction.'],
     demonstrations: [variant('inspect-reference', 'Inspect the reference', 'Hold the arrangement still while examining opposing crowns from several views.', 'Does an orderly-looking model establish ideal occlusal contacts?', 'No. Contact quality, function and root relationships require assessment beyond this authored geometry.', [frame(0, 'Reference arrangement', {}), frame(1, 'Reference held for inspection', {})], { appliance: NONE })],
   },
   {

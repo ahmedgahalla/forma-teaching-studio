@@ -2,6 +2,7 @@ import { BufferGeometry, Mesh, Object3D, Vector3 } from 'three';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { anatomicalFrame, type Vec3 } from './model';
 import type { DentalCase, DentalTooth, Gum } from './geometry';
+import { validateRootAnatomy } from './root-anatomy';
 
 export const TEACHING_ASSET_URL = '/models/forma-teaching-v1.glb';
 export const TEACHING_METADATA_URL = '/models/forma-teaching-v1.json';
@@ -32,6 +33,7 @@ export function validateAnatomyMetadata(raw: unknown): AnatomyMetadata {
     if (!IDS.includes(id) || t.calibrated !== true) throw new Error('The teaching asset has an invalid tooth identifier or frame.');
     const tooth: ToothMetadata = { id, name: text(t.name), calibrated: true, position: vector(t.position), buccal: vector(t.buccal), mesial: vector(t.mesial), occlusal: vector(t.occlusal), bracketPosition: vector(t.bracketPosition), crownMesh: text(t.crownMesh), rootMesh: text(t.rootMesh) };
     anatomicalFrame(tooth);
+    if (t.rootAnatomy !== undefined) tooth.rootAnatomy = validateRootAnatomy(t.rootAnatomy, tooth.occlusal);
     return tooth;
   });
   if (new Set(teeth.map(t => t.id)).size !== 28 || new Set(teeth.flatMap(t => [t.crownMesh, t.rootMesh])).size !== 56) throw new Error('Teaching asset tooth and mesh names must be unique.');

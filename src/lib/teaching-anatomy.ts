@@ -10,6 +10,7 @@ export const DEFAULT_ANATOMY: AnatomyViewState = { bone: false, opacity: .45, cu
 export const ANATOMY_SOURCE = 'https://www.nidcr.nih.gov/health-info/gum-disease';
 
 type Profile = { axial: number; x: number; z: number; rx: number; rz: number };
+type RootEnvelope = { sections: Profile[]; terminal: boolean };
 type Frame = { right: THREE.Vector3; rootward: THREE.Vector3; buccal: THREE.Vector3 };
 type Options = { selected: string; arch?: 'upper' | 'lower' | 'both'; opening?: number; roots?: boolean; gums?: boolean };
 const COLORS = { crown: '#efe6d3', root: '#e2cba7', gum: '#d48d99', ligament: '#d9ad63', bone: '#c6c8b4' };
@@ -24,9 +25,17 @@ function frameFor(tooth: DentalTooth): Frame {
 }
 const fromFrame = (frame: Frame, x: number, axial: number, z: number) => frame.right.clone().multiplyScalar(x).addScaledVector(frame.rootward, axial).addScaledVector(frame.buccal, z);
 
-// Connected branches preserve the existing demo's one-, two- and three-root structure.
-// These sample envelopes are teaching sockets, not segmented alveolar bone.
-function rootProfiles(tooth: DentalTooth, frame: Frame): Profile[][] {
+// New assets explicitly identify the cervical trunk and distal root branches.
+// Legacy schematic roots retain mesh-plane extraction by connected component.
+// These envelopes are teaching sockets, not segmented alveolar bone.
+function rootProfiles(tooth: DentalTooth, frame: Frame): RootEnvelope[] {
+  if (tooth.rootAnatomy) {
+    const convert = (sections: NonNullable<DentalTooth['rootAnatomy']>['branches'][number], terminal: boolean): RootEnvelope => ({ terminal, sections: sections.map(section => {
+      const center = new THREE.Vector3(...section.center);
+      return { axial: center.dot(frame.rootward), x: center.dot(frame.right), z: center.dot(frame.buccal), rx: section.radii[0], rz: section.radii[1] };
+    }) });
+    return [...(tooth.rootAnatomy.trunk ? [convert(tooth.rootAnatomy.trunk, false)] : []), ...tooth.rootAnatomy.branches.map(branch => convert(branch, true))];
+  }
   const geometry = tooth.rootGeometry!, positions = geometry.getAttribute('position'), parent = Array.from({ length: positions.count }, (_, i) => i);
   const find = (i: number): number => { while (parent[i] !== i) { parent[i] = parent[parent[i]]; i = parent[i]; } return i; };
   if (!geometry.index) { const vertices = new Map<string, number>(); for (let i = 0; i < positions.count; i++) { const key = [positions.getX(i), positions.getY(i), positions.getZ(i)].map(v => Math.round(v * 1e5)).join('/'); const previous = vertices.get(key); if (previous !== undefined) parent[i] = previous; else vertices.set(key, i); } }
@@ -49,7 +58,7 @@ function rootProfiles(tooth: DentalTooth, frame: Frame): Profile[][] {
   return [...branches.values()].filter(branch => branch.points.length > 20).map(branch => {
     const min = Math.min(...branch.points.map(p => p.y)), max = Math.max(...branch.points.map(p => p.y));
     // Exact mesh-plane intersections avoid stair steps from wide vertex bands.
-    return Array.from({ length: 33 }, (_, i) => {
+    return { terminal: true, sections: Array.from({ length: 33 }, (_, i) => {
       const axial = THREE.MathUtils.lerp(min, max, i / 32), sample = THREE.MathUtils.clamp(axial, min + .0001, max - .0001);
       let lowX = Infinity, highX = -Infinity, lowZ = Infinity, highZ = -Infinity;
       for (const [a, b] of branch.edges) {
@@ -58,13 +67,14 @@ function rootProfiles(tooth: DentalTooth, frame: Frame): Profile[][] {
         lowX = Math.min(lowX, x); highX = Math.max(highX, x); lowZ = Math.min(lowZ, z); highZ = Math.max(highZ, z);
       }
       return { axial, x: (lowX + highX) / 2, z: (lowZ + highZ) / 2, rx: Math.max(.025, (highX - lowX) / 2), rz: Math.max(.025, (highZ - lowZ) / 2) };
-    });
+    }) };
   });
 }
 
 /** Root-following cavity, rounded apical closure, and a separate alveolar body. */
-function sleeve(profiles: Profile[], frame: Frame, inner: number, outer: number, cutaway: boolean, bone: boolean) {
-  const rings = bone ? profiles.slice(4) : profiles, sides = cutaway ? 32 : 64, cols = cutaway ? sides + 1 : sides;
+function sleeve(envelope: RootEnvelope, frame: Frame, inner: number, outer: number, cutaway: boolean, bone: boolean) {
+  const { sections: profiles, terminal } = envelope;
+  const rings = bone ? profiles.slice(Math.min(4, Math.max(0, profiles.length - 2))) : profiles, sides = cutaway ? 32 : 64, cols = cutaway ? sides + 1 : sides;
   const positions: number[] = [], indices: number[] = [], colors: number[] = [];
   const angleStart = cutaway ? Math.PI / 2 : 0, angleSpan = cutaway ? Math.PI : Math.PI * 2;
   const body = new THREE.Color(bone ? COLORS.bone : COLORS.ligament), socket = body.clone().multiplyScalar(.89), section = new THREE.Color(bone ? '#e9dfc8' : '#eed397');
@@ -77,7 +87,7 @@ function sleeve(profiles: Profile[], frame: Frame, inner: number, outer: number,
         rz: bone && layer ? Math.max(p.rz + 1.35, rings[0].rz + outer - .65 * t) : p.rz + offset };
     });
     const end = path[path.length - 1];
-    for (let j = 1; j <= 8; j++) {
+    for (let j = 1; terminal && j <= 8; j++) {
       const angle = j / 8 * Math.PI / 2;
       path.push({ ...end, axial: end.axial + (bone ? layer ? 2.2 : .75 : offset) * Math.sin(angle), rx: j === 8 ? 0 : end.rx * Math.cos(angle), rz: j === 8 ? 0 : end.rz * Math.cos(angle) });
     }
@@ -97,7 +107,7 @@ function sleeve(profiles: Profile[], frame: Frame, inner: number, outer: number,
     const ids = source.map(id => add(new THREE.Vector3().fromArray(positions, id * 3), section)); quad(ids[0], ids[1], ids[2], ids[3]);
   };
   for (let j = 0; j < count - 1; j++) for (let k = 0; k < sides; k++) {
-    if (j === count - 2) {
+    if (terminal && j === count - 2) {
       indices.push(at(0, j, k), at(0, j, k + 1), at(0, j + 1, k));
       indices.push(at(1, j, k), at(1, j + 1, k), at(1, j, k + 1));
     } else {
@@ -106,6 +116,7 @@ function sleeve(profiles: Profile[], frame: Frame, inner: number, outer: number,
     }
   }
   for (let k = 0; k < sides; k++) sectionQuad(at(0, 0, k), at(1, 0, k), at(1, 0, k + 1), at(0, 0, k + 1));
+  if (!terminal) for (let k = 0; k < sides; k++) sectionQuad(at(0, count - 1, k), at(0, count - 1, k + 1), at(1, count - 1, k + 1), at(1, count - 1, k));
   if (cutaway) for (let j = 0; j < count - 1; j++) {
     sectionQuad(at(0, j, 0), at(0, j + 1, 0), at(1, j + 1, 0), at(1, j, 0));
     sectionQuad(at(0, j, sides), at(1, j, sides), at(1, j + 1, sides), at(0, j + 1, sides));
@@ -125,7 +136,7 @@ export function createTeachingAnatomy(model: DentalCase) {
   const group = new THREE.Group(); group.name = 'teaching-anatomy'; group.visible = false;
   const boneMaterial = new THREE.MeshStandardMaterial({ color: '#ffffff', vertexColors: true, roughness: .82, transparent: true, opacity: .45, side: THREE.DoubleSide });
   const ligamentMaterial = new THREE.MeshStandardMaterial({ color: '#ffffff', vertexColors: true, roughness: .68, side: THREE.DoubleSide });
-  const cache = new Map<string, { bone: THREE.BufferGeometry[]; ligament: THREE.BufferGeometry[]; profiles: Profile[][] }>();
+  const cache = new Map<string, { bone: THREE.BufferGeometry[]; ligament: THREE.BufferGeometry[]; profiles: RootEnvelope[] }>();
   let disposed = false;
   const result = { group, bounds: new THREE.Box3(), gumPlanes: [] as THREE.Plane[], labels: [] as AnatomyLabel[], cutawayTooth: undefined as DentalTooth | undefined,
     update, dispose() { if (disposed) return; disposed = true; group.clear(); cache.forEach(entry => [...entry.bone, ...entry.ligament].forEach(g => g.dispose())); cache.clear(); boneMaterial.dispose(); ligamentMaterial.dispose(); } };
@@ -164,7 +175,8 @@ export function createTeachingAnatomy(model: DentalCase) {
       }
       const buccalPlane = new THREE.Plane().setFromNormalAndCoplanarPoint(frame.buccal.clone().negate(), reference.clone().addScaledVector(frame.buccal, rootCenter.dot(frame.buccal)));
       result.gumPlanes.push(buccalPlane);
-      const profiles = cached(cutaway, true).profiles[0], neck = profiles[0], middle = profiles[Math.floor(profiles.length / 2)];
+      const envelopes = cached(cutaway, true).profiles, profiles = envelopes[0].sections, neck = profiles[0];
+      const branch = envelopes.find(envelope => envelope.terminal)!.sections, middle = branch[Math.floor(branch.length / 2)];
       const label = (name: string, color: string, position: THREE.Vector3, side: AnatomyLabel['side']) => result.labels.push({ name, color, position, side });
       label('Crown', COLORS.crown, new THREE.Vector3().applyMatrix4(posed), 'left');
       if (options.roots !== false) { label('Root', COLORS.root, rootCenter.clone().applyMatrix4(posed), 'left'); result.bounds.union(rootBox.clone().applyMatrix4(posed)); }

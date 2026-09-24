@@ -1,8 +1,59 @@
-# Forma Teaching Studio · v0.11
+# Forma Teaching Studio · v0.12
 
-A local 3D dental workspace for teaching, lectures, and geometric demonstrations. The **Workflow Classroom** explains fixed braces, palatal expansion, archwire expansion, and tooth anatomy. One shared command bar accepts typed requests or **hold-to-talk** speech across the case and classroom. Combine up to eight supported actions, explore a temporary variation of a lesson, undo the request, or return to its authored setup. Next.js and React provide the workspace, Three.js renders the meshes, and an optional Python/FastAPI service uses OpenAI for flexible wording. Familiar commands run locally without an API key.
+A local 3D dental workspace for university lectures, geometric demonstrations and **initial elastic mechanics experiments**. Build an appliance on synthetic teeth, declare an activation or load, ask students to predict, then calculate and compare. The **Workflow Classroom** retains authored appliance and anatomy lessons. One shared command bar accepts typed requests or **hold-to-talk** speech across both workspaces. Combine up to eight supported actions, undo the complete request, or return to an authored setup. Next.js/React provide the interface, Three.js renders the model, and an optional Python/FastAPI service uses OpenAI or an OpenAI-compatible Responses provider for flexible wording. Familiar commands run locally without an API key.
 
 Start with the [combined workspace guide](docs/COMBINED_WORKSPACE.md) to move between prepared lessons and free experiments, the [Try Mode guide](docs/TRY_MODE.md) for the default editing workspace, and the [Voice Classroom guide](docs/VOICE_CLASSROOM.md) for microphone controls, anatomy layers and lesson commands.
+
+## Build an initial-response experiment
+
+Open **Appliances** in the synthetic free workspace. If a prepared case is active, choose **Explore this arrangement** first. The three experiment families share the same unloaded reference and can be combined within the software limits:
+
+| Family | What is calculated | Main assumptions |
+| --- | --- | --- |
+| Brackets and archwire | Coupled initial tooth displacement, rotation, force and moment from wire-width activation; rectangular sections also support relative end twist. | Small-deflection beam spans, ideal sliding and seated bracket slopes; ideal slot clearance, without friction, plasticity or NiTi hysteresis. |
+| TAD and elastic | A declared constant tension or tension-only linear spring acting between tooth attachment points and/or an ideal fixed anchor; anchor reaction and an alternative without the TAD. | The pointed anchor is a graphics location, not a suitable surgical site. Directions and moment arms use the unloaded reference; no force decay or tissue response. |
+| Palatal actuator | Coupled dental-support opening, appliance deflection and force; an optional additional supporting spring separates a schematic compliance contribution. | Contralateral upper-tooth attachments and declared spring stiffnesses. The supporting-spring opening is not predicted sutural separation or jaw growth. |
+
+Start with these separate requests:
+
+```text
+select upper anterior teeth
+install brackets on them
+put a wire through these brackets
+activate the wire by 0.05 mm
+show what happens
+show the roots and explain that movement
+```
+
+The visible wire preset supplies the chosen material and size. Installing passive hardware does not move teeth. A calculated response may be very small: **Movement display** offers 1×, 5×, 10×, 25× or 50× visualization, while all reported values remain unscaled. Arrows and moment arcs show direction; their lengths are not a force scale. Use **Predict before reveal**, then reveal and discuss the result.
+
+Change the selected wire size/material, activation or connection law to compare from the **same unloaded reference**. Saved experiment stages store configurations, not consecutive biological treatment states. Every solve starts from that unchanged reference; neither stage number nor playback speed represents treatment time, remodeling or accumulated tooth movement. **Compare without the TAD** leaves the main configuration available and overlays the alternative.
+
+Clear validated voice/text geometric movements now execute immediately. Start a request with **preview** to review its candidate first; manual numerical tools retain Apply/Discard. Pointing can update “here” or “these teeth” while Space remains held. Release submits once; Escape, Stop or loss of window focus discards unfinished microphone capture. Starting the microphone interrupts narration. See [conversational commands](docs/CONVERSATIONAL_COMMANDS.md) for explicit loads, replacements, references and stage commands.
+
+### Declared mechanics bounds
+
+These are **software/model-domain limits**, not biological safety limits or recommended clinical settings. Input acceptance does not guarantee that a solve will pass its smaller elastic-response checks.
+
+| Parameter | Accepted domain |
+| --- | --- |
+| Experiment size | Up to 32 calibrated synthetic teeth, 4 wires, 8 TADs, 12 elastic connections, 1 expander and 20 saved configurations; the bundled model contains 28 teeth. |
+| Wire section | Each dimension at least 0.20 mm, and must fit the ideal 0.022 × 0.028 inch slot. Round diameter ≤0.5588 mm; rectangular height ≤0.5588 mm and width ≤0.7112 mm. |
+| Wire activation | Total width activation −2 to +2 mm; relative end twist −20° to +20°, rectangular wire only. A wire requires at least two installed brackets on one arch; spans must be 0.5–60 mm. |
+| Elastic law | Constant tension 0–20 N per connection; spring stiffness 0.001–1,000 N/mm and rest length 0–200 mm. Spring force is calculated from extension, not capped by the constant-tension input bound. The group tension control divides its entered total equally; the spring control requires one tooth. |
+| Expander | Activation 0–2 mm; appliance stiffness and optional supporting-spring stiffness each 0.001–1,000 N/mm. Attachments must be on opposite sides of the upper arch. |
+| Attachment coordinates | TAD coordinates within ±200 mm per case axis; crown-local bracket/elastic points within ±30 mm per axis. These bounds do not assess anatomical suitability. |
+| Virtual tooth support | Standard: 100 N/mm and 1,000 N·mm/rad. Soft/firm presets halve/double both values. These are authored engineering assumptions. |
+| Material presets | Ideal stainless steel: 200 GPa, strain limit 0.002. Ideal beta titanium: 69 GPa, strain limit 0.003. Both use Poisson ratio 0.3; neither is a manufacturer specification. |
+| Result rejection | Rotation above 5°, crown-pivot displacement above 5% of the authored root extent, excessive wire strain or failed convergence rejects the result. At most 40 solver iterations. |
+
+The browser worker runs the shared bounded numerical engine. Before displaying its result, the workspace checks six response frames for new crown-surface crossings and preserves existing tooth locks. This sampling does not guarantee continuous clearance, root/bone clearance or biological feasibility. The authored appliance palette and guided animation remain separate display illustrations; they do not silently become mechanical calculations.
+
+## Refined permanent anatomy and dental classes
+
+The current Blender pack contains **28 crowns, 28 connected root objects and two gingival meshes**, totaling **211,452 triangles**. Distinct incisor/canine features, premolar and molar cusp patterns, and joined root trunks/furcations are original teaching forms. Explicit root-branch metadata keeps schematic cutaways registered. The editable `.blend`, runtime GLB, metadata and fresh inspection renders are included; see [Blender model](docs/BLENDER_MODEL.md).
+
+Load **Dental Class I**, **Class II division 1**, **Class II division 2**, or **Class III** from the library or a separate typed request. Each arrangement exposes its assumptions and initial crown/root crossing audit. These illustrate dental relationships using approximate molar guides; they do not diagnose a skeletal class. The pack remains adult permanent dentition without third molars; primary and mixed-dentition packs are not included. Educator review remains pending.
 
 ## Interactive university lectures
 
@@ -22,7 +73,7 @@ The Teaching library now contains **12 cases and 19 authored demonstrations**, i
 
 On phones, the bottom **Model / Select / Layers / Tools / Stop** dock gives access to controls without stacking them over the model. Case playback and Explore remain beside the model. Use text commands or the hold-to-talk microphone where supported. Voice recognition and rendered mobile interaction still need a device check.
 
-Read the [case and command guide](docs/CASE_WORKSPACE.md), [Blender model guide](docs/BLENDER_MODEL.md), and [verification record](docs/VERIFICATION.md). The packaged local build contains v0.11. See [mobile publication status](docs/MOBILE_TEST.md) before using the phone link; a local build does not by itself update the hosted site.
+Read the [case and command guide](docs/CASE_WORKSPACE.md), [Blender model guide](docs/BLENDER_MODEL.md), and [v0.12 acceptance checklist](docs/RELEASE_CHECKLIST_0.12.md). Final build/package and browser acceptance are recorded separately. See [mobile publication status](docs/MOBILE_TEST.md) before using the phone link; a local build does not by itself update the hosted site.
 
 ## Connect a lesson to a free experiment
 
@@ -49,7 +100,7 @@ Version 0.7 opens the case in **Try Mode**. Select teeth, preview a per-tooth mo
 ```text
 select upper front six
 lock upper molars
-move the selected segment posteriorly 0.5 mm
+preview move the selected segment posteriorly 0.5 mm
 apply preview
 show after
 save arrangement as baseline
@@ -59,7 +110,7 @@ Run these as separate requests and review the preview before Apply. Constrained 
 
 New tools include a shared-centre segment rotation, projected gap closure with an explicit equal/first/second rule, symmetric pair-centre span changes, a reference arch ellipse for calibrated synthetic teeth, saved arrangements and selection groups, displacement traces, reverse playback and replacement of the last numeric amount. `compare with original` shows an overlay; `compare saved arrangement baseline` overlays that saved setup. Neither commits a restoration. `undo the last two changes` restores two whole recorded requests, provided enough history exists.
 
-New Try mechanics are **local-only English commands**. The optional AI endpoint can still interpret unfamiliar earlier classroom wording, including camera and visibility requests. Ordinary tooth commands also create previews while Try Mode is active. Resolve the preview before another edit or saving/exporting. Timeline scrubbing changes the shown frame; the applied endpoint remains committed. Say `show after` before a new edit, and `return to try mode` as a separate request when returning from a classroom. See [TRY_MODE.md](docs/TRY_MODE.md) for exact commands, software bounds, persistence and collision limitations.
+Geometric Try tools have deterministic English commands. Clear voice/text moves execute immediately in v0.12; use an explicit `preview` request or manual controls for Apply/Discard review. The optional AI endpoint also supports the bounded appliance-mechanics vocabulary described above. Resolve any preview before another edit or saving/exporting. Timeline scrubbing changes the shown frame; the applied endpoint remains committed. Say `show after` before a new edit, and `return to try mode` as a separate request when returning from a classroom. See [TRY_MODE.md](docs/TRY_MODE.md) for geometric tools and collision limitations; its earlier examples describe the original preview-first command flow.
 
 Version 0.6 improves the synthetic model with smooth, differentiated crowns, curved roots, scalloped gingival bases and clearer tooth-and-socket sections. Enamel and gingiva use subtle colour gradients under studio lighting; brackets, wires and expanders have refined metal finishes. The initial-position overlay is a translucent surface. These are authored teaching models, not patient reconstructions. Display shading leaves stored and exported source geometry unchanged; older saved cases keep their own meshes. No Blender installation is required.
 
@@ -144,7 +195,7 @@ The support tissues are **schematic, stationary teaching references** while the 
 
 ## Explore the case workspace
 
-In v0.7, the movement instructions below create previews in the default Try Mode; use Apply or Discard. `leave try mode` returns to the earlier direct-edit workspace once any preview is resolved. The ordinary checkpoint sequence remains separate from the current Try edit's playback path.
+Manual movement controls create previews in Try Mode; use Apply or Discard. In v0.12, prefix a typed or spoken movement with `preview` to use that same review flow. `leave try mode` returns to the earlier direct-edit workspace once any preview is resolved. The ordinary checkpoint sequence remains separate from the current Try edit's playback path.
 
 1. The synthetic **28-tooth upper and lower dentition** loads with brackets and archwires. The demo omits third molars; the editor accepts all 32 permanent FDI IDs when supplied.
 2. Click a crown or tooth number. Shift-click to build a selection, or use the arch/group controls. Commands can also name groups directly.
@@ -263,15 +314,25 @@ node --experimental-strip-types scripts/generate-samples.mjs
 
 Generation requires Node 22.6 or newer and writes **28 separate synthetic crown STLs plus upper/lower gum STLs**, preserving shared coordinates. It excludes schematic roots and braces. STL import does not carry anatomical calibration metadata; calibrate these imported samples or use world axes. The built-in demo already contains reference axes and root illustrations.
 
-## Optional OpenAI service
+## Optional OpenAI or OpenRouter service
 
 See [backend/README.md](backend/README.md) for exact Python setup, pinned dependencies, environment settings, and mocked tests. Configure `OPENAI_API_KEY` on the server, start the service on port 8000, then connect it through Settings. No API key belongs in browser code or frontend settings.
 
+For OpenRouter, edit the backend's local `.env` using these **non-secret example settings** and enter your own provider key locally in the empty key field:
+
+```dotenv
+OPENAI_API_KEY=
+OPENAI_BASE_URL=https://openrouter.ai/api/v1
+OPENAI_MODEL=openai/gpt-4.1-mini
+```
+
+For OpenAI, omit `OPENAI_BASE_URL` and use the OpenAI model identifier, such as `gpt-4.1-mini`. Choose a model/provider available to your account that supports the Responses structured-output request used by this service; the example is not a live-provider compatibility result. Restart the backend after editing its environment. `/health` identifies the configured provider and whether a key is present; it does not verify the key or make a provider request. Settings takes only the backend URL. Provider authentication, credits and quota remain separate from a ChatGPT subscription. A rejected key or unavailable provider leaves local commands usable. Never include `.env`, credentials or `NEXT_PUBLIC_*` secrets in a shared package.
+
 The shared controller tries the deterministic local planner first. When wording is not recognized and you have enabled the connected service, it requests an interpretation from `/api/interpret-teaching`. The frontend sends text and minimal classroom context: available/selected tooth IDs, mode, step, display state and recent allowlisted actions. Meshes, case names and patient-ID fields are not sent. Do not put personal records into the command text. The original `/api/interpret` endpoint remains available for compatibility.
 
-The server returns at most eight allowlisted actions or a clarification. The frontend checks the plan against the current scene and rejects stale responses before automatically running an accepted request. **There is no separate Apply confirmation in the v0.5 classroom flow.** Use the visible transcript, Stop and whole-request Undo. Missing amounts, unsupported actions or clarification requests leave the scene unchanged. The live integration requires your own credentials and has been tested with mocks only.
+The server returns at most eight allowlisted actions or a clarification. Frontend and backend independently check requested targets, explicit values and available objects. The frontend rejects stale responses before running an accepted request. Clear validated classroom and geometric commands execute immediately; explicit/manual previews retain Apply/Discard. Use the visible transcript, Stop and whole-request Undo. Missing amounts, unsupported actions or clarification requests leave the scene unchanged. Automated provider tests use mocks; live provider and real microphone acceptance are separate checks.
 
-Version 0.7 Try Mode uses the deterministic local parser and its explicit preview/Apply flow. Its new mechanics, named arrangements and counted history are excluded from AI plans and the legacy service context; the backend API remains compatible with the earlier classroom vocabulary.
+The original `/api/interpret` contract remains available. `/api/interpret-teaching` additionally validates supported classroom and initial-mechanics requests. Local geometry tools retain their own bounds and constraints; an AI response cannot bypass them or invent missing appliance values.
 
 ## Geometry, analysis, and saving
 
@@ -280,8 +341,8 @@ Version 0.7 Try Mode uses the deterministic local parser and its explicit previe
 - Rotation increments compose as quaternions in command order; stored poses use XYZ Euler angles in degrees. Playback uses shortest-path quaternion interpolation between original/checkpoint/final poses, with equal-duration segments. Stages imply no treatment duration or biological response.
 - Landmark measurements are straight 3D distances at the displayed stage. Crown-centre spans and the centre-distance selector are explicitly geometric references, not clinical cusp-tip arch widths or interproximal gaps.
 - Intersection analysis checks final crown **triangle-surface crossings**. It does not report clearance, penetration depth, full containment, root/gum/bone intersections, or collisions between displayed stages. A result of zero crossings is not a clinical clearance assessment.
-- Brackets follow each crown and wires connect displayed bracket slots. Bracket positions, root illustrations, wire shapes and synthetic support tissues are schematic; no wire stiffness, forces, anchorage, or periodontal response are calculated. Bone and the exaggerated ligament are stationary display references, not moving or deforming tissue simulations.
-- Version-2 saved cases include movement history, up to 20 checkpoints, attachment specifications and visibility, synthetic root geometry when present, and bracket/ligature settings. Camera position, temporary display separation, landmark selections, intersection results, live speech state, guided-lesson progress and classroom workflow progress are not saved. Case files must be under 100 MB when reopened.
+- Brackets follow each crown and wires connect displayed slots. The ordinary palette remains schematic. Initial-mechanics experiments calculate forces and moments using declared virtual supports; the displayed bone and enlarged ligament remain stationary illustrations, not deforming tissue simulations.
+- Version-3 saved cases can include connected-root metadata, validated mechanics configuration/stages and lecture setup: camera, selection, layers, display separation, magnification and wire preset. Saved numerical mechanics results are discarded on import and require recalculation. Existing movement history, up to 20 geometric checkpoints and attachment/appliance settings remain supported; version-1 and version-2 files still load. Live speech, pointed references and session-only return links are not restored. Case files must stay under 100 MB for saving and reopening.
 - Direct manipulation uses world-axis handles with 0.1 mm translation and 1° rotation snapping. A completed drag changes the active tooth and is one undoable movement. Use group commands for multi-tooth movement and named commands for anatomical directions.
 
 ## Verification
@@ -296,11 +357,11 @@ Backend tests: follow [backend/README.md](backend/README.md). They mock OpenAI a
 
 Frontend tests cover deterministic and compound classroom plans, narration/cancellation, whole-request history, simulated push-to-talk, anatomy display geometry, workflow frames, attachments, group operations, quaternion composition, upper/lower directions, checkpoints, STL/ZIP exports, saved cases, measurements, and mesh intersections. Run the commands above to verify your installed revision. Live microphone permissions and live OpenAI requests are separate integrations and are not verified by automated tests.
 
-See [the verification record](docs/VERIFICATION.md) for revision-specific test counts, build results, browser checks and remaining integration limits. Earlier release checks do not automatically verify the v0.5 classroom. No live microphone or actual PNG-download verification is claimed here.
+See the [v0.12 acceptance matrix](docs/RELEASE_CHECKLIST_0.12.md) for current automated evidence and pending release checks, and [earlier verification records](docs/VERIFICATION.md) for historical results. An older browser pass does not verify this release. No real microphone recognition or educator approval is established by automated tests.
 
 ## Scope and references
 
-This is an education and lecture prototype, **not for clinical use**. It has no automatic segmentation/numbering, CBCT registration, patient-root reconstruction, bone boundaries, biological movement model, force simulation, automatic treatment planning, aligner-shell fabrication, clinical validation, or regulatory approval. Attachments and staged STL exports illustrate geometry. File-based saving does not provide authentication, patient management, multi-user records, or cloud persistence.
+This is an education and lecture prototype, **not for clinical use**. Its mechanics module calculates a limited initial elastic response under authored engineering assumptions. It has no automatic segmentation/numbering, CBCT registration, patient-root reconstruction, measured bone boundaries, biological remodeling or treatment-time model, automatic treatment planning, aligner-shell fabrication, clinical validation or regulatory approval. Attachments and staged STL exports illustrate geometry. File-based saving does not provide authentication, patient management, multi-user records or cloud persistence.
 
 See [Orthodontic references and engineering implications](docs/ORTHODONTIC_REFERENCES.md) for source-linked terminology, pivot/axis caveats, and the distinction between braces visualization and biomechanics. [Treatment workflow research](docs/TREATMENT_WORKFLOWS.md) supports the new classroom explanations with official NHS, AAO and BOS material and original studies.
 
@@ -316,6 +377,10 @@ src/lib/attachments.ts     Attachment settings and crown-local teaching geometry
 src/lib/lecture.ts         Teaching parser, English number forms, guided lessons
 src/lib/classroom.ts       Compound plans, action validation and sequential context
 src/lib/try-mode.ts        Preview geometry, locks, objectives and saved arrangements
+src/lib/mechanics/        Bounded initial elastic engine, assumptions and validation
+src/workers/mechanics.worker.ts  Shared solver off the interface thread
+src/lib/mechanics-commands.ts  Pointed references and bounded appliance instructions
+src/lib/dental-arrangements.ts  Synthetic dental Class I/II/III starting poses
 src/components/TryPanel.tsx Try Mode controls and sampled-path preview review
 src/lib/teaching-runtime.ts Ordered execution, cancellation, narration and request history
 src/lib/push-to-talk.ts    Hold-to-talk browser recognition lifecycle

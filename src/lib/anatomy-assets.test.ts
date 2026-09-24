@@ -1,9 +1,11 @@
 import { describe, expect, it } from 'vitest';
-import { BoxGeometry, Group, Mesh, MeshBasicMaterial } from 'three';
+import { BoxGeometry, DoubleSide, Group, Mesh, MeshBasicMaterial, Raycaster, Vector3 } from 'three';
 import { readFileSync } from 'node:fs';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { dentalCaseFromAsset, validateAnatomyMetadata } from './anatomy-assets';
 import { createOrthodonticDemo } from './demo';
+import { createTeachingAnatomy } from './teaching-anatomy';
+import type { DentalTooth } from './geometry';
 
 function fixture() {
   const scene = new Group(), material = new MeshBasicMaterial();
@@ -38,7 +40,8 @@ describe('Blender anatomy asset contract', () => {
       expect(tooth.bracketPosition).toEqual(original.bracketPosition);
       expect(tooth.geometry.boundingBox!.min.distanceTo(original.geometry.boundingBox!.min)).toBeLessThan(.5);
       expect(tooth.geometry.boundingBox!.max.distanceTo(original.geometry.boundingBox!.max)).toBeLessThan(.5);
-      expect(tooth.rootGeometry!.boundingBox!.min.distanceTo(original.rootGeometry!.boundingBox!.min)).toBeLessThan(1.1);
+      // The joined trunk and curved fuller root body intentionally change silhouette.
+      expect(tooth.rootGeometry!.boundingBox!.min.distanceTo(original.rootGeometry!.boundingBox!.min)).toBeLessThan(1.5);
     }
     const triangles = result.teeth.reduce((count, tooth) => count + (tooth.geometry.index?.count || tooth.geometry.getAttribute('position').count) / 3 + (tooth.rootGeometry!.index?.count || tooth.rootGeometry!.getAttribute('position').count) / 3, 0);
     expect(triangles).toBeGreaterThan(50000); expect(triangles).toBeLessThan(200000);
@@ -51,6 +54,61 @@ describe('Blender anatomy asset contract', () => {
     expect(result.teeth[1].rootGeometry?.boundingBox?.min.y).toBe(2);
     expect(result.teeth[1].bracketPosition).toEqual([0, 0, 2.5]);
     expect(result.teeth[1].geometry).not.toBe((scene.getObjectByName('crown_12') as Mesh).geometry);
+  });
+  it('loads connected root trunks with explicit distal branches and registered cutaways', async () => {
+    const bytes = readFileSync('public/models/forma-teaching-v1.glb');
+    const raw = JSON.parse(readFileSync('public/models/forma-teaching-v1.json', 'utf8'));
+    const scene = await new GLTFLoader().parseAsync(bytes.buffer.slice(bytes.byteOffset, bytes.byteOffset + bytes.byteLength), '');
+    const model = dentalCaseFromAsset(scene.scene, raw), anatomy = createTeachingAnatomy(model);
+    for (const tooth of model.teeth) {
+      const root = tooth.rootGeometry!, index = root.index!, p = root.getAttribute('position');
+      const parent = Array.from({ length: p.count }, (_, i) => i);
+      const find = (i: number): number => { while (parent[i] !== i) { parent[i] = parent[parent[i]]; i = parent[i]; } return i; };
+      for (let i = 0; i < index.count; i += 3) { parent[find(index.getX(i + 1))] = find(index.getX(i)); parent[find(index.getX(i + 2))] = find(index.getX(i)); }
+      expect(new Set(parent.map((_, i) => find(i))).size, `${tooth.id} connected root surface`).toBe(1);
+      const upper = Number(tooth.id[0]) < 3, family = Number(tooth.id[1]), count = family >= 6 ? upper ? 3 : 2 : upper && family === 4 ? 2 : 1;
+      expect(tooth.rootAnatomy!.branches).toHaveLength(count);
+      expect(!!tooth.rootAnatomy!.trunk).toBe(count > 1);
+      const saved = [...p.array];
+      anatomy.update({}, { bone: true, opacity: .5, ligament: true, cutaway: true }, { selected: tooth.id, roots: true, gums: true });
+      expect(anatomy.group.children).toHaveLength((count + (count > 1 ? 1 : 0)) * 2);
+      expect(anatomy.labels).toHaveLength(5);
+      expect(anatomy.bounds.getSize(new Vector3()).length()).toBeLessThan(55);
+      for (const child of anatomy.group.children as Mesh[]) {
+        expect(Array.from(child.geometry.getAttribute('position').array).every(Number.isFinite)).toBe(true);
+        expect(Array.from(child.geometry.getAttribute('normal').array).every(Number.isFinite)).toBe(true);
+      }
+      expect([...p.array]).toEqual(saved);
+      expect(tooth.rootAnatomy).not.toBe(raw.teeth.find((item: { id: string }) => item.id === tooth.id).rootAnatomy);
+    }
+    anatomy.dispose();
+  });
+  it('retains distinguishing posterior landmarks in the exported surfaces, not just the Blender source', async () => {
+    const bytes = readFileSync('public/models/forma-teaching-v1.glb');
+    const scene = await new GLTFLoader().parseAsync(bytes.buffer.slice(bytes.byteOffset, bytes.byteOffset + bytes.byteLength), '');
+    const model = dentalCaseFromAsset(scene.scene, JSON.parse(readFileSync('public/models/forma-teaching-v1.json', 'utf8')));
+    const material = new MeshBasicMaterial({ side: DoubleSide });
+    const height = (id: string, u: number, v: number) => {
+      const tooth = model.teeth.find(t => t.id === id) as DentalTooth;
+      const axis = new Vector3(...tooth.occlusal!), mesial = new Vector3(...tooth.mesial), buccal = new Vector3(...tooth.buccal), point = new Vector3(), positions = tooth.geometry.getAttribute('position');
+      let minM = Infinity, maxM = -Infinity, minB = Infinity, maxB = -Infinity, maxA = -Infinity;
+      for (let i = 0; i < positions.count; i++) {
+        point.fromBufferAttribute(positions, i); minM = Math.min(minM, point.dot(mesial)); maxM = Math.max(maxM, point.dot(mesial)); minB = Math.min(minB, point.dot(buccal)); maxB = Math.max(maxB, point.dot(buccal)); maxA = Math.max(maxA, point.dot(axis));
+      }
+      const origin = mesial.multiplyScalar((minM + maxM) / 2 + (maxM - minM) * u / 2).addScaledVector(buccal, (minB + maxB) / 2 + (maxB - minB) * v / 2).addScaledVector(axis, maxA + 5);
+      const hit = new Raycaster(origin, axis.clone().negate()).intersectObject(new Mesh(tooth.geometry, material))[0];
+      expect(hit, `${id} occlusal landmark ray`).toBeDefined(); return hit.point.dot(axis) - maxA;
+    };
+    // Lower first premolar: dominant buccal cusp; second: two separated lingual lobes.
+    expect(height('44', 0, .45) - height('44', 0, -.45)).toBeGreaterThan(.65);
+    for (const u of [-.30, .30]) expect(height('45', u, -.40) - height('45', 0, -.45)).toBeGreaterThan(.20);
+    // Upper first premolar has a more unequal cusp pair than the second.
+    expect(height('14', 0, .45) - height('14', 0, -.45)).toBeGreaterThan(height('15', 0, .45) - height('15', 0, -.45) + .15);
+    // A smaller distolingual cusp in the upper second molar; a distal fifth-cusp
+    // elevation in the lower first molar compared with the four-cusp second.
+    expect(height('16', -.30, -.40) - height('17', -.30, -.40)).toBeGreaterThan(.15);
+    expect(height('46', -.70, 0) - height('47', -.70, 0)).toBeGreaterThan(.20);
+    material.dispose();
   });
   it('applies parent transforms exactly once', () => {
     const { scene, metadata } = fixture(); scene.position.z = 7;

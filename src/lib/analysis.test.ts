@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { BoxGeometry, Vector3 } from 'three';
+import { BoxGeometry, Euler, MathUtils, Quaternion, Vector3 } from 'three';
 import { archSpans, centreDistance, findSurfaceIntersections, movementRows, toothMatrix } from './analysis';
 import { emptyPose, type Transforms, type Vec3 } from './model';
 import type { DentalCase, DentalTooth } from './geometry';
@@ -65,6 +65,41 @@ describe('surface intersection at transformed tooth poses', () => {
 });
 
 describe('millimetre centre measurements and movement summaries', () => {
+  it('measures movement from the saved translated and obliquely rotated class baseline', () => {
+    const dental = model(tooth('11', [100, 200, 300]), tooth('21', [0, 0, 0]));
+    const original: Transforms = { '11': { translation: [8, -2, 5], rotation: [20, -30, 40] } };
+    const initial = new Quaternion().setFromEuler(new Euler(...original['11'].rotation.map(MathUtils.degToRad) as Vec3));
+    const rotation = new Euler().setFromQuaternion(new Quaternion().setFromAxisAngle(new Vector3(0, 1, 0), MathUtils.degToRad(35)).multiply(initial));
+    const current: Transforms = { '11': { translation: [11, 2, 17], rotation: [rotation.x, rotation.y, rotation.z].map(MathUtils.radToDeg) as Vec3 } };
+    const before = JSON.stringify({ original, current });
+    const row = movementRows(dental, current, original)[0];
+    expect(row).toMatchObject({ x: 3, y: 4, z: 12, displacement: 13 });
+    expect(row.orientationChange).toBeCloseTo(35, 10);
+    expect(movementRows(dental, original, original)[0].displacement).toBe(0);
+    expect(movementRows(dental, original, original)[0].orientationChange).toBeLessThan(.00001);
+    expect(movementRows(dental, current, original)[1]).toMatchObject({ x: 0, y: 0, z: 0, displacement: 0, orientationChange: 0 });
+    expect(JSON.stringify({ original, current })).toBe(before);
+  });
+
+  it('uses the shortest baseline-relative quaternion angle across the Euler wrap', () => {
+    const dental = model(tooth('11', [0, 0, 0]));
+    const original: Transforms = { '11': { translation: [1, 2, 3], rotation: [0, 0, 170] } };
+    const current: Transforms = { '11': { translation: [1, 2, 3], rotation: [0, 0, -170] } };
+    expect(movementRows(dental, current, original)[0].orientationChange).toBeCloseTo(20, 10);
+    expect(movementRows(dental, current)[0].orientationChange).toBeCloseTo(170, 10);
+    expect(movementRows(dental, current)).toEqual(movementRows(dental, current, {}));
+  });
+
+  it('reports the saved class baseline as the initial span rather than the source mesh arrangement', () => {
+    const dental = model(tooth('13', [-10, 0, 0]), tooth('23', [10, 0, 0]));
+    const original: Transforms = { '13': { translation: [-3, 5, 1], rotation: [20, 30, 40] }, '23': { translation: [3, 5, 1], rotation: [0, 40, 0] } };
+    const current: Transforms = { '13': { translation: [-4, 5, 1], rotation: [0, 0, 0] }, '23': { translation: [4, 5, 1], rotation: [0, 0, 0] } };
+    expect(archSpans(dental, current, original)[0]).toMatchObject({ initial: 26, final: 28 });
+    expect(archSpans(dental, original, original)[0]).toMatchObject({ initial: 26, final: 26 });
+    expect(archSpans(dental, current)[0]).toMatchObject({ initial: 20, final: 28 });
+    expect(archSpans(dental, current)).toEqual(archSpans(dental, current, {}));
+  });
+
   it('measures world-space model centres with translations and ignores local rotation', () => {
     const dental = model(tooth('13', [0, 0, 0]), tooth('23', [3, 4, 0]));
     expect(centreDistance(dental, {}, '13', '23')).toBe(5);

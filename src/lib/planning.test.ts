@@ -54,6 +54,24 @@ describe('whole-operation history', () => {
 });
 
 describe('checkpoint paths and quaternion stage previews', () => {
+  it('starts from a nonzero class baseline and visits subsequent checkpoints without accumulating it', () => {
+    const original = { '11': pose([3, 2, 1], [0, 0, 20]) }, final = { '11': pose([9, 6, 1], [0, 0, 80]) };
+    const checkpoints = [{ id: 'middle', name: 'Middle', transforms: { '11': pose([5, 4, 1], [0, 0, 40]) } }];
+    const before = JSON.stringify({ original, final, checkpoints });
+    expect(stageTransforms(final, checkpoints, 0, 4, original)).toEqual(original);
+    const halfFirst = stageTransforms(final, checkpoints, 1, 4, original)['11'];
+    expect(halfFirst.translation).toEqual([4, 3, 1]); expect(halfFirst.rotation[2]).toBeCloseTo(30, 10);
+    expect(stageTransforms(final, checkpoints, 2, 4, original)).toEqual(checkpoints[0].transforms);
+    expect(stageTransforms(final, checkpoints, 3, 4, original)['11'].translation).toEqual([7, 5, 1]);
+    expect(stageTransforms(final, checkpoints, 4, 4, original)).toEqual(final);
+    expect(JSON.stringify({ original, final, checkpoints })).toBe(before);
+  });
+  it('retains identity-start compatibility when an original arrangement is omitted', () => {
+    const final = { '11': pose([4, 2, 0], [0, 0, 40]) };
+    expect(stageTransforms(final, [], 0, 2)).toEqual({});
+    expect(stageTransforms(final, [], 1, 2)).toEqual(stageTransforms(final, [], 1, 2, {}));
+    expect(stageTransforms(final, [], 1, 2)['11'].translation).toEqual([2, 1, 0]);
+  });
   it('visits every captured checkpoint in order and uses equal-duration segments', () => {
     const checkpoints = [
       { id: 'a', name: 'A', transforms: { '11': pose([4, 0, 0]) } },

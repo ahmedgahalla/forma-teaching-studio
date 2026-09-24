@@ -3,13 +3,14 @@ import { STLExporter } from 'three/addons/exporters/STLExporter.js';
 import { strToU8, zip as zipAsync } from 'fflate';
 import { createAttachmentGeometry } from './attachments';
 import { download, type DentalCase } from './geometry';
-import { stageTransforms, validTransforms, type Checkpoint } from './planning';
+import { interpolateTransforms, stageTransforms, validTransforms, type Checkpoint } from './planning';
 import type { Transforms, Vec3 } from './model';
 import { previewPose, type TryPreview } from './try-mode';
 
 const MAX_BATCH_BYTES = 250 * 1024 * 1024;
 const stageName = (index: number) => `stage-${String(index).padStart(3, '0')}.stl`;
 const purpose = 'Educational geometric demonstration only. These meshes are not clinically validated treatment stages or manufacturing-ready aligner models.';
+export type InitialResponsePath = { from: Transforms; to: Transforms; assumptions: string[] };
 
 function requireTransforms(model: DentalCase, transforms: Transforms) {
   if (!validTransforms(transforms, new Set(model.teeth.map(tooth => tooth.id)))) throw new Error('Invalid stage transforms.');
@@ -81,33 +82,40 @@ export function exportStage(model: DentalCase, transforms: Transforms, stageInde
 }
 
 /** Stage 0 is the trajectory start (otherwise original); count + 1 STLs include both endpoints. */
-export async function exportStageSequence(model: DentalCase, final: Transforms, checkpoints: Checkpoint[], count: number, includeAttachments: boolean, trajectory?: TryPreview | null): Promise<void> {
-  requireTransforms(model, final);
+export async function exportStageSequence(model: DentalCase, final: Transforms, checkpoints: Checkpoint[], count: number, includeAttachments: boolean, trajectory?: TryPreview | null, initialResponse?: InitialResponsePath, original: Transforms = {}): Promise<void> {
+  requireTransforms(model, final); requireTransforms(model, original);
+  if (initialResponse) {
+    if (trajectory) throw new Error('Choose one geometric path or one initial-response path to export.');
+    requireTransforms(model, initialResponse.from); requireTransforms(model, initialResponse.to);
+    if (!Array.isArray(initialResponse.assumptions) || initialResponse.assumptions.length > 30 || initialResponse.assumptions.some(value => typeof value !== 'string' || !value.trim() || value.length > 2000)) throw new Error('Invalid initial-response assumptions.');
+  }
   if (!Array.isArray(checkpoints) || checkpoints.length > 20) throw new Error('Use at most 20 checkpoints.');
   for (const checkpoint of checkpoints) requireTransforms(model, checkpoint.transforms);
-  stageTransforms(final, checkpoints, 0, count); // Validate the same 2–50 interval limit as the viewer.
+  stageTransforms(final, checkpoints, 0, count, original); // Validate the same 2–50 interval limit as the viewer.
   // Snapshot the small pose maps before yielding; edits during export cannot mix stage paths.
-  const path = structuredClone({ final, checkpoints, trajectory });
+  const path = structuredClone({ final, checkpoints, trajectory, initialResponse, original });
   const stages = Array.from({ length: count + 1 }, (_, index) => ({
     index, file: stageName(index), fraction: index / count,
-    transforms: path.trajectory ? previewPose(path.trajectory, index / count) : stageTransforms(path.final, path.checkpoints, index, count),
+    transforms: path.initialResponse ? interpolateTransforms(path.initialResponse.from, path.initialResponse.to, index / count) : path.trajectory ? previewPose(path.trajectory, index / count) : stageTransforms(path.final, path.checkpoints, index, count, path.original),
   }));
   for (const stage of stages) requireTransforms(model, stage.transforms);
   const scene = prepareScene(model, includeAttachments, stages.length);
   const files: Record<string, Uint8Array> = {};
   try {
     files['manifest.json'] = strToU8(JSON.stringify({
-      format: 'forma-educational-stages', version: 1, units: 'mm', purpose,
+      format: 'forma-educational-stages', version: 1, units: 'mm', purpose: path.initialResponse ? `Reduced initial elastic response under defined teaching assumptions. ${purpose}` : purpose,
       stageIntervals: count, stlFiles: stages.length, includeAttachments,
       included: ['crowns', 'static gums', ...(includeAttachments ? ['configured attachments'] : [])],
-      excluded: ['roots', 'brackets', 'wires'],
-      interpolation: path.trajectory ? path.trajectory.motion.type === 'rigid'
+      excluded: ['roots', 'brackets', 'wires', ...(path.initialResponse ? ['TADs', 'elastics', 'expanders', 'force arrows', 'display magnification'] : [])],
+      interpolation: path.initialResponse ? 'Presentation progress from the unchanged unloaded reference to the un-magnified calculated initial response; linear translation and shortest-path quaternion rotation. Intermediate frames are display interpolation, not separately solved equilibria. No biological time or remodeling is implied.' : path.trajectory ? path.trajectory.motion.type === 'rigid'
         ? 'The displayed Try Mode edit from its saved starting arrangement; rigid rotation about the shared segment centre and case axis at equal angular intervals.'
         : 'The displayed Try Mode edit from its saved starting arrangement; linear translation and shortest-path quaternion rotation.'
-        : 'Equal-duration segments through the original pose, checkpoints and final pose; linear translation and shortest-path quaternion rotation. Checkpoints may lie between sampled stages.',
-      surfaceNote: 'Meshes are collected in one STL without Boolean union. Gums remain static. The same attachment layout follows each crown in every stage. No shell thickness, material, force, biological response, or fabrication validation is calculated.',
-      checkpoints: path.trajectory ? [] : path.checkpoints,
+        : 'Equal-duration segments through the saved original arrangement, checkpoints and final pose; linear translation and shortest-path quaternion rotation. Checkpoints may lie between sampled stages.',
+      surfaceNote: `Meshes are collected in one STL without Boolean union. Gums remain static. The same attachment layout follows each crown in every stage. ${path.initialResponse ? 'The export uses an existing reduced-model response; it does not solve new mechanics, tissue remodeling, shell thickness, or manufacturing validation.' : 'No shell thickness, material, force, biological response, or fabrication validation is calculated.'}`,
+      checkpoints: path.trajectory || path.initialResponse ? [] : path.checkpoints,
+      original: path.trajectory || path.initialResponse ? undefined : path.original,
       trajectory: path.trajectory ? { label: path.trajectory.label, edit: path.trajectory.edit, from: path.trajectory.from, to: path.trajectory.to, motion: path.trajectory.motion } : undefined,
+      initialResponse: path.initialResponse ? { model: 'reduced-initial-elastic-response', progress: 'presentation-only', magnification: 1, biologicalTime: false, ...path.initialResponse } : undefined,
       stages,
     }, null, 2));
     requireBatchSize(scene.bytesPerStage * stages.length + files['manifest.json'].byteLength, 1);

@@ -4,9 +4,9 @@ import type { TeachingAction } from './lecture';
 export type RuntimeState = { phase: 'idle' | 'interpreting' | 'executing' | 'speaking'; message: string; error: boolean; transcript: string };
 export type TeachingHost<S> = {
   context(): TeachingContext; capture(): S; restore(snapshot: S): void;
-  preflight(actions: TeachingAction[], fromSnapshot?: S): void; apply(action: TeachingAction): void;
+  preflight(actions: TeachingAction[], fromSnapshot?: S): void; apply(action: TeachingAction, signal?: AbortSignal): void | Promise<void>;
   settle?(signal: AbortSignal): Promise<void>;
-  pause(): void; narration(target: 'step' | 'answer'): string;
+  pause(): void; narration(target: 'step' | 'answer' | 'mechanics'): string;
   speak(text: string, signal: AbortSignal): Promise<void>;
   interpret(text: string, context: TeachingContext, signal: AbortSignal): Promise<unknown>;
   publish(state: RuntimeState): void;
@@ -53,7 +53,7 @@ export function createTeachingRuntime<S>(host: TeachingHost<S>) {
       const count = first.kind === 'history' ? first.count : 1, source = redo ? future : past;
       if (first.kind === 'history' && source.length < count) throw new Error(`Only ${source.length} complete requests are available to ${redo ? 'redo' : 'undo'}; nothing was changed.`);
       if (!source.length) {
-        if (host.context().mode === 'case' && first.kind === 'dental') { host.preflight([first]); host.apply(first); publish({ phase: 'idle', message: `${redo ? 'Redo' : 'Undo'} applied to the case movement history.`, error: false }); }
+        if (host.context().mode === 'case' && first.kind === 'dental') { host.preflight([first]); await abortable(Promise.resolve(host.apply(first, signal)), signal); if (signal.aborted || own !== token) return; publish({ phase: 'idle', message: `${redo ? 'Redo' : 'Undo'} applied to the case movement history.`, error: false }); }
         else publish({ phase: 'idle', message: `Nothing to ${redo ? 'redo' : 'undo'} in the command history.`, error: false });
         return;
       }
@@ -85,17 +85,23 @@ export function createTeachingRuntime<S>(host: TeachingHost<S>) {
     const overrides: TeachingAction[] = [];
     try {
       // Replay speed is execution metadata, not a ninth action in an eight-action request.
-      if (replaySpeed !== undefined) { const speed: TeachingAction = { kind: 'speed', value: replaySpeed }; host.apply(speed); overrides.push(speed); }
+      if (replaySpeed !== undefined) { const speed: TeachingAction = { kind: 'speed', value: replaySpeed }; await abortable(Promise.resolve(host.apply(speed, signal)), signal); overrides.push(speed); }
       for (const action of plan.actions) {
         if (signal.aborted || own !== token) return;
-        if (action.kind === 'narrate') {
-          const text = host.narration(action.target);
+        if (action.kind === 'narrate' || action.kind === 'mechanics' && action.action.type === 'explain') {
+          const text = host.narration(action.kind === 'narrate' ? action.target : 'mechanics');
           publish({ phase: 'speaking', message: text }); await abortable(host.speak(text, signal), signal);
         } else {
-          host.apply(action);
+          const applied = host.apply(action, signal);
+          if (applied) await abortable(applied, signal);
+          if (signal.aborted || own !== token) return;
           if (['select', 'view', 'arch', 'toggle', 'anatomy', 'speed'].includes(action.kind)) overrides.push(action);
           // A guided step has useful defaults, but explicit directions in this request win.
-          if ((action.kind === 'workflow' && ['start', 'play'].includes(action.action)) || (action.kind === 'dental' && action.command.type === 'play')) for (const override of overrides) host.apply(override);
+          if ((action.kind === 'workflow' && ['start', 'play'].includes(action.action)) || (action.kind === 'dental' && action.command.type === 'play')) for (const override of overrides) {
+            const reapplied = host.apply(override, signal);
+            if (reapplied) await abortable(reapplied, signal);
+            if (signal.aborted || own !== token) return;
+          }
           await waitForPlayback(signal);
         }
       }

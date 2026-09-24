@@ -31,7 +31,7 @@ describe('prepared synthetic teaching case library', () => {
   it('registers tooth and gum origins together without moving or cloning their mesh buffers', () => {
     const originalPositions = base.teeth.map(tooth => [...tooth.position]);
     const result = createTeachingCase(base, 'reference-occlusion');
-    expect(CASE_REFERENCE_SHIFT).toBe(1.6);
+    expect(CASE_REFERENCE_SHIFT).toBe(1.5);
     for (const tooth of result.model.teeth) {
       const original = base.teeth.find(item => item.id === tooth.id)!;
       const shift = CASE_REFERENCE_OFFSETS[/^[12]/.test(tooth.id) ? 'upper' : 'lower'];

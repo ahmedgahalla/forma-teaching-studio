@@ -7,7 +7,7 @@ from unittest.mock import MagicMock
 import httpx
 import pytest
 from fastapi.testclient import TestClient
-from openai import APITimeoutError
+from openai import APITimeoutError, AuthenticationError, RateLimitError, APIStatusError
 
 import main
 
@@ -627,3 +627,40 @@ def test_provider_failures_do_not_echo_private_exception_details(client, monkeyp
     result = post(client, request())
     assert result.status_code == 502
     assert "private-text" not in result.text
+
+
+@pytest.mark.parametrize("status,code,expected_status,message", [
+    (401, "invalid_api_key", 503, "Replace OPENAI_API_KEY"),
+    (429, "insufficient_quota", 429, "API billing"),
+    (429, "billing_hard_limit_reached", 429, "API billing"),
+    (429, "rate_limit_exceeded", 429, "Wait briefly"),
+])
+@pytest.mark.parametrize("endpoint", ["/api/interpret", "/api/interpret-teaching"])
+def test_actionable_provider_configuration_errors_never_echo_secrets(client, monkeypatch, status, code, expected_status, message, endpoint):
+    secret = "private-secret-not-for-client"
+    response = httpx.Response(status, request=httpx.Request("POST", "https://example.com/private-request"))
+    error_type = AuthenticationError if status == 401 else RateLimitError
+    error = error_type(secret, response=response, body={"code": code, "message": secret})
+    provider = "interpret_teaching_with_openai" if endpoint.endswith("teaching") else "interpret_with_openai"
+    monkeypatch.setattr(main, provider, MagicMock(side_effect=error))
+    payload = request() if endpoint.endswith("teaching") else {"text": "show original", "selected_tooth": "11", "available_teeth": ["11"]}
+    result = client.post(endpoint, json=payload)
+    assert result.status_code == expected_status, result.text
+    assert message in result.json()["detail"]
+    assert secret not in result.text
+    assert "private-request" not in result.text
+
+
+def test_openrouter_provider_label_and_credit_error_are_safe(client, monkeypatch):
+    monkeypatch.setenv("OPENAI_BASE_URL", "https://openrouter.ai/api/v1")
+    assert client.get("/health").json()["provider"] == "OpenRouter"
+    error = APIStatusError("secret upstream detail", response=httpx.Response(402, request=httpx.Request("POST", "https://openrouter.ai/api/v1/responses")), body={"message": "secret upstream detail"})
+    monkeypatch.setattr(main, "interpret_teaching_with_openai", MagicMock(side_effect=error))
+    response = post(client, request())
+    assert response.status_code == 402
+    assert "OpenRouter needs available API credits" in response.json()["detail"]
+    assert "secret upstream detail" not in response.text
+    monkeypatch.setenv("OPENAI_BASE_URL", "https://private:secret@example.invalid/api")
+    health = client.get("/health")
+    assert health.json()["provider"] == "Configured AI provider"
+    assert "secret" not in health.text

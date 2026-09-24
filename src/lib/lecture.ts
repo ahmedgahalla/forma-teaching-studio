@@ -1,8 +1,12 @@
 import { CommandValidationError, parseCommand, type Command } from './commands';
 import type { WorkflowId, WorkflowPhase } from './workflows';
 import type { TryAction } from './try-mode';
+import type { MechanicsAction } from './mechanics/types';
+import type { DentalArrangementId } from './dental-arrangements';
 
 export type TeachingAction =
+  | { kind: 'mechanics'; action: MechanicsAction }
+  | { kind: 'dental-arrangement'; id: DentalArrangementId }
   | { kind: 'case'; action: 'load' | 'variant'; id: string }
   | { kind: 'case'; action: 'play' | 'pause' | 'reset' | 'explore' | 'return' }
   | { kind: 'case'; action: 'progress'; value: number }
@@ -53,7 +57,8 @@ function spokenInteger(words: string): number {
 
 /** Normalize only known speech forms; never infer a target, amount, or treatment plan. */
 export function normalizeSpeechCommand(text: string): string {
-  let normalized = text.trim().toLowerCase().replace(/\s+/g, ' ').replace(/^please /, '').replace(/ please[.!]?$/, '').replace(/[.!]$/, '');
+  let normalized = text.trim().toLowerCase().replace(/\s+/g, ' ').replace(/^please /, '').replace(/ please[.!]?$/, '').replace(/[.!?]$/, '');
+  normalized = normalized.replace(/^(?:(?:can|could|would) you (?:please )?|i want you to )/, '');
   normalized = normalized.replace(new RegExp(`\\b(${tens})-(${unit})\\b`, 'g'), '$1 $2');
   normalized = normalized.replace(new RegExp(`\\b(${wholeNumber}) and (?:a )?half\\b`, 'g'), (_, words: string) => String(spokenInteger(words) + 0.5));
   normalized = normalized.replace(/\b(?:a half|half(?: a)?) (?=millimet(?:er|re)s?\b|mm\b)/g, '0.5 ');

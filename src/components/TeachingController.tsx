@@ -13,21 +13,21 @@ type Mode = 'case' | 'workflow';
 export type TeachingAdapter = {
   context: () => Omit<TeachingContext, 'revision'>;
   capture: () => unknown; restore: (snapshot: unknown) => void;
-  apply: (action: TeachingAction) => boolean; preflight: (actions: TeachingAction[], from?: unknown) => void;
-  pause: () => void; narration: (target: 'step' | 'answer') => string;
+  apply: (action: TeachingAction, signal?: AbortSignal) => boolean | Promise<boolean>; preflight: (actions: TeachingAction[], from?: unknown) => void;
+  pause: () => void; narration: (target: 'step' | 'answer' | 'mechanics') => string;
   settle?: (signal: AbortSignal) => Promise<void>;
   exportSetup?: (from?: unknown) => WorkflowTransfer;
   importSetup?: (setup: WorkflowTransfer, originSnapshot: unknown) => void;
   sourceLesson?: (from?: unknown) => unknown;
 };
-type Config = { enabled: boolean; url: string };
+type Config = { enabled: boolean; url: string; provider?: string };
 type Snapshot = { mode: Mode; scenes: Partial<Record<Mode, unknown>> };
 const initialRuntime: RuntimeState = { phase: 'idle', message: 'Hold Space to speak, or type an instruction.', error: false, transcript: '' };
 type Controller = {
   mode: Mode; runtime: RuntimeState; capture: CaptureState; config: Config;
   run: (text: string) => Promise<void>; start: () => void; finish: () => void; cancel: () => void;
   execute: (actions: TeachingAction[], summary: string) => Promise<void>;
-  interact: () => void; resetHistory: () => void; setConfig: (config: Config) => void;
+  interact: () => void; referenceInteraction: () => void; resetHistory: () => void; setConfig: (config: Config) => void;
   register: (mode: Mode, adapter: TeachingAdapter) => () => void;
 };
 const Context = createContext<Controller | null>(null);
@@ -41,6 +41,16 @@ export function TeachingProvider({ children }: { children: ReactNode }) {
   const [mode, setMode] = useState<Mode>('case'), modeRef = useRef<Mode>('case');
   const [runtime, setRuntime] = useState(initialRuntime), [capture, setCapture] = useState<CaptureState>({ supported: false, phase: 'idle', transcript: '' });
   const [config, updateConfig] = useState<Config>({ enabled: false, url: '' }), configRef = useRef(config); configRef.current = config;
+  useEffect(() => {
+    try {
+      const saved = JSON.parse(localStorage.getItem('forma-command-service') || 'null');
+      if (saved && typeof saved.enabled === 'boolean' && typeof saved.url === 'string') {
+        const url = new URL(saved.url);
+        if (['http:', 'https:'].includes(url.protocol) && !url.username && !url.password) updateConfig({ enabled: saved.enabled, url: saved.url, provider: ['OpenAI', 'OpenRouter', 'Configured AI provider'].includes(saved.provider) ? saved.provider : undefined });
+      }
+    } catch { /* A blocked or cleared browser preference must not disable local commands. */ }
+  }, []);
+  const saveConfig = (settings: Config) => { updateConfig(settings); try { localStorage.setItem('forma-command-service', JSON.stringify(settings)); } catch { /* Current-session settings still work. */ } };
   const adapters = useRef<Partial<Record<Mode, TeachingAdapter>>>({}), revision = useRef(0);
   const engine = useRef<ReturnType<typeof createTeachingRuntime<Snapshot>> | null>(null);
   const mic = useRef<ReturnType<typeof createPushToTalk> | null>(null), held = useRef(false);
@@ -73,7 +83,9 @@ export function TeachingProvider({ children }: { children: ReactNode }) {
         }
         for (const group of groups) adapters.current[group.mode]?.preflight(group.actions, from?.scenes[group.mode]);
       },
-      apply: action => flushSync(() => {
+      apply: async (action, signal) => {
+        let applied: boolean | Promise<boolean> = true;
+        flushSync(() => {
         if (action.kind === 'workspace') {
           const target = adapters.current.case!, source = adapters.current.workflow!;
           if (action.action === 'explore') target.importSetup!(source.exportSetup!(), source.capture());
@@ -83,8 +95,10 @@ export function TeachingProvider({ children }: { children: ReactNode }) {
         }
         if (action.kind === 'case' || (action.kind === 'workflow' && action.action === 'start') || action.kind === 'anatomy-lesson') changeMode(teachingActionMode(action, modeRef.current));
         if (action.kind === 'workflow' && action.action === 'exit') { current().pause(); changeMode('case'); return; }
-        if (!current().apply(action)) throw new Error('That action is unavailable in the current teaching view.');
-      }),
+        applied = current().apply(action, signal);
+        });
+        if (!await applied) throw new Error('That action is unavailable in the current teaching view.');
+      },
       pause: () => { if (alive) flushSync(pause); }, narration: target => current().narration(target),
       speak: (text, signal) => new Promise<void>((resolve, reject) => {
         if (!window.speechSynthesis || !window.SpeechSynthesisUtterance) { reject(new Error(`Speech output is unavailable. ${text}`)); return; }
@@ -110,6 +124,9 @@ export function TeachingProvider({ children }: { children: ReactNode }) {
   const finish = () => { held.current = false; mic.current?.finish(); };
   const cancel = () => { held.current = false; mic.current?.cancel(); engine.current?.cancel(); };
   const interact = () => { revision.current++; if (held.current || mic.current?.getState().phase !== 'idle') { held.current = false; mic.current?.cancel(); } if (engine.current?.getState().phase !== 'idle') engine.current?.cancel('The scene changed. Give the next instruction when ready.'); };
+  // Pointing is part of the current utterance. Keep capture alive, but invalidate
+  // any older interpretation that has already been submitted.
+  const referenceInteraction = () => { revision.current++; if (engine.current?.getState().phase !== 'idle') engine.current?.cancel('The target changed. Give the next instruction when ready.'); };
   useEffect(() => {
     const down = (event: KeyboardEvent) => {
       if (event.key === 'Escape') { cancel(); return; }
@@ -121,14 +138,14 @@ export function TeachingProvider({ children }: { children: ReactNode }) {
     window.addEventListener('keydown', down); window.addEventListener('keyup', up); window.addEventListener('blur', blur);
     return () => { window.removeEventListener('keydown', down); window.removeEventListener('keyup', up); window.removeEventListener('blur', blur); };
   });
-  return <Context.Provider value={{ mode, runtime, capture, config, run: async text => { mic.current?.cancel(); await engine.current?.submit(text); }, execute: async (actions, summary) => { mic.current?.cancel(); await engine.current?.submitActions(actions, summary); }, start, finish, cancel, interact, resetHistory: () => { revision.current++; engine.current?.clearHistory(); }, setConfig: settings => { interact(); updateConfig(settings); }, register: (key, adapter) => { adapters.current[key] = adapter; return () => { if (adapters.current[key] === adapter) delete adapters.current[key]; }; } }}>{children}</Context.Provider>;
+  return <Context.Provider value={{ mode, runtime, capture, config, run: async text => { mic.current?.cancel(); await engine.current?.submit(text); }, execute: async (actions, summary) => { mic.current?.cancel(); await engine.current?.submitActions(actions, summary); }, start, finish, cancel, interact, referenceInteraction, resetHistory: () => { revision.current++; engine.current?.clearHistory(); }, setConfig: settings => { interact(); saveConfig(settings); }, register: (key, adapter) => { adapters.current[key] = adapter; return () => { if (adapters.current[key] === adapter) delete adapters.current[key]; }; } }}>{children}</Context.Provider>;
 }
 
 export function TeachingCommandBar({ label = 'Dental command', placeholder = 'Try “show upper jaw, hide gums, and highlight molars”', value, onChange, inputRef, suggestions }: { suggestions?: string[]; label?: string; placeholder?: string; value?: string; onChange?: (text: string) => void; inputRef?: RefObject<HTMLInputElement | null> }) {
   const teaching = useTeaching(), [draft, setDraft] = useState(''), [examples, setExamples] = useState(false);
   const text = value ?? draft, setText = onChange || setDraft;
   const capturing = teaching.capture.phase !== 'idle', phase = capturing ? teaching.capture.phase : teaching.runtime.phase;
-  const commands = suggestions ?? (teaching.mode === 'case' ? ['select upper front six', 'move selected segment posteriorly 1 mm', 'apply preview', 'discard preview', 'lock upper molars', 'place brackets only', 'place palatal expander', 'return to source lesson', 'restore my workspace', 'show roots', 'show displacement traces', 'save arrangement as example one', 'compare with original', 'undo that'] : ['start anatomy lesson', 'show the root', 'make the bone transparent', 'show cutaway', 'compare translation and tipping', 'repeat that more slowly', 'return to the lesson', 'try this setup', 'restore my workspace', 'reveal answer', 'hide answer', 'explain this step', 'undo that']);
+  const commands = suggestions ?? (teaching.mode === 'case' ? ['select upper front six', 'install brackets here', 'put a wire through these brackets', 'activate that wire by 0.5 mm', 'show what happens', 'use 0.018 inch wire instead', 'explain that movement', 'move selected segment posteriorly 1 mm', 'lock upper molars', 'place brackets only', 'place palatal expander', 'return to source lesson', 'restore my workspace', 'show roots', 'show displacement traces', 'save arrangement as example one', 'compare with original', 'undo that'] : ['start anatomy lesson', 'show the root', 'make the bone transparent', 'show cutaway', 'compare translation and tipping', 'repeat that more slowly', 'return to the lesson', 'try this setup', 'restore my workspace', 'reveal answer', 'hide answer', 'explain this step', 'undo that']);
   return <section className="command-section teaching-command-bar" aria-label="Voice classroom controls">
     <div className="command-title"><span><Mic size={16} />HOLD SPACE TO SPEAK</span><span className={`teaching-phase ${phase}`} role="status">{phase === 'idle' ? 'Ready' : phase}</span><button onClick={() => setExamples(!examples)}>Examples</button><button className="teaching-stop" onClick={teaching.cancel} aria-label="Stop classroom action"><Square size={13} />Stop</button></div>
     {examples && <div className="workflow-command-examples">{commands.map(command => <button key={command} onClick={() => setText(command)}>{command}</button>)}</div>}

@@ -7,6 +7,8 @@ Blender authoring maps case (x,y,z) to Blender (x,-z,y); glTF export reverses it
 import bpy, bmesh, json, math, os, sys
 from mathutils import Vector, Matrix
 from mathutils.bvhtree import BVHTree
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+from sculpt_teeth import sculpt_crown, sculpt_root
 
 args = sys.argv[sys.argv.index('--') + 1:]
 source_file, app_root = args[0], os.path.abspath(args[1])
@@ -32,107 +34,16 @@ def material(name, colour, roughness, subsurface=0):
     shader.inputs['Subsurface Weight'].default_value = subsurface
     shader.inputs['Subsurface Radius'].default_value = (.9, .45, .22)
     return mat
-enamel = material('Enamel | warm ivory', (.82, .78, .66), .27, .035)
-dentine = material('Root | schematic dentine', (.64, .50, .31), .46, .025)
+enamel = material('Enamel | warm ivory', (.82, .78, .66), .34, .025)
+dentine = material('Root | schematic dentine', (.72, .60, .43), .50, .025)
 gingiva = material('Gingiva | muted coral', (.40, .105, .12), .47, .055)
 anchor_errors = []
-
-def gaussian(value, sigma): return math.exp(-.5 * (value / sigma) ** 2)
-
-def refine_crown(obj, tooth):
-    """Anatomical shape adjustments in each tooth's own calibrated frame.
-
-    Longitudinal labial lobes, a lingual fossa/cingulum and a rounded distal
-    incisal corner are explicit sculpt fields. Posterior fossae and fissures are
-    deepened locally rather than using uniform noise or blind subdivision.
-    A protected bracket patch keeps the existing attachment registration.
-    """
-    outward, axis, mesial = [to_blender(tooth[key]) for key in ['buccal', 'occlusal', 'mesial']]
-    vertices = obj.data.vertices
-    heights = [v.co.dot(axis) for v in vertices]; lo, hi = min(heights), max(heights)
-    width = max(abs(v.co.dot(mesial)) for v in vertices)
-    depth = max(abs(v.co.dot(outward)) for v in vertices)
-    anchor = to_blender(tooth['bracketPosition']) - outward * .22
-    weight = obj.vertex_groups.new(name='Sculpt | protected bracket contact')
-    tooth_class = int(tooth['id'][1]); upper = tooth['id'][0] in '12'
-    for vertex in vertices:
-        p = vertex.co.copy(); t = max(0, min(1, (p.dot(axis) - lo) / (hi - lo)))
-        u, v = p.dot(mesial) / width, p.dot(outward) / depth
-        patch = 1 - gaussian((p - anchor).length, 1.3)
-        # Fade all changes at the cervical junction and at the protected bracket seat.
-        envelope = math.sin(math.pi * t) ** 2
-        delta = Vector((0, 0, 0))
-        if tooth_class <= 3:
-            if v > 0:
-                lobes = gaussian(u, .24) + .33 * (gaussian(u - .56, .19) + gaussian(u + .56, .19))
-                delta += outward * ((.14 if tooth_class == 3 else .085) * lobes * envelope * v * v)
-                delta -= outward * (.055 * (gaussian(u - .31, .095) + gaussian(u + .31, .095)) * envelope * v * v)
-            else:
-                # Depression toward the labial side, with a cervical cingulum below.
-                delta += outward * (.24 * gaussian(t - .60, .18) * gaussian(u, .53) * v * v)
-                delta -= outward * (.13 * gaussian(t - .24, .12) * gaussian(u, .49) * v * v)
-            # Softer distal corner and a gently converging cervical waist.
-            if tooth_class < 3:
-                delta -= axis * (.24 * gaussian(u + .87, .20) * max(0, (t - .66) / .34) ** 2)
-                delta -= mesial * (.065 * u * envelope * gaussian(t - .18, .22))
-            else:
-                delta -= mesial * (.14 * u * gaussian(t - .79, .19) * envelope)
-        else:
-            occlusal = max(0, min(1, (t - .56) / .34))
-            fissure = .14 * gaussian(v + .035 * math.sin(u * 5), .066) * gaussian(u, .66)
-            if tooth_class >= 6:
-                fissure += .12 * gaussian(u + .1 * v, .065) * gaussian(v, .64)
-                # Mesial/distal fossae terminate the central fissure.
-                fissure += .09 * (gaussian(u - .46, .12) + gaussian(u + .46, .12)) * gaussian(v, .19)
-            delta -= axis * (fissure * occlusal)
-            delta += outward * (.075 * v * gaussian(t - .35, .22) * gaussian(u, .7))
-        vertex.co += delta * patch
-        # A tighter patch pins the original surface through fairing and decimation.
-        weight.add([vertex.index], max(0, min(1, 1 - gaussian((p - anchor).length, 1.1))), 'REPLACE')
-    return weight.name
 
 def modifier(obj, kind, name, **values):
     bpy.context.view_layer.objects.active = obj
     mod = obj.modifiers.new(name, kind)
     for key, value in values.items(): setattr(mod, key, value)
     bpy.ops.object.modifier_apply(modifier=mod.name)
-
-def refine_root(obj, tooth):
-    """Broader mid-root and rounded apical taper, separately for each root branch.
-
-    Root necks remain fixed. The distal apical sweep and rounded profile are
-    authored schematic morphology, not estimated patient root anatomy.
-    """
-    vertices = obj.data.vertices; parent = list(range(len(vertices)))
-    def find(i):
-        while parent[i] != i:
-            parent[i] = parent[parent[i]]; i = parent[i]
-        return i
-    for edge in obj.data.edges: parent[find(edge.vertices[0])] = find(edge.vertices[1])
-    branches = {}
-    for vertex in vertices: branches.setdefault(find(vertex.index), []).append(vertex)
-    axis = to_blender(tooth['occlusal']); distal = -to_blender(tooth['mesial']); outward = to_blender(tooth['buccal'])
-    branch_rings = []
-    for branch in branches.values():
-        rings = {}
-        for vertex in branch: rings.setdefault(round(vertex.co.dot(axis), 5), []).append(vertex)
-        neck_ring = rings[max(rings)]
-        neck = sum((v.co for v in neck_ring), Vector()) / len(neck_ring)
-        branch_rings.append((rings, neck))
-    root_neck = sum((neck for _, neck in branch_rings), Vector()) / len(branch_rings)
-    for rings, neck in branch_rings:
-        lo, hi = min(rings), max(rings)
-        for height, ring in rings.items():
-            t = max(0, min(1, (hi - height) / (hi - lo)))
-            centre = sum((v.co for v in ring), Vector()) / len(ring)
-            # Retain the original ellipsoidal apex; avoid a straight cone silhouette.
-            breadth = (1 - .40 * t) / (1 - .72 * t)
-            splay = (neck - root_neck) * 1.08 * t
-            sweep = distal * (1.15 if len(branches) == 1 else .65) * t ** 3 - outward * .28 * t ** 2
-            new_centre = neck + axis * (height - hi) + splay + sweep
-            for vertex in ring:
-                radial = vertex.co - centre; radial -= axis * radial.dot(axis)
-                vertex.co += radial * (breadth - 1) + new_centre - centre
 
 objects = []
 for piece in source['meshes']:
@@ -143,17 +54,18 @@ for piece in source['meshes']:
     obj['units'] = 'mm'; obj['schematic'] = True; obj['part'] = piece['kind']
     if piece.get('tooth'): obj['fdi'] = piece['tooth']
     mesh.materials.append(enamel if piece['kind'] == 'crown' else dentine if piece['kind'] == 'root' else gingiva)
-    protected = refine_crown(obj, teeth[piece['tooth']]) if piece['kind'] == 'crown' else None
-    if piece['kind'] == 'root': refine_root(obj, teeth[piece['tooth']])
+    protected = sculpt_crown(obj, teeth[piece['tooth']]) if piece['kind'] == 'crown' else None
+    if piece['kind'] == 'root': sculpt_root(obj, teeth[piece['tooth']], modifier)
     # Alternating fairing removes triangulation ripple with negligible global shrink.
     settings = {'factor': .27, 'iterations': 2}
     if protected: settings['vertex_group'] = protected
     modifier(obj, 'SMOOTH', 'Surface fairing', **settings)
     settings['factor'] = -.275
     modifier(obj, 'SMOOTH', 'Volume-preserving fairing', **settings)
-    ratio = .43 if piece['kind'] == 'crown' else .38 if piece['kind'] == 'root' else .34
+    obj.data.calc_loop_triangles()
+    ratio = .50 if piece['kind'] == 'crown' else min(.85, 3400 / len(obj.data.loop_triangles)) if piece['kind'] == 'root' else .34
     modifier(obj, 'DECIMATE', 'Runtime simplification', ratio=ratio, use_collapse_triangulate=True)
-    for polygon in mesh.polygons: polygon.use_smooth = True
+    for polygon in obj.data.polygons: polygon.use_smooth = True
     # Explicitly recalculate orientation after Blender's applied topology changes.
     bm = bmesh.new(); bm.from_mesh(obj.data); bmesh.ops.recalc_face_normals(bm, faces=bm.faces); bm.to_mesh(obj.data); bm.free()
     obj.data.update(); objects.append(obj)
@@ -170,9 +82,9 @@ for obj in objects:
     obj.data.calc_loop_triangles(); counts[{'crown':'crowns','root':'roots','gum':'gums'}[obj['part']]] += len(obj.data.loop_triangles)
 meta['assetInfo'] = {
     'generator': 'Blender ' + bpy.app.version_string, 'originalSource': 'Forma procedural teaching geometry',
-    'schematic': True, 'patientSpecific': False, 'meshCount': len(objects),
+    'schematic': True, 'patientSpecific': False, 'meshCount': len(objects), 'revision': 'permanent-landmarks-2',
     'triangles': {**counts, 'total': sum(counts.values())},
-    'refinement': ['calibrated labial/lingual sculpt fields', 'rounded distal incisal corners', 'posterior fissure/fossa definition', 'rounded mid/apical root taper with distal sweep', 'alternating surface fairing', 'adaptive mesh decimation'],
+    'refinement': ['distinct permanent class cusp/ridge/fossa patterns', 'anterior cingula and marginal ridges', 'rounded asymmetric incisal corners', 'continuous multi-root cervical trunks and furcations', 'curved roots with fuller middle thirds and rounded apices', 'explicit root-branch support envelopes', 'protected bracket seats', 'adaptive mesh decimation'],
     'bracketClearanceMm': anchor_errors,
     'coordinateNote': 'GLB world coordinates are millimetres. Do not multiply by 1000. Apply node matrixWorld, then subtract metadata position for crown-local geometry.',
 }
@@ -215,7 +127,7 @@ ink.node_tree.links.new(emission.outputs[0], nodes.new('ShaderNodeOutputMaterial
 def text_label(body, location, size):
     curve = bpy.data.curves.new(body, 'FONT'); curve.body = body; curve.size = size; curve.align_x = 'LEFT'; curve.extrude = 0
     obj = bpy.data.objects.new(body, curve); presentation.objects.link(obj); obj.location = location; obj.rotation_euler = (math.pi / 2, 0, 0); curve.materials.append(ink)
-text_label('FORMA  /  Blender teaching anatomy', (-83, -21, 82), 4)
+text_label('FORMA  /  Permanent anatomy · refinement 2', (-83, -21, 82), 3.7)
 text_label('28 individual crowns + roots  /  original schematic model  /  millimetres', (-83, -21, 76), 2.3)
 for label, x, z in [('01   COMPLETE DENTITION', -82, 66), ('02   UPPER OCCLUSAL', 7, 66), ('03   LOWER OCCLUSAL', -82, -4), ('04   CROWN + ROOT FORMS', 7, -4)]: text_label(label, (x, -30, z), 2.5)
 text_label('Central incisor    Canine       Upper molar    Lower molar', (19, -25, -62), 1.7)
@@ -240,5 +152,25 @@ camera_background = world_nodes.new('ShaderNodeBackground'); camera_background.i
 mix = world_nodes.new('ShaderNodeMixShader'); rays = world_nodes.new('ShaderNodeLightPath')
 scene.world.node_tree.links.new(rays.outputs['Is Camera Ray'], mix.inputs[0]); scene.world.node_tree.links.new(background.outputs[0], mix.inputs[1]); scene.world.node_tree.links.new(camera_background.outputs[0], mix.inputs[2]); scene.world.node_tree.links.new(mix.outputs[0], world_nodes.get('World Output').inputs['Surface'])
 scene.render.filepath = os.path.join(asset_dir, 'forma-teaching-contact-sheet.png')
+bpy.ops.render.render(write_still=True)
+
+# A closer atlas shows all fourteen authored crown/root classes in the actual GLB.
+presentation.hide_render = True
+presentation = bpy.data.collections.new('PRESENTATION | permanent class atlas'); scene.collection.children.link(presentation)
+camera.location.z = 8; camera_data.ortho_scale = 145
+names = ['Central incisor', 'Lateral incisor', 'Canine', 'First premolar', 'Second premolar', 'First molar', 'Second molar']
+for quadrant, z, tilt in [('1', 25, -25), ('4', -18, 25)]:
+    for i in range(7):
+        tooth_id = quadrant + str(i + 1); x = -48 + i * 16
+        buccal = teeth[tooth_id]['buccal']; turn = math.atan2(-buccal[0], buccal[2])
+        rotation = (Matrix.Rotation(math.radians(tilt), 4, 'X') @ Matrix.Rotation(turn, 4, 'Z')).to_euler()
+        duplicates('Atlas ' + tooth_id, lambda obj, tid=tooth_id: obj.get('fdi') == tid, (x, 0, z), rotation)
+        text_label(tooth_id + '  ' + names[i], (x - 6.7, -24, z - 17), 1.32)
+text_label('FORMA  /  Permanent crown and root landmarks', (-65, -28, 54), 3)
+text_label('Upper dentition', (-65, -28, 42), 1.7)
+text_label('Lower dentition', (-65, -28, -1), 1.7)
+text_label('Original reference-informed teaching forms · not patient anatomy · educator review pending', (-65, -25, -43), 1.5)
+scene.render.resolution_x = 2100; scene.render.resolution_y = 1500
+scene.render.filepath = os.path.join(asset_dir, 'forma-anatomy-landmarks.png')
 bpy.ops.render.render(write_still=True)
 print('FORMA_ASSET_COMPLETE', json.dumps(meta['assetInfo']))
