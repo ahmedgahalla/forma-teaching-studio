@@ -1,7 +1,7 @@
 import { parseTeachingPlan, validateTeachingPlan, type TeachingContext, type TeachingPlan } from './classroom';
 import type { TeachingAction } from './lecture';
 
-export type RuntimeState = { phase: 'idle' | 'interpreting' | 'executing' | 'speaking'; message: string; error: boolean; transcript: string };
+export type RuntimeState = { phase: 'idle' | 'interpreting' | 'executing' | 'speaking'; message: string; error: boolean; transcript: string; interpreter?: 'local' | 'ai' };
 export type TeachingHost<S> = {
   context(): TeachingContext; capture(): S; restore(snapshot: S): void;
   preflight(actions: TeachingAction[], fromSnapshot?: S): void; apply(action: TeachingAction, signal?: AbortSignal): void | Promise<void>;
@@ -114,17 +114,24 @@ export function createTeachingRuntime<S>(host: TeachingHost<S>) {
       host.restore(entry.before); past.pop(); future.splice(0, future.length, ...previousFuture); activeEntry = undefined; throw error;
     }
   };
-  const submit = async (text: string) => {
+  const submit = async (text: string, options: { interpreter?: 'auto' | 'ai' } = {}) => {
     if (disposed || !text.trim()) return;
     if (/^(stop|cancel|pause everything)$/i.test(text.trim())) { cancel(); return; }
     interrupt(); const own = token;
     controller = new AbortController(); const signal = controller.signal;
     const context = { ...host.context(), lastActions: last?.actions }, revision = context.revision;
-    publish({ phase: 'interpreting', transcript: text, message: 'Understanding your instruction…', error: false });
+    publish({ phase: 'interpreting', transcript: text, message: options.interpreter === 'ai' ? 'Asking AI to interpret your request…' : 'Understanding your instruction…', error: false, interpreter: undefined });
     try {
-      let plan: TeachingPlan;
-      try { plan = parseTeachingPlan(text, context); }
-      catch { const response = await abortable(host.interpret(text, context, signal), signal); if (signal.aborted || own !== token) return; plan = validateTeachingPlan(response, { ...host.context(), lastActions: last?.actions }, { sourceText: text, expectedRevision: revision }); }
+      let plan: TeachingPlan | undefined;
+      try { plan = parseTeachingPlan(text, context); } catch { /* Unfamiliar wording uses the configured interpreter. */ }
+      // Stop/history/replay remain immediate and independent of network availability.
+      const localControl = plan && !plan.clarification && plan.actions.length > 0 && plan.actions.every(action => ['stop', 'history', 'replay'].includes(action.kind) || action.kind === 'dental' && ['undo', 'redo', 'pause'].includes(action.command.type));
+      if (!plan || options.interpreter === 'ai' && !localControl) {
+        const response = await abortable(host.interpret(text, context, signal), signal);
+        if (signal.aborted || own !== token) return;
+        plan = validateTeachingPlan(response, { ...host.context(), lastActions: last?.actions }, { sourceText: text, expectedRevision: revision });
+        publish({ interpreter: 'ai' });
+      } else publish({ interpreter: 'local' });
       if (signal.aborted || own !== token || host.context().revision !== revision) return;
       await run(plan, own, signal, undefined, false, undefined, undefined, revision);
     } catch (error) { if (own === token && !signal.aborted) publish({ phase: 'idle', message: error instanceof Error ? error.message : 'Could not run that instruction.', error: true }); }
@@ -133,7 +140,7 @@ export function createTeachingRuntime<S>(host: TeachingHost<S>) {
     if (disposed) return;
     interrupt(); const own = token;
     controller = new AbortController(); const signal = controller.signal;
-    publish({ phase: 'interpreting', transcript: summary, message: 'Checking the instruction…', error: false });
+    publish({ phase: 'interpreting', transcript: summary, message: 'Checking the instruction…', error: false, interpreter: 'local' });
     try {
       const context = { ...host.context(), lastActions: last?.actions };
       const plan = validateTeachingPlan({ actions, summary, clarification: null }, context, { allowLocalActions: true });

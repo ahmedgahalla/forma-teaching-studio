@@ -1,9 +1,10 @@
 'use client';
 import { useEffect, useState } from 'react';
-import { ArrowRight, Play, Plus, RotateCcw } from 'lucide-react';
+import { ArrowRight, Focus, Play, Plus, RotateCcw } from 'lucide-react';
 import type { MechanicsAction, MechanicsExperiment, WireMaterial, WireSection } from '@/lib/mechanics/types';
 import type { MechanicsFocus, PointedReference } from '@/lib/mechanics-commands';
 import { MATERIAL_PRESETS, MECHANICS_SOURCES, SUPPORT_PRESETS } from '@/lib/mechanics/presets';
+import { hasMechanicsMovement, MECHANICS_DISPLAY_SCALES } from '@/lib/mechanics-presentation';
 
 export const WIRE_OPTIONS: { label: string; section: WireSection }[] = [
   { label: 'Round · 0.014 in', section: { shape: 'round', diameterMm: .014 * 25.4 } },
@@ -21,6 +22,7 @@ type Props = {
   preset: WirePreset; onPreset: (preset: WirePreset) => void; onFocus: (focus: MechanicsFocus) => void;
   onActions: (actions: MechanicsAction[], summary: string) => void; busy: boolean;
   magnification: number; onMagnification: (value: number) => void;
+  onReplay: () => void; onFrame: () => void;
   predict: boolean; onPredict: (value: boolean) => void; revealed: boolean; onReveal: () => void;
   forces: boolean; onForces: () => void; onExplain: () => void;
 };
@@ -79,7 +81,11 @@ export default function MechanicsPanel(p: Props) {
       </section>
       <section className="mechanics-section mechanics-calculate"><label className="mechanics-check"><input type="checkbox" checked={p.predict} onChange={event => p.onPredict(event.target.checked)} />Ask students before revealing</label><button className="button primary mechanics-wide" onClick={() => perform([{ type: 'solve' }], 'Calculate the supported initial response', false)}><Play size={15} />Show what happens</button>
         {result && !p.revealed && <button className="mechanics-wide" onClick={p.onReveal}>Reveal calculated response</button>}
-        <label>Movement display<select aria-label="Mechanics display magnification" value={p.magnification} onChange={event => p.onMagnification(Number(event.target.value))}>{[1, 5, 10, 25, 50].map(value => <option key={value} value={value}>{value === 1 ? 'Actual geometric scale' : `Exaggerated ${value}×`}</option>)}</select></label>
+        {!result && <p className="mechanics-setup-note">Setup only. Brackets and a passive wire do not move teeth. Set an activation, then calculate the response.</p>}
+        {result && p.revealed && <div className="mechanics-actions"><button disabled={!hasMechanicsMovement(result.diagnostics)} onClick={p.onReplay}><RotateCcw size={14} />Replay response</button><button onClick={p.onFrame}><Focus size={14} />Focus selection</button></div>}
+        <label>Movement display<select aria-label="Mechanics display magnification" value={p.magnification} onChange={event => p.onMagnification(Number(event.target.value))}>{MECHANICS_DISPLAY_SCALES.map(value => <option key={value} value={value}>{value === 1 ? 'Actual geometric scale' : `Exaggerated ${value}×`}</option>)}</select></label>
+        <p className="mechanics-small">Each calculation chooses a bounded lecture scale. Adjust it here; all values and saved geometry stay at actual scale.</p>
+        {result && p.revealed && !hasMechanicsMovement(result.diagnostics) && <p className="mechanics-setup-note">No measurable response. Check activation and fixed teeth; the display will not invent movement.</p>}
         <label className="mechanics-check"><input type="checkbox" checked={p.forces} onChange={p.onForces} />Show force directions</label>
       </section>
       {result && p.revealed && <section className="mechanics-result" aria-label="Calculated mechanics result"><span className="eyebrow">CALCULATED INITIAL RESPONSE</span><div className="mechanics-result-values"><div><strong>{result.diagnostics.maxDisplacementMm.toFixed(4)}<small> mm</small></strong><span>Largest displacement</span></div><div><strong>{result.diagnostics.maxRotationDeg.toFixed(3)}<small>°</small></strong><span>Largest rotation</span></div></div>{comparison && <p>Without TAD: {comparison.diagnostics.maxDisplacementMm.toFixed(4)} mm maximum · ghost overlay from the same reference.</p>}{result.expanders.map(item => <p key={item.id}>{item.id}: {item.forceN.toFixed(3)} N · dental opening {item.dentalOpeningMm.toFixed(4)} mm · supporting-spring opening {item.skeletalOpeningMm.toFixed(4)} mm · appliance deflection {item.applianceDeflectionMm.toFixed(4)} mm.</p>)}{selectedResults.length > 0 && <div className="mechanics-load-table"><div><strong>Tooth</strong><strong>Force · N</strong><strong>Moment · N·mm</strong></div>{selectedResults.map(item => <div key={item.id}><span>{item.id}{item.fixed ? ' · fixed' : ''}</span><span>{magnitude(item.forceN).toFixed(3)}</span><span>{magnitude(item.momentNmm).toFixed(3)}</span></div>)}<small>Resultant applied magnitudes about each specified virtual support origin; no biological center is inferred.</small></div>}{result.elastics.map(item => <p key={item.id}>{item.id}: calculated tension {item.forceN.toFixed(3)} N.</p>)}{result.tads.map(item => <p key={item.id}>{item.id}: anchor reaction {magnitude(item.reactionN).toFixed(3)} N.</p>)}{result.diagnostics.warnings.map(item => <p className="mechanics-warning" key={item}>{item}</p>)}<button className="mechanics-wide" onClick={p.onExplain}>Explain the result aloud</button></section>}

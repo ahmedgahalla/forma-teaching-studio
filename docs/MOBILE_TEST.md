@@ -1,14 +1,15 @@
 # Test Forma on your phone
 
-Open https://forma-teaching-mobile.ahmedgah123.chatgpt.site in your phone browser and sign in with the same ChatGPT account used to publish the private site. It works across mobile data and different Wi-Fi networks. Version 0.12, including online AI, was published on 24 September 2026.
+Open https://forma-teaching-mobile.ahmedgah123.chatgpt.site in your phone browser and sign in with the same ChatGPT account used to publish the private site. It works across mobile data and different Wi-Fi networks. The 24 September 2026 update adds explicit Ask AI command routing and a more visible replay of calculated wire responses to version 0.12.
 
 ## Quick test
 
 1. Wait for the synthetic 28-tooth model to load; landscape gives more space.
-2. Type `select upper front six`, then `install brackets here`.
-3. Try `show roots and hide gums`, a small supported movement, and `undo that`.
-4. Use flexible wording to exercise online AI. Clear commands are handled locally first; ambiguous instructions request clarification.
-5. Try the on-screen Hold to talk button if your phone browser supports speech recognition. Actual mobile microphone behavior still needs testing.
+2. Turn **Ask AI** on in the command bar. Try `Can you show the roots and remove the gums so the students can see more clearly?` The command status identifies AI interpretation; ordinary automatic mode still handles recognized commands locally first.
+3. Try `Please select the upper anterior teeth.`, then `Could you attach the brackets to these teeth?` and `Please thread a wire through these brackets.` The wire uses the displayed preset.
+4. Try `Could you activate that wire by half a millimeter, then show me what happens?` Look for the unloaded ghost, displacement traces, actual displacement values and a clearly labelled display scale. The eight-second replay magnifies the initial response by at most 50×; it does not change the calculated values or represent elapsed treatment time.
+5. Use **Stop** and **Undo** to pause or restore the request. These controls remain local even when Ask AI is on. Missing or ambiguous parameters require clarification.
+6. Try the on-screen Hold to talk button if your phone browser supports speech recognition. Actual mobile microphone behavior still needs testing.
 
 The phone discovers the authenticated same-origin AI service automatically. If you previously disabled AI in this phone browser, enable it in Settings. The service URL is the same URL as the app. Never enter an API key on the phone.
 
@@ -18,20 +19,25 @@ The host computer, local backend, phone bridge and tunnel must remain on. The Op
 
 Stopping the computer or tunnel disconnects online AI; built-in commands and loaded models continue working. Restarting the temporary tunnel requires updating the bridge URL in Sites and redeploying its environment revision. This is a test connection, not a permanent independent backend.
 
-## Verification
+## Current verification · 24 September 2026
 
-- Production build and TypeScript passed.
-- Frontend: 1,476 tests / 47 files passed.
-- Python backend: 363 tests passed, including 28 phone-bridge tests.
-- Private gateway: six tests passed for identity, origin, routing, body bounds, credential isolation and offline responses.
-- Live gateway code -> HTTPS tunnel -> authenticated bridge -> existing Python validation -> OpenRouter: `Show roots and hide gums` returned the two expected actions. Unauthenticated tunnel access returned 401.
-- Sites confirmed publication succeeded with environment revision 1. Physical phone, touch and microphone testing remain unverified; publication success is not an end-to-end phone test.
+- Frontend: **1,493 tests / 47 files passed**. Production build passed.
+- Python backend: **389 tests passed**, including phone-bridge coverage; one existing Starlette/AnyIO deprecation warning.
+- Ask AI explicitly invokes the configured interpreter, while status distinguishes AI from local commands. Stop and manual controls retain local execution.
+- Backend speech-unit normalization now accepts written millimeter/millimetre variants and singular/plural degrees. Strict output schemas put action discriminators before inherited payload fields. Exact target, amount and unsupported-field audits remain enforced.
+- Wire response presentation uses a bounded scale up to 50×, an unloaded-reference ghost, displacement traces and an eight-second replay. Saved geometry and actual result values remain unchanged.
+- Sites confirmed publication succeeded with environment revision 1 and the existing owner-private audience. Natural-language anatomy, selection, brackets, wire installation and activation were exercised with real AI in the connected desktop browser; see VERIFICATION.md and the full-screen demo. Physical phone, touch and microphone testing remain unverified; publication success is not an end-to-end phone test.
+
+### Historical connection verification
+
+The earlier phone publication passed six private-gateway tests for identity, origin, routing, body bounds, credential isolation and offline responses. Its live gateway code → HTTPS tunnel → authenticated bridge → Python validation → OpenRouter request, `Show roots and hide gums`, returned the two expected actions; unauthenticated tunnel access returned 401. These are earlier connection checks, not a new device test of this update.
 
 ## Published identity
 
 - Site: `appgprj_6ab39ed0b82881919f49cba3045245ce`
-- Version: `appgprj_6ab39ed0b82881919f49cba3045245ce~appgver_c119ebf311748191a2842ced03aa36c0`
-- Deployment: `appgdep_6ab4d3c6ea008191af7875d15f23c0f1`
-- Site source commit: `95abf5fbf27398b64191cafd7ee983fb74177f3c`
+- Version: `appgprj_6ab39ed0b82881919f49cba3045245ce~appgver_928a60f20a3c8191b0e1a6b49e46b9ef`
+- Deployment: `appgdep_6ab4e3d5133c8191a02d693198755117`
+- Site source commit: `9af5d4dcf4a76f53539592c458d060a9289f1b71`
+- Environment revision: `1`
 
 Keep this Site identity and owner-only access. The hosted Worker source is maintained in the separate `../forma-mobile` Site checkout. See [backend setup](../backend/README.md) and [conversational commands](CONVERSATIONAL_COMMANDS.md).

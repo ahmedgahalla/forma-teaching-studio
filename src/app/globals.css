@@ -55,3 +55,9 @@
 @media(max-width:700px){.teaching-command-bar .command-title{gap:7px;flex-wrap:wrap}.teaching-command-bar .command-title>span:first-child{font-size:12px}.teaching-command-bar .voice-button span{display:none}.workflow-studio .workflow-viewport{min-height:410px}.teaching-experiment{align-items:flex-start}.workflow-studio .workflow-main{overflow:visible}.teaching-command-bar .command-status>span{max-height:90px}}
 /* Coarse pointers need larger hit areas; model labels stay compact. */
 @media(pointer:coarse){.button,.icon-button,.camera-tabs button,.model-tools button,.workflow-step-list button,.workflow-fit,.workflow-switch,.toggle-row,.try-panel button,.try-preview button,.workspace-origin-actions button{min-height:44px}.icon-button,.model-tools button,.workflow-fit{min-width:44px}.command-input input,.form-label input,.form-label select,.timeline-heading select,.workflow-speed select{font-size:16px}.chart-teeth button{min-height:40px}}
+
+/* Conversation source remains visible beside the actual interpreter response. */
+.teaching-command-bar .command-title>.teaching-ai-toggle{display:inline-flex!important;align-items:center;gap:5px;border:1px solid var(--ui-line);border-radius:6px;padding:4px 8px;color:var(--ui-muted);white-space:nowrap}
+.teaching-command-bar .command-title>.teaching-ai-toggle[aria-pressed=true]{background:var(--ui-soft);border-color:var(--ui-accent);color:var(--ui-accent)}
+.command-origin{display:inline-block;margin-right:7px;color:var(--ui-accent);font-size:10px;font-weight:650;letter-spacing:.2px}
+@media(max-width:700px){.teaching-command-bar .command-title>.teaching-ai-toggle{padding:4px 6px;font-size:11px}.teaching-command-bar .command-title>.teaching-ai-toggle svg{display:none}}

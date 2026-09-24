@@ -52,6 +52,60 @@ function setup(inWorkflow = false) {
 afterEach(() => { controllers.splice(0).forEach(controller => controller.dispose()); vi.useRealTimers(); });
 
 describe('classroom request execution', () => {
+  it('sends a polite contextual appliance request through forced AI and independently accepts its matching targets', async () => {
+    const { runtime, host, scene } = setup();
+    scene().context.selectedIds = ['11', '21'];
+    scene().context.mechanics = {
+      config: { brackets: {}, wires: [], tads: [], elastics: [], expanders: [], support: 'standard', fixedTeeth: [] },
+      bracketAnchors: { '11': [0, 0, 3], '21': [0, 0, 3] }, focus: {}, stageIndex: 0, stageCount: 1, hasResult: false,
+    };
+    const action: TeachingAction = { kind: 'mechanics', action: { type: 'brackets', teeth: ['11', '21'], installed: true } };
+    host.interpret.mockResolvedValue(external([action]));
+    await runtime.submit('Could you put brackets on these teeth for me?', { interpreter: 'ai' });
+    expect(host.interpret).toHaveBeenCalledOnce();
+    expect(host.preflight).toHaveBeenCalledWith([action]);
+    expect(host.apply).toHaveBeenCalledWith(action, expect.any(AbortSignal));
+    expect(runtime.getState()).toMatchObject({ interpreter: 'ai', error: false });
+  });
+
+  it('routes even a known command through AI when explicitly requested and records its provenance', async () => {
+    const { runtime, host, scene } = setup();
+    host.interpret.mockResolvedValue(external([{ kind: 'toggle', target: 'roots', visible: true }]));
+    await runtime.submit('show roots', { interpreter: 'ai' });
+    expect(host.interpret).toHaveBeenCalledOnce(); expect(scene().roots).toBe(true);
+    expect(runtime.getState()).toMatchObject({ interpreter: 'ai', error: false, message: 'Interpreted request' });
+    await runtime.submit('undo', { interpreter: 'ai' });
+    expect(scene().roots).toBe(false); expect(host.interpret).toHaveBeenCalledOnce();
+    expect(runtime.getState().interpreter).toBe('local');
+  });
+
+  it('does not silently substitute local execution after an explicitly requested AI failure', async () => {
+    const { runtime, host, scene } = setup();
+    await runtime.submit('show roots', { interpreter: 'ai' });
+    expect(host.interpret).toHaveBeenCalledOnce(); expect(scene().roots).toBe(false);
+    expect(runtime.getState()).toMatchObject({ error: true, interpreter: undefined });
+    await runtime.submit('show roots');
+    expect(scene().roots).toBe(true); expect(runtime.getState().interpreter).toBe('local');
+  });
+
+  it('retains independent amount validation for explicitly requested AI plans', async () => {
+    const { runtime, host, scene } = setup();
+    host.interpret.mockResolvedValue(external([{ kind: 'dental', command: { type: 'move', tooth: '11', direction: 'buccal', amount: 2 } }]));
+    await runtime.submit('move tooth 11 buccally 0.5 mm', { interpreter: 'ai' });
+    expect(host.apply).not.toHaveBeenCalled(); expect(scene().distance).toBe(0);
+    expect(runtime.getState()).toMatchObject({ error: true, interpreter: undefined });
+  });
+
+  it('Stop cancels an explicit AI request without accepting its stale response', async () => {
+    const { runtime, host, scene } = setup(), pending = deferred<unknown>();
+    host.interpret.mockReturnValue(pending.promise);
+    const running = runtime.submit('show roots', { interpreter: 'ai' }); await flush();
+    await runtime.submit('stop', { interpreter: 'ai' }); await running;
+    pending.resolve(external([{ kind: 'toggle', target: 'roots', visible: true }])); await flush();
+    expect(scene().roots).toBe(false); expect(host.apply).not.toHaveBeenCalled();
+    expect(runtime.getState().interpreter).toBeUndefined();
+  });
+
   it('awaits an asynchronous host action before executing the next instruction', async () => {
     const { host, scene } = setup(), pending = deferred<void>(), baseApply = host.apply.getMockImplementation()!;
     const asyncApply = vi.fn(async (action: TeachingAction, signal?: AbortSignal) => {

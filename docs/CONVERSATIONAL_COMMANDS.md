@@ -98,3 +98,15 @@ Known commands run locally. The optional server-side AI can interpret supported 
 Typed commands and ordinary manual controls remain available when speech or AI is unavailable. Actual microphone accuracy depends on browser support and permission. Automated tests cover parsing, compound references, replacement, atomic undo, asynchronous cancellation and independent provider validation. They do not establish real microphone recognition, projector usability, faculty approval or clinical validity.
 
 The mechanics calculations illustrate initial elastic response under declared engineering assumptions. They do not calculate growth, biological remodeling, force decay, treatment time, patient-specific safety or treatment success.
+
+## Clear response replay and AI conversation (24 September 2026)
+
+The command bar now offers **Ask AI** when a service is configured. Switch it on to send ordinary classroom requests through the actual interpreter, including wording the local parser could already handle. The **AI reply** label appears only after a provider response passes frontend validation. Provider errors do not silently execute a different local command. Stop, Undo and Repeat remain local and responsive. Default mode still uses built-in commands first.
+
+Natural activation wording such as `Could you activate that wire by half a millimeter, then show me what happens?` retains the explicit amount and units. Missing values still request clarification.
+
+Each mechanics calculation chooses a bounded display scale up to 50×, reveals the unloaded reference ghost and displacement traces, and animates for eight seconds at normal speed. The viewport shows the **actual**, unscaled maximum displacement and rotation beside the scale label. The calculation and saved geometry are unchanged. Zero responses remain zero. Use the existing movement-display control to override the scale, and Replay response / Focus selection in the appliance panel for close-up explanation.
+
+A replacement followed by `then show me what happens` recalculates once from the unchanged reference. Example: `Use a 0.018 inch wire instead, then show me what happens.`
+
+[Watch the 81-second full-screen AI demo](https://forma-teaching-mobile.ahmedgah123.chatgpt.site/demos/forma-ai-demo.mp4) (same private sign-in). It includes actual typed AI requests and replies, passive appliance placement, activation, replay and local Undo.

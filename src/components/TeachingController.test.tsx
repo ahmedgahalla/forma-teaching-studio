@@ -77,6 +77,21 @@ beforeEach(async () => {
 });
 
 describe('hosted command service discovery', () => {
+  it('lets a professor explicitly use AI and shows its real reply while Undo stays local', async () => {
+    await act(async () => { teaching.setConfig({ enabled: true, url: 'https://forma.example', provider: 'OpenRouter' }); });
+    const button = container.querySelector<HTMLButtonElement>('[aria-label="Use AI interpreter"]')!;
+    expect(button.getAttribute('aria-pressed')).toBe('false');
+    await act(async () => { button.click(); });
+    expect(teaching.preferAI).toBe(true);
+    const fetcher = vi.fn().mockResolvedValue({ ok: true, json: async () => ({ actions: [{ kind: 'toggle', target: 'roots', visible: true }], summary: 'Roots are now visible for your students.', clarification: null }) });
+    vi.stubGlobal('fetch', fetcher);
+    await act(async () => { await teaching.run('show roots'); });
+    expect(fetcher).toHaveBeenCalledOnce(); expect(scene().roots).toBe(true);
+    expect(container.querySelector('.command-status')!.textContent).toContain('AI replyRoots are now visible for your students.');
+    await act(async () => { await teaching.run('undo'); });
+    expect(scene().roots).toBe(false); expect(fetcher).toHaveBeenCalledOnce();
+  });
+
   const hosted = { commandService: { enabled: true, url: 'same-origin', provider: 'OpenRouter' } };
   async function remount() {
     await act(async () => { root.unmount(); });

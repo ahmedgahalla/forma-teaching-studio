@@ -23,6 +23,24 @@ function withWire(): TeachingContext {
 }
 
 describe('conversational appliance configuration', () => {
+  it('accepts a terminal courtesy phrase without changing the contextual bracket targets', () => {
+    const context = setup(), sourceText = 'Could you put brackets on these teeth for me?';
+    const expected: TeachingAction[] = [{ kind: 'mechanics', action: { type: 'brackets', teeth: ['11', '21'], installed: true } }];
+    expect(parseTeachingPlan(sourceText, context).actions).toEqual(expected);
+    expect(validateTeachingPlan({ actions: expected, summary: 'Install brackets on the selected teeth.', clarification: null }, context, { sourceText }).actions).toEqual(expected);
+    expect(() => validateTeachingPlan({ actions: [{ kind: 'mechanics', action: { type: 'brackets', teeth: ['16'], installed: true } }], summary: '', clarification: null }, context, { sourceText })).toThrow(/targets/);
+    expect(parseTeachingPlan('put brackets on these teeth except 11 for me', context)).toMatchObject({ actions: [], clarification: expect.any(String) });
+    expect(parseTeachingPlan(sourceText, { ...context, selectedIds: [], selected: '' })).toMatchObject({ actions: [], clarification: expect.any(String) });
+  });
+  it.each(['Please thread a wire through these brackets.', 'Could you put a wire through these brackets?', 'Please install a wire through these brackets.'])('accepts the single passive wire instruction: %s', sourceText => {
+    const context = setup(); context.mechanics!.config.brackets = { '11': [0, 0, 3], '21': [0, 0, 3] };
+    const expected: TeachingAction[] = [{ kind: 'mechanics', action: { type: 'wire', id: 'wire-1', teeth: ['11', '21'], material: 'stainless-steel', section: { shape: 'round', diameterMm: .4 } } }];
+    const plan = { actions: expected, summary: 'Install the selected wire preset.', clarification: null };
+    expect(parseTeachingPlan(sourceText, context).actions).toEqual(expected);
+    expect(validateTeachingPlan(plan, context, { sourceText }).actions).toEqual(expected);
+    expect(() => validateTeachingPlan({ ...plan, actions: [...expected, { kind: 'mechanics', action: { type: 'solve' } }] }, context, { sourceText })).toThrow(/targets/);
+    expect(() => validateTeachingPlan({ ...plan, actions: [{ kind: 'mechanics', action: { type: 'wire', id: 'wire-1', teeth: ['11', '21'], material: 'stainless-steel', section: { shape: 'round', diameterMm: .5 } } }] }, context, { sourceText })).toThrow(/values/);
+  });
   it('preserves gingiva pointing metadata and uses the associated tooth for brackets but the actual point for a TAD', () => {
     const context = setup(); context.selectedIds = ['21']; context.pointed!.surface = 'gingiva';
     expect(mechanical('install brackets here', context)).toEqual([{ type: 'brackets', teeth: ['11'], installed: true }]);
@@ -60,6 +78,28 @@ describe('conversational appliance configuration', () => {
     for (const action of actions) advanceMechanicsContext(context, action);
     expect(context.mechanics!.config.wires[0].section).toEqual({ shape: 'round', diameterMm: .5 });
     expect(context.mechanics!.config.wires[0].expansionMm).toBe(.1);
+  });
+  it.each([false, true])('uses one solve for replacement followed immediately by an explicit solve (existing result: %s)', hasResult => {
+    const context = withWire(); context.mechanics!.hasResult = hasResult;
+    const sourceText = 'Use a 0.018 inch wire instead, then show me what happens.';
+    const expected: TeachingAction[] = [
+      { kind: 'mechanics', action: { type: 'wire-section', id: 'wire-1', section: { shape: 'round', diameterMm: .018 * 25.4 } } },
+      { kind: 'mechanics', action: { type: 'solve' } },
+    ];
+    const plan = { actions: expected, summary: 'Replace the wire and recalculate.', clarification: null };
+    expect(parseTeachingPlan(sourceText, context).actions).toEqual(expected);
+    expect(validateTeachingPlan(plan, context, { sourceText }).actions).toEqual(expected);
+    expect(() => validateTeachingPlan({ ...plan, actions: expected.slice(0, 1) }, context, { sourceText })).toThrow(/omitted/);
+    expect(() => validateTeachingPlan({ ...plan, actions: [...expected, expected[1]] }, context, { sourceText })).toThrow(/must match/);
+    expect(() => validateTeachingPlan({ ...plan, actions: [{ kind: 'mechanics', action: { type: 'wire-section', id: 'wire-1', section: { shape: 'round', diameterMm: .5 } } }, expected[1]] }, context, { sourceText })).toThrow(/must match/);
+  });
+  it('does not merge a later explicit solve across an intervening presentation instruction', () => {
+    const context = withWire(); context.mechanics!.hasResult = true;
+    const sourceText = 'use a 0.018 inch wire instead then hide gums then show what happens';
+    const plan = parseTeachingPlan(sourceText, context);
+    expect(plan.actions.map(action => action.kind === 'mechanics' ? action.action.type : action.kind)).toEqual(['wire-section', 'solve', 'toggle', 'solve']);
+    expect(validateTeachingPlan(plan, context, { sourceText }).actions).toEqual(plan.actions);
+    expect(() => validateTeachingPlan({ ...plan, actions: plan.actions.slice(0, -1) }, context, { sourceText })).toThrow(/omitted/);
   });
   it('resolves rectangle dimensions and inch conversion without guessing a thicker value', () => {
     const context = withWire();

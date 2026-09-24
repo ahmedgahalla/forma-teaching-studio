@@ -294,6 +294,10 @@ def source_is_mechanics(source):
     return bool(re.search(r"^(?:(?:install|add|bond|remove) (?:the |a |an )?brackets?\b|(?:put|insert|make|create|add|install|engage) (?:the |a |an )?(?:arch)?wires?\b|(?:put|place|add|install) (?:a |the )?(?:tad|mini[ -]?screw)\b|connect\b|(?:use|set|change|make)\b.*\b(?:wire|steel|titanium|tension|force)\b|(?:set|change|make) (?:that|it)\b|(?:show|calculate|solve|explain|compare)\b.*\b(?:happens?|response|result|movement|tad)\b|(?:activate|expand|widen) (?:the |this |that )?(?:arch)?wires?\b|(?:save|show|go to) (?:mechanics |experiment )?stage\b|(?:fix|release)\b.*\bmechanically\b)", source))
 
 
+def source_is_solve(source):
+    return bool(re.fullmatch(r"(?:show what (?:will )?happen(?:s)?(?: after that)?|(?:calculate|show|solve) (?:the |this )?(?:initial |mechanical )?(?:response|result))", normalize_wording(source)))
+
+
 def expected_actions(source, scene, resolve_targets):
     """Independent canonical evidence, shared only as a wire contract with the TS parser."""
     source = normalize_wording(source)
@@ -359,7 +363,7 @@ def expected_actions(source, scene, resolve_targets):
         if not scene.get("pointed"):
             raise ValueError("Point to a synthetic location first.")
         return [{"type": "tad", "id": new_id("tad", config["tads"]), "position": scene["pointed"]["worldPoint"]}]
-    if re.fullmatch(r"(?:show what (?:will )?happen(?:s)?(?: after that)?|(?:calculate|show|solve) (?:the |this )?(?:initial |mechanical )?(?:response|result))", source):
+    if source_is_solve(source):
         return [{"type": "solve"}]
     if re.fullmatch(r"explain (?:that |this |the )?(?:movement|response|result)(?: aloud)?", source):
         return [{"type": "explain"}]

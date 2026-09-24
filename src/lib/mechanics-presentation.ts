@@ -2,9 +2,32 @@ import { Euler, MathUtils, Quaternion } from 'three';
 import { emptyPose, type Transforms, type Vec3 } from './model';
 import type { MechanicsExperiment, MechanicsResult } from './mechanics/types';
 
+export const MECHANICS_DISPLAY_SCALES = [1, 5, 10, 25, 50] as const;
+type ResponseSize = Pick<MechanicsResult['diagnostics'], 'maxDisplacementMm' | 'maxRotationDeg'>;
+
+/** Choose a lecture display scale, bounded by 1.5 mm / 12 degrees and 50×.
+ * These are graphics limits, not mechanical or clinical movement limits. */
+export function recommendedMechanicsMagnification(size: ResponseSize): number {
+  const { maxDisplacementMm: distance, maxRotationDeg: rotation } = size;
+  if (!Number.isFinite(distance) || !Number.isFinite(rotation) || distance < 0 || rotation < 0) throw new Error('Invalid calculated response size.');
+  if (!hasMechanicsMovement(size)) return 1;
+  const limit = Math.min(distance > 0 ? 1.5 / distance : 50, rotation > 0 ? 12 / rotation : 50);
+  return MECHANICS_DISPLAY_SCALES.findLast(scale => scale <= limit) || 1;
+}
+
+export function hasMechanicsMovement(size: ResponseSize): boolean {
+  return size.maxDisplacementMm > 1e-8 || size.maxRotationDeg > 1e-6;
+}
+
+export function mechanicsResponseCaption(size: ResponseSize, magnification: number): string {
+  if (!hasMechanicsMovement(size)) return 'No measurable response in this configuration. No movement is added for display.';
+  const values = `Actual maximum: ${size.maxDisplacementMm.toFixed(4)} mm · ${size.maxRotationDeg.toFixed(3)}°`;
+  return `${values} · ${magnification === 1 ? 'actual scale' : `visualization exaggerated ${magnification}×`}`;
+}
+
 /** Display-only amplification. Neither experiment results nor measurements use these poses. */
 export function mechanicsDisplayPoses(reference: Transforms, result: Transforms, progress: number, magnification = 1): Transforms {
-  if (!Number.isFinite(progress) || progress < 0 || progress > 1 || ![1, 5, 10, 25, 50].includes(magnification)) throw new Error('Invalid mechanics presentation scale.');
+  if (!Number.isFinite(progress) || progress < 0 || progress > 1 || !(MECHANICS_DISPLAY_SCALES as readonly number[]).includes(magnification)) throw new Error('Invalid mechanics presentation scale.');
   if (!progress) return reference;
   if (progress === 1 && magnification === 1) return result;
   const displayed: Transforms = {}, factor = progress * magnification;

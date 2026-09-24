@@ -56,11 +56,15 @@ export function isMechanicsClause(text: string): boolean {
 }
 
 function normalizeMechanicsWording(text: string): string {
-  return text.replace(/^(?:attach|fit|put) (?:the )?brackets\b/, 'install brackets')
+  return text.replace(/ for me$/, '').replace(/^(?:attach|fit|put) (?:the )?brackets\b/, 'install brackets')
     .replace(/^(?:run|thread) (a |the )?wire\b/, 'put $1wire')
     .replace(/^show me what /, 'show what ')
     .replace(/^(?:replace|switch) (?:the |this |that )?wire (?:with|to) /, 'change the wire to ')
     .replace(/\bover here\b/g, 'here');
+}
+
+export function isMechanicsSolveClause(text: string): boolean {
+  return /^(?:show what (?:will )?happen(?:s)?(?: after that)?|(?:calculate|show|solve) (?:the |this )?(?:initial |mechanical )?(?:response|result))$/.test(normalizeMechanicsWording(text));
 }
 
 function current(context: MechanicsSceneContext): MechanicsCommandContext {
@@ -139,7 +143,7 @@ export function parseMechanicsClause(text: string, scene: MechanicsSceneContext)
     if (!scene.pointed || !scene.availableIds.includes(scene.pointed.tooth)) return fail('Point to the synthetic attachment location before placing a TAD.');
     return [{ type: 'tad', id: nextId('tad', config.tads.map(item => item.id)), position: [...scene.pointed.worldPoint] }];
   }
-  if (/^(?:show what (?:will )?happen(?:s)?(?: after that)?|(?:calculate|show|solve) (?:the |this )?(?:initial |mechanical )?(?:response|result))$/.test(text)) return [{ type: 'solve' }];
+  if (isMechanicsSolveClause(text)) return [{ type: 'solve' }];
   if (/^explain (?:that |this |the )?(?:movement|response|result)(?: aloud)?$/.test(text)) return [{ type: 'explain' }];
   if (/^compare (?:it |this |that )?without (?:the |this |that )?tad$/.test(text)) return [{ type: 'compare-without-tad', id: tad(context).id }];
   const activation = text.match(new RegExp(`^(?:activate|expand|widen) (?:the |this |that )?(?:arch)?wire (?:by |to )?${number} mm$`));

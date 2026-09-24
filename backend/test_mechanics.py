@@ -46,6 +46,24 @@ def test_select_then_brackets_then_visible_wire_preset(client, monkeypatch):
     assert response.json() == result  # Optional wire settings must not become null fields.
 
 
+@pytest.mark.parametrize("source", ["Please thread a wire through these brackets.", "Could you put a wire through these brackets?", "Please install a wire through these brackets."])
+def test_natural_wire_request_requires_exactly_the_passive_preset_action(client, monkeypatch, source):
+    scene = with_wire()
+    scene["mechanics"]["config"]["wires"] = []
+    scene["mechanics"]["focus"] = {}
+    wire = {"type": "wire", "id": "wire-1", "teeth": ["11", "21"], "material": "stainless-steel", "section": {"shape": "round", "diameterMm": .4}}
+    result = wrap(wire)
+    response, _ = post(client, monkeypatch, source, result, scene)
+    assert response.status_code == 200, response.text
+    assert response.json() == result
+
+    response, _ = post(client, monkeypatch, source, wrap(wire, {"type": "solve"}), scene)
+    assert response.status_code == 422
+    assert "no matching source instruction" in response.json()["detail"]
+    response, _ = post(client, monkeypatch, source, wrap({**wire, "section": {"shape": "round", "diameterMm": .5}}), scene)
+    assert response.status_code == 422
+
+
 def test_gingiva_point_preserves_surface_and_actual_tad_position(client, monkeypatch):
     scene = context()
     scene["pointed"]["surface"] = "gingiva"
@@ -85,6 +103,35 @@ def test_replacement_recalculates_current_wire_without_accumulation(client, monk
     response, _ = post(client, monkeypatch, "make that 0.5 mm instead", expected, scene)
     assert response.status_code == 422
     assert "both height and width" in response.json()["detail"]
+
+
+@pytest.mark.parametrize("has_result", [False, True])
+def test_adjacent_explicit_solve_satisfies_replacement_recalculation_once(client, monkeypatch, has_result):
+    scene = with_wire()
+    scene["mechanics"]["hasResult"] = has_result
+    source = "Use a 0.018 inch wire instead, then show me what happens."
+    replacement = {"type": "wire-section", "id": "wire-1", "section": {"shape": "round", "diameterMm": .018 * 25.4}}
+    solve = {"type": "solve"}
+    expected = wrap(replacement, solve)
+    response, _ = post(client, monkeypatch, source, expected, scene)
+    assert response.status_code == 200, response.text
+    assert response.json() == expected
+    for invalid in [wrap(replacement), wrap(replacement, solve, solve), wrap({**replacement, "section": {"shape": "round", "diameterMm": .5}}, solve)]:
+        response, _ = post(client, monkeypatch, source, invalid, scene)
+        assert response.status_code == 422
+
+
+def test_replacement_does_not_consume_a_nonadjacent_explicit_solve(client, monkeypatch):
+    scene = with_wire()
+    scene["mechanics"]["hasResult"] = True
+    source = "Use a 0.018 inch wire instead then hide gums then show what happens"
+    result = wrap({"type": "wire-section", "id": "wire-1", "section": {"shape": "round", "diameterMm": .018 * 25.4}}, {"type": "solve"})
+    result["actions"].append({"kind": "toggle", "target": "gums", "visible": False})
+    response, _ = post(client, monkeypatch, source, result, scene)
+    assert response.status_code == 422
+    result["actions"].append({"kind": "mechanics", "action": {"type": "solve"}})
+    response, _ = post(client, monkeypatch, source, result, scene)
+    assert response.status_code == 200, response.text
 
 
 @pytest.mark.parametrize("separator", ["by", "x", "×"])

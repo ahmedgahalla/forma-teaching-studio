@@ -3,7 +3,7 @@ import { normalizeSpeechCommand, parseTeachingCommand, type TeachingAction } fro
 import { WORKFLOWS } from './workflows';
 import { validateTryAction, type TryAction } from './try-mode';
 import { TEACHING_CASES } from './teaching-cases';
-import { advanceMechanicsContext, isMechanicsClause, planMechanicsClause, sameMechanicsIntent, type MechanicsCommandContext, type PointedReference } from './mechanics-commands';
+import { advanceMechanicsContext, isMechanicsClause, isMechanicsSolveClause, planMechanicsClause, sameMechanicsIntent, type MechanicsCommandContext, type PointedReference } from './mechanics-commands';
 import { validateMechanicsAction } from './mechanics/validation';
 import type { MechanicsAction } from './mechanics/types';
 
@@ -372,14 +372,20 @@ export function validateTeachingPlan(value: unknown, context: TeachingContext, o
     if (requestedActions.length > 8) throw new Error('Use at most eight actions in one classroom request, including movement application.');
   }
   const next = copyContext(context), overrides = { arch: false, view: false, selection: false }, actions: TeachingAction[] = [];
-  const mechanicsClauses = options.sourceText === undefined || options.allowLocalActions ? [] : clauses(normalizeSpeechCommand(options.sourceText)).filter(isMechanicsClause);
+  const sourceClauses = options.sourceText === undefined || options.allowLocalActions ? [] : clauses(normalizeSpeechCommand(options.sourceText));
+  const mechanicsClauses = sourceClauses.map((text, index) => ({ text, index })).filter(clause => isMechanicsClause(clause.text));
   let mechanicsCursor = 0;
   let expectedMechanics: MechanicsAction[] = [];
   for (const [index, raw] of requestedActions.entries()) {
     const action = validateAction(raw, next);
     if (action.kind === 'mechanics' && action.action.type === 'stage' && requestedActions.length !== 1) throw new Error('Recall an experiment stage as a separate request, then give instructions for its setup.');
     if (action.kind === 'mechanics' && options.sourceText !== undefined && !options.allowLocalActions) {
-      if (!expectedMechanics.length) expectedMechanics = planMechanicsClause(mechanicsClauses[mechanicsCursor++] || '', next) || [];
+      if (!expectedMechanics.length) {
+        const source = mechanicsClauses[mechanicsCursor++];
+        expectedMechanics = planMechanicsClause(source?.text || '', next) || [];
+        // An adjacent explicit solve is satisfied by the replacement's required solve.
+        if (source && expectedMechanics.length > 1 && expectedMechanics.at(-1)?.type === 'solve' && isMechanicsSolveClause(sourceClauses[source.index + 1] || '')) mechanicsCursor++;
+      }
       if (!sameMechanicsIntent(expectedMechanics.shift(), action.action)) throw new Error('The appliance action must match the requested targets, explicit values or visible preset.');
     }
     if (['case', 'dental-arrangement', 'try', 'history', 'try-display', 'try-playback', 'workspace', 'appliance-display'].includes(action.kind) && !options.allowLocalActions && !automatic.has(raw)) throw new Error('Prepared cases, Try Mode mechanics, workspace transfers, appliance placement and counted history use local commands only.');
@@ -567,10 +573,13 @@ function buildTeachingPlan(text: string, context: TeachingContext): TeachingPlan
     try { if (actions.length >= 8) throw new Error('Use at most eight actions in one classroom request.'); advance(next, action, overrides); actions.push(action); }
     catch (error) { throw new CommandValidationError(error instanceof Error ? error.message : 'This action is unavailable in the current scene.'); }
   };
-  for (let clause of clauses(source)) {
+  const sourceClauses = clauses(source);
+  for (let clauseIndex = 0; clauseIndex < sourceClauses.length; clauseIndex++) {
+    let clause = sourceClauses[clauseIndex];
     const mechanicsActions = planMechanicsClause(clause, next);
     if (mechanicsActions) {
       mechanicsActions.forEach(action => append({ kind: 'mechanics', action }));
+      if (mechanicsActions.length > 1 && mechanicsActions.at(-1)?.type === 'solve' && isMechanicsSolveClause(sourceClauses[clauseIndex + 1] || '')) clauseIndex++;
       continue;
     }
     if (clause === 'compare translation and tipping') {

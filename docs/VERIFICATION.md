@@ -1,3 +1,43 @@
+# Current verification · 24 September 2026 · visible mechanics and Ask AI
+
+This update makes the existing initial elastic response easier to see and lets the professor explicitly send a typed instruction to the configured AI interpreter. It retains the same synthetic anatomy, deterministic calculations and independent command validation.
+
+## Completed checks
+
+- **Frontend: 1,493 tests passed in 47 files.** The production build passed.
+- **Backend: 389 tests passed.** The full Python suite includes phone-bridge coverage and retains one existing Starlette/AnyIO deprecation warning.
+- **Ask AI** forces a provider interpretation request instead of silently satisfying recognized text locally. Command status distinguishes AI interpretation from local execution. Stop and manual controls remain local; cancellation, context revision checks, whole-request preflight and result validation are retained.
+- Written millimeter/millimetre quantities and singular/plural degrees are normalized consistently with the frontend. Tests exercise compound natural-language wire activation and solve requests, correct half/quarter values, and rejection of altered quantities or missing/wrong units.
+- Strict output schemas put action discriminators before inherited payload fields. Regression checks cover SDK schema order, unchanged validation constraints, correct group selection, wrong targets and unexpected fields. No numerical or target audit was relaxed.
+- Calculated wire-response replay automatically chooses a display scale bounded at **50×**, shows the unloaded-reference ghost and displacement traces, and lasts **eight seconds** at normal presentation speed. Actual displacement and rotation remain unscaled; saved geometry and the unloaded solver reference are unchanged. This is an initial elastic response, not a biological timeline.
+
+## Private phone publication
+
+Native Sites publication succeeded at https://forma-teaching-mobile.ahmedgah123.chatgpt.site with the existing owner-private audience:
+
+- Project: `appgprj_6ab39ed0b82881919f49cba3045245ce`
+- Version: `appgprj_6ab39ed0b82881919f49cba3045245ce~appgver_928a60f20a3c8191b0e1a6b49e46b9ef`
+- Deployment: `appgdep_6ab4e3d5133c8191a02d693198755117`
+- Site source commit: `9af5d4dcf4a76f53539592c458d060a9289f1b71`
+- Environment revision: `1`
+
+## Live browser and recording
+
+- The connected browser executed five real OpenRouter interpretations with Ask AI enabled: natural-language upper-jaw/root/gum presentation, upper-anterior selection, bracket placement (including “for me”), passive wire installation, and half-millimeter activation plus response calculation. The response completed at 0.0116 mm / 0.076 degrees with a labelled 50× display scale. Focus, occlusal camera, complete replay and Undo were exercised through normal controls.
+- `../../Forma-Fullscreen-AI-Demo.mp4` is an 81.17-second silent, casual 1920×1080 capture, encoded as H.264/30 fps from actual browser frames (roughly 8–10 captured frames per second). Recording pauses between interaction batches are removed. No fabricated screen states, AI replies, narration or decorative titles were added. Video dimensions and full decode were verified.
+- An additional real provider request replaced a wire with 0.018 inches (0.4572 mm) and returned exactly one solve; backend semantic validation passed. Adjacent requested recalculation is coalesced with the replacement's required recalculation in both validators and local planning.
+- During debugging, some provider plans added or omitted actions and were correctly rejected without scene changes; an AI camera request also received a rejected plan. This is bounded command interpretation, not a guarantee of arbitrary language understanding. Manual camera controls and local commands remain available.
+- A 390×844 browser check found no horizontal overflow, with Ask AI and Stop visible. This is viewport testing, not physical-phone testing. The temporary viewport override was reset.
+- One expensive GLB collision regression exceeded its existing 30-second timeout while video encoding was running. A separate full-suite rerun, with encoding finished, passed all 1,493 tests without changing test limits.
+
+ Publication success does not establish physical-phone behavior, actual microphone capture or educator approval. Online AI still uses the temporary authenticated connection to the host computer; see [phone testing](MOBILE_TEST.md).
+
+---
+
+# Historical verification records
+
+The sections below preserve the checks and deployment status at each earlier release. Their test counts and statements about remote publication are historical; the current status is recorded above.
+
 # Version 0.12 verification · conversational teaching experiments
 
 Verified locally on 24 September 2026. Forma now supports pointing, typed/hold-to-talk appliance commands and a bounded initial elastic mechanics engine in the existing free workspace. This is a synthetic teaching system; it does not predict treatment time, remodeling or patient outcomes.

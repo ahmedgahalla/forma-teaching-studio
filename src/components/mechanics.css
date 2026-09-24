@@ -112,4 +112,7 @@
 }
 @media(max-width:1024px){.studio-experience.teaching-studio .viewport .model-tools{top:auto;bottom:32px;right:8px;left:auto;flex-direction:row}}
 .studio-experience.teaching-studio .viewport:has(.mechanics-scale-badge) .stage-preview-badge{display:none}
+.studio-experience.teaching-studio .viewport .mechanics-scale-badge{font-size:12px;line-height:1.45;font-variant-numeric:tabular-nums;padding:7px 10px;text-align:left;border-left:3px solid var(--ui-accent)}
+.mechanics-panel .mechanics-setup-note{padding:9px 10px;border-left:2px solid var(--ui-accent);background:var(--ui-raised);font-size:11px;line-height:1.6}
+@media(max-width:700px){.studio-experience.teaching-studio .viewport .mechanics-scale-badge{font-size:10px;padding:5px 7px;max-width:calc(100% - 18px)}}
 @media(max-width:1024px){.studio-experience.teaching-studio .viewport .orientation{display:none}}

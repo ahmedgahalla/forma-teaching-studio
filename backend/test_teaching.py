@@ -1,5 +1,6 @@
 """Teaching-plan contract and semantic audits; all provider calls are mocked."""
 
+import copy
 import json
 from types import SimpleNamespace
 from unittest.mock import MagicMock
@@ -8,6 +9,7 @@ import httpx
 import pytest
 from fastapi.testclient import TestClient
 from openai import APITimeoutError, AuthenticationError, RateLimitError, APIStatusError
+from openai.lib._pydantic import to_strict_json_schema
 
 import main
 
@@ -40,6 +42,15 @@ def fake(monkeypatch, result):
     return provider
 
 
+def wire_context():
+    return {"config": {"brackets": {"11": [0, 0, 3], "21": [0, 0, 3]},
+            "wires": [{"id": "wire-1", "teeth": ["11", "21"], "material": "stainless-steel",
+                       "section": {"shape": "round", "diameterMm": .4}, "expansionMm": 0, "torqueDeg": 0}],
+            "tads": [], "elastics": [], "expanders": [], "support": "standard", "fixedTeeth": []},
+            "bracketAnchors": {"11": [0, 0, 3], "21": [0, 0, 3]}, "focus": {"wireId": "wire-1"},
+            "stageIndex": 0, "stageCount": 1, "hasResult": False}
+
+
 @pytest.fixture
 def client(monkeypatch):
     monkeypatch.delenv("OPENAI_API_KEY", raising=False)
@@ -48,6 +59,36 @@ def client(monkeypatch):
 
 def post(client, payload):
     return client.post("/api/interpret-teaching", json=payload)
+
+
+@pytest.mark.parametrize("wording,field,amount", [
+    ("activate that wire by half a millimeter", "expansionMm", .5),
+    ("activate that wire by half a millimetre", "expansionMm", .5),
+    ("activate that wire by zero point five millimeters", "expansionMm", .5),
+    ("activate that wire by zero point five millimetres", "expansionMm", .5),
+    ("activate that wire by one and a half millimeters", "expansionMm", 1.5),
+    ("activate that wire by a quarter millimetre", "expansionMm", .25),
+    ("set that wire torque to one degree", "torqueDeg", 1),
+    ("set that wire torque to five degrees", "torqueDeg", 5),
+])
+def test_natural_wire_units_preserve_exact_activation_and_solve(client, monkeypatch, wording, field, amount):
+    action = {"type": "wire-activation", "id": "wire-1", "expansionMm": 0, "torqueDeg": 0, field: amount}
+    expected = plan({"kind": "mechanics", "action": action}, {"kind": "mechanics", "action": {"type": "solve"}})
+    fake(monkeypatch, expected)
+    payload = request(f"Could you {wording}, then show me what happens?", mechanics=wire_context())
+    response = post(client, payload)
+    assert response.status_code == 200, response.text
+    assert response.json() == expected
+
+    wrong = {**action, field: amount + .1}
+    fake(monkeypatch, plan({"kind": "mechanics", "action": wrong}, {"kind": "mechanics", "action": {"type": "solve"}}))
+    assert post(client, payload).status_code == 422
+
+
+@pytest.mark.parametrize("wording", ["activate that wire by millimeters", "activate that wire by half", "activate that wire by five degrees"])
+def test_natural_wire_normalization_never_supplies_missing_amount_or_unit(client, monkeypatch, wording):
+    fake(monkeypatch, plan({"kind": "mechanics", "action": {"type": "wire-activation", "id": "wire-1", "expansionMm": .5, "torqueDeg": 0}}))
+    assert post(client, request(wording, mechanics=wire_context())).status_code == 422
 
 
 def test_teaching_missing_key_is_actionable(client):
@@ -606,6 +647,46 @@ def test_sdk_uses_server_key_minimal_context_strict_schema_and_no_storage(client
     schema = main.TeachingPlan.model_json_schema()
     assert schema["additionalProperties"] is False
     assert all(definition.get("additionalProperties") is False for definition in schema["$defs"].values())
+
+
+@pytest.mark.parametrize("name,first", [
+    ("TeachingSelect", ["kind", "teeth"]),
+    ("TeachingAttachmentAdd", ["kind", "action", "teeth"]),
+    ("TeachingAttachmentRemove", ["kind", "action", "teeth"]),
+    ("MoveGroup", ["type", "teeth"]),
+    ("RotateGroup", ["type", "teeth"]),
+    ("Orthodontic", ["type", "teeth"]),
+    ("Reset", ["type", "teeth"]),
+])
+def test_strict_sdk_schema_keeps_inherited_action_discriminators_first(name, first):
+    schema = to_strict_json_schema(main.TeachingPlan)
+    definition = schema["$defs"][name]
+    assert list(definition["properties"])[:len(first)] == first
+    assert definition["required"] == list(definition["properties"])
+    assert definition["additionalProperties"] is False
+    assert definition["properties"][first[0]]["const"]
+    assert definition["properties"]["teeth"]["items"]["pattern"] == r"^[1-4][1-8]$"
+
+
+def test_schema_key_order_changes_preserve_all_validation_keywords():
+    schema = main.TeachingPlan.model_json_schema()
+    before = copy.deepcopy(schema)
+    for definition in schema["$defs"].values():
+        # Reproduce inherited-field-first input without modifying its constraints.
+        definition["properties"] = dict(reversed(list(definition["properties"].items())))
+        main.discriminator_first_schema(definition)
+    assert schema == before  # Dictionary equality ignores key order, not constraints.
+    assert schema["properties"]["actions"]["maxItems"] == 8
+
+
+def test_reordered_select_schema_retains_target_and_unknown_field_audits(client, monkeypatch):
+    selected = {"kind": "select", "teeth": ["11", "12", "13", "21", "22", "23"]}
+    fake(monkeypatch, plan(selected))
+    assert post(client, request("Please select upper anterior teeth.")).status_code == 200
+    fake(monkeypatch, plan({**selected, "teeth": ["11", "12", "13"]}))
+    assert post(client, request("Please select upper anterior teeth.")).status_code == 422
+    fake(monkeypatch, plan({**selected, "unsafe": True}))
+    assert post(client, request("Please select upper anterior teeth.")).status_code == 502
 
 
 def test_provider_refusal_returns_empty_clarification(client, monkeypatch):
