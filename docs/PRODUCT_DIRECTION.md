@@ -2,6 +2,10 @@
 
 Proposed next design pass, following the request to make Forma excellent without spreading the experience across too many places. This is a proposal, not a claim that the consolidation has shipped.
 
+## First usability pass · 24 September 2026
+
+Implemented a bounded first step: a pinned command bar, separate camera row, contextual suggestions, less idle lecture chrome, compact phone sheets, and everyday upper/lower appliance wording. Manual previews keep Apply/Discard accessible; lesson explanations expand when requested. See [verification](VERIFICATION.md) for the measured checks. This does not complete the broader consolidation below: intent-routing across editing and Analyze, clarification memory, collision performance, and educator-reviewed demonstration quality remain separate work.
+
 ## Product promise
 
 A professor can select a teaching setup, demonstrate a concept on a clear 3D mouth, ask students to predict a change, then reveal and compare the result without leaving the workspace.

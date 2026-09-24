@@ -3,6 +3,9 @@ import type { Axis, MovementDirection } from "./model";
 /** Known local grammar with an invalid amount or target, rather than unfamiliar wording. */
 export class CommandValidationError extends Error {}
 
+/** A target phrase outside the local grammar may be interpreted, never treated as a valid target. */
+export class UnrecognizedCommandError extends Error {}
+
 export type Command =
   | { type: "move"; tooth: string; direction: MovementDirection; amount: number }
   | { type: "rotate"; tooth: string; axis: Axis; amount: number }
@@ -60,7 +63,11 @@ function targets(selector: string, selectedId: string | null | undefined, availa
   } else {
     const match = scope.match(/^(?:all )?(?:(upper|lower|maxillary|mandibular) )?(?:(left|right) )?(?:all )?(teeth|arch|incisors?|canines?|premolars?|molars?|anterior(?: teeth)?|posterior(?: teeth)?)$/);
     if (!match || (match[3] === "arch" && !match[1])) {
-      throw new CommandValidationError('Name one tooth, “teeth 11,12”, “selected teeth”, or an upper/lower tooth group.');
+      const message = 'Name one tooth, “teeth 11,12”, “selected teeth”, or an upper/lower tooth group.';
+      // Do not reinterpret malformed FDI lists, an unnamed arch, or an unsupported
+      // exclusion/constraint as permission to choose a different target.
+      if (scope === 'arch' || /\d|\b(?:except|excluding|exclude|without|only|but|not|never|unless|if|locked|fixed)\b/.test(scope)) throw new CommandValidationError(message);
+      throw new UnrecognizedCommandError(message);
     }
     const upper = match[1] === "upper" || match[1] === "maxillary";
     const lower = match[1] === "lower" || match[1] === "mandibular";

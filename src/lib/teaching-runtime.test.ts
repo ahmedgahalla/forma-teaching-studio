@@ -581,6 +581,69 @@ describe('prepared case whole-scene runtime history', () => {
 });
 
 describe('interpretation and replay boundaries', () => {
+  it('asks AI about unfamiliar target wording and undoes the complete interpreted request', async () => {
+    const { runtime, host, scene } = setup(); scene().context.tryMode = true;
+    host.interpret.mockResolvedValue(external([{ kind: 'toggle', target: 'roots', visible: true }, { kind: 'select', teeth: ['11', '21'] }]));
+    await runtime.submit('show roots then select the central incisor pair');
+    expect(host.interpret).toHaveBeenCalledOnce(); expect(host.preflight).toHaveBeenCalledOnce();
+    expect(scene().roots).toBe(true); expect(scene().context.selectedIds).toEqual(['11', '21']);
+    expect(runtime.getState()).toMatchObject({ error: false, interpreter: 'ai' });
+    await runtime.submit('undo');
+    expect(scene().roots).toBe(false); expect(scene().context.selectedIds).toEqual(['11']);
+  });
+
+  it.each(['auto', 'ai'] as const)('keeps real target and amount clarifications local in %s routing', async interpreter => {
+    const { runtime, host, scene } = setup(); scene().context.tryMode = true;
+    for (const text of ['move tooth 11 buccally', 'move tooth 18 x 1 mm', 'move tooth 11 x 11 mm', 'select upper teeth except 11', 'select arch']) {
+      await runtime.submit(text, { interpreter });
+      expect(host.interpret).not.toHaveBeenCalled(); expect(host.apply).not.toHaveBeenCalled();
+      expect(runtime.getState().error).toBe(true);
+    }
+    scene().context.selectedIds = [];
+    await runtime.submit('move selected teeth x 1 mm', { interpreter });
+    expect(host.interpret).not.toHaveBeenCalled(); expect(host.apply).not.toHaveBeenCalled();
+    expect(runtime.getState().message).toMatch(/No teeth match/);
+  });
+
+  it('does not apply an AI interpretation when it invents a movement amount for unfamiliar wording', async () => {
+    const { runtime, host } = setup();
+    host.interpret.mockResolvedValue(external([{ kind: 'dental', command: { type: 'move', tooth: '11', direction: 'buccal', amount: 1 } }]));
+    await runtime.submit('move the central incisor pair buccally');
+    expect(host.interpret).toHaveBeenCalledOnce(); expect(host.apply).not.toHaveBeenCalled();
+    expect(runtime.getState().message).toMatch(/explicit requested amount/);
+  });
+
+  it('can ask AI to clarify unfamiliar appliance targets without relaxing exact appliance intent checks', async () => {
+    const { runtime, host, scene } = setup();
+    scene().context.mechanics = {
+      config: { brackets: {}, wires: [], tads: [], elastics: [], expanders: [], support: 'standard', fixedTeeth: [] },
+      bracketAnchors: { '11': [0, 0, 3], '21': [0, 0, 3] }, focus: {}, stageIndex: -1, stageCount: 0, hasResult: false,
+    };
+    host.interpret.mockResolvedValue({ actions: [], summary: '', clarification: 'Which teeth should receive brackets?' });
+    await runtime.submit('put brackets on the incisor pair');
+    expect(host.interpret).toHaveBeenCalledOnce(); expect(host.apply).not.toHaveBeenCalled();
+    expect(runtime.getState().message).toMatch(/Which teeth/);
+    host.interpret.mockResolvedValue(external([{ kind: 'mechanics', action: { type: 'brackets', teeth: ['11', '21'], installed: true } }]));
+    await runtime.submit('put brackets on the incisor pair');
+    expect(host.interpret).toHaveBeenCalledTimes(2); expect(host.apply).not.toHaveBeenCalled();
+    expect(runtime.getState().error).toBe(true);
+    host.interpret.mockClear();
+    await runtime.submit('show what happens', { interpreter: 'ai' });
+    expect(host.interpret).not.toHaveBeenCalled(); expect(host.apply).not.toHaveBeenCalled();
+    expect(runtime.getState().message).toMatch(/passive wire/);
+  });
+
+  it('does not let forced AI bypass a tooth lock or a preceding lock in the same request', async () => {
+    const { runtime, host, scene } = setup(); scene().context.tryMode = true;
+    await runtime.submit('lock tooth 11 then move tooth 11 x 1 mm', { interpreter: 'ai' });
+    expect(host.interpret).not.toHaveBeenCalled(); expect(host.apply).not.toHaveBeenCalled();
+    expect(runtime.getState().message).toMatch(/Unlock 11/);
+    scene().context.lockedIds = ['11'];
+    await runtime.submit('move tooth 11 x 1 mm', { interpreter: 'ai' });
+    expect(host.interpret).not.toHaveBeenCalled(); expect(host.apply).not.toHaveBeenCalled();
+    expect(runtime.getState().message).toMatch(/Unlock 11/);
+  });
+
   it('uses configured AI for unfamiliar legacy view wording while Try Mode is active', async () => {
     const { runtime, host, scene } = setup(); scene().context.tryMode = true;
     host.interpret.mockResolvedValue(external([{ kind: 'view', view: 'front' }]));

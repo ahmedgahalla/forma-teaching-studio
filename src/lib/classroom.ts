@@ -1,4 +1,4 @@
-import { CommandValidationError, validateCommand } from './commands';
+import { CommandValidationError, UnrecognizedCommandError, validateCommand } from './commands';
 import { normalizeSpeechCommand, parseTeachingCommand, type TeachingAction } from './lecture';
 import { WORKFLOWS } from './workflows';
 import { validateTryAction, type TryAction } from './try-mode';
@@ -628,6 +628,7 @@ function buildTeachingPlan(text: string, context: TeachingContext): TeachingPlan
 export function parseTeachingPlan(text: string, context: TeachingContext): TeachingPlan {
   try { return buildTeachingPlan(text, context); }
   catch (error) {
+    if (error instanceof UnrecognizedCommandError) throw error;
     // New mechanics stay deterministic and local, including useful validation errors.
     if (context.tryMode && error instanceof CommandValidationError || typeof text === 'string' && clauses(normalizeSpeechCommand(text)).some(clause => isDentalArrangementClause(clause) || isMechanicsClause(clause) || isCaseClause(clause, context) || isTryClause(clause) || isWorkspaceClause(clause, context) || isApplianceClause(clause) || /^(?:undo|redo) (?:the )?(?:last )?\d/.test(clause) || /^(?:show|reveal|hide) (?:the )?(?:answer|explanation)$/.test(clause))) return { actions: [], summary: '', clarification: error instanceof Error ? error.message : 'Specify an explicit local classroom command.' };
     throw error;

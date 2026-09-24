@@ -2,6 +2,14 @@
 
 Open https://forma-teaching-mobile.ahmedgah123.chatgpt.site in your phone browser and sign in with the same ChatGPT account used to publish the private site. It works across mobile data and different Wi-Fi networks. The 24 September 2026 update adds explicit Ask AI command routing and a more visible replay of calculated wire responses to version 0.12.
 
+## Latest usability update · 24 September 2026
+
+The command bar stays available while you inspect the model or open a tool sheet. Camera controls sit outside the teeth. **Examples** shows up to four relevant commands. Try `put brackets in top`; it selects the upper arch correctly, with Ask AI either on or off. **Measure** opens measurement tools; **Analyze** still asks AI a read-only question. New brackets alone do not move teeth.
+
+Manual movement preview closes the phone tool sheet so you can inspect the ghost. Apply/Discard remain visible, and Modify reopens editing. In prepared lessons, Question & explanation starts compact on narrow screens; `reveal answer` opens and brings the explanation into view.
+
+Current automated results: **1,599 frontend tests / 51 files**, **531 backend tests**, and **8 gateway tests** passed. The production build passed. Responsive browser checks covered 375×667, 760×694 and 1366×768; these are not physical-phone or microphone tests. See [verification](VERIFICATION.md).
+
 ## Quick test
 
 1. Wait for the synthetic 28-tooth model to load; landscape gives more space.
@@ -21,7 +29,7 @@ The host computer, local backend, phone bridge and tunnel must remain on. The Op
 
 Stopping the computer or tunnel disconnects online AI; built-in commands and loaded models continue working. Restarting the temporary tunnel requires updating the bridge URL in Sites and redeploying its environment revision. This is a test connection, not a permanent independent backend.
 
-## Current verification · 24 September 2026
+## Earlier verification · 24 September 2026
 
 - Frontend: **1,493 tests / 47 files passed**. Production build passed.
 - Python backend: **389 tests passed**, including phone-bridge coverage; one existing Starlette/AnyIO deprecation warning.
@@ -37,9 +45,9 @@ The earlier phone publication passed six private-gateway tests for identity, ori
 ## Published identity
 
 - Site: `appgprj_6ab39ed0b82881919f49cba3045245ce`
-- Version: `appgprj_6ab39ed0b82881919f49cba3045245ce~appgver_137307362fc481918897e0347be4c326`
-- Deployment: `appgdep_6ab4f77c8cd08191b589f69d200cd71b`
-- Site source commit: `24d2be74b690335c86fda71ea0c478f9c8caaa1c`
+- Version: `appgprj_6ab39ed0b82881919f49cba3045245ce~appgver_a40d679eb62481918ba0f1925223c5c7`
+- Deployment: `appgdep_6ab50502ab70819190b3b55b276d056d`
+- Site source commit: `a6d5c65a37e4ed9d2e63cdfeccdfb7e909843135`
 - Environment revision: `1`
 
 Keep this Site identity and owner-only access. The hosted Worker source is maintained in the separate `../forma-mobile` Site checkout. See [backend setup](../backend/README.md) and [conversational commands](CONVERSATIONAL_COMMANDS.md).

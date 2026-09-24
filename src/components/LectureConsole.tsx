@@ -1,11 +1,13 @@
 'use client';
 
-import { useId, type ReactNode } from 'react';
-import { ArrowRight, Eye, Lightbulb, Pause, Play, RotateCcw } from 'lucide-react';
+import { useEffect, useId, useLayoutEffect, useRef, useState, type ReactNode } from 'react';
+import { ArrowRight, ChevronDown, Eye, Lightbulb, Pause, Play, RotateCcw } from 'lucide-react';
 import './lecture-console.css';
 
 export type LectureConsoleProps = {
   title: string;
+  compact?: boolean;
+  collapsible?: boolean;
   showPlayback?: boolean;
   objective?: string;
   question?: string;
@@ -31,13 +33,33 @@ export type LectureConsoleProps = {
 };
 
 /** Presentation only: the host validates and executes every requested change. */
-export function LectureConsole({ showPlayback = true, title, objective, question, answer, answerVisible, onToggleAnswer, playing, progress, onPlayPause, onRestart, onHalf, onProgress, speed, onSpeed, canPlay = true, disabled = false, variants = [], variantId, onVariant, explorationAction, note = 'Authored illustration · no treatment time scale · educator review pending', children }: LectureConsoleProps) {
+export function LectureConsole({ compact = false, collapsible = false, showPlayback = true, title, objective, question, answer, answerVisible, onToggleAnswer, playing, progress, onPlayPause, onRestart, onHalf, onProgress, speed, onSpeed, canPlay = true, disabled = false, variants = [], variantId, onVariant, explorationAction, note = 'Authored illustration · no treatment time scale · educator review pending', children }: LectureConsoleProps) {
   const id = useId();
+  const cardRef = useRef<HTMLElement>(null), answerRef = useRef<HTMLDivElement>(null);
+  const [expanded, setExpanded] = useState(false);
+  useEffect(() => { if (collapsible && answerVisible) setExpanded(true); }, [collapsible, answerVisible]);
+  useLayoutEffect(() => {
+    const card = cardRef.current, explanation = answerRef.current;
+    if (!collapsible || !expanded || !answerVisible || !card || !explanation) return;
+    // Move only the two workspace scroll containers, never the page or composer.
+    if (card.scrollHeight > card.clientHeight) {
+      card.scrollTop += explanation.getBoundingClientRect().top - card.getBoundingClientRect().top - 8;
+    }
+    const scene = card.closest<HTMLElement>('.workspace-scene');
+    if (!scene || scene.scrollHeight <= scene.clientHeight) return;
+    const cardBounds = card.getBoundingClientRect(), sceneBounds = scene.getBoundingClientRect();
+    if (cardBounds.top < sceneBounds.top) scene.scrollTop += cardBounds.top - sceneBounds.top;
+    else if (cardBounds.bottom > sceneBounds.bottom) scene.scrollTop += cardBounds.bottom - sceneBounds.bottom;
+  }, [collapsible, expanded, answerVisible]);
   const shownProgress = Number.isFinite(progress) ? Math.max(0, Math.min(1, progress)) : 0;
   const percentage = Math.round(shownProgress * 100);
   const playbackDisabled = disabled || !canPlay;
 
-  return <section className="lecture-console" aria-label="Professor lecture controls">
+  if (compact) return <section className="lecture-console lecture-console-compact" aria-label="Quick anatomy controls">{children}</section>;
+
+  return <section ref={cardRef} className={`lecture-console${collapsible ? ' lecture-console-collapsible' : ''}`} data-expanded={expanded} aria-label="Professor lecture controls">
+    {collapsible && <button className="lecture-console-toggle" aria-expanded={expanded} aria-controls={`${id}-content`} onClick={() => setExpanded(!expanded)}><Lightbulb size={16} />Question & explanation<ChevronDown size={16} /></button>}
+    <div id={`${id}-content`} className="lecture-console-content">
     <header className="lecture-console-heading">
       <div><span className="lecture-console-eyebrow">PROFESSOR CONTROLS</span><h2>{title}</h2>{objective && <p>{objective}</p>}</div>
       {explorationAction && <button type="button" className="lecture-console-explore" disabled={disabled} onClick={explorationAction.onClick}>{explorationAction.label}<ArrowRight size={17} aria-hidden="true" /></button>}
@@ -57,9 +79,10 @@ export function LectureConsole({ showPlayback = true, title, objective, question
       {(question || answer) && <div className="lecture-console-question">
         <span className="lecture-console-eyebrow"><Lightbulb size={17} aria-hidden="true" />ASK THE CLASS</span>
         {question && <p>{question}</p>}
-        {answer && <><button type="button" className="lecture-console-reveal" aria-expanded={answerVisible} aria-controls={`${id}-answer`} disabled={disabled} onClick={onToggleAnswer}><Eye size={17} aria-hidden="true" />{answerVisible ? 'Hide explanation' : 'Reveal explanation'}</button><div id={`${id}-answer`} className="lecture-console-answer" hidden={!answerVisible}>{answer}</div></>}
+        {answer && <><button type="button" className="lecture-console-reveal" aria-expanded={answerVisible} aria-controls={`${id}-answer`} disabled={disabled} onClick={onToggleAnswer}><Eye size={17} aria-hidden="true" />{answerVisible ? 'Hide explanation' : 'Reveal explanation'}</button><div ref={answerRef} id={`${id}-answer`} className="lecture-console-answer" hidden={!answerVisible}>{answer}</div></>}
       </div>}
     </div>
     {note && <p className="lecture-console-note">{note}</p>}
+    </div>
   </section>;
 }

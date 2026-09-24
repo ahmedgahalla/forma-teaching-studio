@@ -21,6 +21,10 @@ export function normalizeClassroomLanguage(text: string): string {
   rewrite('(?:(?:show|switch to|give me) (?:a |the )?)?(?:top[- ]down|overhead) view\\b', prefix => `${prefix}show occlusal view`);
   rewrite(`make (?:the )?${anatomy} (disappear|invisible|visible|appear)\\b`, (prefix, target, state) => `${prefix}${state === 'disappear' || state === 'invisible' ? 'hide' : 'show'} ${layer(target)}`);
   rewrite(`(reveal|display|conceal|see|show|hide) (?:me )?(?:the )?${anatomy}\\b`, (prefix, action, target) => `${prefix}${action === 'conceal' || action === 'hide' ? 'hide' : 'show'} ${layer(target)}`);
+  // Top/bottom name an arch only beside a dental noun or an explicit appliance target.
+  // Camera directions and bare positional language keep their existing meanings.
+  value = value.replace(/\b(top|bottom) (?=(?:(?:left|right) )?(?:front|back|anterior|posterior|incisors?|canines?|premolars?|molars?|teeth|arch|jaw)\b)/g, (_, arch: string) => `${arch === 'top' ? 'upper' : 'lower'} `);
+  rewrite('((?:put|place|install|add|bond|attach|fit) (?:a |an |the )?(?:brackets?|braces|(?:arch)?wires?)) (?:in|on|to) (?:the )?(top|bottom|upper|lower)(?: (?:teeth|arch|jaw))?(?=$|[;,\\n.!?]|\\s+(?:and then|then|also|after that|and)\\b)', (prefix, action, arch) => `${prefix}${action} on ${arch === 'top' || arch === 'upper' ? 'upper' : 'lower'} teeth`);
   // These named anatomical groups are resolved before spoken numerals become quantities.
   value = value.replace(/\b(upper|lower|maxillary|mandibular) (?:front (?:six|6)|(?:six|6) front)(?: teeth)?\b/g, '$1 anterior teeth');
   value = value.replace(/\b(upper|lower|maxillary|mandibular) (?:front (?:four|4)|(?:four|4) front)(?: teeth)?\b/g, '$1 incisors');

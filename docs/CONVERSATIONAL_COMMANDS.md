@@ -15,6 +15,11 @@ Clear validated voice/text movements execute immediately. To inspect a geometric
 - `Put wire on all teeth.`
 - `Fit a wire on every tooth.`
 - `Put wires on both arches.`
+- `Put brackets in top.`
+- `Put brackets in bottom.`
+- `Put a wire on the top teeth.`
+
+**Top** and **bottom** mean upper and lower when naming a dental group, such as `top incisors` or `bottom front six teeth`. For appliance placement, `in top`, `in bottom`, and `on the top teeth` resolve to the corresponding arch. These phrases work locally and through Ask AI. Camera phrases retain their own meaning: `look from top` selects the occlusal view.
 
 For appliance requests, **all teeth** uses the currently visible arch when Upper or Lower is isolated. With Both arches visible, it covers both. Say **both arches** or **the whole mouth** to explicitly target both regardless of the current view. The response identifies the resolved targets.
 
@@ -22,7 +27,7 @@ For appliance requests, **all teeth** uses the currently visible arch when Upper
 
 A wire request adds missing bracket attachments and creates an ordered connection using the visible material/size preset. Both arches receive separate wires. Existing compatible connections are reused or extended instead of duplicated; overlapping or incompatible configurations require clarification. Installing a new wire remains passive. “Put wire on all teeth and show what happens” asks for activation if none has been specified; it does not invent movement.
 
-Natural wording does not supply missing distances, dimensions or force values. Unknown clauses, negations and hypothetical requests are preserved for validation rather than silently discarded. If an AI plan fails independent validation, the server can make one bounded repair request and validates that reply again before anything executes.
+Unfamiliar wording can use the configured AI interpreter. Missing targets, amounts or required constraints still produce a clarification, including when Ask AI is selected; the interpreter does not fill them in. Natural wording does not supply missing distances, dimensions or force values. Unknown clauses, negations and hypothetical requests are preserved for validation rather than silently discarded. If an AI plan fails independent validation, the server can make one bounded repair request and validates that reply again before anything executes.
 
 ## Ask AI versus Analyze
 
@@ -41,7 +46,7 @@ The server default is **GPT-6 Luna**: `gpt-6-luna` for OpenAI, or `openai/gpt-6-
 
 ## A first wire experiment
 
-Start in the synthetic free workspace and choose the visible wire preset. Give these requests separately:
+Start in the synthetic free workspace. Give these requests separately; after installing brackets, the command context exposes the wire preset so you can check its material and size before connecting the wire:
 
 1. `Select upper anterior teeth`
 2. `Install brackets on them`
@@ -128,7 +133,7 @@ These are synthetic dental arrangements, with their assumptions and initial geom
 
 ## Interpretation and verification
 
-Known commands run locally. The optional server-side AI can interpret supported classroom wording; both the backend and frontend independently check targets, explicit values, visible presets and available objects. No mesh, API key or patient identifier is included in the interpretation request. The frontend checks scene revisions so an old response cannot change a newer scene.
+Known commands run locally by default. Unfamiliar wording can reach the optional server-side AI, while recognized commands with missing values or invalid targets remain clarifications. Both the backend and frontend independently check targets, explicit values, presets and available objects. No mesh, API key or patient identifier is included in the interpretation request. The frontend checks scene revisions so an old response cannot change a newer scene.
 
 Typed commands and ordinary manual controls remain available when speech or AI is unavailable. Actual microphone accuracy depends on browser support and permission. Automated tests cover parsing, compound references, replacement, atomic undo, asynchronous cancellation and independent provider validation. They do not establish real microphone recognition, projector usability, faculty approval or clinical validity.
 

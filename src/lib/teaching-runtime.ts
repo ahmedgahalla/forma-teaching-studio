@@ -126,7 +126,9 @@ export function createTeachingRuntime<S>(host: TeachingHost<S>) {
       try { plan = parseTeachingPlan(text, context); } catch { /* Unfamiliar wording uses the configured interpreter. */ }
       // Stop/history/replay remain immediate and independent of network availability.
       const localControl = plan && !plan.clarification && plan.actions.length > 0 && plan.actions.every(action => ['stop', 'history', 'replay'].includes(action.kind) || action.kind === 'dental' && ['undo', 'redo', 'pause'].includes(action.command.type));
-      if (!plan || options.interpreter === 'ai' && !localControl) {
+      // An explicit ambiguity or failed constraint is not an invitation to invent
+      // a replacement, even when the professor has requested AI interpretation.
+      if (!plan || options.interpreter === 'ai' && !localControl && !plan.clarification) {
         const response = await abortable(host.interpret(text, context, signal), signal);
         if (signal.aborted || own !== token) return;
         plan = validateTeachingPlan(response, { ...host.context(), lastActions: last?.actions }, { sourceText: text, expectedRevision: revision });

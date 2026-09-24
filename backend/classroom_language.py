@@ -29,6 +29,8 @@ def normalize_classroom_language(text: str) -> str:
     rewrite(r"(?:(?:show|switch to|give me) (?:a |the )?)?(?:top[- ]down|overhead) view\b", lambda prefix: f"{prefix}show occlusal view")
     rewrite(rf"make (?:the )?{_ANATOMY} (disappear|invisible|visible|appear)\b", lambda prefix, target, state: f"{prefix}{'hide' if state in ('disappear', 'invisible') else 'show'} {_layer(target)}")
     rewrite(rf"(reveal|display|conceal|see|show|hide) (?:me )?(?:the )?{_ANATOMY}\b", lambda prefix, action, target: f"{prefix}{'hide' if action in ('conceal', 'hide') else 'show'} {_layer(target)}")
+    value = re.sub(r"\b(top|bottom) (?=(?:(?:left|right) )?(?:front|back|anterior|posterior|incisors?|canines?|premolars?|molars?|teeth|arch|jaw)\b)", lambda m: "upper " if m[1] == "top" else "lower ", value)
+    rewrite(r"((?:put|place|install|add|bond|attach|fit) (?:a |an |the )?(?:brackets?|braces|(?:arch)?wires?)) (?:in|on|to) (?:the )?(top|bottom|upper|lower)(?: (?:teeth|arch|jaw))?(?=$|[;,\n.!?]|\s+(?:and then|then|also|after that|and)\b)", lambda prefix, action, arch: f"{prefix}{action} on {'upper' if arch in ('top', 'upper') else 'lower'} teeth")
     # Named anatomical groups must be resolved before spoken numerals become quantities.
     value = re.sub(r"\b(upper|lower|maxillary|mandibular) (?:front (?:six|6)|(?:six|6) front)(?: teeth)?\b", r"\1 anterior teeth", value)
     value = re.sub(r"\b(upper|lower|maxillary|mandibular) (?:front (?:four|4)|(?:four|4) front)(?: teeth)?\b", r"\1 incisors", value)
