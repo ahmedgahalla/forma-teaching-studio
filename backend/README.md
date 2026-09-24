@@ -225,6 +225,20 @@ Both validation layers check complete sequences before execution, resolve refere
 
 This API never calculates displacement or fabricates a mechanical explanation. The browser worker performs supported initial elastic calculations, and frontend narration uses the actual result and declared assumptions. No biological timeline or patient-specific treatment response is inferred. See the [conversational command guide](../docs/CONVERSATIONAL_COMMANDS.md) for exact recipes.
 
+## Temporary private phone bridge
+
+`phone_bridge.py` provides a narrow relay to the existing API at `127.0.0.1:8000`; it retains that API's complete command and source validation. Supply `FORMA_PHONE_BRIDGE_TOKEN` securely in the bridge process environment, then run from this directory with the backend virtual environment:
+
+```powershell
+python -m uvicorn phone_bridge:app --host 127.0.0.1 --port 8001 --workers 1 --no-access-log
+```
+
+The trusted server gateway sends the token in `X-Forma-Bridge-Token`. Keep this credential on the server; do not include it in browser JavaScript, URLs or repository files. The gateway must also enforce its own private-user access. Tunnel only the bridge on port 8001, keeping the main API on loopback. Stopping the bridge or tunnel ends remote AI access.
+
+Only authenticated `GET /health` and `POST /api/interpret-teaching` are available. Query strings, compressed bodies and non-JSON teaching requests are rejected. The bridge caps streamed request bodies at 64 KiB, permits 30 teaching POST requests per rolling minute across the process, and allows at most two concurrent upstream calls, with a 23-second deadline. Use exactly one worker for these shared limits. Incoming browser headers, cookies and the bridge credential are never forwarded to the local backend. Responses are not cached; provider and transport errors are sanitized. No patient files or mesh-upload route is exposed.
+
+Run `python -m pytest test_phone_bridge.py -q` to verify authentication, route restrictions, body/header handling, deadlines, sanitized errors, rate limiting and cancellation-safe concurrency accounting.
+
 ## Official API references
 
 - [OpenAI Structured Outputs](https://developers.openai.com/api/docs/guides/structured-outputs): Python `responses.parse` and schema requirements.

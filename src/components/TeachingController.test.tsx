@@ -71,8 +71,53 @@ beforeEach(async () => {
   vi.stubGlobal('SpeechRecognition', FakeRecognition);
   vi.stubGlobal('SpeechSynthesisUtterance', FakeUtterance);
   vi.stubGlobal('speechSynthesis', synthesis);
+  vi.stubGlobal('fetch', vi.fn().mockResolvedValue({ ok: false }));
   container = document.createElement('div'); document.body.appendChild(container); root = createRoot(container);
   await act(async () => { root.render(<TeachingProvider><Harness /></TeachingProvider>); });
+});
+
+describe('hosted command service discovery', () => {
+  const hosted = { commandService: { enabled: true, url: 'same-origin', provider: 'OpenRouter' } };
+  async function remount() {
+    await act(async () => { root.unmount(); });
+    root = createRoot(container);
+    await act(async () => { root.render(<TeachingProvider><Harness /></TeachingProvider>); });
+  }
+  it('automatically connects the same-origin gateway on a fresh phone', async () => {
+    const fetcher = vi.fn().mockResolvedValue({ ok: true, json: async () => hosted }); vi.stubGlobal('fetch', fetcher);
+    await remount();
+    expect(fetcher).toHaveBeenCalledExactlyOnceWith('/forma-runtime-config.json', expect.objectContaining({ cache: 'no-store', redirect: 'error' }));
+    expect(teaching.config).toEqual({ enabled: true, url: window.location.origin, provider: 'OpenRouter' });
+    expect(localStorage.getItem('forma-command-service')).toBeNull();
+  });
+  it.each([true, false])('preserves saved settings when enabled is %s', async enabled => {
+    const saved = { enabled, url: 'http://127.0.0.1:8000', provider: 'OpenRouter' };
+    localStorage.setItem('forma-command-service', JSON.stringify(saved));
+    const fetcher = vi.fn(); vi.stubGlobal('fetch', fetcher); await remount();
+    expect(teaching.config).toEqual(saved); expect(fetcher).not.toHaveBeenCalled();
+  });
+  it('does not replace a user choice made while discovery is pending', async () => {
+    let resolve!: (value: unknown) => void;
+    vi.stubGlobal('fetch', vi.fn(() => new Promise(done => { resolve = done; }))); await remount();
+    await act(async () => { teaching.setConfig({ enabled: false, url: '' }); resolve({ ok: true, json: async () => hosted }); });
+    expect(teaching.config).toEqual({ enabled: false, url: '' });
+    expect(JSON.parse(localStorage.getItem('forma-command-service')!)).toEqual({ enabled: false, url: '' });
+  });
+  it('keeps local commands usable when discovery fails', async () => {
+    vi.stubGlobal('fetch', vi.fn().mockRejectedValue(new TypeError('Offline'))); await remount();
+    await act(async () => { await teaching.run('show roots'); });
+    expect(teaching.config.enabled).toBe(false); expect(scene().roots).toBe(true); expect(teaching.runtime.error).toBe(false);
+  });
+  it('aborts discovery after five seconds and ignores a late response', async () => {
+    vi.useFakeTimers();
+    try {
+      let resolve!: (value: unknown) => void;
+      const fetcher = vi.fn((_url: string, _options: RequestInit) => new Promise(done => { resolve = done; }));
+      vi.stubGlobal('fetch', fetcher); await remount();
+      await act(async () => { vi.advanceTimersByTime(5000); resolve({ ok: true, json: async () => hosted }); });
+      expect(fetcher.mock.calls[0][1].signal?.aborted).toBe(true); expect(teaching.config.enabled).toBe(false);
+    } finally { vi.useRealTimers(); }
+  });
 });
 afterEach(async () => {
   await act(async () => { root.unmount(); }); container.remove(); vi.unstubAllGlobals();

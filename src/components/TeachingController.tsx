@@ -8,6 +8,7 @@ import { speechConstructor } from '@/lib/speech';
 import type { TeachingAction } from '@/lib/lecture';
 import { interpreterTeachingContext, teachingActionMode, type TeachingContext } from '@/lib/classroom';
 import type { WorkflowTransfer } from '@/lib/workflow-transfer';
+import { hostedCommandService, savedCommandService, type CommandServiceConfig as Config } from '@/lib/command-service';
 
 type Mode = 'case' | 'workflow';
 export type TeachingAdapter = {
@@ -20,7 +21,6 @@ export type TeachingAdapter = {
   importSetup?: (setup: WorkflowTransfer, originSnapshot: unknown) => void;
   sourceLesson?: (from?: unknown) => unknown;
 };
-type Config = { enabled: boolean; url: string; provider?: string };
 type Snapshot = { mode: Mode; scenes: Partial<Record<Mode, unknown>> };
 const initialRuntime: RuntimeState = { phase: 'idle', message: 'Hold Space to speak, or type an instruction.', error: false, transcript: '' };
 type Controller = {
@@ -41,16 +41,26 @@ export function TeachingProvider({ children }: { children: ReactNode }) {
   const [mode, setMode] = useState<Mode>('case'), modeRef = useRef<Mode>('case');
   const [runtime, setRuntime] = useState(initialRuntime), [capture, setCapture] = useState<CaptureState>({ supported: false, phase: 'idle', transcript: '' });
   const [config, updateConfig] = useState<Config>({ enabled: false, url: '' }), configRef = useRef(config); configRef.current = config;
+  const configRevision = useRef(0);
   useEffect(() => {
     try {
-      const saved = JSON.parse(localStorage.getItem('forma-command-service') || 'null');
-      if (saved && typeof saved.enabled === 'boolean' && typeof saved.url === 'string') {
-        const url = new URL(saved.url);
-        if (['http:', 'https:'].includes(url.protocol) && !url.username && !url.password) updateConfig({ enabled: saved.enabled, url: saved.url, provider: ['OpenAI', 'OpenRouter', 'Configured AI provider'].includes(saved.provider) ? saved.provider : undefined });
-      }
+      const saved = savedCommandService(JSON.parse(localStorage.getItem('forma-command-service') || 'null'));
+      if (saved) { configRef.current = saved; updateConfig(saved); return; }
     } catch { /* A blocked or cleared browser preference must not disable local commands. */ }
+    const controller = new AbortController(), startedAt = configRevision.current;
+    const timeout = setTimeout(() => controller.abort(), 5000);
+    void (async () => {
+      try {
+        const response = await fetch('/forma-runtime-config.json', { signal: controller.signal, cache: 'no-store', redirect: 'error' });
+        if (!response.ok) return;
+        const hosted = hostedCommandService(await response.json(), window.location.origin);
+        if (hosted && !controller.signal.aborted && configRevision.current === startedAt) { configRef.current = hosted; updateConfig(hosted); }
+      } catch { /* Offline and local builds retain all built-in commands. */ }
+      finally { clearTimeout(timeout); }
+    })();
+    return () => { controller.abort(); clearTimeout(timeout); };
   }, []);
-  const saveConfig = (settings: Config) => { updateConfig(settings); try { localStorage.setItem('forma-command-service', JSON.stringify(settings)); } catch { /* Current-session settings still work. */ } };
+  const saveConfig = (settings: Config) => { configRevision.current++; configRef.current = settings; updateConfig(settings); try { localStorage.setItem('forma-command-service', JSON.stringify(settings)); } catch { /* Current-session settings still work. */ } };
   const adapters = useRef<Partial<Record<Mode, TeachingAdapter>>>({}), revision = useRef(0);
   const engine = useRef<ReturnType<typeof createTeachingRuntime<Snapshot>> | null>(null);
   const mic = useRef<ReturnType<typeof createPushToTalk> | null>(null), held = useRef(false);

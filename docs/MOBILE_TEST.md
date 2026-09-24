@@ -1,32 +1,37 @@
 # Test Forma on your phone
 
-The existing [private phone link](https://forma-teaching-mobile.ahmedgah123.chatgpt.site) works across networks and remains on **version 0.8**. Sign in with the same ChatGPT account if prompted. **The Midnight Lab redesign is not deployed there yet.**
+Open https://forma-teaching-mobile.ahmedgah123.chatgpt.site in your phone browser and sign in with the same ChatGPT account used to publish the private site. It works across mobile data and different Wi-Fi networks. Version 0.12, including online AI, was published on 24 September 2026.
 
-## New local build: version 0.11
+## Quick test
 
-The packaged build and host computer at `http://127.0.0.1:3000` contain the professor console, question/reveal, group focus and isolation, improved anatomy rendering, Midnight Lab, the Clinical Studio theme, compact tool panels, persistent preview decisions, and the version 0.9 Blender anatomy / twelve-case library. A phone on another network cannot reach the host through that localhost URL; use the existing remote-control session to inspect the host browser, or wait for an updated private deployment.
+1. Wait for the synthetic 28-tooth model to load; landscape gives more space.
+2. Type `select upper front six`, then `install brackets here`.
+3. Try `show roots and hide gums`, a small supported movement, and `undo that`.
+4. Use flexible wording to exercise online AI. Clear commands are handled locally first; ambiguous instructions request clarification.
+5. Try the on-screen Hold to talk button if your phone browser supports speech recognition. Actual mobile microphone behavior still needs testing.
 
-The authenticated source-hosting push on 23 September 2026 timed out. No new saved version or deployment was submitted. The earlier owner-private publication was left intact. The earlier v0.10 static export was prepared in `../forma-mobile`, at local commit `0deb1c40f67d472fa8b12ab61cf35439dc114caa`, ready for a future publication retry. That checkout has not been updated to v0.11; an additional `forma-version.json` identifies version 0.10.0.
+The phone discovers the authenticated same-origin AI service automatically. If you previously disabled AI in this phone browser, enable it in Settings. The service URL is the same URL as the app. Never enter an API key on the phone.
 
-After publication, check:
+## Temporary AI connection
 
-1. Switch between **Midnight** and **Clinical** using the moon/sun button; reload to check the saved preference.
-2. Open **Teaching library**, choose a case, play/pause, and explore its arrangement.
-3. Type `select upper front six`, then `move the selected segment posteriorly 0.5 mm`.
-4. Keep Tools closed and inspect the fixed preview decision bar. Try Modify, Discard and an eligible Apply.
-5. Check portrait, landscape, short screens and the on-screen keyboard. Test roots, labels, overlay, orbit and lecture mode.
+The host computer, local backend, phone bridge and tunnel must remain on. The OpenRouter key remains on that computer. The private Site stores a separate bridge credential as a server secret; it is never sent to the browser. Only command text and minimal scene context go through this connection. No file, mesh-upload or arbitrary proxy route is exposed.
 
-Read the [UI guide](UI_GUIDE.md) and [case command guide](CASE_WORKSPACE.md). Version 0.11 was checked in the connected browser at desktop, 800px and 390px widths. This is not a physical phone/touch or microphone test; those checks remain to be performed.
+Stopping the computer or tunnel disconnects online AI; built-in commands and loaded models continue working. Restarting the temporary tunnel requires updating the bridge URL in Sites and redeploying its environment revision. This is a test connection, not a permanent independent backend.
 
-Core typed commands, synthetic models and prepared demonstrations need no API key. The optional Python/OpenAI backend is not deployed on the private static site. Save a case before reloading; unsaved session state is temporary.
+## Verification
 
-## Existing published version 0.8
+- Production build and TypeScript passed.
+- Frontend: 1,476 tests / 47 files passed.
+- Python backend: 363 tests passed, including 28 phone-bridge tests.
+- Private gateway: six tests passed for identity, origin, routing, body bounds, credential isolation and offline responses.
+- Live gateway code -> HTTPS tunnel -> authenticated bridge -> existing Python validation -> OpenRouter: `Show roots and hide gums` returned the two expected actions. Unauthenticated tunnel access returned 401.
+- Sites confirmed publication succeeded with environment revision 1. Physical phone, touch and microphone testing remain unverified; publication success is not an end-to-end phone test.
 
-Sites reported this earlier deployment as succeeded. It remains the last confirmed publication; that does not establish a new phone/browser interaction test.
+## Published identity
 
 - Site: `appgprj_6ab39ed0b82881919f49cba3045245ce`
-- Version: `appgprj_6ab39ed0b82881919f49cba3045245ce~appgver_44b65b789aec8191be46eac300f4407b`
-- Deployment: `appgdep_6ab3a26b8b1c8191963f0fb78068b6af`
-- Published source commit: `3369c0088dac5bc11e126e451f5390b2bceb0652`
+- Version: `appgprj_6ab39ed0b82881919f49cba3045245ce~appgver_c119ebf311748191a2842ced03aa36c0`
+- Deployment: `appgdep_6ab4d3c6ea008191af7875d15f23c0f1`
+- Site source commit: `95abf5fbf27398b64191cafd7ee983fb74177f3c`
 
-Keep this Site identity and owner-only access when updating the hosted export.
+Keep this Site identity and owner-only access. The hosted Worker source is maintained in the separate `../forma-mobile` Site checkout. See [backend setup](../backend/README.md) and [conversational commands](CONVERSATIONAL_COMMANDS.md).
