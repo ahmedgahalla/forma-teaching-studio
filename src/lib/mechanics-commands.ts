@@ -56,8 +56,10 @@ export function isMechanicsClause(text: string): boolean {
 }
 
 function normalizeMechanicsWording(text: string): string {
-  return text.replace(/ for me$/, '').replace(/^(?:attach|fit|put) (?:the )?brackets\b/, 'install brackets')
-    .replace(/^(?:run|thread) (a |the )?wire\b/, 'put $1wire')
+  if (/^place (?:braces|brackets only)$/.test(text)) return text;
+  return text.replace(/ for me$/, '').replace(/^(install|add|bond|remove|attach|fit|put|place) (?:the )?braces\b/, '$1 brackets')
+    .replace(/^(?:attach|fit|put|place) (?:the )?brackets\b/, 'install brackets')
+    .replace(/^(?:run|thread|fit|place|attach) (a |an |the )?((?:arch)?wires?)\b/, 'put $1$2')
     .replace(/^show me what /, 'show what ')
     .replace(/^(?:replace|switch) (?:the |this |that )?wire (?:with|to) /, 'change the wire to ')
     .replace(/\bover here\b/g, 'here');
@@ -75,12 +77,22 @@ function current(context: MechanicsSceneContext): MechanicsCommandContext {
 
 function targets(text: string | undefined, context: MechanicsSceneContext): string[] {
   let requested = (text || 'selected teeth').replace(/^(?:on|to|for|through) /, '').replace(/^the /, '').replace(/\bsegment\b/g, 'teeth').replace(/^(?:these|those) brackets$/, 'selected teeth');
+  requested = requested.replace(/^all (?:of )?the /, 'all ').replace(/^every (upper|lower) tooth$/, 'all $1 teeth')
+    .replace(/^(?:all |every )?(?:teeth|tooth) (?:in|on) (?:the )?(upper|lower) arch$/, '$1 teeth')
+    .replace(/^(?:whole|entire) (upper|lower) (?:arch|jaw)$/, '$1 teeth');
+  if (/^(?:all teeth|every tooth|all brackets|whole arch|entire arch)$/.test(requested)) requested = context.arch && context.arch !== 'both' ? `${context.arch} teeth` : 'all teeth';
+  if (/^(?:both (?:arches|jaws)|(?:the )?(?:whole|entire) mouth|all teeth in both arches)$/.test(requested)) requested = 'all teeth';
   if (context.arch && context.arch !== 'both' && /^(?:incisors?|canines?|premolars?|molars?|anterior(?: teeth)?|posterior(?: teeth)?)$/.test(requested)) requested = `${context.arch} ${requested}`;
   if (/^(?:here|there|this tooth|that tooth)$/.test(requested)) {
     if (!context.pointed || !context.availableIds.includes(context.pointed.tooth)) return fail('Point to a tooth first, or name the teeth to use.');
     // A picked member of a selected group denotes that highlighted group.
     if (/^(?:here|there)$/.test(requested) && context.selectedIds.includes(context.pointed.tooth)) return [...context.selectedIds];
     return [context.pointed.tooth];
+  }
+  if (/^(?:them|these(?: teeth)?|those(?: teeth)?|this group|that group)$/.test(requested) && !context.selectedIds.length && context.mechanics?.focus.teeth?.length) {
+    const focused = context.mechanics.focus.teeth;
+    if (focused.some(id => !context.availableIds.includes(id))) return fail('The referenced teeth are no longer in this model. Select the target again.');
+    return [...focused];
   }
   const selector = /^(?:them|these(?: teeth)?|those(?: teeth)?|selected|this group|that group)$/.test(requested) ? 'selected teeth' : requested;
   const parsed = parseCommand(`move ${selector} x 1 mm`, context.selected, context.availableIds, context.selectedIds);
@@ -133,11 +145,31 @@ export function parseMechanicsClause(text: string, scene: MechanicsSceneContext)
   if (/^(?:install|add|place|put) (?:a |the )?(?:palatal )?expander\b/.test(text)) return fail('Choose the upper attachment teeth and specify activation in mm and appliance stiffness in N/mm, or use the expander controls.');
   const bracket = text.match(/^(install|add|bond|remove) (?:the )?brackets?(?: (?:on|to|from))?(?: (.+))?$/);
   if (bracket) return [{ type: 'brackets', teeth: targets(bracket[2], scene), installed: bracket[1] !== 'remove' }];
-  const makeWire = text.match(/^(?:put|insert|make|create|add|install|engage) (?:a |the )?(?:arch)?wires?(?: (?:through|on|for))?(?: (.+))?$/);
+  const makeWire = text.match(/^(?:put|insert|make|create|add|install|engage) (?:a |an |the )?(?:arch)?wires?(?: (?:through|on|for))?(?: (.+))?$/);
   if (makeWire) {
     const teeth = targets(makeWire[1], scene), preset = context.wirePreset;
     if (!preset) return fail('Choose a visible wire material and cross-section preset first.');
-    return [{ type: 'wire', id: nextId('wire', config.wires.map(item => item.id)), teeth, ...structuredClone(preset) }];
+    const actions: MechanicsAction[] = [], usedIds = config.wires.map(item => item.id);
+    for (const upper of [true, false]) {
+      const group = teeth.filter(id => (Number(id[0]) < 3) === upper).sort((a, b) => {
+        const order = (id: string) => ['1', '4'].includes(id[0]) ? 8 - Number(id[1]) : 8 + Number(id[1]);
+        return order(a) - order(b);
+      });
+      if (!group.length) continue;
+      if (group.length < 2) return fail('A wire needs at least two teeth in each requested arch. Select a larger group or one arch.');
+      const overlapping = config.wires.filter(item => item.teeth.some(id => group.includes(id)));
+      const existing = overlapping.find(item => item.teeth.every(id => group.includes(id)));
+      if (overlapping.length && (overlapping.length !== 1 || !existing)) return fail('Existing wires extend beyond this group or overlap one another. Remove the conflicting wire or include all of its teeth.');
+      const missing = group.filter(id => !config.brackets[id]);
+      if (missing.length) actions.push({ type: 'brackets', teeth: missing, installed: true });
+      if (existing) actions.push({ type: 'wire', ...structuredClone(existing), teeth: group });
+      else {
+        if (usedIds.length >= 4) return fail('This experiment supports up to four wires. Remove an unused wire first.');
+        const id = nextId('wire', usedIds); usedIds.push(id);
+        actions.push({ type: 'wire', id, teeth: group, ...structuredClone(preset) });
+      }
+    }
+    return actions;
   }
   if (/^(?:put|place|add|install) (?:a |the )?(?:tad|mini[ -]?screw) (?:here|there)$/.test(text)) {
     if (!scene.pointed || !scene.availableIds.includes(scene.pointed.tooth)) return fail('Point to the synthetic attachment location before placing a TAD.');

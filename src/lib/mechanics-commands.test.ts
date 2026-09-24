@@ -10,7 +10,7 @@ function setup(): TeachingContext {
     bracketAnchors: Object.fromEntries(ids.map(id => [id, [0, 0, 3]])), focus: {}, stageIndex: 0, stageCount: 1, hasResult: false,
     wirePreset: { material: 'stainless-steel', section: { shape: 'round', diameterMm: .4 } },
   };
-  return { mode: 'case', workflowId: null, stepIndex: 0, selected: '11', selectedIds: ['11', '21'], availableIds: ids, synthetic: true, revision: 2, view: 'perspective', arch: 'both', speed: 1, mechanics,
+  return { mode: 'case', workflowId: null, stepIndex: 0, selected: '11', selectedIds: ['11', '21'], availableIds: [...ids], synthetic: true, revision: 2, view: 'perspective', arch: 'both', speed: 1, mechanics,
     pointed: { tooth: '11', localPoint: [1, 2, 3], worldPoint: [6, 7, 8] } };
 }
 const mechanical = (text: string, context: TeachingContext) => parseTeachingPlan(text, context).actions.filter((action): action is Extract<TeachingAction, { kind: 'mechanics' }> => action.kind === 'mechanics').map(action => action.action);
@@ -113,7 +113,7 @@ describe('conversational appliance configuration', () => {
   });
   it('does not execute earlier actions when brackets have no load to demonstrate', () => {
     expect(parseTeachingPlan('install brackets here and show what happens', setup())).toMatchObject({ actions: [], clarification: expect.stringMatching(/activation/) });
-    expect(parseTeachingPlan('put a wire through these brackets', setup())).toMatchObject({ actions: [], clarification: expect.stringMatching(/Install brackets/) });
+    expect(mechanical('put a wire through these brackets', setup()).map(action => action.type)).toEqual(['brackets', 'wire']);
   });
   it('creates a fixed TAD only at the actual pointed world coordinate and connects total tension equally', () => {
     const context = setup(); context.mechanics!.config.brackets = { '11': [0, 0, 3], '21': [0, 0, 3] };
@@ -183,6 +183,75 @@ describe('conversational appliance configuration', () => {
     expect(parseTeachingPlan(`${text} then show what happens`, context).actions).toEqual([action, { kind: 'mechanics', action: { type: 'solve' } }]);
     expect(context).toEqual(before);
     expect(parseTeachingPlan(`${text} then connect the TAD to these teeth`, context).actions).toEqual([]);
+  });
+});
+
+describe('everyday whole-arch appliance requests', () => {
+  const upper = ['16', '13', '12', '11', '21', '22', '23', '26'];
+  const passive = (teeth: string[], id = 'wire-1') => ({ type: 'wire' as const, id, teeth, material: 'stainless-steel' as const, section: { shape: 'round' as const, diameterMm: .4 } });
+  it.each(['put wire on all teeth', 'fit a wire on every tooth', 'thread wire through all the teeth', 'place an archwire on the whole upper arch'])('adds missing brackets and a passive wire for the visible arch: %s', sourceText => {
+    const context = setup(); context.arch = 'upper';
+    context.mechanics!.config.brackets['11'] = [1, 2, 3];
+    const before = structuredClone(context), actions = mechanical(sourceText, context);
+    expect(actions).toEqual([{ type: 'brackets', teeth: upper.filter(id => id !== '11'), installed: true }, passive(upper)]);
+    const plan = parseTeachingPlan(sourceText, context);
+    expect(validateTeachingPlan(plan, context, { sourceText }).actions).toEqual(plan.actions);
+    expect(context).toEqual(before);
+    actions.forEach(action => advanceMechanicsContext(context, action));
+    expect(context.mechanics!.config.brackets['11']).toEqual([1, 2, 3]);
+    expect(context.mechanics!.config.wires[0]).toMatchObject({ expansionMm: 0, torqueDeg: 0 });
+  });
+  it('splits a whole-mouth wire request into two ordered arches in one bounded request', () => {
+    const context = setup(); context.arch = 'upper';
+    context.availableIds.push('41', '36', '46');
+    for (const id of ['41', '36', '46']) context.mechanics!.bracketAnchors[id] = [0, 0, 3];
+    const lower = ['46', '41', '31', '36'];
+    for (const sourceText of ['put wires on both arches', 'put wire on the whole mouth']) {
+      const actions = mechanical(sourceText, context);
+      expect(actions).toEqual([{ type: 'brackets', teeth: upper, installed: true }, passive(upper), { type: 'brackets', teeth: lower, installed: true }, passive(lower, 'wire-2')]);
+      const plan = parseTeachingPlan(sourceText, context);
+      expect(validateTeachingPlan(plan, context, { sourceText }).actions).toEqual(plan.actions);
+      expect(actions).toHaveLength(4);
+    }
+    context.arch = 'both';
+    expect(mechanical('put wire on all teeth', context)).toHaveLength(4);
+    expect(mechanical('put wire on lower teeth', context)).toEqual([{ type: 'brackets', teeth: lower, installed: true }, passive(lower)]);
+  });
+  it('uses explicit arch targets and ordinary braces wording without inventing movement', () => {
+    const context = setup(); context.arch = 'lower';
+    expect(mechanical('put wire on all upper teeth', context)).toEqual([{ type: 'brackets', teeth: upper, installed: true }, passive(upper)]);
+    expect(mechanical('put braces on every upper tooth', context)).toEqual([{ type: 'brackets', teeth: ids.filter(id => id !== '31'), installed: true }]);
+    context.arch = 'upper';
+    expect(parseTeachingPlan('put wire on all teeth and show what happens', context)).toMatchObject({ actions: [], clarification: expect.stringMatching(/activation/) });
+    expect(parseTeachingPlan('put wire on all teeth except 11', context).actions).toEqual([]);
+  });
+  it('reuses an identical wire without changing activation or duplicating it', () => {
+    const context = withWire();
+    const actions = mechanical('put a wire on these teeth', context);
+    expect(actions).toEqual([{ type: 'wire', ...context.mechanics!.config.wires[0] }]);
+    actions.forEach(action => advanceMechanicsContext(context, action));
+    expect(context.mechanics!.config.wires).toHaveLength(1);
+    expect(context.mechanics!.config.wires[0].expansionMm).toBe(.1);
+    const extended = mechanical('put wire on all upper teeth', context);
+    expect(extended).toEqual([{ type: 'brackets', teeth: upper.filter(id => !['11', '21'].includes(id)), installed: true }, { type: 'wire', ...context.mechanics!.config.wires[0], teeth: upper }]);
+    extended.forEach(action => advanceMechanicsContext(context, action));
+    expect(context.mechanics!.config.wires).toHaveLength(1);
+    expect(parseTeachingPlan('put wire on upper incisors', context)).toMatchObject({ actions: [], clarification: expect.stringMatching(/extend beyond/) });
+  });
+  it('rejects invented extra arches, activation, omitted prerequisites and incorrect wire paths', () => {
+    const context = setup(); context.arch = 'upper';
+    const sourceText = 'put wire on all teeth', plan = parseTeachingPlan(sourceText, context);
+    const forged = structuredClone(plan);
+    const wire = forged.actions[1] as Extract<TeachingAction, { kind: 'mechanics' }>;
+    wire.action = { ...passive([...upper].reverse()), expansionMm: .5 };
+    expect(() => validateTeachingPlan(forged, context, { sourceText })).toThrow();
+    expect(() => validateTeachingPlan({ ...plan, actions: plan.actions.slice(1) }, context, { sourceText })).toThrow();
+    expect(parseTeachingPlan('put wires on both arches', context)).toMatchObject({ actions: [], clarification: expect.stringMatching(/at least two/) });
+  });
+  it('retains a referenced tooth group when only the camera changes and selection is cleared', () => {
+    const context = setup(); context.selectedIds = []; context.mechanics!.focus.teeth = ['11', '21'];
+    expect(mechanical('put brackets on them', { ...context, view: 'occlusal' })).toEqual([{ type: 'brackets', teeth: ['11', '21'], installed: true }]);
+    expect(parseTeachingPlan('put brackets on selected teeth', context).actions).toEqual([]);
   });
 });
 

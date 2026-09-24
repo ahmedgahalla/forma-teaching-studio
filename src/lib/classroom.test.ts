@@ -224,7 +224,7 @@ describe('local Try Mode planning', () => {
   });
   it('leaves unfamiliar legacy wording available to AI while keeping known invalid local commands local', () => {
     expect(() => mechanics('show me the frontal camera')).toThrow();
-    expect(() => mechanics('conceal the gingiva')).toThrow();
+    expect(() => mechanics('display gingival tissue invisibly')).toThrow();
     expect(mechanics('move tooth 18 x 1 mm').clarification).toMatch(/not present/);
     expect(mechanics('move selected teeth x 1 mm', { ...active, selectedIds: [] }).clarification).toMatch(/No teeth match/);
     expect(mechanics('move tooth 11 x 11 mm').clarification).toMatch(/nonzero amount/);

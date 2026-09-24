@@ -745,3 +745,123 @@ def test_openrouter_provider_label_and_credit_error_are_safe(client, monkeypatch
     health = client.get("/health")
     assert health.json()["provider"] == "Configured AI provider"
     assert "secret" not in health.text
+
+
+def repair_sdk(monkeypatch, *plans):
+    monkeypatch.setenv("OPENAI_API_KEY", "server-secret")
+    monkeypatch.setenv("OPENAI_MODEL", "openai/gpt-6-luna")
+    sdk = MagicMock()
+    sdk.__enter__.return_value = sdk
+    sdk.responses.parse.side_effect = [SimpleNamespace(output_parsed=main.TeachingPlan.model_validate(value)) for value in plans]
+    factory = MagicMock(return_value=sdk)
+    monkeypatch.setattr(main, "OpenAI", factory)
+    return sdk, factory
+
+
+def test_one_repair_reinterprets_original_context_then_passes_independent_validation(client, monkeypatch):
+    rejected, corrected = plan(dental(tooth="12")), plan(dental())
+    sdk, factory = repair_sdk(monkeypatch, rejected, corrected)
+    payload = request("Move tooth 11 buccally 1 mm")
+    before = copy.deepcopy(payload)
+    response = post(client, payload)
+    assert response.status_code == 200, response.text
+    assert response.json() == corrected
+    assert payload == before
+    assert sdk.responses.parse.call_count == 2
+    assert factory.call_count == 2
+    assert factory.call_args.kwargs["timeout"] <= 10
+    for call in sdk.responses.parse.call_args_list:
+        assert call.kwargs["reasoning"] == {"effort": "none"}
+        assert call.kwargs["store"] is False
+        assert call.kwargs["text_format"] is main.TeachingPlan
+    repair = sdk.responses.parse.call_args.kwargs["input"]
+    assert json.loads(repair[1]["content"]) == main.TeachingRequest.model_validate(payload).model_dump(exclude_none=True, by_alias=True)
+    assert json.loads(repair[1]["content"]) == json.loads(sdk.responses.parse.call_args_list[0].kwargs["input"][1]["content"])
+    assert json.loads(repair[2]["content"]) == rejected
+    assert "application rejected that plan" in repair[3]["content"]
+    assert "server-secret" not in str(repair)
+
+
+@pytest.mark.parametrize("invalid", [plan(dental(tooth="12")), plan(dental(amount=2))])
+def test_invalid_repair_cannot_change_target_or_value_and_does_not_loop(client, monkeypatch, invalid):
+    sdk, factory = repair_sdk(monkeypatch, plan(dental(tooth="12")), invalid)
+    response = post(client, request("Move tooth 11 buccally 1 mm"))
+    assert response.status_code == 422, response.text
+    assert sdk.responses.parse.call_count == factory.call_count == 2
+    assert "actions" not in response.json()
+
+
+def test_invalid_repair_schema_is_rejected_without_a_third_attempt(client, monkeypatch):
+    sdk, _ = repair_sdk(monkeypatch, plan(dental(tooth="12")))
+    sdk.responses.parse.side_effect = [SimpleNamespace(output_parsed=main.TeachingPlan.model_validate(plan(dental(tooth="12")))), SimpleNamespace(output_parsed={**plan(dental()), "script": "private-payload"})]
+    response = post(client, request("Move tooth 11 buccally 1 mm"))
+    assert response.status_code == 502
+    assert sdk.responses.parse.call_count == 2
+    assert "private-payload" not in response.text
+
+
+def test_missing_movement_amount_can_be_repaired_only_to_a_clarification(client, monkeypatch):
+    clarification = plan(clarification="How many millimetres should tooth 11 move buccally?")
+    sdk, _ = repair_sdk(monkeypatch, plan(dental()), clarification)
+    response = post(client, request("Move tooth 11 buccally"))
+    assert response.status_code == 200, response.text
+    assert response.json() == clarification
+    assert sdk.responses.parse.call_count == 2
+
+
+def test_repair_does_not_run_when_request_deadline_has_insufficient_time(client, monkeypatch):
+    sdk, _ = repair_sdk(monkeypatch, plan(dental(tooth="12")))
+    monkeypatch.setattr(main, "monotonic", MagicMock(side_effect=[100, 116]))
+    response = post(client, request("Move tooth 11 buccally 1 mm"))
+    assert response.status_code == 422
+    assert sdk.responses.parse.call_count == 1
+
+
+def test_provider_clarification_is_not_retried_or_converted_to_an_edit(client, monkeypatch):
+    clarification = plan(clarification="Choose an explicit movement amount in mm.")
+    sdk, _ = repair_sdk(monkeypatch, clarification)
+    response = post(client, request("Move tooth 11 buccally"))
+    assert response.status_code == 200, response.text
+    assert response.json() == clarification
+    assert sdk.responses.parse.call_count == 1
+
+
+@pytest.mark.parametrize("model", ["gpt-6-luna", "openai/gpt-6-luna", "gpt-4.1-mini"])
+def test_legacy_interpreter_only_disables_reasoning_for_luna(client, monkeypatch, model):
+    monkeypatch.setenv("OPENAI_API_KEY", "server-secret")
+    monkeypatch.setenv("OPENAI_MODEL", model)
+    sdk = MagicMock()
+    sdk.__enter__.return_value = sdk
+    sdk.responses.parse.return_value = SimpleNamespace(output_parsed=main.Interpretation.model_validate({"command": {"type": "ghost", "visible": True}, "reason": ""}))
+    monkeypatch.setattr(main, "OpenAI", MagicMock(return_value=sdk))
+    response = client.post("/api/interpret", json={"text": "show original", "selected_tooth": "11", "available_teeth": ["11"]})
+    assert response.status_code == 200, response.text
+    options = sdk.responses.parse.call_args.kwargs
+    assert options["model"] == model
+    assert options.get("reasoning") == ({"effort": "none"} if model.endswith("gpt-6-luna") else None)
+    assert options["store"] is False
+
+
+def test_front_six_group_and_spoken_amount_resolve_before_numeric_target_audit(client, monkeypatch):
+    text = "Select the upper front six teeth and move them buccally by one millimeter."
+    teeth = ["11", "12", "13", "21", "22", "23"]
+    selected = {"kind": "select", "teeth": teeth}
+    movement = {"kind": "dental", "command": {"type": "move_group", "teeth": teeth, "direction": "buccal", "amount": 1}}
+    expected = plan(selected, movement)
+    fake(monkeypatch, expected)
+    payload = request(text, arch="upper", selectedIds=["11"], availableIds=[f"{q}{p}" for q in range(1, 5) for p in range(1, 8)])
+    result = post(client, payload)
+    assert result.status_code == 200, result.text
+    assert result.json() == expected
+    assert main.normalized_teaching_text(text) == "select the upper anterior teeth and move them buccally by 1 mm."
+    fake(monkeypatch, plan(selected, {**movement, "command": {**movement["command"], "amount": 2}}))
+    assert post(client, payload).status_code == 422
+    fake(monkeypatch, plan(selected, {**movement, "command": {**movement["command"], "teeth": ["11"]}}))
+    assert post(client, payload).status_code == 422
+
+
+@pytest.mark.parametrize("group", ["upper front five teeth", "six upper teeth", "upper front six teeth except 11"])
+def test_front_six_alias_does_not_allow_arbitrary_counts_or_exclusions(client, monkeypatch, group):
+    fake(monkeypatch, plan({"kind": "select", "teeth": ["11", "12", "13", "21", "22", "23"]}))
+    response = post(client, request(f"Select {group}"))
+    assert response.status_code == 422, response.text

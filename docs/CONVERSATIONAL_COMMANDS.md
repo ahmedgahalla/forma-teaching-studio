@@ -4,6 +4,41 @@ Use the same command bar for typing and push-to-talk. Hold Space outside an edit
 
 Clear validated voice/text movements execute immediately. To inspect a geometric ghost first, start with **preview**. Manual numerical controls retain their preview/apply workflow.
 
+## Natural classroom wording and whole-arch wires
+
+**Ask AI** accepts conversational requests and displays the validated interpretation before execution. Familiar phrases also work locally. Examples:
+
+- `For this lecture, could you make the gums disappear and reveal the roots?`
+- `Let’s look from above.`
+- `Would you mind moving the upper front teeth buccally half a millimeter?`
+- `Select the upper front six teeth and move them buccally by one millimeter.`
+- `Put wire on all teeth.`
+- `Fit a wire on every tooth.`
+- `Put wires on both arches.`
+
+For appliance requests, **all teeth** uses the currently visible arch when Upper or Lower is isolated. With Both arches visible, it covers both. Say **both arches** or **the whole mouth** to explicitly target both regardless of the current view. The response identifies the resolved targets.
+
+**Upper/lower front six**, **front six teeth**, and **six front teeth** mean that arch’s anterior group: incisors and canines. **Front four** means its incisors. These group aliases are resolved before spoken numbers become numeric values; the six or four is not a movement amount. Explicit arch names remain necessary when the target would otherwise be ambiguous.
+
+A wire request adds missing bracket attachments and creates an ordered connection using the visible material/size preset. Both arches receive separate wires. Existing compatible connections are reused or extended instead of duplicated; overlapping or incompatible configurations require clarification. Installing a new wire remains passive. “Put wire on all teeth and show what happens” asks for activation if none has been specified; it does not invent movement.
+
+Natural wording does not supply missing distances, dimensions or force values. Unknown clauses, negations and hypothetical requests are preserved for validation rather than silently discarded. If an AI plan fails independent validation, the server can make one bounded repair request and validates that reply again before anything executes.
+
+## Ask AI versus Analyze
+
+In the command bar, choose **Ask AI** to change the model. Choose **Analyze** to ask questions about the current setup without changing it:
+
+- `What is installed on the selected teeth?`
+- `Why did these teeth move so little?`
+- `How is this displayed tipping different from translation?`
+- `What should I ask the students before showing the answer?`
+
+Analyze receives structured scene facts: selected tooth IDs, geometric poses, visible layers, configured appliances, the current lesson and a current revealed calculation when available. It does not receive a screenshot or tooth meshes and cannot inspect tissue boundaries or diagnose a patient. Its response separates observations, explanation, limitations and a student question. Hidden prediction results are not sent. Analysis replies cannot contain executable scene actions or create undo entries.
+
+Manual controls, Stop and Undo remain available while Analyze is selected. Choose Ask AI again before typing a scene-edit instruction. Scene changes, Stop and superseding questions discard stale explanations.
+
+The server default is **GPT-6 Luna**: `gpt-6-luna` for OpenAI, or `openai/gpt-6-luna` through the configured OpenRouter service. Interpretation uses `OPENAI_MODEL`; analysis defaults to the same model, with an optional server-side `OPENAI_ANALYSIS_MODEL` override. The analysis reply displays the configured model identifier. Provider availability, authentication and billing remain separate from these settings.
+
 ## A first wire experiment
 
 Start in the synthetic free workspace and choose the visible wire preset. Give these requests separately:
@@ -109,4 +144,4 @@ Each mechanics calculation chooses a bounded display scale up to 50×, reveals t
 
 A replacement followed by `then show me what happens` recalculates once from the unchanged reference. Example: `Use a 0.018 inch wire instead, then show me what happens.`
 
-[Watch the 81-second full-screen AI demo](https://forma-teaching-mobile.ahmedgah123.chatgpt.site/demos/forma-ai-demo.mp4) (same private sign-in). It includes actual typed AI requests and replies, passive appliance placement, activation, replay and local Undo.
+[Watch the earlier 81-second full-screen AI demo](https://forma-teaching-mobile.ahmedgah123.chatgpt.site/demos/forma-ai-demo.mp4) (same private sign-in). It includes actual typed AI requests and replies, passive appliance placement, activation, replay and local Undo. The broader language and Analyze update has a separate [verification record](VERIFICATION.md); a previous recording does not verify these new capabilities.

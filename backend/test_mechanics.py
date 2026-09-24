@@ -243,3 +243,150 @@ def test_last_wire_dimension_can_retain_its_explicit_prior_unit(client, monkeypa
     result = wrap({"type": "wire-section", "id": "wire-1", "section": {"shape": "round", "diameterMm": .5}})
     response, _ = post(client, monkeypatch, "make that 0.5 instead", result, with_wire())
     assert response.status_code == 200, response.text
+
+
+UPPER_PATH = ["16", "13", "12", "11", "21", "22", "23", "26"]
+
+
+def passive_wire(teeth, identity="wire-1"):
+    return {"type": "wire", "id": identity, "teeth": teeth, "material": "stainless-steel", "section": {"shape": "round", "diameterMm": .4}}
+
+
+@pytest.mark.parametrize("source", ["put wire on all teeth", "fit a wire on every tooth", "thread wire through all the teeth", "place an archwire on the whole upper arch"])
+def test_whole_visible_arch_wire_adds_only_missing_brackets(client, monkeypatch, source):
+    scene = context()
+    scene["arch"] = "upper"
+    scene["mechanics"]["config"]["brackets"]["11"] = [1, 2, 3]
+    result = wrap({"type": "brackets", "teeth": [tooth for tooth in UPPER_PATH if tooth != "11"], "installed": True}, passive_wire(UPPER_PATH))
+    before = copy.deepcopy(scene)
+    response, _ = post(client, monkeypatch, source, result, scene)
+    assert response.status_code == 200, response.text
+    assert response.json() == result
+    assert scene == before
+
+
+@pytest.mark.parametrize("source", ["put wires on both arches", "put wire on the whole mouth", "put wire on all teeth"])
+def test_two_arch_wire_request_remains_one_atomic_passive_setup(client, monkeypatch, source):
+    scene = context()
+    scene["availableIds"] = scene["availableIds"] + ["31", "41", "36", "46"]
+    scene["mechanics"]["bracketAnchors"].update({tooth: [0, 0, 3] for tooth in ["31", "41", "36", "46"]})
+    lower = ["46", "41", "31", "36"]
+    result = wrap({"type": "brackets", "teeth": UPPER_PATH, "installed": True}, passive_wire(UPPER_PATH), {"type": "brackets", "teeth": lower, "installed": True}, passive_wire(lower, "wire-2"))
+    response, _ = post(client, monkeypatch, source, result, scene)
+    assert response.status_code == 200, response.text
+    assert response.json() == result
+    assert len(result["actions"]) == 4
+    if source != "put wire on all teeth":
+        scene["arch"] = "upper"
+        response, _ = post(client, monkeypatch, source, result, scene)
+        assert response.status_code == 200, response.text
+
+
+def test_explicit_arch_overrides_visibility_and_braces_is_a_bracket_request(client, monkeypatch):
+    scene = context()
+    scene["arch"] = "lower"
+    result = wrap({"type": "brackets", "teeth": UPPER_PATH, "installed": True}, passive_wire(UPPER_PATH))
+    response, _ = post(client, monkeypatch, "put wire on all upper teeth", result, scene)
+    assert response.status_code == 200, response.text
+    result = wrap({"type": "brackets", "teeth": IDS, "installed": True})
+    response, _ = post(client, monkeypatch, "put braces on every upper tooth", result, scene)
+    assert response.status_code == 200, response.text
+
+
+def test_existing_identical_wire_is_reused_with_its_activation_preserved(client, monkeypatch):
+    scene = with_wire()
+    result = wrap({"type": "wire", **scene["mechanics"]["config"]["wires"][0]})
+    response, _ = post(client, monkeypatch, "put a wire on these teeth", result, scene)
+    assert response.status_code == 200, response.text
+    assert response.json() == result
+    response, _ = post(client, monkeypatch, "put a wire on these teeth", wrap(passive_wire(["11", "21"], "wire-2")), scene)
+    assert response.status_code == 422
+    extended = wrap({"type": "brackets", "teeth": [tooth for tooth in UPPER_PATH if tooth not in ("11", "21")], "installed": True}, {"type": "wire", **scene["mechanics"]["config"]["wires"][0], "teeth": UPPER_PATH})
+    response, _ = post(client, monkeypatch, "put wire on all upper teeth", extended, scene)
+    assert response.status_code == 200, response.text
+    assert response.json() == extended
+    scene["mechanics"]["config"]["wires"][0]["teeth"] = UPPER_PATH
+    scene["mechanics"]["config"]["brackets"] = {tooth: [0, 0, 3] for tooth in UPPER_PATH}
+    response, _ = post(client, monkeypatch, "put wire on upper incisors", result, scene)
+    assert response.status_code == 422
+    assert "extend beyond" in response.json()["detail"]
+
+
+@pytest.mark.parametrize("alter", ["omit-brackets", "reverse-path", "invent-activation", "invent-solve"])
+def test_whole_arch_cannot_skip_prerequisites_change_path_or_invent_response(client, monkeypatch, alter):
+    scene = context()
+    scene["arch"] = "upper"
+    bracket, wire = {"type": "brackets", "teeth": UPPER_PATH, "installed": True}, passive_wire(UPPER_PATH)
+    actions = [bracket, wire]
+    if alter == "omit-brackets":
+        actions = [wire]
+    elif alter == "reverse-path":
+        wire["teeth"] = list(reversed(UPPER_PATH))
+    elif alter == "invent-activation":
+        wire["expansionMm"] = .5
+    else:
+        actions.append({"type": "solve"})
+    response, _ = post(client, monkeypatch, "put wire on all teeth", wrap(*actions), scene)
+    assert response.status_code == 422, response.text
+
+
+def test_pronoun_can_use_recent_appliance_tooth_focus_but_explicit_selection_cannot(client, monkeypatch):
+    scene = context()
+    scene["selectedIds"], scene["selected"] = [], ""
+    scene["mechanics"]["focus"]["teeth"] = ["11", "21"]
+    result = wrap({"type": "brackets", "teeth": ["11", "21"], "installed": True})
+    response, _ = post(client, monkeypatch, "put brackets on them", result, scene)
+    assert response.status_code == 200, response.text
+    response, _ = post(client, monkeypatch, "put brackets on selected teeth", result, scene)
+    assert response.status_code == 422
+
+
+@pytest.mark.parametrize("arch", ["upper", "both"])
+def test_normal_28_tooth_model_never_requires_absent_third_molars(client, monkeypatch, arch):
+    scene = context()
+    scene["availableIds"] = [f"{quadrant}{position}" for quadrant in range(1, 5) for position in range(1, 8)]
+    scene["arch"] = arch
+    scene["mechanics"]["bracketAnchors"] = {tooth: [0, 0, 3] for tooth in scene["availableIds"]}
+    upper = [f"1{position}" for position in range(7, 0, -1)] + [f"2{position}" for position in range(1, 8)]
+    lower = [f"4{position}" for position in range(7, 0, -1)] + [f"3{position}" for position in range(1, 8)]
+    actions = [{"type": "brackets", "teeth": upper, "installed": True}, passive_wire(upper)]
+    if arch == "both":
+        actions += [{"type": "brackets", "teeth": lower, "installed": True}, passive_wire(lower, "wire-2")]
+    result = wrap(*actions)
+    response, _ = post(client, monkeypatch, "Put wire on all teeth", result, scene)
+    assert response.status_code == 200, response.text
+    assert response.json() == result
+    assert all(tooth not in ("18", "28", "38", "48") for action in response.json()["actions"] for tooth in action["action"]["teeth"])
+    assert "normal synthetic adult model has 28 teeth" in main.TEACHING_INSTRUCTIONS
+
+
+def test_provider_hints_ground_entire_compound_setup_against_empty_active_experiment():
+    scene = context()
+    before = copy.deepcopy(scene)
+    payload = main.TeachingRequest.model_validate({"text": "Select the upper anterior teeth, install brackets on them, and put a wire through those brackets.", "context": scene})
+    teeth = ["11", "12", "13", "21", "22", "23"]
+    path = ["13", "12", "11", "21", "22", "23"]
+    grounded = main.grounded_mechanics_plan(payload)
+    assert grounded is not None
+    assert [action.model_dump(exclude_none=True, by_alias=True) for action in grounded.actions] == [
+        {"kind": "select", "teeth": teeth},
+        {"kind": "mechanics", "action": {"type": "brackets", "teeth": teeth, "installed": True}},
+        {"kind": "mechanics", "action": passive_wire(path)},
+    ]
+    assert scene == before
+    hint = main.teaching_interpretation_instructions(payload)
+    assert "recognized the ENTIRE current request" in hint
+    assert "empty config is already an ACTIVE" in hint
+
+
+@pytest.mark.parametrize("source", [
+    "put wire on all teeth and invent a movement",
+    "put wire on upper teeth except 11",
+    "put wire on all teeth and show what happens",
+    "use a thicker wire instead",
+    "select six upper teeth",
+])
+def test_partial_unsupported_or_ambiguous_requests_receive_no_canonical_hint(source):
+    payload = main.TeachingRequest.model_validate({"text": source, "context": context()})
+    assert main.grounded_mechanics_plan(payload) is None
+    assert main.teaching_interpretation_instructions(payload) == main.TEACHING_INSTRUCTIONS

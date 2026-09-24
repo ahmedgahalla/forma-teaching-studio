@@ -4,6 +4,14 @@ A local 3D dental workspace for university lectures, geometric demonstrations an
 
 Start with the [combined workspace guide](docs/COMBINED_WORKSPACE.md) to move between prepared lessons and free experiments, the [Try Mode guide](docs/TRY_MODE.md) for the default editing workspace, and the [Voice Classroom guide](docs/VOICE_CLASSROOM.md) for microphone controls, anatomy layers and lesson commands.
 
+## Conversational control and model explanation
+
+Use **Ask AI** to control the scene in natural language, or **Analyze** to discuss the current setup without editing it. Try “For this lecture, could you make the gums disappear and reveal the roots?” or “Would you mind moving the upper front teeth buccally half a millimeter?” The application still validates every action, target and numeric amount; broad wording does not become unrestricted treatment planning.
+
+“Put wire on all teeth” adds missing brackets and connects the visible arch using the selected wire preset. With Both arches visible, it creates separate upper and lower connections. Say “Put wires on both arches” to target the whole mouth regardless of the view. Existing compatible wires are reused; passive installation does not cause tooth movement.
+
+Analyze answers questions such as “What is installed here?” and “Why did these teeth move so little?” from selected IDs, geometric poses, appliance settings, current lesson content and available revealed calculation facts. It does not see images or meshes. Its reply includes observations, an explanation, limitations and a student question, with no executable scene actions. Manual controls, Stop and Undo remain responsive while analysis is selected. See [conversational commands](docs/CONVERSATIONAL_COMMANDS.md) for examples and boundaries.
+
 ## Build an initial-response experiment
 
 Open **Appliances** in the synthetic free workspace. If a prepared case is active, choose **Explore this arrangement** first. The three experiment families share the same unloaded reference and can be combined within the software limits:
@@ -205,7 +213,7 @@ Manual movement controls create previews in Try Mode; use Apply or Discard. In v
 6. Show brackets, wires, schematic roots, or gingiva. Adjust bracket appearance and ligature colour, or separate the arches for inspection. Display separation does not alter movements, exported geometry, or measurements.
 7. Add rectangular, ellipsoid, or beveled attachments to selected calibrated teeth. Edit dimensions, mesial/occlusal offsets and rotation, then apply. Attachments follow their crowns; use Remove to reverse an attachment edit. Command-bar Undo restores attachment changes made in a command request. The older manual movement history does not track attachment metadata.
 8. In **Stages**, capture a displayed setup as a checkpoint, including an intermediate preview. Enter `create 10 stages`, then `play`. Playback interpolates from the original through checkpoints to the final setup. Undo/redo a movement, group action or completed handle drag with the buttons or `Ctrl/Cmd+Z` / `Ctrl/Cmd+Shift+Z`.
-9. In **Analyze**, pick two crown landmarks, inspect centre-to-centre spans, check final crown-surface intersections, or export a movement CSV. The camera button offers PNG snapshot export of the current 3D canvas.
+9. In the inspector’s **Analyze** tab, pick two crown landmarks, inspect centre-to-centre spans, check final crown-surface intersections, or export a movement CSV. These geometric tools are separate from the command bar’s AI Analyze mode. The camera button offers PNG snapshot export of the current 3D canvas.
 10. **Save case** downloads meshes, axes, attachment settings, final transforms, movement history, checkpoints and appliance settings. **Open case** restores them. Export an individual stage STL or the complete stage ZIP for geometry demonstrations; see the export limits below. Older version-1 case files remain readable.
 
 Nothing is saved automatically. Save before closing, importing another case, or reloading. STL and case files are processed locally in the browser. There is no patient database or cloud storage.
@@ -323,12 +331,14 @@ For OpenRouter, edit the backend's local `.env` using these **non-secret example
 ```dotenv
 OPENAI_API_KEY=
 OPENAI_BASE_URL=https://openrouter.ai/api/v1
-OPENAI_MODEL=openai/gpt-4.1-mini
+OPENAI_MODEL=openai/gpt-6-luna
+# Optional separate model for read-only explanations:
+# OPENAI_ANALYSIS_MODEL=openai/gpt-6-luna
 ```
 
-For OpenAI, omit `OPENAI_BASE_URL` and use the OpenAI model identifier, such as `gpt-4.1-mini`. Choose a model/provider available to your account that supports the Responses structured-output request used by this service; the example is not a live-provider compatibility result. Restart the backend after editing its environment. `/health` identifies the configured provider and whether a key is present; it does not verify the key or make a provider request. Settings takes only the backend URL. Provider authentication, credits and quota remain separate from a ChatGPT subscription. A rejected key or unavailable provider leaves local commands usable. Never include `.env`, credentials or `NEXT_PUBLIC_*` secrets in a shared package.
+The current server default is **GPT-6 Luna**. For OpenAI, omit `OPENAI_BASE_URL` and use `gpt-6-luna`. Interpretation uses `OPENAI_MODEL`; read-only explanations use `OPENAI_ANALYSIS_MODEL` when set, otherwise the interpretation model. Choose a model/provider available to your account that supports the Responses structured-output request used by this service; configuration alone is not a live-provider compatibility result. Restart the backend after editing its environment. `/health` identifies the configured provider, model and whether a key is present; it does not verify the key or make a provider request. Settings takes only the backend URL. Provider authentication, credits and quota remain separate from a ChatGPT subscription. A rejected key or unavailable provider leaves local commands usable. Never include `.env`, credentials or `NEXT_PUBLIC_*` secrets in a shared package.
 
-The shared controller tries the deterministic local planner first. When wording is not recognized and you have enabled the connected service, it requests an interpretation from `/api/interpret-teaching`. The frontend sends text and minimal classroom context: available/selected tooth IDs, mode, step, display state and recent allowlisted actions. Meshes, case names and patient-ID fields are not sent. Do not put personal records into the command text. The original `/api/interpret` endpoint remains available for compatibility.
+The shared controller normally tries the deterministic local planner first. When wording is not recognized and you have enabled the connected service, it requests an interpretation from `/api/interpret-teaching`; **Ask AI** explicitly requests provider interpretation. The frontend sends text and minimal classroom context: available/selected tooth IDs, mode, step, display state and recent allowlisted actions. Meshes, case names and patient-ID fields are not sent. Do not put personal records into the command text. The original `/api/interpret` endpoint remains available for compatibility. **Analyze** uses the separate read-only `/api/analyze-teaching` endpoint and cannot submit scene actions.
 
 The server returns at most eight allowlisted actions or a clarification. Frontend and backend independently check requested targets, explicit values and available objects. The frontend rejects stale responses before running an accepted request. Clear validated classroom and geometric commands execute immediately; explicit/manual previews retain Apply/Discard. Use the visible transcript, Stop and whole-request Undo. Missing amounts, unsupported actions or clarification requests leave the scene unchanged. Automated provider tests use mocks; live provider and real microphone acceptance are separate checks.
 
@@ -346,6 +356,8 @@ The original `/api/interpret` contract remains available. `/api/interpret-teachi
 - Direct manipulation uses world-axis handles with 0.1 mm translation and 1° rotation snapping. A completed drag changes the active tooth and is one undoable movement. Use group commands for multi-tooth movement and named commands for anatomical directions.
 
 ## Verification
+
+The broader-language and Analyze update passed **1,577 frontend tests in 50 files**, **503 backend tests**, and TypeScript checking. These checks cover whole-arch appliance requests, front-six/front-four group aliases, matching language normalization, independent validation, analysis isolation/cancellation, and local manual controls while Analyze is active. Direct live GPT-6 Luna requests also passed independent backend validation for whole-mouth wires, compound bracket/wire placement and upper-front-six movement. The current [verification appendix](docs/VERIFICATION.md) records those API checks and browser/video acceptance separately; they do not establish actual microphone performance or educator review.
 
 ```sh
 npm test
@@ -400,3 +412,7 @@ out/                      Prebuilt static application
 ```
 
 Technical references: [Three.js STLLoader](https://threejs.org/docs/pages/STLLoader.html), [OrbitControls](https://threejs.org/docs/pages/OrbitControls.html), [BufferGeometry](https://threejs.org/docs/pages/BufferGeometry.html), [Next.js static exports](https://nextjs.org/docs/app/guides/static-exports), and the official OpenAI references in the backend README.
+
+## Full feature recording
+
+[Watch the 4:38 fullscreen tour](https://forma-teaching-mobile.ahmedgah123.chatgpt.site/demos/forma-full-feature-demo.mp4): natural AI commands, all-teeth wires, read-only scene analysis, numerical single-tooth editing, original comparison, full animations, prepared cases, anatomy and the bracket-to-retention workflow. This private link uses the same account access as the app.

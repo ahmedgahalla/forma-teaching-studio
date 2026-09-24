@@ -310,7 +310,7 @@ describe('classroom request execution', () => {
 
   it('cancels an older pending provider request when a validated button action arrives', async () => {
     const { runtime, host, scene } = setup(), response = deferred<unknown>(); host.interpret.mockReturnValue(response.promise);
-    const old = runtime.submit('conceal the gingiva'); await flush();
+    const old = runtime.submit('display gingival tissue invisibly'); await flush();
     await runtime.submitActions([{ kind: 'toggle', target: 'roots', visible: true }], 'Show roots'); await old;
     response.resolve(external([{ kind: 'toggle', target: 'gums', visible: false }])); await flush();
     expect(scene().roots).toBe(true); expect(scene().gums).toBe(true); expect(host.interpret.mock.calls[0][2].aborted).toBe(true);
@@ -606,7 +606,7 @@ describe('interpretation and replay boundaries', () => {
   it('discards a provider response when scene revision changed during interpretation', async () => {
     const { runtime, host, scene } = setup(), response = deferred<unknown>();
     host.interpret.mockReturnValue(response.promise);
-    const work = runtime.submit('conceal the gingiva'); await flush(); scene().context.revision++;
+    const work = runtime.submit('display gingival tissue invisibly'); await flush(); scene().context.revision++;
     response.resolve(external([{ kind: 'toggle', target: 'gums', visible: false }])); await work;
     expect(host.apply).not.toHaveBeenCalled(); expect(runtime.getState().message).toMatch(/changed/);
   });
@@ -614,14 +614,14 @@ describe('interpretation and replay boundaries', () => {
   it('validates every external action and refuses invented movement amounts', async () => {
     const { runtime, host } = setup();
     host.interpret.mockResolvedValue(external([{ kind: 'toggle', target: 'gums', visible: false }, { kind: 'dental', command: { type: 'move', tooth: '11', direction: 'buccal', amount: 1 } }]));
-    await runtime.submit('conceal the gingiva and shift tooth eleven toward the cheek');
+    await runtime.submit('display gingival tissue invisibly and shift tooth eleven toward the cheek');
     expect(host.apply).not.toHaveBeenCalled(); expect(host.preflight).not.toHaveBeenCalled();
     expect(runtime.getState().message).toMatch(/explicit/);
   });
 
   it('settles a superseded interpretation promptly and ignores its late response', async () => {
     const { runtime, host, scene } = setup(), response = deferred<unknown>(); host.interpret.mockReturnValue(response.promise);
-    const first = runtime.submit('conceal the gingiva'); await flush();
+    const first = runtime.submit('display gingival tissue invisibly'); await flush();
     await runtime.submit('show roots'); await first;
     expect(host.interpret.mock.calls[0][2].aborted).toBe(true);
     response.resolve(external([{ kind: 'toggle', target: 'gums', visible: false }])); await flush();

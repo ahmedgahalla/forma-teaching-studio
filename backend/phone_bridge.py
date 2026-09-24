@@ -13,6 +13,7 @@ from starlette.requests import ClientDisconnect
 
 
 MAX_BODY_BYTES = 64 * 1024
+TEACHING_PATHS = {"/api/interpret-teaching", "/api/analyze-teaching"}
 UPSTREAM = "http://127.0.0.1:8000"
 app = FastAPI(docs_url=None, redoc_url=None, openapi_url=None)
 _post_times: deque[float] = deque()
@@ -35,7 +36,7 @@ async def authenticate(request: Request, call_next):
         response = error(400, "Query strings are not supported.")
     else:
         limited = False
-        if request.method == "POST" and request.url.path == "/api/interpret-teaching":
+        if request.method == "POST" and request.url.path in TEACHING_PATHS:
             now = monotonic()
             while _post_times and _post_times[0] <= now - 60:
                 _post_times.popleft()
@@ -100,6 +101,7 @@ async def health():
 
 
 @app.post("/api/interpret-teaching")
+@app.post("/api/analyze-teaching")
 async def interpret(request: Request):
     if request.headers.get("content-type", "").split(";", 1)[0].strip().lower() != "application/json":
         return error(415, "Use application/json for teaching requests.")
@@ -118,5 +120,5 @@ async def interpret(request: Request):
             return error(400, "Supply a JSON request object.")
     except (ValueError, UnicodeError):
         return error(400, "Supply a valid JSON request object.")
-    # Original bytes go to main.py; its complete Pydantic and source audits remain authoritative.
-    return await forward("POST", "/api/interpret-teaching", bytes(data))
+    # Both allowlisted routes retain the backend's complete validation.
+    return await forward("POST", request.url.path, bytes(data))

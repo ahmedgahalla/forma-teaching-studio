@@ -1,4 +1,42 @@
-# Current verification · 24 September 2026 · visible mechanics and Ask AI
+# Current verification appendix · 24 September 2026 · broader language and Analyze
+
+This update broadens bounded classroom wording and adds a separate read-only AI explanation mode. The initial-response solver and clinical limitations are unchanged.
+
+## Automated evidence
+
+- **Frontend: 1,577 tests passed in 50 files.** `npm run typecheck` passed.
+- **Backend: 503 tests passed.** Provider responses in the automated suite are mocked; this count is not a live-provider test.
+- Shared TypeScript/Python fixtures verify matching everyday-language aliases, including polite classroom prefixes, top/down camera wording, visible anatomy, explicit upper/lower front/back groups, numeric signs and retention of unknown or guarded clauses.
+- Explicit upper/lower front-six and six-front-teeth aliases map to anterior groups before spoken-number conversion; front-four aliases map to incisors. Tests preserve their group meaning without mistaking the count for a movement amount or tooth ID.
+- Whole-arch wire tests cover visible-arch targeting, explicit both-arch targeting, missing bracket prerequisites, separate ordered upper/lower wires, reuse/extension, ambiguous overlaps, missing activation and rejection of invented or omitted actions. Complete-request preflight and undo remain in the execution path.
+- Recognized complete selection/appliance requests can supply deterministic action hints to the provider only after independent source validation. The actual provider is still called and its returned plan is validated again. Unknown or ambiguous requests receive no such hint. An empty appliance configuration in an active synthetic experiment does not require inventing an experiment-opening action.
+- Analyze sends projected scene facts only, accepts a strict text-only explanation schema, does not apply/preflight scene actions, and creates no command-history entry. Hidden, stale or imported-model calculations are not exposed as current teaching results. Tests reject action-bearing replies and stale responses after cancellation, scene changes or superseding questions.
+- Manual-control regression: with both the AI preference and Analyze active, `runControl('show roots')` executes locally without a network request; one Undo restores it while Analyze remains selected. Production manual controls were audited for the same route.
+- The configured server default is GPT-6 Luna (`gpt-6-luna`, or `openai/gpt-6-luna` through OpenRouter). `OPENAI_ANALYSIS_MODEL` optionally overrides the model used for explanations. This records configuration, not a provider availability guarantee.
+
+## Direct live-provider checks
+
+- The configured `openai/gpt-6-luna` provider interpreted `Select the upper front six teeth and move them buccally by one millimeter.` against a 28-tooth scene with the upper arch visible. It returned the correct upper-anterior selection and a 1 mm buccal group movement; independent backend validation passed. This single request took 6.16 seconds.
+- After the validated action-hint update, `Put wire on all teeth` against a 28-tooth scene with both arches visible returned four validated passive setup actions: missing upper brackets, an upper wire, missing lower brackets, and a lower wire. This single request took 3.17 seconds.
+- `Select the upper anterior teeth, install brackets on them, and put a wire through those brackets.` returned the correct three actions in 3.76 seconds. `Put a wire on the upper anterior teeth.` returned missing brackets plus a passive wire in 3.33 seconds. Both real provider replies passed independent validation.
+- These are direct API integration checks, not a browser walkthrough, recorded UI result, real-microphone test or performance guarantee.
+
+## Browser and release acceptance for this update
+
+- Connected-browser walkthrough passed with real Luna replies: upper arch/root/gum request; upper-anterior buccal 1 mm movement; exact `Put wire on all teeth` with 28 brackets and two ordered archwires; compound selection/brackets/wire; activation by half a millimetre followed by calculation; and a 0.5 mm single-tooth edit in an explorable lesson.
+- Read-only Analyze returned a scene-grounded answer explaining passive wires, zero activation and absence of a calculation. A separate live request for an exact patient treatment timeline correctly declined to invent one.
+- Manual browser checks: FDI chart selection of 11, 1 mm buccal preview/apply and 8 degree axial rotation preview/apply, full animations, saved arrangement, original overlay, complete-request undo, lesson variation, return to prepared case, and restoration of the prior workspace.
+- Recorded the diastema lesson and alternate midpoint, labelled anatomy cutaway, translation/tipping, and fixed-brace bracket/wire/alignment/retention steps. This is a feature tour, not a recording of every supported command. Mechanical response shown: actual maximum 0.0118 mm and 0.077 degrees; the visible 50x magnification label remains on screen.
+- Responsive browser check at 390 x 844: model, Ask AI, Analyze, command input and Stop remain visible. This is emulation, not a physical phone test.
+- New casual screen-capture video uses actual browser interactions with typed natural-language input and numeric manual controls, no narration/music or fabricated UI. Captured content is 1920 x 1061, padded at the bottom to a 1920 x 1080 MP4; inactive gaps between recording batches are shortened. The final MP4 is 278.03 seconds (4:38), H.264/yuv420p, 1920 x 1080 at 30 fps, 9,199,061 bytes. Full FFmpeg decode completed without errors. No audio track was synthesized.
+- Production build and TypeScript check passed. The phone gateway passed 7 route/authentication tests. Credential exclusion check passed across 247 source/export files. Private publication succeeded at the existing Forma phone URL on 24 September 2026. Site source b991c4918f7d983492496f26e9af34f656fa641f includes the authenticated analysis gateway and the new video. Existing owner-only access is unchanged. The live API reports openai/gpt-6-luna for both interpretation and analysis. The computer-hosted AI service must remain running for online AI.
+- Packaged download: Forma-Dental-Studio.zip includes the current source, exported local app, synthetic model assets and documentation; ZIP integrity passed for 248 files. Runtime credentials and dependency/build caches are excluded.
+- Actual English microphone recognition, physical-phone touch behavior, projector readability and orthodontic educator review remain unverified. Typed commands and simulated recognition do not establish these.
+- Analysis is an explanation of supplied educational scene facts. It does not inspect images/meshes, diagnose, predict treatment duration or establish clinical validity.
+
+---
+
+# Earlier verification · 24 September 2026 · visible mechanics and Ask AI
 
 This update makes the existing initial elastic response easier to see and lets the professor explicitly send a typed instruction to the configured AI interpreter. It retains the same synthetic anatomy, deterministic calculations and independent command validation.
 

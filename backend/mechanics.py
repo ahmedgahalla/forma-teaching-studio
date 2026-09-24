@@ -309,8 +309,22 @@ def expected_actions(source, scene, resolve_targets):
         selector = re.sub(r"^(?:on|to|for|through) ", "", selector or "selected teeth")
         selector = re.sub(r"^the ", "", selector)
         selector = re.sub(r"\bsegment\b", "teeth", selector)
+        selector = re.sub(r"^all (?:of )?the ", "all ", selector)
+        selector = re.sub(r"^every (upper|lower) tooth$", r"all \1 teeth", selector)
+        selector = re.sub(r"^(?:all |every )?(?:teeth|tooth) (?:in|on) (?:the )?(upper|lower) arch$", r"\1 teeth", selector)
+        selector = re.sub(r"^(?:whole|entire) (upper|lower) (?:arch|jaw)$", r"\1 teeth", selector)
+        if re.fullmatch(r"all teeth|every tooth|all brackets|whole arch|entire arch", selector):
+            arch = scene.get("arch", "both")
+            return [tooth for tooth in scene["availableIds"] if arch == "both" or (int(tooth[0]) < 3) == (arch == "upper")]
+        if re.fullmatch(r"both (?:arches|jaws)|(?:the )?(?:whole|entire) mouth|all teeth in both arches", selector):
+            return scene["availableIds"][:]
         if re.fullmatch(r"(?:the )?(?:these|those) brackets|them|these(?: teeth)?|those(?: teeth)?|selected|this group|that group", selector):
-            return scene["selectedIds"]
+            selected = scene["selectedIds"]
+            if not selected and re.fullmatch(r"them|these(?: teeth)?|those(?: teeth)?|this group|that group", selector):
+                selected = focus.get("teeth") or []
+                if any(tooth not in scene["availableIds"] for tooth in selected):
+                    raise ValueError("The referenced teeth are no longer in this model.")
+            return selected[:]
         if selector in ("here", "there", "this tooth", "that tooth"):
             pointed = scene.get("pointed")
             if not pointed:
@@ -354,11 +368,35 @@ def expected_actions(source, scene, resolve_targets):
     bracket = re.fullmatch(r"(install|add|bond|remove) (?:the )?brackets?(?: (?:on|to|from))?(?: (.+))?", source)
     if bracket:
         return [{"type": "brackets", "teeth": targets(bracket[2]), "installed": bracket[1] != "remove"}]
-    wire = re.fullmatch(r"(?:put|insert|make|create|add|install|engage) (?:a |the )?(?:arch)?wires?(?: (?:through|on|for))?(?: (.+))?", source)
+    wire = re.fullmatch(r"(?:put|insert|make|create|add|install|engage) (?:a |an |the )?(?:arch)?wires?(?: (?:through|on|for))?(?: (.+))?", source)
     if wire:
         if not context.get("wirePreset"):
             raise ValueError("Select the visible wire preset first.")
-        return [{"type": "wire", "id": new_id("wire", config["wires"]), "teeth": targets(wire[1]), **context["wirePreset"]}]
+        teeth, actions, used = targets(wire[1]), [], copy.deepcopy(config["wires"])
+        if not teeth:
+            raise ValueError("Select teeth present in this model.")
+        for upper in (True, False):
+            group = sorted((tooth for tooth in teeth if (int(tooth[0]) < 3) == upper), key=lambda tooth: 8 - int(tooth[1]) if tooth[0] in ("1", "4") else 8 + int(tooth[1]))
+            if not group:
+                continue
+            if len(group) < 2:
+                raise ValueError("A wire needs at least two teeth in each requested arch.")
+            overlapping = [item for item in config["wires"] if set(item["teeth"]) & set(group)]
+            existing = next((item for item in overlapping if set(item["teeth"]).issubset(group)), None)
+            if overlapping and (len(overlapping) != 1 or existing is None):
+                raise ValueError("Existing wires extend beyond this group or overlap. Remove the conflicting wire or include all of its teeth.")
+            missing = [tooth for tooth in group if tooth not in config["brackets"]]
+            if missing:
+                actions.append({"type": "brackets", "teeth": missing, "installed": True})
+            if existing:
+                actions.append({"type": "wire", **copy.deepcopy(existing), "teeth": group})
+            else:
+                if len(used) >= 4:
+                    raise ValueError("This experiment supports up to four wires. Remove an unused wire first.")
+                value = {"type": "wire", "id": new_id("wire", used), "teeth": group, **context["wirePreset"]}
+                actions.append(value)
+                used.append(value)
+        return actions
     if re.fullmatch(r"(?:put|place|add|install) (?:a |the )?(?:tad|mini[ -]?screw) (?:here|there)", source):
         if not scene.get("pointed"):
             raise ValueError("Point to a synthetic location first.")
@@ -442,8 +480,11 @@ def expected_actions(source, scene, resolve_targets):
 
 
 def normalize_wording(source):
-    source = re.sub(r"^(?:attach|fit|put) (?:the )?brackets\b", "install brackets", source)
-    source = re.sub(r"^(?:run|thread) (a |the )?wire\b", r"put \1wire", source)
+    if re.fullmatch(r"place (?:braces|brackets only)", source):
+        return source
+    source = re.sub(r"^(install|add|bond|remove|attach|fit|put|place) (?:the )?braces\b", r"\1 brackets", source)
+    source = re.sub(r"^(?:attach|fit|put|place) (?:the )?brackets\b", "install brackets", source)
+    source = re.sub(r"^(?:run|thread|fit|place|attach) (a |an |the )?((?:arch)?wires?)\b", r"put \1\2", source)
     source = re.sub(r"^show me what ", "show what ", source)
     source = re.sub(r"^(?:replace|switch) (?:the |this |that )?wire (?:with|to) ", "change the wire to ", source)
     return re.sub(r"\bover here\b", "here", source)

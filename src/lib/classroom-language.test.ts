@@ -1,0 +1,37 @@
+import { describe, expect, it } from 'vitest';
+import { normalizeClassroomLanguage } from './classroom-language';
+import fixtures from './classroom-language.fixtures.json';
+import { normalizeSpeechCommand, parseTeachingCommand } from './lecture';
+import { parseTeachingPlan, validateTeachingPlan, type TeachingContext } from './classroom';
+
+describe('bounded everyday classroom wording', () => {
+  it.each(fixtures)('normalizes without filling missing intent: %s', (input, expected) => {
+    expect(normalizeClassroomLanguage(input)).toBe(expected);
+    expect(normalizeClassroomLanguage(expected)).toBe(expected);
+  });
+  it('retains original numerical evidence through the existing number parser', () => {
+    expect(normalizeSpeechCommand('Would you mind moving the upper front teeth buccally minus half a millimeter')).toBe('move the upper anterior teeth buccally -0.5 mm');
+    expect(normalizeSpeechCommand('For this lecture, could you rotate tooth eleven minus three degrees')).toBe('rotate tooth 11 -3 degrees');
+  });
+  it('supports explicit camera and layer wording through the shared executor parser', () => {
+    expect(parseTeachingCommand('Let’s look from above', '11', ['11'])).toEqual({ kind: 'view', view: 'occlusal' });
+    expect(parseTeachingCommand('Could you make the gums disappear?', '11', ['11'])).toEqual({ kind: 'toggle', target: 'gums', visible: false });
+  });
+  it('does not turn unknown or negated wording into an executable camera action', () => {
+    expect(() => parseTeachingCommand('Do not look from above', '11', ['11'])).toThrow();
+    expect(() => parseTeachingCommand('Please look from above and invent a response', '11', ['11'])).toThrow();
+  });
+  it('resolves front six before quantities, then resolves them against that selection', () => {
+    const context: TeachingContext = { mode: 'case', workflowId: null, stepIndex: 0, selected: '11', selectedIds: ['11'], availableIds: [1, 2, 3, 4].flatMap(q => Array.from({ length: 7 }, (_, index) => `${q}${index + 1}`)), synthetic: true, revision: 1, view: 'front', arch: 'upper', speed: 1 };
+    const sourceText = 'Select the upper front six teeth and move them buccally by one millimeter.';
+    const teeth = ['11', '12', '13', '21', '22', '23'];
+    expect(normalizeSpeechCommand(sourceText)).toBe('select the upper anterior teeth and move them buccally by 1 mm');
+    const plan = parseTeachingPlan(sourceText, context);
+    expect(plan.actions).toEqual([{ kind: 'select', teeth }, { kind: 'dental', command: { type: 'move_group', teeth, direction: 'buccal', amount: 1 } }]);
+    expect(validateTeachingPlan(plan, context, { sourceText }).actions).toEqual(plan.actions);
+    const wrong = structuredClone(plan);
+    wrong.actions[1] = { kind: 'dental', command: { type: 'move_group', teeth, direction: 'buccal', amount: 2 } };
+    expect(() => validateTeachingPlan(wrong, context, { sourceText })).toThrow();
+    expect(parseTeachingPlan('Select upper front six teeth and move them buccally', context).actions).toEqual([]);
+  });
+});

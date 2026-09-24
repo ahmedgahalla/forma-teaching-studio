@@ -86,6 +86,30 @@ def test_post_preserves_body_for_full_backend_validation_without_forwarding_head
     assert not {"cookie", "x-untrusted", "x-forma-bridge-token"} & set(requests[0].headers)
 
 
+def test_analysis_uses_same_authentication_body_limits_and_fixed_target(setup):
+    client, requests, _, reply = setup
+    reply["json"] = {"observations": "Two teeth are selected.", "model": "test"}
+    body = b'{"question":"Explain this scene","context":{}}'
+    assert client.post("/api/analyze-teaching", content=body).status_code == 401
+    assert not requests
+    response = client.post("/api/analyze-teaching", content=body, headers={**AUTH, "Content-Type": "application/json"})
+    assert response.status_code == 200 and response.json() == reply["json"]
+    assert str(requests[0].url) == "http://127.0.0.1:8000/api/analyze-teaching"
+    assert requests[0].content == body
+    assert client.post("/api/analyze-teaching", content=b" " * (phone_bridge.MAX_BODY_BYTES + 1), headers={**AUTH, "Content-Type": "application/json"}).status_code == 413
+    assert len(requests) == 1
+
+
+def test_analysis_and_commands_share_one_rate_budget(setup):
+    client, requests, _, _ = setup
+    for index in range(30):
+        path = "/api/analyze-teaching" if index % 2 else "/api/interpret-teaching"
+        assert client.post(path, headers=AUTH, json={}).status_code == 200
+    assert client.post("/api/analyze-teaching", headers=AUTH, json={}).status_code == 429
+    assert client.post("/api/interpret-teaching", headers=AUTH, json={}).status_code == 429
+    assert len(requests) == 30
+
+
 def test_stream_limit_does_not_trust_content_length(setup):
     client, requests, _, _ = setup
     response = client.post("/api/interpret-teaching", content=iter([b" " * 32000, b" " * 34000]), headers={**AUTH, "Content-Type": "application/json", "Content-Length": "1"})

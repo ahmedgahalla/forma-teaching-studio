@@ -11,6 +11,7 @@ import { applyWorkflowAction, classroomDefinition, initialWorkflowScene, workflo
 import AnatomyPanel from './AnatomyPanel';
 import { TeachingCommandBar, useTeaching, useTeachingAdapter } from './TeachingController';
 import { captureWorkflowArrangement } from '@/lib/workflow-transfer';
+import { sceneAnalysisContext } from '@/lib/scene-analysis';
 
 
 export function WorkflowLibrary({ onChoose }: { onChoose: (id: string) => void }) {
@@ -33,7 +34,7 @@ export default function WorkflowStudio({ active }: { active: boolean }) {
   const frame = useMemo(() => workflowSceneFrame(scene), [scene]);
   const selectedIds = scene.selected, activeId = selectedIds[0] || '11';
   const viewFrame = useMemo(() => ({ ...frame, arrows: frame.arrows && arrows }), [frame, arrows]);
-  const run = (text: string) => void teaching.run(text);
+  const run = (text: string) => void teaching.runControl(text);
   const patch = (change: Partial<WorkflowScene>) => { teaching.interact(); setScene(value => ({ ...value, ...change })); };
   const setRoots = (value: boolean) => patch({ roots: value }), setGums = (value: boolean) => patch({ gums: value }), setLabels = (value: boolean) => patch({ labels: value }), setArrows = (value: boolean) => patch({ arrows: value });
   const setProgress = (value: number) => patch({ progress: value, playing: false }), setPlaying = (value: boolean) => patch({ playing: value });
@@ -44,6 +45,7 @@ export default function WorkflowStudio({ active }: { active: boolean }) {
   const choose = (id: string) => { setLibrary(false); run(id === 'anatomy' ? 'start anatomy lesson' : `start ${id === 'fixed-braces' ? 'braces' : id.replace('-', ' ')} workflow`); };
   const animate = () => run('play demonstration');
   useTeachingAdapter('workflow', {
+    analysisContext: () => sceneAnalysisContext({ synthetic: true, ids: model.teeth.map(tooth => tooth.id), transforms: scene.variation || frame.transforms, selectedIds, arch, roots, gums, bone: scene.anatomy.bone, lesson: { title: `${definition.title}: ${step.title}`, explanation: step.explanation } }),
     context: () => ({ mode: 'workflow', workflowId, stepIndex, selected: activeId, selectedIds, availableIds: model.teeth.map(tooth => tooth.id), synthetic: true, view, arch, speed, stage: Math.round(frame.progress * scene.stages), stages: scene.stages, playing, lessonActive: true, canReturnToLesson: true, layers: { roots, gums, labels, braces: scene.braces, attachments: scene.attachments, bone: scene.anatomy.bone, cutaway: scene.anatomy.cutaway, ligament: scene.anatomy.ligament }, boneOpacity: scene.anatomy.opacity }),
     capture: () => ({ scene, camera: viewer.current?.getCamera(), answer, lecture, isolated }),
     exportSetup: from => captureWorkflowArrangement((from as { scene: WorkflowScene } | undefined)?.scene || scene, base),
