@@ -2,7 +2,7 @@
 import type { ApplianceDisplay } from '@/lib/appliance-display';
 import './appliance-palette.css';
 
-export type AppliancePaletteProps = {
+type AppliancePaletteProps = {
   value: ApplianceDisplay;
   onChange: (value: ApplianceDisplay) => void;
   available: boolean;
@@ -18,12 +18,7 @@ const OPTIONS: { preset: ApplianceDisplay['preset']; label: string; detail: stri
   { preset: 'retainer', label: 'Lingual retainer', detail: 'Behind the front teeth' },
 ];
 
-export function AppliancePalette({
-  value,
-  onChange,
-  available,
-  busy = false,
-}: AppliancePaletteProps) {
+function AppliancePalette({ value, onChange, available, busy = false }: AppliancePaletteProps) {
   const expander = value.preset === 'expander-bands' || value.preset === 'palatal-expander';
   return (
     <section className="appliance-palette" aria-label="Appliance display">

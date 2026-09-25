@@ -4,8 +4,8 @@ import { anatomicalFrame, type Vec3 } from './model';
 import type { DentalCase, DentalTooth, Gum } from './geometry';
 import { validateRootAnatomy } from './root-anatomy';
 
-export const TEACHING_ASSET_URL = '/models/forma-teaching-v1.glb';
-export const TEACHING_METADATA_URL = '/models/forma-teaching-v1.json';
+const TEACHING_ASSET_URL = '/models/forma-teaching-v1.glb';
+const TEACHING_METADATA_URL = '/models/forma-teaching-v1.json';
 const IDS = ['1', '2', '3', '4'].flatMap(quadrant =>
   Array.from({ length: 7 }, (_, i) => `${quadrant}${i + 1}`),
 );

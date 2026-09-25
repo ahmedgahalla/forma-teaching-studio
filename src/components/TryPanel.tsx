@@ -27,7 +27,7 @@ export type TryPreview = {
   canApply: boolean;
   detail?: string;
 };
-export type TryPreviewCardProps = {
+type TryPreviewCardProps = {
   pending: TryPreview;
   unrestricted: boolean;
   onUnrestrictedChange: (enabled: boolean) => void;
@@ -35,7 +35,7 @@ export type TryPreviewCardProps = {
   onDiscard: () => void;
   busy?: boolean;
 };
-export function TryPreviewCard({
+function TryPreviewCard({
   pending,
   unrestricted,
   onUnrestrictedChange,

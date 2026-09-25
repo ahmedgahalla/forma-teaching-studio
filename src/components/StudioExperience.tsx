@@ -35,7 +35,7 @@ export type CaseDiagramKind =
   | 'translation'
   | 'tipping'
   | 'retention';
-export type TeachingCaseCard = {
+type TeachingCaseCard = {
   id: string;
   title: string;
   description: string;

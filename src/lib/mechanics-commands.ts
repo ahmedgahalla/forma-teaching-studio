@@ -271,7 +271,7 @@ function material(text: string): WireMaterial | undefined {
 }
 
 /** The parser returns configuration intents only. It never invents forces or tooth displacement. */
-export function parseMechanicsClause(
+function parseMechanicsClause(
   text: string,
   scene: MechanicsSceneContext,
 ): MechanicsAction[] | undefined {

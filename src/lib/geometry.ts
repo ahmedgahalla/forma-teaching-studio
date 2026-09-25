@@ -1,6 +1,5 @@
 import * as THREE from 'three';
 import { STLLoader } from 'three/addons/loaders/STLLoader.js';
-import { STLExporter } from 'three/addons/exporters/STLExporter.js';
 import { anatomicalFrame, type Tooth, type Vec3, type Transforms } from './model';
 import { createOrthodonticDemo } from './demo';
 import { getTeachingAssetCase } from './anatomy-assets';
@@ -32,7 +31,7 @@ const names = [
   'First molar',
   'Second molar',
 ];
-export function toothName(id: string) {
+function toothName(id: string) {
   return names[Number(id[1]) - 1] || 'Third molar';
 }
 
@@ -317,25 +316,4 @@ export async function loadCase(
   if (session?.mechanics !== undefined)
     session.mechanics = validateMechanicsExperiment(session.mechanics, model);
   return { model, transforms: data.transforms, session };
-}
-export function exportSTL(model: DentalCase, transforms: Transforms) {
-  const group = new THREE.Group();
-  for (const tooth of model.teeth) {
-    const mesh = new THREE.Mesh(tooth.geometry);
-    const pose = transforms[tooth.id];
-    mesh.position.fromArray(tooth.position);
-    if (pose) {
-      mesh.position.add(new THREE.Vector3(...pose.translation));
-      mesh.rotation.set(...(pose.rotation.map(v => THREE.MathUtils.degToRad(v)) as Vec3));
-    }
-    group.add(mesh);
-  }
-  for (const gum of model.gums) {
-    const mesh = new THREE.Mesh(gum.geometry);
-    mesh.position.fromArray(gum.position);
-    group.add(mesh);
-  }
-  group.updateMatrixWorld(true);
-  const output = new STLExporter().parse(group, { binary: true });
-  download('forma-final-arch.stl', output.buffer as ArrayBuffer, 'model/stl');
 }

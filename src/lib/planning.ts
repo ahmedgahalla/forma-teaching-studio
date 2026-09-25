@@ -6,7 +6,7 @@ import type { MechanicsExperiment, WireMaterial, WireSection } from './mechanics
 import { validateWireSection } from './mechanics/validation';
 import type { AnatomyViewState } from './teaching-anatomy';
 
-export type HistoryEntry = { value: Transforms; label: string };
+type HistoryEntry = { value: Transforms; label: string };
 export type Plan = { current: Transforms; past: HistoryEntry[]; future: HistoryEntry[] };
 export type PlanAction =
   | { type: 'commit'; value: Transforms; label: string }

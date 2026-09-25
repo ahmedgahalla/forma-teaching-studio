@@ -17,7 +17,7 @@ export type TeachingCaseId =
   | 'occlusal-finishing'
   | 'removable-retention';
 export type TeachingSource = { title: string; url: string };
-export type CaseDemonstration = {
+type CaseDemonstration = {
   id: string;
   title: string;
   description: string;

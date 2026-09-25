@@ -11,7 +11,7 @@ import type { MechanicsFocus, PointedReference } from '@/lib/mechanics-commands'
 import { MATERIAL_PRESETS, MECHANICS_SOURCES, SUPPORT_PRESETS } from '@/lib/mechanics/presets';
 import { hasMechanicsMovement, MECHANICS_DISPLAY_SCALES } from '@/lib/mechanics-presentation';
 
-export const WIRE_OPTIONS: { label: string; section: WireSection }[] = [
+const WIRE_OPTIONS: { label: string; section: WireSection }[] = [
   { label: 'Round · 0.014 in', section: { shape: 'round', diameterMm: 0.014 * 25.4 } },
   { label: 'Round · 0.016 in', section: { shape: 'round', diameterMm: 0.016 * 25.4 } },
   { label: 'Round · 0.018 in', section: { shape: 'round', diameterMm: 0.018 * 25.4 } },
