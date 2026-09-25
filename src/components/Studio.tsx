@@ -1,5 +1,5 @@
 'use client';
-import { useEffect, useMemo, useReducer, useRef, useState, type ReactNode } from 'react';
+import { useEffect, useMemo, useRef } from 'react';
 import { flushSync } from 'react-dom';
 import { Vector3 } from 'three';
 import {
@@ -38,20 +38,12 @@ import ModelBootstrap from './ModelBootstrap';
 import { getTeachingAssetCase } from '@/lib/anatomy-assets';
 import { casePathAudit } from '@/lib/case-path-audit';
 import { createDentalArrangement, DENTAL_ARRANGEMENTS } from '@/lib/dental-arrangements';
-import {
-  createTeachingCase,
-  getTeachingCase,
-  sampleCaseDemonstration,
-  TEACHING_CASES,
-  type TeachingCaseId,
-} from '@/lib/teaching-cases';
+import { createTeachingCase, getTeachingCase, sampleCaseDemonstration } from '@/lib/teaching-cases';
 import {
   TeachingCaseLibrary,
   CaseScenarioPanel,
   MobileStudioDock,
   MobilePanelHeading,
-  type MobileStudioPanel,
-  type CaseDiagramKind,
 } from './StudioExperience';
 import Viewer, {
   type ArchView,
@@ -72,29 +64,20 @@ import {
   applyDentalCommand,
   emptyPose,
   isPose,
-  type Axis,
-  type MovementDirection,
   type Pose,
   type Transforms,
   type Vec3,
 } from '@/lib/model';
 import { parseCommand, type Command } from '@/lib/commands';
-import {
-  historyReducer,
-  interpolateTransforms,
-  stageTransforms,
-  type CaseSession,
-  type Checkpoint,
-} from '@/lib/planning';
+import { interpolateTransforms, stageTransforms, type CaseSession } from '@/lib/planning';
 import {
   archSpans,
   centreDistance,
   findSurfaceIntersections,
   movementRows,
   toothMatrix,
-  type SurfaceIntersection,
 } from '@/lib/analysis';
-import { orderedArchIds, toothArch, type Landmark } from '@/lib/appliances';
+import { orderedArchIds, toothArch } from '@/lib/appliances';
 import {
   createAttachmentGeometry,
   validateAttachment,
@@ -109,7 +92,7 @@ import {
   useTeachingAdapter,
 } from './TeachingController';
 import AnatomyPanel from './AnatomyPanel';
-import { DEFAULT_ANATOMY, type AnatomyViewState } from '@/lib/teaching-anatomy';
+import { DEFAULT_ANATOMY } from '@/lib/teaching-anatomy';
 import WorkflowStudio, { WorkflowLibrary } from './WorkflowStudio';
 import AppliancePalette from './AppliancePalette';
 import {
@@ -117,7 +100,6 @@ import {
   applianceView,
   mapWorkflowAppliance,
   validateApplianceDisplay,
-  type ApplianceDisplay,
 } from '@/lib/appliance-display';
 import { createWorkflowTryState, type WorkflowTransfer } from '@/lib/workflow-transfer';
 import './combined-workspace.css';
@@ -131,7 +113,6 @@ import {
   transitionMechanics,
   attachMechanicsResult,
   experimentWithoutTad,
-  type MechanicsExperiment,
   type MechanicsAction,
 } from '@/lib/mechanics';
 import { calculateMechanics } from '@/lib/mechanics-client';
@@ -144,19 +125,10 @@ import {
 } from '@/lib/mechanics-presentation';
 import { sceneAnalysisContext } from '@/lib/scene-analysis';
 import StageBar from './StageBar';
-import MechanicsPanel, {
-  DEFAULT_WIRE_PRESET,
-  wireSizeLabel,
-  type WirePreset,
-} from './MechanicsPanel';
+import MechanicsPanel, { DEFAULT_WIRE_PRESET, wireSizeLabel } from './MechanicsPanel';
 import './mechanics.css';
 import './classroom-workspace.css';
-import {
-  mechanicsCommandContext,
-  reduceMechanicsFocus,
-  type MechanicsFocus,
-  type PointedReference,
-} from '@/lib/mechanics-commands';
+import { mechanicsCommandContext, reduceMechanicsFocus } from '@/lib/mechanics-commands';
 import {
   createTryState,
   transitionTryMode,
@@ -166,222 +138,175 @@ import {
   archCurvePoints,
   serializeTrySession,
   type TryAction,
-  type TryState,
 } from '@/lib/try-mode';
 
-function Dialog({
-  title,
-  children,
-  onClose,
-}: {
-  title: string;
-  children: ReactNode;
-  onClose: () => void;
-}) {
-  const ref = useRef<HTMLDialogElement>(null);
-  useEffect(() => {
-    ref.current?.showModal();
-  }, []);
-  return (
-    <dialog
-      ref={ref}
-      className="dialog"
-      onCancel={onClose}
-      onClick={e => {
-        if (e.target === ref.current) onClose();
-      }}
-    >
-      <div className="dialog-heading">
-        <h2>{title}</h2>
-        <button className="icon-button" onClick={onClose} aria-label="Close dialog">
-          <X size={19} />
-        </button>
-      </div>
-      {children}
-    </dialog>
-  );
-}
-function Toggle({
-  label,
-  value,
-  onChange,
-}: {
-  label: string;
-  value: boolean;
-  onChange: () => void;
-}) {
-  return (
-    <button
-      type="button"
-      className={`toggle-row ${value ? 'on' : ''}`}
-      role="switch"
-      aria-checked={value}
-      onClick={onChange}
-    >
-      <span>{label}</span>
-      <span className="switch">
-        <span />
-      </span>
-    </button>
-  );
-}
-const directions: { id: MovementDirection; label: string; detail: string }[] = [
-  { id: 'buccal', label: 'Buccal', detail: 'Labial / outward' },
-  { id: 'lingual', label: 'Lingual', detail: 'Palatal / inward' },
-  { id: 'mesial', label: 'Mesial', detail: 'Toward midline' },
-  { id: 'distal', label: 'Distal', detail: 'Away from midline' },
-  { id: 'intrude', label: 'Intrude', detail: 'Toward root' },
-  { id: 'extrude', label: 'Extrude', detail: 'Toward occlusal' },
-];
-const axisVectors: Record<string, Vec3> = {
-  '+X': [1, 0, 0],
-  '-X': [-1, 0, 0],
-  '+Y': [0, 1, 0],
-  '-Y': [0, -1, 0],
-  '+Z': [0, 0, 1],
-  '-Z': [0, 0, -1],
-};
-const pretty = (v: number) => `${v > 0 ? '+' : ''}${v.toFixed(2)}`;
-const DEFAULT_ATTACHMENT: AttachmentSpec = {
-  shape: 'rectangle',
-  width: 2.5,
-  height: 3.5,
-  depth: 1,
-  offsetMesial: 0,
-  offsetOcclusal: 0,
-  rotation: 0,
-};
-type LessonSnapshot = {
-  transforms: Transforms;
-  model: DentalCase;
-  selected: string;
-  selectedIds: string[];
-  arch: ArchView;
-  view: ViewName;
-  ghost: boolean;
-  roots: boolean;
-  braces: boolean;
-  attachments: boolean;
-  gums: boolean;
-  labels: boolean;
-  grid: boolean;
-  stage: number;
-  stages: number;
-  opening: number;
-};
-const errorText = (e: unknown) =>
-  e instanceof Error ? e.message : 'The operation could not be completed.';
-const EXAMPLES = [
-  'select upper front six, install brackets on them, then put a wire through these brackets',
-  'activate that wire by 0.5 mm, then show what happens',
-  'use 0.018 inch wire instead',
-  'explain that movement',
-  'save experiment stage as setup one',
-  'load dental class II division 1',
-  'load crowding',
-  'play case',
-  'pause case',
-  'explore this arrangement',
-  'return to prepared case',
-  'load deep bite',
-  'choose posterior extrusion',
-  'load anchorage',
-  'select upper front six',
-  'move the selected segment posteriorly 1 mm',
-  'apply preview',
-  'make the last movement smaller',
-  'discard preview',
-  'lock upper molars',
-  'show roots',
-  'show displacement traces',
-  'play in reverse',
-  'pause halfway',
-  'show after',
-  'save arrangement as example one',
-  'compare with original',
-  'undo the last two changes',
-  'start braces workflow',
-  'start palatal expansion workflow',
-  'start archwire expansion workflow',
-  'start anatomy lesson',
-  'try this setup',
-  'place palatal expander',
-  'return to source lesson',
-  'restore my workspace',
-  'return to try mode',
-];
-function commandLabel(c: Command) {
-  const targets =
-    'teeth' in c
-      ? c.teeth.length > 6
-        ? `${c.teeth.length} teeth`
-        : c.teeth.join(', ')
-      : 'tooth' in c
-        ? c.tooth
-        : '';
-  if (c.type === 'move' || c.type === 'move_group')
-    return `${targets} · ${c.direction} ${pretty(c.amount)} mm`;
-  if (c.type === 'rotate' || c.type === 'rotate_group')
-    return `${targets} · World ${c.axis.toUpperCase()} ${pretty(c.amount)}°`;
-  if (c.type === 'orthodontic')
-    return `${targets} · ${c.movement === 'rotate' ? 'Axial rotation' : c.movement} ${pretty(c.amount)}°`;
-  if (c.type === 'reset') return `${targets} · Reset to original`;
-  if (c.type === 'ghost') return `${c.visible ? 'Show' : 'Hide'} original positions`;
-  if (c.type === 'appliance') return `${c.visible ? 'Show' : 'Hide'} brackets and archwires`;
-  if (c.type === 'stages') return `Create ${c.count} display stages`;
-  return c.type;
-}
-
-type PreparedScenario = {
-  caseId: TeachingCaseId;
-  variantId: string;
-  model: DentalCase;
-  returnProgress: number;
-  exploring: boolean;
-  answerVisible: boolean;
-  returnDisplay?: {
-    lesson: LessonSnapshot;
-    anatomy: AnatomyViewState;
-    appliance: ApplianceDisplay;
-    bracketStyle: 'metal' | 'ceramic';
-    ligatureColor: string;
-    camera: ViewerCamera | null;
-  };
-};
-const CASE_DIAGRAMS: Record<TeachingCaseId, CaseDiagramKind> = {
-  'reference-occlusion': 'anatomy',
-  'movement-types': 'translation',
-  crowding: 'crowding',
-  'midline-diastema': 'spacing',
-  'increased-overjet': 'overjet',
-  'anterior-crossbite': 'crossbite',
-  deepbite: 'overbite',
-  openbite: 'open-bite',
-  'posterior-crossbite': 'crossbite',
-  'anchorage-space-closure': 'braces',
-  'occlusal-finishing': 'rotation',
-  'removable-retention': 'retention',
-};
-const CASE_CARDS = TEACHING_CASES.map(item => ({
-  ...item,
-  diagram: CASE_DIAGRAMS[item.id],
-  variantCount: item.variants.length,
-  concepts: [item.learningGoal],
-}));
+import { Dialog, Toggle } from './case/ui';
+import {
+  directions,
+  axisVectors,
+  pretty,
+  DEFAULT_ATTACHMENT,
+  errorText,
+  EXAMPLES,
+  commandLabel,
+  CASE_CARDS,
+} from './case/constants';
+import type { ClassroomSnapshot, LessonSnapshot } from './case/types';
+import {
+  useAttachmentState,
+  useCalibrationInputs,
+  useCaseFiles,
+  useCaseScenario,
+  useCommandState,
+  useDisplayState,
+  useLayoutState,
+  useLessonState,
+  useManipulationTool,
+  useMeasureState,
+  useMechanicsState,
+  useModelState,
+  useMovementInputs,
+  useSelectionState,
+  useServiceDraft,
+  useStagePlayback,
+} from './case/state';
 
 function CaseStudio({ active }: { active: boolean }) {
   const teaching = useTeaching();
-  const [pointed, setPointed] = useState<PointedReference | null>(null);
-  const [mechanics, setMechanics] = useState<MechanicsExperiment | null>(null);
-  const [wirePreset, setWirePreset] = useState<WirePreset>(DEFAULT_WIRE_PRESET);
-  const [magnification, setMagnification] = useState(10),
-    [predictResponse, setPredictResponse] = useState(false),
-    [responseRevealed, setResponseRevealed] = useState(true),
-    [forceVectors, setForceVectors] = useState(true);
-  const [mechanicsFocus, setMechanicsFocus] = useState<MechanicsFocus>({});
-  const [scenario, setScenario] = useState<PreparedScenario | null>(null);
-  const [mobilePanel, setMobilePanel] = useState<MobileStudioPanel>('model');
-  const [toolsOpen, setToolsOpen] = useState(true);
+  const {
+    pointed,
+    setPointed,
+    mechanics,
+    setMechanics,
+    wirePreset,
+    setWirePreset,
+    magnification,
+    setMagnification,
+    predictResponse,
+    setPredictResponse,
+    responseRevealed,
+    setResponseRevealed,
+    forceVectors,
+    setForceVectors,
+    mechanicsFocus,
+    setMechanicsFocus,
+  } = useMechanicsState();
+  const { scenario, setScenario } = useCaseScenario();
+  const {
+    mobilePanel,
+    setMobilePanel,
+    toolsOpen,
+    setToolsOpen,
+    modal,
+    setModal,
+    panel,
+    setPanel,
+    lecture,
+    setLecture,
+    playbackSpeed,
+    setPlaybackSpeed,
+    isolated,
+    setIsolated,
+    pointer,
+    setPointer,
+  } = useLayoutState();
+  const {
+    anatomy,
+    setAnatomy,
+    model,
+    setModel,
+    plan,
+    dispatch,
+    sandbox,
+    setSandbox,
+    applianceDisplay,
+    setApplianceDisplay,
+    workflowOrigin,
+    setWorkflowOrigin,
+  } = useModelState();
+  const returnWorkspace = useRef<ClassroomSnapshot | null>(null);
+  const {
+    comparisonName,
+    setComparisonName,
+    traces,
+    setTraces,
+    curveVisible,
+    setCurveVisible,
+    reverse,
+    setReverse,
+    arch,
+    setArch,
+    ghost,
+    setGhost,
+    gums,
+    setGums,
+    labels,
+    setLabels,
+    grid,
+    setGrid,
+    braces,
+    setBraces,
+    roots,
+    setRoots,
+    bracketStyle,
+    setBracketStyle,
+    ligatureColor,
+    setLigatureColor,
+    opening,
+    setOpening,
+    view,
+    setView,
+  } = useDisplayState();
+  const { selectedIds, setSelectedIds, selected, setSelected, multi, setMulti } =
+    useSelectionState();
+  const {
+    stages,
+    setStages,
+    stage,
+    setStage,
+    playing,
+    setPlaying,
+    checkpoints,
+    setCheckpoints,
+    checkpointName,
+    setCheckpointName,
+  } = useStagePlayback();
+  const {
+    direction,
+    setDirection,
+    distance,
+    setDistance,
+    degrees,
+    setDegrees,
+    rotationMode,
+    setRotationMode,
+    axis,
+    setAxis,
+  } = useMovementInputs();
+  const { command, setCommand, status, setStatus, statusError, setStatusError } = useCommandState();
+  const { files, setFiles, scale, setScale, busy, setBusy, importError, setImportError } =
+    useCaseFiles();
+  const importAbort = useRef<AbortController | null>(null);
+  useEffect(() => () => importAbort.current?.abort(), []);
+  const {
+    measureTo,
+    setMeasureTo,
+    measureMode,
+    setMeasureMode,
+    landmarks,
+    setLandmarks,
+    contacts,
+    setContacts,
+    checking,
+    setChecking,
+  } = useMeasureState();
+  const contactTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const { apiDraft, setApiDraft } = useServiceDraft();
+  const { attachments, setAttachments, attachmentDraft, setAttachmentDraft } = useAttachmentState();
+  const { tool, setTool, dragPreview, setDragPreview } = useManipulationTool();
+  const { lessonId, setLessonId, lessonStep, setLessonStep } = useLessonState();
+  const lessonSnapshots = useRef<LessonSnapshot[]>([]);
+  const { bAxis, setBAxis, mAxis, setMAxis, oAxis, setOAxis } = useCalibrationInputs();
   const prepared = !!scenario && !scenario.exploring;
   const caseDefinition = useMemo(
     () => (scenario ? getTeachingCase(scenario.caseId) : null),
@@ -402,94 +327,12 @@ function CaseStudio({ active }: { active: boolean }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps -- TODO(phase-2): revisit effect deps; adding them may change behavior
     [scenario?.caseId, scenario?.variantId],
   );
-  const [anatomy, setAnatomy] = useState<AnatomyViewState>({ ...DEFAULT_ANATOMY });
-  const [model, setModel] = useState<DentalCase>(() => createDemo());
   const dentalArrangement = DENTAL_ARRANGEMENTS.find(
     item => model.name === `${item.title} · synthetic teaching arrangement`,
   );
-  const [plan, dispatch] = useReducer(historyReducer, { current: {}, past: [], future: [] });
-  const [sandbox, setSandbox] = useState<TryState>(() => createTryState());
-  const [applianceDisplay, setApplianceDisplay] = useState<ApplianceDisplay>({
-    ...DEFAULT_APPLIANCE_DISPLAY,
-  });
-  const [workflowOrigin, setWorkflowOrigin] = useState<{
-    setup: WorkflowTransfer;
-    snapshot: unknown;
-  } | null>(null);
-  const returnWorkspace = useRef<ClassroomSnapshot | null>(null);
-  const [comparisonName, setComparisonName] = useState<string | null>(null),
-    [traces, setTraces] = useState(false),
-    [curveVisible, setCurveVisible] = useState(false);
-  const [reverse, setReverse] = useState(false);
-  const [selectedIds, setSelectedIds] = useState<string[]>(['11']),
-    [selected, setSelected] = useState('11'),
-    [multi, setMulti] = useState(false);
-  const [arch, setArch] = useState<ArchView>('both'),
-    [ghost, setGhost] = useState(false),
-    [gums, setGums] = useState(true),
-    [labels, setLabels] = useState(false),
-    [grid, setGrid] = useState(false);
-  const [braces, setBraces] = useState(false),
-    [roots, setRoots] = useState(false),
-    [bracketStyle, setBracketStyle] = useState<'metal' | 'ceramic'>('metal'),
-    [ligatureColor, setLigatureColor] = useState('#299f9b'),
-    [opening, setOpening] = useState(0);
-  const [stages, setStages] = useState(10),
-    [stage, setStage] = useState(10),
-    [playing, setPlaying] = useState(false),
-    [checkpoints, setCheckpoints] = useState<Checkpoint[]>([]),
-    [checkpointName, setCheckpointName] = useState('');
-  const [direction, setDirection] = useState<MovementDirection>('buccal'),
-    [distance, setDistance] = useState('0.25'),
-    [degrees, setDegrees] = useState('3'),
-    [rotationMode, setRotationMode] = useState<'tip' | 'torque' | 'rotate' | 'world'>('tip'),
-    [axis, setAxis] = useState<Axis>('y');
-  const [command, setCommand] = useState(''),
-    [status, setStatus] = useState('Select teeth, then explore a movement or command.'),
-    [statusError, setStatusError] = useState(false);
-  const [modal, setModal] = useState<
-      | 'import'
-      | 'settings'
-      | 'guide'
-      | 'calibrate'
-      | 'demo'
-      | 'lessons'
-      | 'workflows'
-      | 'arrangement'
-      | null
-    >(null),
-    [panel, setPanel] = useState<'move' | 'braces' | 'analysis' | 'history'>('move');
-  const [files, setFiles] = useState<File[]>([]),
-    [scale, setScale] = useState('1'),
-    [busy, setBusy] = useState(false),
-    [importError, setImportError] = useState('');
-  const [view, setView] = useState<ViewName>('perspective'),
-    [measureTo, setMeasureTo] = useState(''),
-    [measureMode, setMeasureMode] = useState(false),
-    [landmarks, setLandmarks] = useState<Landmark[]>([]);
-  const [contacts, setContacts] = useState<SurfaceIntersection[] | null>(null),
-    [checking, setChecking] = useState(false);
-  const contactTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const importAbort = useRef<AbortController | null>(null);
-  useEffect(() => () => importAbort.current?.abort(), []);
-  const [apiDraft, setApiDraft] = useState('http://127.0.0.1:8000');
   const apiUrl = teaching.config.url,
     aiEnabled = teaching.config.enabled;
   const setAiEnabled = (enabled: boolean) => teaching.setConfig({ ...teaching.config, enabled });
-  const [isolated, setIsolated] = useState(false),
-    [pointer, setPointer] = useState(false);
-  const [lecture, setLecture] = useState(false),
-    [playbackSpeed, setPlaybackSpeed] = useState<0.5 | 1 | 2>(1);
-  const [attachments, setAttachments] = useState(false),
-    [attachmentDraft, setAttachmentDraft] = useState<AttachmentSpec>(DEFAULT_ATTACHMENT);
-  const [tool, setTool] = useState<'orbit' | 'translate' | 'rotate'>('orbit'),
-    [dragPreview, setDragPreview] = useState<Transforms | null>(null);
-  const [lessonId, setLessonId] = useState(''),
-    [lessonStep, setLessonStep] = useState(-1);
-  const lessonSnapshots = useRef<LessonSnapshot[]>([]);
-  const [bAxis, setBAxis] = useState('+Z'),
-    [mAxis, setMAxis] = useState('+X'),
-    [oAxis, setOAxis] = useState('-Y');
   const pendingCamera = useRef<ViewerCamera | null>(null);
   const pendingView = useRef<ViewName | null>(null);
   const viewer = useRef<ViewerHandle>(null),
@@ -694,9 +537,8 @@ function CaseStudio({ active }: { active: boolean }) {
     }
   };
   useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect -- TODO(phase-2): derive this state or move the sync out of the effect
     setAttachmentDraft(tooth.attachment || DEFAULT_ATTACHMENT);
-  }, [tooth]);
+  }, [tooth, setAttachmentDraft]);
   useEffect(() => {
     if (!playing) return;
     const frames = mechanics?.result ? 200 : 125;
@@ -711,13 +553,11 @@ function CaseStudio({ active }: { active: boolean }) {
       40,
     );
     return () => clearInterval(timer);
-  }, [playing, stages, playbackSpeed, reverse, mechanics?.result]);
+  }, [playing, stages, playbackSpeed, reverse, mechanics?.result, setStage]);
   useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect -- TODO(phase-2): derive this state or move the sync out of the effect
     if (playing && (reverse ? stage <= 0 : stage >= stages)) setPlaying(false);
-  }, [playing, stage, stages, reverse]);
+  }, [playing, stage, stages, reverse, setPlaying]);
   useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect -- TODO(phase-2): derive this state or move the sync out of the effect
     setContacts(null);
     setChecking(false);
     return () => {
@@ -1639,48 +1479,11 @@ function CaseStudio({ active }: { active: boolean }) {
   };
   useEffect(() => {
     if (!active) {
-      // eslint-disable-next-line react-hooks/set-state-in-effect -- TODO(phase-2): derive this state or move the sync out of the effect
       setPlaying(false);
       setModal(null);
       setDragPreview(null);
     }
-  }, [active]);
-  type ClassroomSnapshot = {
-    mechanics: MechanicsExperiment | null;
-    wirePreset: WirePreset;
-    magnification: number;
-    predictResponse: boolean;
-    responseRevealed: boolean;
-    forceVectors: boolean;
-    pointed: PointedReference | null;
-    mechanicsFocus: MechanicsFocus;
-    scenario: PreparedScenario | null;
-    applianceDisplay: ApplianceDisplay;
-    workflowOrigin: typeof workflowOrigin;
-    returnWorkspace: ClassroomSnapshot | null;
-    sandbox: TryState;
-    comparisonName: string | null;
-    traces: boolean;
-    curveVisible: boolean;
-    reverse: boolean;
-    lesson: LessonSnapshot;
-    history: typeof plan;
-    checkpoints: Checkpoint[];
-    speed: 0.5 | 1 | 2;
-    anatomy: AnatomyViewState;
-    camera: ViewerCamera | null;
-    lessonId: string;
-    lessonStep: number;
-    lessonSnapshots: LessonSnapshot[];
-    bracketStyle: typeof bracketStyle;
-    ligatureColor: string;
-    lecture: boolean;
-    isolated: boolean;
-    tool: typeof tool;
-    measureTo: string;
-    measureMode: boolean;
-    landmarks: Landmark[];
-  };
+  }, [active, setPlaying, setModal, setDragPreview]);
   const captureClassroom = (): ClassroomSnapshot => ({
     mechanics,
     wirePreset,
