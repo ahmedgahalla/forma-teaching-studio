@@ -3,7 +3,7 @@
   "asset": {
     "file": "public/models/forma-teaching-v1.glb",
     "sha256": "b9f009f0dea3e019de180f8b41ab8a5be9a514b851bb969f36da6b700ab02d27",
-    "metadataSha256": "12dd26123641fca14dd6c0331fe08e17fc1f37b5fc8c63d3a5da743033ee5afd"
+    "metadataSha256": "e2e8c8cd9a79c0376f0f11cb059b937e3909f7157f7ca9e7ab2176948b480ac5"
   },
   "caseSourceSha256": "dec6ce50fd2d84dd19d0a1dc6bc7073871c4a3b81c921e4518a1ccab1366f0a3",
   "referenceShiftMm": 1.5,

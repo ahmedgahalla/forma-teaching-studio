@@ -45,10 +45,10 @@ Entry format: mistake (with link) · root cause · prevention · status (`noted`
 
 ## 6. Line-ending drift
 
-- **Mistake:** on Windows, `core.autocrlf` was converting working copies to CRLF while Prettier writes LF, making `format:check` unreliable and diffs noisy.
-- **Root cause:** no `.gitattributes`; line-ending policy was left to each machine's git config.
-- **Prevention:** `.gitattributes` with `* text=auto eol=lf` plus binary rules; `format:check` in CI confirms LF end to end.
-- **Status:** automated · **Count:** 1
+- **Mistake:** on Windows, `core.autocrlf` was converting working copies to CRLF while Prettier writes LF, making `format:check` unreliable and diffs noisy. Second occurrence (2026-09-25): the teaching-case audit pinned a SHA-256 of `public/models/forma-teaching-v1.json` computed from a stale CRLF working copy — the blob is LF, so the audit test passed on Windows and failed on CI's Linux checkout.
+- **Root cause:** no `.gitattributes`; line-ending policy was left to each machine's git config. And adding `.gitattributes` does not re-smudge already-checked-out files — git leaves "clean" working copies alone until the file is recreated.
+- **Prevention:** `.gitattributes` with `* text=auto eol=lf` plus binary rules; `format:check` in CI confirms LF end to end. When hashing tracked files (the audit script), the working copy must match the blob: after changing eol attributes, force-refresh (`rm <file> && git checkout -- <file>`) before regenerating pinned hashes; CI's Linux run is the cross-check.
+- **Status:** automated · **Count:** 2
 
 ## 7. Manual setup steps get skipped
 
