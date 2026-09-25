@@ -56,3 +56,10 @@ Entry format: mistake (with link) · root cause · prevention · status (`noted`
 - **Root cause:** humans and tools follow the shortest path; anything not automated silently decays.
 - **Prevention:** `npm run setup` is the single entry point (version checks, npm ci, venv + requirements, git config), and `.githooks/` post-merge/post-checkout hooks re-sync dependencies only when the lockfiles actually changed, enabled automatically by the npm `prepare` script. The session start protocol verifies sync.
 - **Status:** automated · **Count:** 1
+
+## 8. Incomplete lockfile after piecemeal installs
+
+- **Mistake:** `npm ci` failed twice from a lockfile missing transitive entries — first locally (missing `@emnapi/core`), then on CI's Linux runner (missing `@emnapi/runtime` for Linux) even after a Windows-side `npm install` "repair", because platform-conditional optional dependencies only fully record on a clean regeneration.
+- **Root cause:** incremental `npm i <pkg>` calls merged into an existing lock instead of resolving the full cross-platform tree.
+- **Prevention:** when `npm ci` reports missing lock entries, regenerate wholesale (delete `package-lock.json` + `node_modules`, run `npm install`) rather than patching; CI's `npm ci` on Linux is the enforcement.
+- **Status:** automated · **Count:** 2
