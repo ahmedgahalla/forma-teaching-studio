@@ -557,37 +557,6 @@
 .main-workspace > .try-preview {
   margin-top: 12px;
 }
-.try-display-tools {
-  display: flex;
-  align-items: center;
-  flex-wrap: wrap;
-  gap: 6px;
-  padding-top: 10px;
-  flex-shrink: 0;
-}
-.try-display-tools button {
-  min-height: 36px;
-  padding: 6px 9px;
-  border: 1px solid var(--ui-line);
-  border-radius: 6px;
-  background: var(--ui-panel);
-  color: var(--ui-muted);
-  font-size: 13px;
-}
-.try-display-tools button:hover {
-  background: var(--ui-soft);
-}
-.try-display-tools button[aria-pressed='true'] {
-  border-color: var(--ui-accent);
-  background: var(--ui-soft);
-  color: var(--ui-accent);
-}
-.try-display-tools > span {
-  color: var(--ui-muted);
-  font-size: 12px;
-  line-height: 1.6;
-  flex-basis: 100%;
-}
 .chart-teeth button.tooth-locked {
   position: relative;
   border-style: dashed !important;
@@ -608,13 +577,6 @@
   background: var(--ui-warning);
 }
 @media (max-width: 700px) {
-  .try-display-tools button {
-    min-height: 44px;
-    font-size: 13px;
-  }
-  .try-display-tools > span {
-    font-size: 12px;
-  }
   .main-workspace > .try-preview {
     margin-top: 14px;
   }

@@ -119,11 +119,6 @@
   font-size: 15px;
   min-height: 44px;
 }
-.studio-experience.teaching-studio.lecture-mode .main-workspace .timeline,
-.studio-experience.teaching-studio.lecture-mode .main-workspace .case-stage-toolbar,
-.studio-experience.teaching-studio.lecture-mode .main-workspace .try-display-tools {
-  display: none;
-}
 .workflow-presenting .workflow-animation,
 .workflow-presenting .workflow-try-note {
   display: none;
