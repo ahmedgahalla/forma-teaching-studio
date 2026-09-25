@@ -2,8 +2,6 @@ import type { TeachingAction } from '../lecture';
 import { TEACHING_CASES } from '../teaching-cases';
 import type { TeachingContext } from './types';
 import { CommandValidationError } from '../commands';
-import { parseTeachingCommand } from '../lecture';
-import type { TryAction } from '../try-mode';
 
 export const VERBS =
   '(?:load|choose|show|hide|highlight|select|focus|zoom|move|rotate|tip|torque|intrude|extrude|retract|protract|expand|constrict|distali[sz]e|mesiali[sz]e|reset|start|open|isolate|switch|install|bond|insert|engage|fit|activate|demonstrate|compare|play|animate|pause|stop|next|previous|restart|create|generate|add|remove|set|make|turn|repeat|replay|do|undo|redo|explain|narrate|read|reveal|return|go|back|lecture|enter|exit|end|leave|lock|unlock|close|change|increase|decrease|save|apply|accept|discard|cancel|try|explore|restore|place|put|connect|use|calculate|solve|fix|release|widen|attach|run|thread|replace|preview)';

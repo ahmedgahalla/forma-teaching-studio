@@ -1,6 +1,6 @@
-import { CommandValidationError } from '../commands';
 import { parseTeachingCommand, type TeachingAction } from '../lecture';
 import type { TryAction } from '../try-mode';
+import { isTryClause } from './parse-clauses';
 import type { TeachingContext } from './types';
 
 export function parseTryActions(

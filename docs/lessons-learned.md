@@ -63,3 +63,10 @@ Entry format: mistake (with link) · root cause · prevention · status (`noted`
 - **Root cause:** incremental `npm i <pkg>` calls merged into an existing lock instead of resolving the full cross-platform tree.
 - **Prevention:** when `npm ci` reports missing lock entries, regenerate wholesale (delete `package-lock.json` + `node_modules`, run `npm install`) rather than patching; CI's `npm ci` on Linux is the enforcement.
 - **Status:** automated · **Count:** 2
+
+## 9. Incremental typecheck false greens
+
+- **Mistake:** during the Phase 2.4 classroom split, `npm run typecheck` reported clean while `tsc` with a fresh state found real missing-import errors; the broken state was even committed (fixed in the next commit). The full test suite caught it, but only after a misleading gate.
+- **Root cause:** `tsc --incremental` reused a stale `tsconfig.tsbuildinfo` across large file moves and skipped re-checking affected modules.
+- **Prevention:** the `typecheck` script now runs `tsc --noEmit --incremental false`, so local runs match CI's fresh-checkout behavior.
+- **Status:** automated · **Count:** 1

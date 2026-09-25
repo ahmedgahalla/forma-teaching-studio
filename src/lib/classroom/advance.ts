@@ -2,7 +2,7 @@ import type { TeachingAction } from '../lecture';
 import { advanceMechanicsContext } from '../mechanics-commands';
 import { WORKFLOWS } from '../workflows';
 import { TEACHING_CASES } from '../teaching-cases';
-import { copyContext, DEMO_IDS, type TeachingContext } from './types';
+import { DEMO_IDS, type TeachingContext } from './types';
 
 type Overrides = { arch: boolean; view: boolean; selection: boolean };
 /** Advance a private preflight context; no scene, mesh, or caller state is changed. */

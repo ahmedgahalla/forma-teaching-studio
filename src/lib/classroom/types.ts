@@ -1,4 +1,6 @@
 import type { TeachingAction } from '../lecture';
+import { TEACHING_CASES } from '../teaching-cases';
+import { WORKFLOWS } from '../workflows';
 import type { MechanicsCommandContext, PointedReference } from '../mechanics-commands';
 
 export type TeachingContext = {
