@@ -5,15 +5,31 @@ import { LectureConsole, type LectureConsoleProps } from './LectureConsole';
 
 function props(overrides: Partial<LectureConsoleProps> = {}): LectureConsoleProps {
   return {
-    title: 'Compare tooth movements', objective: 'Observe crown and root movement.',
-    question: 'Does the root stay still?', answer: 'The crown and root move together.', answerVisible: false,
-    onToggleAnswer: vi.fn(), playing: false, progress: 0.25, onPlayPause: vi.fn(), onRestart: vi.fn(), onHalf: vi.fn(), onProgress: vi.fn(), speed: 1, onSpeed: vi.fn(),
+    title: 'Compare tooth movements',
+    objective: 'Observe crown and root movement.',
+    question: 'Does the root stay still?',
+    answer: 'The crown and root move together.',
+    answerVisible: false,
+    onToggleAnswer: vi.fn(),
+    playing: false,
+    progress: 0.25,
+    onPlayPause: vi.fn(),
+    onRestart: vi.fn(),
+    onHalf: vi.fn(),
+    onProgress: vi.fn(),
+    speed: 1,
+    onSpeed: vi.fn(),
     ...overrides,
   };
 }
-const render = (value: LectureConsoleProps) => renderToStaticMarkup(createElement(LectureConsole, value));
+const render = (value: LectureConsoleProps) =>
+  renderToStaticMarkup(createElement(LectureConsole, value));
 function button(html: string, label: string) {
-  const match = html.match(new RegExp(`<button\\b[^>]*>(?:(?!</button>)[\\s\\S])*${label}(?:(?!</button>)[\\s\\S])*</button>`));
+  const match = html.match(
+    new RegExp(
+      `<button\\b[^>]*>(?:(?!</button>)[\\s\\S])*${label}(?:(?!</button>)[\\s\\S])*</button>`,
+    ),
+  );
   expect(match, `Button ${label} should be present`).not.toBeNull();
   return match![0];
 }
@@ -23,15 +39,26 @@ function range(html: string) {
 
 describe('professor lecture console', () => {
   it('shows a question before an initially hidden, labelled explanation without starting any action', () => {
-    const value = props(), html = render(value);
+    const value = props(),
+      html = render(value);
     expect(html).toContain('Professor lecture controls');
     expect(html).toContain('Observe crown and root movement.');
     const reveal = button(html, 'Reveal explanation');
     expect(reveal).toContain('aria-expanded="false"');
     const answerId = reveal.match(/aria-controls="([^"]+)"/)![1];
     expect(html).toContain(`id="${answerId}" class="lecture-console-answer" hidden=""`);
-    expect(html.indexOf('Does the root stay still?')).toBeLessThan(html.indexOf('The crown and root move together.'));
-    for (const handler of [value.onPlayPause, value.onRestart, value.onHalf, value.onProgress, value.onSpeed, value.onToggleAnswer]) expect(handler).not.toHaveBeenCalled();
+    expect(html.indexOf('Does the root stay still?')).toBeLessThan(
+      html.indexOf('The crown and root move together.'),
+    );
+    for (const handler of [
+      value.onPlayPause,
+      value.onRestart,
+      value.onHalf,
+      value.onProgress,
+      value.onSpeed,
+      value.onToggleAnswer,
+    ])
+      expect(handler).not.toHaveBeenCalled();
   });
 
   it('reveals the controlled answer and gives the professor an explicit hide action', () => {
@@ -41,16 +68,39 @@ describe('professor lecture console', () => {
     expect(html).toContain('The crown and root move together.');
   });
 
-  it.each([[false, 0.25, 'Play'], [true, 0.5, 'Pause'], [false, 1, 'Replay']] as const)('reflects playing=%s at progress %s without changing the host', (playing, progress, label) => {
-    const html = render(props({ playing, progress }));
-    expect(button(html, label)).not.toContain('disabled');
-    expect(range(html)).toContain(`value="${progress}"`);
-    expect(range(html)).toContain(`aria-valuetext="${Math.round(progress * 100)} percent of demonstration"`);
-  });
+  it.each([
+    [false, 0.25, 'Play'],
+    [true, 0.5, 'Pause'],
+    [false, 1, 'Replay'],
+  ] as const)(
+    'reflects playing=%s at progress %s without changing the host',
+    (playing, progress, label) => {
+      const html = render(props({ playing, progress }));
+      expect(button(html, label)).not.toContain('disabled');
+      expect(range(html)).toContain(`value="${progress}"`);
+      expect(range(html)).toContain(
+        `aria-valuetext="${Math.round(progress * 100)} percent of demonstration"`,
+      );
+    },
+  );
 
   it('keeps every owned mutation control disabled when the host is busy or reviewing a preview', () => {
-    const html = render(props({ disabled: true, variants: [{ id: 'translation', label: 'Translation' }], onVariant: vi.fn(), explorationAction: { label: 'Explore arrangement', onClick: vi.fn() } }));
-    for (const label of ['Play', 'Restart', 'Pause at 50%', 'Reveal explanation', 'Explore arrangement']) expect(button(html, label)).toContain('disabled');
+    const html = render(
+      props({
+        disabled: true,
+        variants: [{ id: 'translation', label: 'Translation' }],
+        onVariant: vi.fn(),
+        explorationAction: { label: 'Explore arrangement', onClick: vi.fn() },
+      }),
+    );
+    for (const label of [
+      'Play',
+      'Restart',
+      'Pause at 50%',
+      'Reveal explanation',
+      'Explore arrangement',
+    ])
+      expect(button(html, label)).toContain('disabled');
     expect(range(html)).toContain('disabled');
     expect(html).toMatch(/<select\b[^>]*disabled/);
     expect(html).toMatch(/<fieldset\b[^>]*disabled/);
@@ -66,7 +116,13 @@ describe('professor lecture console', () => {
   });
 
   it('identifies the selected authored variant and requires a host handler to change variants', () => {
-    const value = props({ variants: [{ id: 'a', label: 'Translation' }, { id: 'b', label: 'Tipping' }], variantId: 'b' });
+    const value = props({
+      variants: [
+        { id: 'a', label: 'Translation' },
+        { id: 'b', label: 'Tipping' },
+      ],
+      variantId: 'b',
+    });
     let html = render(value);
     expect(button(html, 'Tipping')).toContain('aria-pressed="true"');
     expect(button(html, 'Translation')).toContain('aria-pressed="false"');
@@ -92,7 +148,11 @@ describe('professor lecture console', () => {
   });
 
   it('keeps caller-supplied display controls and teaching limitations visible', () => {
-    const html = render(props({ children: createElement('button', { type: 'button', 'aria-pressed': true }, 'Roots') }));
+    const html = render(
+      props({
+        children: createElement('button', { type: 'button', 'aria-pressed': true }, 'Roots'),
+      }),
+    );
     expect(html).toContain('aria-label="Lecture model display"');
     expect(button(html, 'Roots')).toContain('aria-pressed="true"');
     expect(html).toContain('no treatment time scale');

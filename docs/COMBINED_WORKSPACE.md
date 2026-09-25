@@ -18,13 +18,13 @@ The source lesson's directional arrows and conceptual palate split are deliberat
 
 Open the **Appliances** tab in the editing workspace.
 
-| Choice | Display |
-| --- | --- |
-| None | Hides bracket and workflow hardware. |
-| Brackets | Bracket bodies without the archwire or ligatures. |
-| Brackets + wire | Brackets, archwires and ligatures. |
-| Molar bands | Upper molar bands on teeth 16 and 26. |
-| Palatal expander | Molar bands, connecting arms, guide rails and a central screw. |
+| Choice           | Display                                                                        |
+| ---------------- | ------------------------------------------------------------------------------ |
+| None             | Hides bracket and workflow hardware.                                           |
+| Brackets         | Bracket bodies without the archwire or ligatures.                              |
+| Brackets + wire  | Brackets, archwires and ligatures.                                             |
+| Molar bands      | Upper molar bands on teeth 16 and 26.                                          |
+| Palatal expander | Molar bands, connecting arms, guide rails and a central screw.                 |
 | Lingual retainer | A schematic wire and bonding pads behind the front teeth of each visible arch. |
 
 The **Appliance display** / **Show chosen appliance** toggle hides and reveals the chosen hardware. If the preset is None, switching it on selects ordinary brackets and wire. Attachment visibility is controlled separately. Bracket material and ligature colour apply to fixed brackets, not to expander or retainer metalwork.

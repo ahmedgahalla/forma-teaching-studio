@@ -1,7 +1,36 @@
 import { describe, expect, it } from 'vitest';
 import { LESSONS, normalizeSpeechCommand, parseTeachingCommand } from './lecture';
 
-const ids = ['11', '12', '13', '14', '15', '16', '17', '21', '22', '23', '24', '25', '26', '27', '31', '32', '33', '34', '35', '36', '37', '41', '42', '43', '44', '45', '46', '47'];
+const ids = [
+  '11',
+  '12',
+  '13',
+  '14',
+  '15',
+  '16',
+  '17',
+  '21',
+  '22',
+  '23',
+  '24',
+  '25',
+  '26',
+  '27',
+  '31',
+  '32',
+  '33',
+  '34',
+  '35',
+  '36',
+  '37',
+  '41',
+  '42',
+  '43',
+  '44',
+  '45',
+  '46',
+  '47',
+];
 
 describe('English classroom speech normalization', () => {
   it.each([
@@ -47,10 +76,23 @@ describe('deterministic teaching scene commands', () => {
     expect(parseTeachingCommand(text as string, '11', ids)).toEqual(expected);
   });
   it('supports patient-side groups, upper front six, and bounded counted request history', () => {
-    expect(parseTeachingCommand('select upper front six', '11', ids)).toEqual({ kind: 'select', teeth: ['11', '12', '13', '21', '22', '23'] });
-    expect(parseTeachingCommand('select left posterior teeth', '11', ids)).toEqual({ kind: 'select', teeth: ['24', '25', '26', '27', '34', '35', '36', '37'] });
-    expect(parseTeachingCommand('select lower right molars', '11', ids)).toEqual({ kind: 'select', teeth: ['46', '47'] });
-    expect(parseTeachingCommand('undo the last two changes', '11', ids)).toEqual({ kind: 'history', action: 'undo', count: 2 });
+    expect(parseTeachingCommand('select upper front six', '11', ids)).toEqual({
+      kind: 'select',
+      teeth: ['11', '12', '13', '21', '22', '23'],
+    });
+    expect(parseTeachingCommand('select left posterior teeth', '11', ids)).toEqual({
+      kind: 'select',
+      teeth: ['24', '25', '26', '27', '34', '35', '36', '37'],
+    });
+    expect(parseTeachingCommand('select lower right molars', '11', ids)).toEqual({
+      kind: 'select',
+      teeth: ['46', '47'],
+    });
+    expect(parseTeachingCommand('undo the last two changes', '11', ids)).toEqual({
+      kind: 'history',
+      action: 'undo',
+      count: 2,
+    });
     expect(() => parseTeachingCommand('redo eleven changes', '11', ids)).toThrow(/1 and 10/);
   });
   it.each([
@@ -110,35 +152,90 @@ describe('deterministic teaching scene commands', () => {
   });
 
   it('passes normalized dental movements through all existing target and amount checks', () => {
-    expect(parseTeachingCommand('move tooth eleven buccally one millimeter', null, ids)).toEqual({ kind: 'dental', command: { type: 'move', tooth: '11', direction: 'buccal', amount: 1 } });
-    expect(parseTeachingCommand('torque upper incisors minus three degrees', null, ids)).toEqual({ kind: 'dental', command: { type: 'orthodontic', teeth: ['11', '12', '21', '22'], movement: 'torque', amount: -3 } });
-    expect(parseTeachingCommand('move selected teeth x half a millimeter', '11', ids, ['11', '21'])).toEqual({ kind: 'dental', command: { type: 'move_group', teeth: ['11', '21'], direction: 'x', amount: 0.5 } });
-    expect(parseTeachingCommand('create ten stages', null, ids)).toEqual({ kind: 'dental', command: { type: 'stages', count: 10 } });
-    expect(parseTeachingCommand('rotate it five degrees', '11', ids)).toEqual({ kind: 'dental', command: { type: 'rotate', tooth: '11', axis: 'y', amount: 5 } });
+    expect(parseTeachingCommand('move tooth eleven buccally one millimeter', null, ids)).toEqual({
+      kind: 'dental',
+      command: { type: 'move', tooth: '11', direction: 'buccal', amount: 1 },
+    });
+    expect(parseTeachingCommand('torque upper incisors minus three degrees', null, ids)).toEqual({
+      kind: 'dental',
+      command: {
+        type: 'orthodontic',
+        teeth: ['11', '12', '21', '22'],
+        movement: 'torque',
+        amount: -3,
+      },
+    });
+    expect(
+      parseTeachingCommand('move selected teeth x half a millimeter', '11', ids, ['11', '21']),
+    ).toEqual({
+      kind: 'dental',
+      command: { type: 'move_group', teeth: ['11', '21'], direction: 'x', amount: 0.5 },
+    });
+    expect(parseTeachingCommand('create ten stages', null, ids)).toEqual({
+      kind: 'dental',
+      command: { type: 'stages', count: 10 },
+    });
+    expect(parseTeachingCommand('rotate it five degrees', '11', ids)).toEqual({
+      kind: 'dental',
+      command: { type: 'rotate', tooth: '11', axis: 'y', amount: 5 },
+    });
   });
 
   it.each([
-    ['add attachments to upper incisors', { kind: 'attachment', action: 'add', teeth: ['11', '12', '21', '22'], shape: 'rectangle' }],
-    ['add rectangular attachment to tooth eleven', { kind: 'attachment', action: 'add', teeth: ['11'], shape: 'rectangle' }],
-    ['add ellipsoidal attachments on selected teeth', { kind: 'attachment', action: 'add', teeth: ['11', '21'], shape: 'ellipsoid' }],
-    ['add bevelled attachment to tooth twenty one', { kind: 'attachment', action: 'add', teeth: ['21'], shape: 'beveled' }],
-    ['remove attachments from selected teeth', { kind: 'attachment', action: 'remove', teeth: ['11', '21'] }],
+    [
+      'add attachments to upper incisors',
+      { kind: 'attachment', action: 'add', teeth: ['11', '12', '21', '22'], shape: 'rectangle' },
+    ],
+    [
+      'add rectangular attachment to tooth eleven',
+      { kind: 'attachment', action: 'add', teeth: ['11'], shape: 'rectangle' },
+    ],
+    [
+      'add ellipsoidal attachments on selected teeth',
+      { kind: 'attachment', action: 'add', teeth: ['11', '21'], shape: 'ellipsoid' },
+    ],
+    [
+      'add bevelled attachment to tooth twenty one',
+      { kind: 'attachment', action: 'add', teeth: ['21'], shape: 'beveled' },
+    ],
+    [
+      'remove attachments from selected teeth',
+      { kind: 'attachment', action: 'remove', teeth: ['11', '21'] },
+    ],
   ])('parses a concrete teaching appliance action: %s', (text, expected) => {
     expect(parseTeachingCommand(text as string, '11', ids, ['11', '21'])).toEqual(expected);
   });
 
   it.each([
-    'show front and right views', 'show roots and move tooth eleven x one millimeter',
-    'show before and after', 'select eleven then move it one millimeter',
-    'move tooth eleven buccally one millimeter and show original', 'next step and play',
-    'select teeth eleven to eighteen', 'select teeth 11–18', 'focus upper incisors',
-    'stage fifty one', 'stage minus one', 'stage one point five', 'next', 'continue',
-    'align the teeth automatically', 'fix the bite', 'apply one hundred grams of force',
-    'torque tooth eleven two hundred degrees', 'move tooth eleven x eleven millimeters',
-    'show constructor', 'constructor on', 'show banana', 'show rear view',
-    'add attachments to teeth eleven to eighteen', 'add attachments from tooth eleven',
-    'remove rectangular attachments from tooth eleven', 'remove attachments to tooth eleven',
-    'add attachments to upper incisors and show roots', 'add round attachment to tooth eleven',
+    'show front and right views',
+    'show roots and move tooth eleven x one millimeter',
+    'show before and after',
+    'select eleven then move it one millimeter',
+    'move tooth eleven buccally one millimeter and show original',
+    'next step and play',
+    'select teeth eleven to eighteen',
+    'select teeth 11–18',
+    'focus upper incisors',
+    'stage fifty one',
+    'stage minus one',
+    'stage one point five',
+    'next',
+    'continue',
+    'align the teeth automatically',
+    'fix the bite',
+    'apply one hundred grams of force',
+    'torque tooth eleven two hundred degrees',
+    'move tooth eleven x eleven millimeters',
+    'show constructor',
+    'constructor on',
+    'show banana',
+    'show rear view',
+    'add attachments to teeth eleven to eighteen',
+    'add attachments from tooth eleven',
+    'remove rectangular attachments from tooth eleven',
+    'remove attachments to tooth eleven',
+    'add attachments to upper incisors and show roots',
+    'add round attachment to tooth eleven',
   ])('rejects a compound, unknown, ambiguous or unbounded instruction: %s', text => {
     expect(() => parseTeachingCommand(text, '11', ids, ['11', '21'])).toThrow();
   });
@@ -146,7 +243,9 @@ describe('deterministic teaching scene commands', () => {
   it('requires present tooth IDs and an actual selection when requested', () => {
     expect(() => parseTeachingCommand('select tooth eighteen', '11', ids)).toThrow(/not present/);
     expect(() => parseTeachingCommand('focus it', null, ids)).toThrow(/Select a tooth/);
-    expect(() => parseTeachingCommand('add attachments to selected teeth', null, ids, [])).toThrow(/No teeth/);
+    expect(() => parseTeachingCommand('add attachments to selected teeth', null, ids, [])).toThrow(
+      /No teeth/,
+    );
   });
 });
 
@@ -158,12 +257,19 @@ describe('built-in teaching sequences', () => {
       expect(lesson.steps.length).toBeGreaterThanOrEqual(4);
       expect(lesson.steps.length).toBeLessThanOrEqual(6);
       expect(lesson.steps[0].command).toBe('reset all teeth');
-      let selected = '11', selection = ['11'];
+      let selected = '11',
+        selection = ['11'];
       for (const step of lesson.steps) {
         expect(step.caption.length).toBeGreaterThan(20);
         const action = parseTeachingCommand(step.command, selected, ids, selection);
-        if (action.kind === 'select') { selection = action.teeth; selected = selection[0]; }
-        if (action.kind === 'focus') { selection = [action.tooth]; selected = action.tooth; }
+        if (action.kind === 'select') {
+          selection = action.teeth;
+          selected = selection[0];
+        }
+        if (action.kind === 'focus') {
+          selection = [action.tooth];
+          selected = action.tooth;
+        }
         expect(action.kind).not.toBe('lesson-step');
       }
     }
@@ -174,8 +280,14 @@ describe('explicit workflow voice controls', () => {
   it.each([
     ['start braces workflow', { kind: 'workflow', action: 'start', id: 'fixed-braces' }],
     ['start fixed braces workflow', { kind: 'workflow', action: 'start', id: 'fixed-braces' }],
-    ['start palatal expansion workflow', { kind: 'workflow', action: 'start', id: 'palatal-expansion' }],
-    ['start archwire expansion workflow', { kind: 'workflow', action: 'start', id: 'archwire-expansion' }],
+    [
+      'start palatal expansion workflow',
+      { kind: 'workflow', action: 'start', id: 'palatal-expansion' },
+    ],
+    [
+      'start archwire expansion workflow',
+      { kind: 'workflow', action: 'start', id: 'archwire-expansion' },
+    ],
     ['next workflow step', { kind: 'workflow', action: 'next' }],
     ['previous workflow step', { kind: 'workflow', action: 'previous' }],
     ['restart workflow', { kind: 'workflow', action: 'restart' }],
@@ -198,16 +310,31 @@ describe('explicit workflow voice controls', () => {
   });
 
   it('keeps existing appliance visibility and generic step commands distinct', () => {
-    expect(parseTeachingCommand('show brackets', '11', ids)).toEqual({ kind: 'toggle', target: 'braces', visible: true });
-    expect(parseTeachingCommand('next step', '11', ids)).toEqual({ kind: 'lesson-step', action: 'next' });
-    expect(parseTeachingCommand('play', '11', ids)).toEqual({ kind: 'dental', command: { type: 'play' } });
+    expect(parseTeachingCommand('show brackets', '11', ids)).toEqual({
+      kind: 'toggle',
+      target: 'braces',
+      visible: true,
+    });
+    expect(parseTeachingCommand('next step', '11', ids)).toEqual({
+      kind: 'lesson-step',
+      action: 'next',
+    });
+    expect(parseTeachingCommand('play', '11', ids)).toEqual({
+      kind: 'dental',
+      command: { type: 'play' },
+    });
     expect(parseTeachingCommand('stop', '11', ids)).toEqual({ kind: 'stop' });
   });
 
   it.each([
-    'start expansion workflow', 'start braces workflow and move tooth eleven x one millimeter',
-    'activate expander ten turns', 'show forces of one hundred grams', 'insert archwire and show movement',
-    'install brackets then play demonstration', 'start patient treatment workflow', 'show retention for six months',
+    'start expansion workflow',
+    'start braces workflow and move tooth eleven x one millimeter',
+    'activate expander ten turns',
+    'show forces of one hundred grams',
+    'insert archwire and show movement',
+    'install brackets then play demonstration',
+    'start patient treatment workflow',
+    'show retention for six months',
   ])('does not infer a workflow, force or activation prescription: %s', text => {
     expect(() => parseTeachingCommand(text, '11', ids)).toThrow();
   });
@@ -229,7 +356,10 @@ describe('classroom action aliases', () => {
     ['show cutaway view', { kind: 'anatomy', action: 'cutaway', visible: true }],
     ['show periodontal ligament', { kind: 'anatomy', action: 'ligament', visible: true }],
     ['hide pdl', { kind: 'anatomy', action: 'ligament', visible: false }],
-    ['set bone opacity to thirty five percent', { kind: 'anatomy', action: 'opacity', value: 0.35 }],
+    [
+      'set bone opacity to thirty five percent',
+      { kind: 'anatomy', action: 'opacity', value: 0.35 },
+    ],
     ['bone opacity 0.5', { kind: 'anatomy', action: 'opacity', value: 0.5 }],
     ['set speed to slow', { kind: 'speed', value: 0.5 }],
     ['normal speed', { kind: 'speed', value: 1 }],
@@ -255,9 +385,18 @@ describe('classroom action aliases', () => {
     ['compare translation and tipping', { kind: 'anatomy-lesson', action: 'start' }],
     ['demonstrate tooth translation', { kind: 'anatomy-lesson', action: 'translation' }],
     ['show tipping in the anatomy lesson', { kind: 'anatomy-lesson', action: 'tipping' }],
-  ])('parses %s', (text, expected) => expect(parseTeachingCommand(text as string, '11', ids)).toEqual(expected));
+  ])('parses %s', (text, expected) =>
+    expect(parseTeachingCommand(text as string, '11', ids)).toEqual(expected),
+  );
 
-  it.each(['bone opacity 101 percent', 'bone opacity 1.1', 'show bone reconstruction', 'explain which treatment is safe', 'demonstrate translation safely', 'set speed to 4x'])('does not infer unsupported action: %s', text => {
+  it.each([
+    'bone opacity 101 percent',
+    'bone opacity 1.1',
+    'show bone reconstruction',
+    'explain which treatment is safe',
+    'demonstrate translation safely',
+    'set speed to 4x',
+  ])('does not infer unsupported action: %s', text => {
     expect(() => parseTeachingCommand(text, '11', ids)).toThrow();
   });
 });

@@ -4,14 +4,14 @@ Forma now loads an actual Blender-refined GLB into the interactive workspace. Th
 
 The second Blender morphology pass refines anterior cingula, marginal ridges and incisal corners, adds distinct posterior cusp/groove patterns, and joins multi-root teeth through continuous cervical trunks and furcations. Surface fairing and decimation reduce the original 406,304 triangles to **211,452** while retaining the tooth frames and bracket anchors used by commands and appliances. The model remains an original teaching illustration pending educator review.
 
-| Deliverable | Location |
-| --- | --- |
-| Editable Blender 5.1 source | [forma-teaching-v1.blend](../assets/anatomy/forma-teaching-v1.blend) |
-| Rendered contact sheet | [forma-teaching-contact-sheet.png](../assets/anatomy/forma-teaching-contact-sheet.png) |
-| Fourteen-class detail render | [forma-anatomy-landmarks.png](../assets/anatomy/forma-anatomy-landmarks.png) |
-| Browser model, about 3.86 MB | [forma-teaching-v1.glb](../public/models/forma-teaching-v1.glb) |
-| Mesh names, tooth frames and manifest | [forma-teaching-v1.json](../public/models/forma-teaching-v1.json) |
-| Geometry verification report | [verification.json](../assets/anatomy/verification.json) |
+| Deliverable                           | Location                                                                               |
+| ------------------------------------- | -------------------------------------------------------------------------------------- |
+| Editable Blender 5.1 source           | [forma-teaching-v1.blend](../assets/anatomy/forma-teaching-v1.blend)                   |
+| Rendered contact sheet                | [forma-teaching-contact-sheet.png](../assets/anatomy/forma-teaching-contact-sheet.png) |
+| Fourteen-class detail render          | [forma-anatomy-landmarks.png](../assets/anatomy/forma-anatomy-landmarks.png)           |
+| Browser model, about 3.86 MB          | [forma-teaching-v1.glb](../public/models/forma-teaching-v1.glb)                        |
+| Mesh names, tooth frames and manifest | [forma-teaching-v1.json](../public/models/forma-teaching-v1.json)                      |
+| Geometry verification report          | [verification.json](../assets/anatomy/verification.json)                               |
 
 The application loads the GLB and metadata before mounting the case and workflow viewers. If loading fails, **Retry model** retries the asset; **Open basic model** explicitly uses the procedural fallback. A notice identifies that fallback. Previously saved cases keep their saved meshes rather than being silently replaced by the new asset.
 

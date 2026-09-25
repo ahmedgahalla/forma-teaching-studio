@@ -54,21 +54,21 @@ The legacy `POST /api/interpret` contract is unchanged. It takes only command te
 The successful response is a direct command object:
 
 ```json
-{"type": "move", "tooth": "11", "direction": "buccal", "amount": 1.0}
+{ "type": "move", "tooth": "11", "direction": "buccal", "amount": 1.0 }
 ```
 
-| Type | Additional fields |
-| --- | --- |
-| `move` | `tooth`, `direction`: `buccal`, `lingual`, `mesial`, `distal`, `intrude`, `extrude`, `x`, `y`, or `z`; signed `amount` in mm, -10 to 10, nonzero |
-| `rotate` | `tooth`, `axis`: `x`, `y`, or `z`; signed `amount` in degrees, -180 to 180, nonzero |
-| `move_group` | `teeth`: unique nonempty array of IDs; the same `direction` and millimetre bounds as `move` |
-| `rotate_group` | `teeth`: unique nonempty array of IDs; the same `axis` and degree bounds as `rotate` |
-| `orthodontic` | `teeth`: unique nonempty array of IDs; `movement`: `tip`, `torque`, or `rotate`; signed `amount` in degrees, -180 to 180, nonzero |
-| `reset` | `teeth`: unique nonempty array of IDs; restore these teeth's original transforms |
-| `appliance` | `visible`: boolean; show or hide the braces overlay |
-| `ghost` | `visible`: boolean |
-| `stages` | `count`: integer, 2 to 50 |
-| `undo`, `redo`, `play` | None |
+| Type                   | Additional fields                                                                                                                                |
+| ---------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `move`                 | `tooth`, `direction`: `buccal`, `lingual`, `mesial`, `distal`, `intrude`, `extrude`, `x`, `y`, or `z`; signed `amount` in mm, -10 to 10, nonzero |
+| `rotate`               | `tooth`, `axis`: `x`, `y`, or `z`; signed `amount` in degrees, -180 to 180, nonzero                                                              |
+| `move_group`           | `teeth`: unique nonempty array of IDs; the same `direction` and millimetre bounds as `move`                                                      |
+| `rotate_group`         | `teeth`: unique nonempty array of IDs; the same `axis` and degree bounds as `rotate`                                                             |
+| `orthodontic`          | `teeth`: unique nonempty array of IDs; `movement`: `tip`, `torque`, or `rotate`; signed `amount` in degrees, -180 to 180, nonzero                |
+| `reset`                | `teeth`: unique nonempty array of IDs; restore these teeth's original transforms                                                                 |
+| `appliance`            | `visible`: boolean; show or hide the braces overlay                                                                                              |
+| `ghost`                | `visible`: boolean                                                                                                                               |
+| `stages`               | `count`: integer, 2 to 50                                                                                                                        |
+| `undo`, `redo`, `play` | None                                                                                                                                             |
 
 Permanent FDI tooth IDs (`11`–`18`, `21`–`28`, `31`–`38`, `41`–`48`) are accepted, with at most 32 available, selected, or target IDs. Lists must be unique. `selected_tooth` can be null; `selected_teeth` is optional and defaults to an empty list for older clients. Each selected ID must be in `available_teeth`. “It” and omitted targets refer to `selected_tooth`; “selected teeth” refers to `selected_teeth` and is rejected when that group is empty.
 
@@ -80,18 +80,18 @@ Commands are limited to 500 characters. Unknown fields, malformed IDs, missing c
 
 ### Movement examples and conventions
 
-| Example | Proposed action |
-| --- | --- |
-| `intrude upper incisors 0.5 mm` | `move_group`, `direction: intrude`, all available upper incisors |
-| `torque lower incisors -3 degrees` | `orthodontic`, `movement: torque`, available lower incisors |
-| `expand upper teeth 0.5 mm` | `move_group`, `direction: buccal`, 0.5 mm **per tooth** |
-| `retract upper anterior 1 mm` | `move_group`, `direction: lingual`, 1 mm per selected anterior tooth |
-| `rotate 11 5 degrees` | Legacy single-tooth `rotate`, world `axis: y` |
-| `rotate teeth 11,12 5 degrees around x` | `rotate_group`, world `axis: x`, each tooth about its own pivot |
-| `rotate upper incisors 5 degrees` | `orthodontic`, `movement: rotate`, each tooth about its own long axis |
-| `axially rotate 11 5 degrees` | Single-tooth `orthodontic` axial rotation, using `teeth: ["11"]` |
-| `reset selected teeth` | Restore only the explicitly selected group |
-| `show braces` / `hide braces` | Toggle the appliance visualization |
+| Example                                 | Proposed action                                                       |
+| --------------------------------------- | --------------------------------------------------------------------- |
+| `intrude upper incisors 0.5 mm`         | `move_group`, `direction: intrude`, all available upper incisors      |
+| `torque lower incisors -3 degrees`      | `orthodontic`, `movement: torque`, available lower incisors           |
+| `expand upper teeth 0.5 mm`             | `move_group`, `direction: buccal`, 0.5 mm **per tooth**               |
+| `retract upper anterior 1 mm`           | `move_group`, `direction: lingual`, 1 mm per selected anterior tooth  |
+| `rotate 11 5 degrees`                   | Legacy single-tooth `rotate`, world `axis: y`                         |
+| `rotate teeth 11,12 5 degrees around x` | `rotate_group`, world `axis: x`, each tooth about its own pivot       |
+| `rotate upper incisors 5 degrees`       | `orthodontic`, `movement: rotate`, each tooth about its own long axis |
+| `axially rotate 11 5 degrees`           | Single-tooth `orthodontic` axial rotation, using `teeth: ["11"]`      |
+| `reset selected teeth`                  | Restore only the explicitly selected group                            |
+| `show braces` / `hide braces`           | Toggle the appliance visualization                                    |
 
 The interpreter also understands protract as buccal, constrict as lingual, distalize as distal, and mesialize as mesial. Explicit cm values are converted to mm. Named-group requests remain group operations even if only one tooth matches. A group action should be applied atomically in the frontend and undone in one step.
 
@@ -99,13 +99,13 @@ These are fixed-reference-axis geometric previews. Tip and torque angles are not
 
 Errors have the form `{"detail": "Human-readable error"}`. The frontend displays them without applying an invalid plan. Both endpoints use these status mappings:
 
-| HTTP status | Meaning |
-| --- | --- |
-| `422` | Invalid request, ambiguity, or a provider action that fails independent semantic validation |
-| `503` | No server key, or the provider rejected the configured key with upstream `401` |
-| `402` | Provider reports that API credits are needed |
-| `429` | Provider quota exhausted or temporary rate limiting; the message distinguishes these cases |
-| `502` | Other provider failure, timeout, or malformed provider output |
+| HTTP status | Meaning                                                                                     |
+| ----------- | ------------------------------------------------------------------------------------------- |
+| `422`       | Invalid request, ambiguity, or a provider action that fails independent semantic validation |
+| `503`       | No server key, or the provider rejected the configured key with upstream `401`              |
+| `402`       | Provider reports that API credits are needed                                                |
+| `429`       | Provider quota exhausted or temporary rate limiting; the message distinguishes these cases  |
+| `502`       | Other provider failure, timeout, or malformed provider output                               |
 
 Provider messages are fixed, actionable text selected from status and allowlisted error codes. Upstream exception text, request URLs, bodies and credentials are not returned. The legacy endpoint still returns a proposal only. The current classroom controller automatically executes clear validated requests after frontend preflight, with Stop and whole-request Undo; explicit `preview` commands and manual numeric controls retain preview/apply behavior. Schema validity alone does not establish correct interpretation or clinical validity.
 
@@ -157,12 +157,17 @@ The successful response contains **at most eight ordered actions**, a short summ
 ```json
 {
   "actions": [
-    {"kind": "arch", "arch": "upper"},
-    {"kind": "select", "teeth": ["11", "12", "21", "22"]},
-    {"kind": "dental", "command": {
-      "type": "move_group", "teeth": ["11", "12", "21", "22"],
-      "direction": "buccal", "amount": 0.5
-    }}
+    { "kind": "arch", "arch": "upper" },
+    { "kind": "select", "teeth": ["11", "12", "21", "22"] },
+    {
+      "kind": "dental",
+      "command": {
+        "type": "move_group",
+        "teeth": ["11", "12", "21", "22"],
+        "direction": "buccal",
+        "amount": 0.5
+      }
+    }
   ],
   "summary": "Show and select the upper incisors, then demonstrate the requested displacement.",
   "clarification": null
@@ -204,11 +209,15 @@ For example, with a focused round wire and an existing result, `Use a 0.5 mm wir
 ```json
 {
   "actions": [
-    {"kind": "mechanics", "action": {
-      "type": "wire-section", "id": "wire-1",
-      "section": {"shape": "round", "diameterMm": 0.5}
-    }},
-    {"kind": "mechanics", "action": {"type": "solve"}}
+    {
+      "kind": "mechanics",
+      "action": {
+        "type": "wire-section",
+        "id": "wire-1",
+        "section": { "shape": "round", "diameterMm": 0.5 }
+      }
+    },
+    { "kind": "mechanics", "action": { "type": "solve" } }
   ],
   "summary": "Replace the focused wire diameter and recalculate from the same reference.",
   "clarification": null

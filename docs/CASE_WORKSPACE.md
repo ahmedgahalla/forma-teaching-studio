@@ -32,20 +32,20 @@ restore my workspace
 
 ## Cases and comparisons
 
-| Case | Authored demonstration or comparison |
-| --- | --- |
-| Reference occlusal relationships | Inspect the registered reference without movement. |
-| Translation, tip, torque and rotation | Four geometric movement types from one incisor setup. |
-| Anterior crowding | Centre alignment followed by rotation correction. |
-| Midline diastema | Symmetric closure versus closure with a shifted midpoint. |
-| Increased overjet | Anterior translation versus incisor inclination. |
-| Dental anterior crossbite | Local repositioning through an illustrative clearance waypoint. |
-| Deep bite · anterior intrusion | Upper-incisor intrusion versus a posterior-extrusion concept. |
-| Dental anterior open bite | Reduce the authored anterior separation. |
-| Dental posterior crossbite | Reposition and upright the displayed posterior segment. |
-| Anchorage and space use | Hold posterior reference teeth or let both segments contribute; teeth 14 and 24 are omitted in this example. |
-| Occlusal finishing observations | Inspect alignment, height and inclination separately. |
-| Removable retention | Hold the arrangement still beneath a schematic transparent removable retainer. |
+| Case                                  | Authored demonstration or comparison                                                                         |
+| ------------------------------------- | ------------------------------------------------------------------------------------------------------------ |
+| Reference occlusal relationships      | Inspect the registered reference without movement.                                                           |
+| Translation, tip, torque and rotation | Four geometric movement types from one incisor setup.                                                        |
+| Anterior crowding                     | Centre alignment followed by rotation correction.                                                            |
+| Midline diastema                      | Symmetric closure versus closure with a shifted midpoint.                                                    |
+| Increased overjet                     | Anterior translation versus incisor inclination.                                                             |
+| Dental anterior crossbite             | Local repositioning through an illustrative clearance waypoint.                                              |
+| Deep bite · anterior intrusion        | Upper-incisor intrusion versus a posterior-extrusion concept.                                                |
+| Dental anterior open bite             | Reduce the authored anterior separation.                                                                     |
+| Dental posterior crossbite            | Reposition and upright the displayed posterior segment.                                                      |
+| Anchorage and space use               | Hold posterior reference teeth or let both segments contribute; teeth 14 and 24 are omitted in this example. |
+| Occlusal finishing observations       | Inspect alignment, height and inclination separately.                                                        |
+| Removable retention                   | Hold the arrangement still beneath a schematic transparent removable retainer.                               |
 
 For example, run `load deep bite`, then `choose posterior extrusion`, then `play case`, as separate requests. Choosing another variant always starts that variant at **0%**; it does not add a second mechanism to the current endpoint. Return from free exploration before choosing or playing a prepared variant. `reset prepared case` restores the current variant's start.
 

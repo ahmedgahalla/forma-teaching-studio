@@ -87,15 +87,15 @@ Each tooth movement needs its amount, unit and direction. `move it a little` is 
 
 ## Experiment, restore and explain
 
-| Request | Result |
-| --- | --- |
-| `move 11 buccally 0.5 mm` during a workflow | Creates a temporary variation of the displayed lesson frame. |
-| `return to the lesson` | Restores the current step's authored geometry. Going to the next step also resumes the authored story. |
-| `undo that` / `redo` | Restores the whole command request, including selection and display changes. |
-| `repeat that more slowly` | Replays the prior completed demonstration from its saved starting setup at half speed. It does not accumulate the same edit again. |
-| `explain this step` | Reads the current lesson explanation aloud. |
-| `explain the answer` | Reads the lesson's answer aloud. |
-| `half speed`, `normal speed`, `double speed` | Changes animation playback speed, not clinical treatment time. |
+| Request                                      | Result                                                                                                                             |
+| -------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------- |
+| `move 11 buccally 0.5 mm` during a workflow  | Creates a temporary variation of the displayed lesson frame.                                                                       |
+| `return to the lesson`                       | Restores the current step's authored geometry. Going to the next step also resumes the authored story.                             |
+| `undo that` / `redo`                         | Restores the whole command request, including selection and display changes.                                                       |
+| `repeat that more slowly`                    | Replays the prior completed demonstration from its saved starting setup at half speed. It does not accumulate the same edit again. |
+| `explain this step`                          | Reads the current lesson explanation aloud.                                                                                        |
+| `explain the answer`                         | Reads the lesson's answer aloud.                                                                                                   |
+| `half speed`, `normal speed`, `double speed` | Changes animation playback speed, not clinical treatment time.                                                                     |
 
 Undo, redo and replay must be separate requests. Returning to the lesson or exiting a workflow must be the final action in a compound request. Narration starts only when you ask for it; it is not automatic after every action.
 
