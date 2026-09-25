@@ -12,8 +12,14 @@
   ["Switch to the overhead view", "show occlusal view"],
   ["Conceal the roots and reveal the gums", "hide roots and show gums"],
   ["Make the root visible; make the gingiva invisible", "show roots; hide gums"],
-  ["Please select lower back teeth, then could you move them buccally -0.5 mm", "select lower posterior teeth, then move them buccally -0.5 mm"],
-  ["Would you mind moving upper front teeth by +.25 mm, then rotating them −3 degrees", "move upper anterior teeth by +.25 mm, then rotating them -3 degrees"],
+  [
+    "Please select lower back teeth, then could you move them buccally -0.5 mm",
+    "select lower posterior teeth, then move them buccally -0.5 mm"
+  ],
+  [
+    "Would you mind moving upper front teeth by +.25 mm, then rotating them −3 degrees",
+    "move upper anterior teeth by +.25 mm, then rotating them -3 degrees"
+  ],
   ["Select the upper teeth at the back", "select the upper posterior teeth"],
   ["Let us see the roots and then look from above", "show roots and then show occlusal view"],
   ["Could you put a wire on all teeth", "put a wire on all teeth"],
@@ -22,7 +28,10 @@
   ["Install braces in the top arch", "install braces on upper teeth"],
   ["Put an archwire in bottom", "put an archwire on lower teeth"],
   ["Add a wire on the upper jaw", "add a wire on upper teeth"],
-  ["Put brackets in top and then put a wire on top", "put brackets on upper teeth and then put a wire on upper teeth"],
+  [
+    "Put brackets in top and then put a wire on top",
+    "put brackets on upper teeth and then put a wire on upper teeth"
+  ],
   ["Select the top front six teeth", "select the upper anterior teeth"],
   ["Select bottom left molars", "select lower left molars"],
   ["Put brackets on top teeth except 11", "put brackets on upper teeth except 11"],
@@ -31,10 +40,16 @@
   ["What if we put a wire on the bottom", "what if we put a wire on the bottom"],
   ["Move them to the top", "move them to the top"],
   ["Look from the top", "show occlusal view"],
-  ["Please look from above and calculate an unknown effect", "show occlusal view and calculate an unknown effect"],
+  [
+    "Please look from above and calculate an unknown effect",
+    "show occlusal view and calculate an unknown effect"
+  ],
   ["Please move the upper front teeth", "move the upper anterior teeth"],
   ["Could you select the upper front six", "select the upper anterior teeth"],
-  ["Select the upper front six teeth and move them buccally by one millimeter.", "select the upper anterior teeth and move them buccally by one millimeter."],
+  [
+    "Select the upper front six teeth and move them buccally by one millimeter.",
+    "select the upper anterior teeth and move them buccally by one millimeter."
+  ],
   ["Select lower front 6 teeth", "select lower anterior teeth"],
   ["Select the maxillary six front teeth", "select the maxillary anterior teeth"],
   ["Select the lower front four teeth", "select the lower incisors"],
@@ -42,15 +57,27 @@
   ["Select upper front five teeth", "select upper front five teeth"],
   ["Select six upper teeth", "select six upper teeth"],
   ["Do not select upper front six teeth", "do not select upper front six teeth"],
-  ["Please make the gums disappear without changing tooth 11", "hide gums without changing tooth 11"],
+  [
+    "Please make the gums disappear without changing tooth 11",
+    "hide gums without changing tooth 11"
+  ],
   ["Do not hide the gums", "do not hide the gums"],
   ["Could you not move tooth 11", "could you not move tooth 11"],
   ["Would you mind not showing the roots", "would you mind not showing the roots"],
   ["What if we make the gums disappear", "what if we make the gums disappear"],
-  ["Could you show what would happen if we move a tooth", "could you show what would happen if we move a tooth"],
+  [
+    "Could you show what would happen if we move a tooth",
+    "could you show what would happen if we move a tooth"
+  ],
   ["For this lecture, prescribe a treatment plan", "for this lecture, prescribe a treatment plan"],
   ["Please move these teeth if it is safe", "please move these teeth if it is safe"],
-  ["For this lecture, compare the unknown mechanism with the original", "compare the unknown mechanism with the original"],
-  ["Please repair this mesh and fabricate a result", "please repair this mesh and fabricate a result"],
+  [
+    "For this lecture, compare the unknown mechanism with the original",
+    "compare the unknown mechanism with the original"
+  ],
+  [
+    "Please repair this mesh and fabricate a result",
+    "please repair this mesh and fabricate a result"
+  ],
   ["Please hide gums\nWould you mind showing roots", "hide gums\nshow roots"]
 ]

@@ -93,7 +93,7 @@ Native Sites publication succeeded at https://forma-teaching-mobile.ahmedgah123.
 - A 390×844 browser check found no horizontal overflow, with Ask AI and Stop visible. This is viewport testing, not physical-phone testing. The temporary viewport override was reset.
 - One expensive GLB collision regression exceeded its existing 30-second timeout while video encoding was running. A separate full-suite rerun, with encoding finished, passed all 1,493 tests without changing test limits.
 
- Publication success does not establish physical-phone behavior, actual microphone capture or educator approval. Online AI still uses the temporary authenticated connection to the host computer; see [phone testing](MOBILE_TEST.md).
+Publication success does not establish physical-phone behavior, actual microphone capture or educator approval. Online AI still uses the temporary authenticated connection to the host computer; see [phone testing](MOBILE_TEST.md).
 
 ---
 

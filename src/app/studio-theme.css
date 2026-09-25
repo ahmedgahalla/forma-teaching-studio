@@ -1,38 +1,127 @@
 :root {
-  color-scheme:dark;
-  --ui-bg:#0b1319; --ui-panel:#111f28; --ui-raised:#192b36;
-  --ui-text:#edf6f5; --ui-muted:#a1b4bd; --ui-line:#354c57;
-  --ui-accent:#7ce9d3; --ui-accent-text:#09221e; --ui-soft:#1c383b;
-  --ui-warning:#f2c58b; --ui-warning-bg:#342b20;
-  --ui-error:#ffb4a6; --ui-error-bg:#38252a;
-  --ui-preview:#70e9f1; --ui-preview-bg:#15333e;
-  --ui-shadow:#00000038;
+  color-scheme: dark;
+  --ui-bg: #0b1319;
+  --ui-panel: #111f28;
+  --ui-raised: #192b36;
+  --ui-text: #edf6f5;
+  --ui-muted: #a1b4bd;
+  --ui-line: #354c57;
+  --ui-accent: #7ce9d3;
+  --ui-accent-text: #09221e;
+  --ui-soft: #1c383b;
+  --ui-warning: #f2c58b;
+  --ui-warning-bg: #342b20;
+  --ui-error: #ffb4a6;
+  --ui-error-bg: #38252a;
+  --ui-preview: #70e9f1;
+  --ui-preview-bg: #15333e;
+  --ui-shadow: #00000038;
 }
-:root[data-forma-theme=clinical] {
-  color-scheme:light;
-  --ui-bg:#eef3f5; --ui-panel:#fff; --ui-raised:#e7eef4;
-  --ui-text:#20323d; --ui-muted:#526779; --ui-line:#a4b6c2;
-  --ui-accent:#235cd9; --ui-accent-text:#fff; --ui-soft:#e6edff;
-  --ui-warning:#815014; --ui-warning-bg:#fff3df;
-  --ui-error:#a02d20; --ui-error-bg:#fff0ec;
-  --ui-preview:#006b77; --ui-preview-bg:#e5f5f8;
-  --ui-shadow:#20323d14;
+:root[data-forma-theme='clinical'] {
+  color-scheme: light;
+  --ui-bg: #eef3f5;
+  --ui-panel: #fff;
+  --ui-raised: #e7eef4;
+  --ui-text: #20323d;
+  --ui-muted: #526779;
+  --ui-line: #a4b6c2;
+  --ui-accent: #235cd9;
+  --ui-accent-text: #fff;
+  --ui-soft: #e6edff;
+  --ui-warning: #815014;
+  --ui-warning-bg: #fff3df;
+  --ui-error: #a02d20;
+  --ui-error-bg: #fff0ec;
+  --ui-preview: #006b77;
+  --ui-preview-bg: #e5f5f8;
+  --ui-shadow: #20323d14;
 }
-body {background:var(--ui-bg);color:var(--ui-text)}
-button,input,select,textarea {font:inherit}
-button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visible {outline:2px solid var(--ui-accent);outline-offset:3px}
-button:disabled {cursor:not-allowed}
-.studio-theme-toggle {display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:44px;padding:0 12px;border:1px solid var(--ui-line);border-radius:9px;background:var(--ui-raised);color:var(--ui-text);font-size:13px;white-space:nowrap}
-.studio-theme-toggle:hover {border-color:var(--ui-accent)}
-.tooth-label {background:var(--ui-panel);color:var(--ui-text);border-color:var(--ui-line)}
-.tooth-label.selected {background:var(--ui-accent);color:var(--ui-accent-text)}
-.anatomy-label,.anatomy-caption,.viewer-error {background:var(--ui-panel);color:var(--ui-text);border-color:var(--ui-line)}
-@media(max-width:850px){.studio-theme-toggle span{display:none}.studio-theme-toggle{width:44px;padding:0;flex-shrink:0}}
-@media(max-width:700px){
-  .teaching-studio.workflow-studio .topbar{padding:0 10px;gap:8px}
-  .workflow-studio .topbar>.brand{display:none}
-  .workflow-studio .workflow-back{min-width:44px;min-height:44px}
-  .workflow-studio .header-actions{flex:1;justify-content:flex-end}
-  .workflow-studio .workflow-library-button span{display:none}
-  .workflow-studio .header-actions .workflow-library-button{padding:0;width:44px;min-height:44px}
+body {
+  background: var(--ui-bg);
+  color: var(--ui-text);
+}
+button,
+input,
+select,
+textarea {
+  font: inherit;
+}
+button:focus-visible,
+a:focus-visible,
+input:focus-visible,
+select:focus-visible,
+summary:focus-visible {
+  outline: 2px solid var(--ui-accent);
+  outline-offset: 3px;
+}
+button:disabled {
+  cursor: not-allowed;
+}
+.studio-theme-toggle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 44px;
+  padding: 0 12px;
+  border: 1px solid var(--ui-line);
+  border-radius: 9px;
+  background: var(--ui-raised);
+  color: var(--ui-text);
+  font-size: 13px;
+  white-space: nowrap;
+}
+.studio-theme-toggle:hover {
+  border-color: var(--ui-accent);
+}
+.tooth-label {
+  background: var(--ui-panel);
+  color: var(--ui-text);
+  border-color: var(--ui-line);
+}
+.tooth-label.selected {
+  background: var(--ui-accent);
+  color: var(--ui-accent-text);
+}
+.anatomy-label,
+.anatomy-caption,
+.viewer-error {
+  background: var(--ui-panel);
+  color: var(--ui-text);
+  border-color: var(--ui-line);
+}
+@media (max-width: 850px) {
+  .studio-theme-toggle span {
+    display: none;
+  }
+  .studio-theme-toggle {
+    width: 44px;
+    padding: 0;
+    flex-shrink: 0;
+  }
+}
+@media (max-width: 700px) {
+  .teaching-studio.workflow-studio .topbar {
+    padding: 0 10px;
+    gap: 8px;
+  }
+  .workflow-studio .topbar > .brand {
+    display: none;
+  }
+  .workflow-studio .workflow-back {
+    min-width: 44px;
+    min-height: 44px;
+  }
+  .workflow-studio .header-actions {
+    flex: 1;
+    justify-content: flex-end;
+  }
+  .workflow-studio .workflow-library-button span {
+    display: none;
+  }
+  .workflow-studio .header-actions .workflow-library-button {
+    padding: 0;
+    width: 44px;
+    min-height: 44px;
+  }
 }

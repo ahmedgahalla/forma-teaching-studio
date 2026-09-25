@@ -24,17 +24,17 @@ Resolve a pending preview before another edit, saving an arrangement/case, expor
 
 ## Select and move
 
-| Command | Meaning |
-| --- | --- |
-| `select upper front six` | Available upper incisors and canines. |
-| `select upper left molars` | Patient-left FDI group; left means quadrants 2/3, right means 1/4. |
-| `select teeth 11,12,21,22` | Explicit ordered list; missing IDs reject the request. |
-| `lock posterior teeth` / `unlock selection` | Lock a named group or unlock the selected teeth. |
-| `save group as front segment` | Save the current selection; recall it from the group controls. |
-| `move selected teeth buccally 0.5 mm` | Each tooth follows its own calibrated buccal direction. |
-| `move selected segment posteriorly 1 mm` | One rigid translation, fixed case **−Z**. |
-| `move segment upward 0.5 mm` | One rigid translation, fixed case **+Y**. |
-| `rotate segment teeth 11,21 5 degrees around z` | Rotate the pair about its shared centre and case Z. |
+| Command                                         | Meaning                                                            |
+| ----------------------------------------------- | ------------------------------------------------------------------ |
+| `select upper front six`                        | Available upper incisors and canines.                              |
+| `select upper left molars`                      | Patient-left FDI group; left means quadrants 2/3, right means 1/4. |
+| `select teeth 11,12,21,22`                      | Explicit ordered list; missing IDs reject the request.             |
+| `lock posterior teeth` / `unlock selection`     | Lock a named group or unlock the selected teeth.                   |
+| `save group as front segment`                   | Save the current selection; recall it from the group controls.     |
+| `move selected teeth buccally 0.5 mm`           | Each tooth follows its own calibrated buccal direction.            |
+| `move selected segment posteriorly 1 mm`        | One rigid translation, fixed case **−Z**.                          |
+| `move segment upward 0.5 mm`                    | One rigid translation, fixed case **+Y**.                          |
+| `rotate segment teeth 11,21 5 degrees around z` | Rotate the pair about its shared centre and case Z.                |
 
 Segment translations preserve spacing and orientation; segment rotations preserve relative spacing and orientation throughout playback. Ordinary group rotations rotate each tooth around its own crown centre. Case axes stay fixed when the camera or displayed arch changes: anterior is +Z, posterior −Z, upward +Y, downward −Y. Imported scans retain their supplied orientation, so these aliases describe case axes, not inferred anatomy. Named anatomical movements require calibration.
 

@@ -4,7 +4,7 @@ A map for working in this codebase. Written 2026-09-25 (post commit `0b2e7db`); 
 
 ## Frontend (Next.js 16, static export)
 
-- `next.config.ts` sets `output: 'export'` — there is no server runtime. `npm run build` writes `out/`; `npm start` serves it with `scripts/serve.mjs` (a plain Node static server, *not* `next start`). This Next.js version has breaking changes — read `node_modules/next/dist/docs/` before writing Next.js code (see AGENTS.md).
+- `next.config.ts` sets `output: 'export'` — there is no server runtime. `npm run build` writes `out/`; `npm start` serves it with `scripts/serve.mjs` (a plain Node static server, _not_ `next start`). This Next.js version has breaking changes — read `node_modules/next/dist/docs/` before writing Next.js code (see AGENTS.md).
 - Boot chain: `src/app/layout.tsx` (imports `globals.css` + `studio-theme.css`, wraps in `StudioThemeProvider`) → `src/app/page.tsx` → `<Studio />`.
 
 Inside `src/components/Studio.tsx`:
@@ -20,17 +20,17 @@ Studio
 
 ## Key components (src/components)
 
-| File | Role |
-| --- | --- |
-| `Studio.tsx` | **The monolith (~139 KB).** `CaseStudio`: ~70 useState + one `useReducer(historyReducer)`; executes every `TeachingAction` for case mode via `applyTeaching`; `preflight` makes multi-action requests all-or-nothing; full-state snapshots for undo; mechanics solves; file I/O; the whole case UI layout. Target of the Phase 2 refactor. |
-| `TeachingController.tsx` | `TeachingProvider` + `TeachingCommandBar`. Owns the teaching runtime, push-to-talk, AI service config, `case`/`workflow` mode switching. Scenes register a `TeachingAdapter` via `useTeachingAdapter(mode, adapter)`. **All UI changes flow through `teaching.execute(actions)` / `runControl(text)`** — validated, applied, undoable as one request. Calls the backend (`/api/interpret-teaching`, `/api/analyze-teaching`). |
-| `Viewer.tsx` | Owns the single Three.js scene (renderer, GTAO composer, OrbitControls, gizmo, picking). Scene built once per model; the RAF loop reads props via a ref, so prop changes don't rebuild the scene. Exposes `ViewerHandle` (`setView`, `fit`, `focus`, `snapshot`, `whenRendered`). Used by both studios. |
-| `WorkflowStudio.tsx` | Guided workflows (braces, palatal expansion, archwire expansion) + anatomy lesson. State is one `WorkflowScene` (`lib/workflow-scene`); pure `applyWorkflowAction`. |
-| `TryPanel.tsx` | Try Mode inspector (move/rotate/objectives, locks, saved arrangements). Emits `TryAction`s → `teaching.execute`. |
-| `MechanicsPanel.tsx` | Appliance-mechanics experiment UI (brackets, wires, TADs, elastics, expander, solve). Emits `MechanicsAction[]`. |
-| `StudioExperience.tsx` | Presentation-only pieces for CaseStudio: case library cards, prepared-case panel, mobile dock. |
-| `LectureConsole.tsx` | Lecture overlay (question/answer reveal, playback, variants) with its interaction test; `classroom-workspace.css` carries the pinned command bar / camera row styles added in `0b2e7db`. |
-| `StageBar.tsx`, `PreviewDecisionBar.tsx`, `LectureViewTools.tsx`, `AnatomyPanel.tsx`, `AppliancePalette.tsx` | Small presentational panels; the host wires callbacks to the runtime. |
+| File                                                                                                         | Role                                                                                                                                                                                                                                                                                                                                                                                                                          |
+| ------------------------------------------------------------------------------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `Studio.tsx`                                                                                                 | **The monolith (~139 KB).** `CaseStudio`: ~70 useState + one `useReducer(historyReducer)`; executes every `TeachingAction` for case mode via `applyTeaching`; `preflight` makes multi-action requests all-or-nothing; full-state snapshots for undo; mechanics solves; file I/O; the whole case UI layout. Target of the Phase 2 refactor.                                                                                    |
+| `TeachingController.tsx`                                                                                     | `TeachingProvider` + `TeachingCommandBar`. Owns the teaching runtime, push-to-talk, AI service config, `case`/`workflow` mode switching. Scenes register a `TeachingAdapter` via `useTeachingAdapter(mode, adapter)`. **All UI changes flow through `teaching.execute(actions)` / `runControl(text)`** — validated, applied, undoable as one request. Calls the backend (`/api/interpret-teaching`, `/api/analyze-teaching`). |
+| `Viewer.tsx`                                                                                                 | Owns the single Three.js scene (renderer, GTAO composer, OrbitControls, gizmo, picking). Scene built once per model; the RAF loop reads props via a ref, so prop changes don't rebuild the scene. Exposes `ViewerHandle` (`setView`, `fit`, `focus`, `snapshot`, `whenRendered`). Used by both studios.                                                                                                                       |
+| `WorkflowStudio.tsx`                                                                                         | Guided workflows (braces, palatal expansion, archwire expansion) + anatomy lesson. State is one `WorkflowScene` (`lib/workflow-scene`); pure `applyWorkflowAction`.                                                                                                                                                                                                                                                           |
+| `TryPanel.tsx`                                                                                               | Try Mode inspector (move/rotate/objectives, locks, saved arrangements). Emits `TryAction`s → `teaching.execute`.                                                                                                                                                                                                                                                                                                              |
+| `MechanicsPanel.tsx`                                                                                         | Appliance-mechanics experiment UI (brackets, wires, TADs, elastics, expander, solve). Emits `MechanicsAction[]`.                                                                                                                                                                                                                                                                                                              |
+| `StudioExperience.tsx`                                                                                       | Presentation-only pieces for CaseStudio: case library cards, prepared-case panel, mobile dock.                                                                                                                                                                                                                                                                                                                                |
+| `LectureConsole.tsx`                                                                                         | Lecture overlay (question/answer reveal, playback, variants) with its interaction test; `classroom-workspace.css` carries the pinned command bar / camera row styles added in `0b2e7db`.                                                                                                                                                                                                                                      |
+| `StageBar.tsx`, `PreviewDecisionBar.tsx`, `LectureViewTools.tsx`, `AnatomyPanel.tsx`, `AppliancePalette.tsx` | Small presentational panels; the host wires callbacks to the runtime.                                                                                                                                                                                                                                                                                                                                                         |
 
 Note: `useSpeech.ts` is currently unused (live voice goes through `lib/push-to-talk`) — Phase 2 removes it.
 
@@ -62,17 +62,17 @@ Optional text-only AI interpreter — the app fully works without it; local dete
 
 ## Commands
 
-| Task | Command |
-| --- | --- |
-| Dev server | `npm run dev` (127.0.0.1:3000; auto-builds the worker via `predev`) |
-| Build (static export → `out/`) | `npm run build` |
-| Serve the build | `npm start` (scripts/serve.mjs; `PORT`, `FORMA_HOST` env) |
-| Frontend tests | `npm test` (vitest) |
-| Typecheck | `npm run typecheck` |
-| Lint / format check | `npm run lint` / `npm run format:check` |
+| Task                           | Command                                                                                                                                                                                                     |
+| ------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Dev server                     | `npm run dev` (127.0.0.1:3000; auto-builds the worker via `predev`)                                                                                                                                         |
+| Build (static export → `out/`) | `npm run build`                                                                                                                                                                                             |
+| Serve the build                | `npm start` (scripts/serve.mjs; `PORT`, `FORMA_HOST` env)                                                                                                                                                   |
+| Frontend tests                 | `npm test` (vitest)                                                                                                                                                                                         |
+| Typecheck                      | `npm run typecheck`                                                                                                                                                                                         |
+| Lint / format check            | `npm run lint` / `npm run format:check`                                                                                                                                                                     |
 | Regenerate teaching-case audit | `node --experimental-strip-types scripts/audit-teaching-cases.mjs` — **required whenever `src/lib/teaching-cases.ts`, the GLB or its JSON change**, or `teaching-case-audit.test.ts` fails on hash mismatch |
-| Backend run | from `backend/`: create `.venv`, install `requirements.txt`, copy `.env.example` → `.env`, then `python -m uvicorn main:app --host 127.0.0.1 --port 8000 --env-file .env` |
-| Backend tests | from `backend/`: `.venv\Scripts\python.exe -m pytest -q` (providers mocked, no key needed) |
+| Backend run                    | from `backend/`: create `.venv`, install `requirements.txt`, copy `.env.example` → `.env`, then `python -m uvicorn main:app --host 127.0.0.1 --port 8000 --env-file .env`                                   |
+| Backend tests                  | from `backend/`: `.venv\Scripts\python.exe -m pytest -q` (providers mocked, no key needed)                                                                                                                  |
 
 ## Gotchas
 

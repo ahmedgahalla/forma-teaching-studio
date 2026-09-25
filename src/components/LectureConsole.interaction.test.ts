@@ -15,20 +15,35 @@ beforeEach(() => {
 });
 
 afterEach(async () => {
-  await act(async () => { root.unmount(); });
+  await act(async () => {
+    root.unmount();
+  });
   container.remove();
   vi.unstubAllGlobals();
 });
 
 it('opens a collapsed lecture card when an external reveal arrives and still allows manual closing', async () => {
   const props: LectureConsoleProps = {
-    title: 'Translation and tipping', collapsible: true, showPlayback: false,
-    question: 'Which part of the tooth moves?', answer: 'Compare the crown and root positions.',
-    answerVisible: false, onToggleAnswer: vi.fn(), playing: false, progress: 0,
-    onPlayPause: vi.fn(), onRestart: vi.fn(), onHalf: vi.fn(), onProgress: vi.fn(), speed: 1, onSpeed: vi.fn(),
+    title: 'Translation and tipping',
+    collapsible: true,
+    showPlayback: false,
+    question: 'Which part of the tooth moves?',
+    answer: 'Compare the crown and root positions.',
+    answerVisible: false,
+    onToggleAnswer: vi.fn(),
+    playing: false,
+    progress: 0,
+    onPlayPause: vi.fn(),
+    onRestart: vi.fn(),
+    onHalf: vi.fn(),
+    onProgress: vi.fn(),
+    speed: 1,
+    onSpeed: vi.fn(),
   };
   const render = async (answerVisible: boolean) => {
-    await act(async () => { root.render(createElement(LectureConsole, { ...props, answerVisible })); });
+    await act(async () => {
+      root.render(createElement(LectureConsole, { ...props, answerVisible }));
+    });
   };
   await render(false);
   const toggle = container.querySelector<HTMLButtonElement>('.lecture-console-toggle')!;
@@ -37,12 +52,27 @@ it('opens a collapsed lecture card when an external reveal arrives and still all
   expect(toggle.getAttribute('aria-expanded')).toBe('false');
   expect(card.dataset.expanded).toBe('false');
   expect(answer.hidden).toBe(true);
-  expect(document.getElementById(toggle.getAttribute('aria-controls')!)).toBe(container.querySelector('.lecture-console-content'));
+  expect(document.getElementById(toggle.getAttribute('aria-controls')!)).toBe(
+    container.querySelector('.lecture-console-content'),
+  );
   // JSDOM has no layout: model a card below the scene's visible area and an answer
   // below the card's fold. Only these local containers should move on reveal.
-  const bounds = (top: number, bottom: number) => ({ top, bottom, height: bottom - top, left: 0, right: 300, width: 300, x: 0, y: top, toJSON: () => ({}) });
+  const bounds = (top: number, bottom: number) => ({
+    top,
+    bottom,
+    height: bottom - top,
+    left: 0,
+    right: 300,
+    width: 300,
+    x: 0,
+    y: top,
+    toJSON: () => ({}),
+  });
   Object.defineProperties(card, { scrollHeight: { value: 500 }, clientHeight: { value: 200 } });
-  Object.defineProperties(container, { scrollHeight: { value: 600 }, clientHeight: { value: 300 } });
+  Object.defineProperties(container, {
+    scrollHeight: { value: 600 },
+    clientHeight: { value: 300 },
+  });
   card.getBoundingClientRect = () => bounds(220, 420);
   answer.getBoundingClientRect = () => bounds(400, 500);
   container.getBoundingClientRect = () => bounds(0, 300);
@@ -62,7 +92,9 @@ it('opens a collapsed lecture card when an external reveal arrives and still all
   expect(card.scrollTop).toBe(172);
   expect(container.scrollTop).toBe(120);
 
-  await act(async () => { toggle.click(); });
+  await act(async () => {
+    toggle.click();
+  });
   await render(true);
   expect(toggle.getAttribute('aria-expanded')).toBe('false');
   expect(card.dataset.expanded).toBe('false');

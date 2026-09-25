@@ -1,8 +1,177 @@
-.appliance-palette{display:flex;flex-direction:column;gap:11px;min-width:0;padding:14px 0;border-top:1px solid var(--line);color:var(--ink);font-size:13px;line-height:1.55}
-.appliance-palette .sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
-.appliance-palette-heading{display:flex;align-items:center;justify-content:space-between;gap:10px}.appliance-palette-heading>strong{font-size:14px;font-weight:650}.appliance-palette-heading>span{font-size:12px;letter-spacing:.6px;text-transform:uppercase;color:var(--ui-muted);background:var(--ui-soft);padding:3px 6px;border-radius:4px}
-.appliance-palette-options{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:7px;border:0;padding:0;margin:0;min-width:0}.appliance-palette-options button{display:flex;flex-direction:column;align-items:flex-start;text-align:left;justify-content:center;min-height:60px;padding:9px;border:1px solid var(--ui-line);border-radius:7px;background:var(--ui-panel);color:var(--ui-text);font:inherit}.appliance-palette-options button strong{font-size:13px;font-weight:650}.appliance-palette-options button small{font-size:12px;line-height:1.5;color:var(--ui-muted);margin-top:2px}.appliance-palette-options button:hover:not(:disabled){background:var(--ui-soft)}.appliance-palette-options button[aria-pressed=true]{border-color:var(--ui-accent);background:var(--ui-soft);box-shadow:inset 0 0 0 1px var(--ui-accent)}.appliance-palette-options button[aria-pressed=true] strong{color:var(--ui-text)}
-.appliance-palette p{font-size:12px;line-height:1.65;color:var(--ui-muted);margin:0}.appliance-expander-settings{display:flex;flex-direction:column;gap:11px;padding:11px;background:var(--ui-soft);border:1px solid var(--ui-line);border-radius:7px}.appliance-palate-toggle{display:flex;align-items:center;gap:8px;font-size:13px;cursor:pointer;min-height:44px}.appliance-palate-toggle input{width:16px;height:16px;flex-shrink:0;margin:0;accent-color:var(--teal)}.appliance-opening{display:grid;grid-template-columns:1fr auto;gap:7px;font-size:13px}.appliance-opening output{font-variant-numeric:tabular-nums;color:var(--ui-muted)}.appliance-opening input{grid-column:1/-1;width:100%;min-width:0;margin:2px 0;accent-color:var(--teal)}
-.appliance-palette button:disabled,.appliance-palette input:disabled{opacity:.5;cursor:not-allowed}.appliance-palette button:focus-visible,.appliance-palette input:focus-visible{outline:2px solid var(--ui-accent);outline-offset:3px}
-@media(max-width:700px){.appliance-palette{gap:13px}.appliance-palette-heading>strong{font-size:16px}.appliance-palette-options button{min-height:70px;padding:11px}.appliance-palette-options button strong{font-size:13px}.appliance-palette-options button small,.appliance-palette p{font-size:12px}.appliance-palate-toggle,.appliance-opening{font-size:13px}.appliance-opening input{min-height:30px}}
-@media(min-width:1600px){.appliance-palette-options button strong{font-size:13px}.appliance-palette-options button small,.appliance-palette p{font-size:12px}}
+.appliance-palette {
+  display: flex;
+  flex-direction: column;
+  gap: 11px;
+  min-width: 0;
+  padding: 14px 0;
+  border-top: 1px solid var(--line);
+  color: var(--ink);
+  font-size: 13px;
+  line-height: 1.55;
+}
+.appliance-palette .sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+.appliance-palette-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+.appliance-palette-heading > strong {
+  font-size: 14px;
+  font-weight: 650;
+}
+.appliance-palette-heading > span {
+  font-size: 12px;
+  letter-spacing: 0.6px;
+  text-transform: uppercase;
+  color: var(--ui-muted);
+  background: var(--ui-soft);
+  padding: 3px 6px;
+  border-radius: 4px;
+}
+.appliance-palette-options {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 7px;
+  border: 0;
+  padding: 0;
+  margin: 0;
+  min-width: 0;
+}
+.appliance-palette-options button {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  text-align: left;
+  justify-content: center;
+  min-height: 60px;
+  padding: 9px;
+  border: 1px solid var(--ui-line);
+  border-radius: 7px;
+  background: var(--ui-panel);
+  color: var(--ui-text);
+  font: inherit;
+}
+.appliance-palette-options button strong {
+  font-size: 13px;
+  font-weight: 650;
+}
+.appliance-palette-options button small {
+  font-size: 12px;
+  line-height: 1.5;
+  color: var(--ui-muted);
+  margin-top: 2px;
+}
+.appliance-palette-options button:hover:not(:disabled) {
+  background: var(--ui-soft);
+}
+.appliance-palette-options button[aria-pressed='true'] {
+  border-color: var(--ui-accent);
+  background: var(--ui-soft);
+  box-shadow: inset 0 0 0 1px var(--ui-accent);
+}
+.appliance-palette-options button[aria-pressed='true'] strong {
+  color: var(--ui-text);
+}
+.appliance-palette p {
+  font-size: 12px;
+  line-height: 1.65;
+  color: var(--ui-muted);
+  margin: 0;
+}
+.appliance-expander-settings {
+  display: flex;
+  flex-direction: column;
+  gap: 11px;
+  padding: 11px;
+  background: var(--ui-soft);
+  border: 1px solid var(--ui-line);
+  border-radius: 7px;
+}
+.appliance-palate-toggle {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  cursor: pointer;
+  min-height: 44px;
+}
+.appliance-palate-toggle input {
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
+  margin: 0;
+  accent-color: var(--teal);
+}
+.appliance-opening {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 7px;
+  font-size: 13px;
+}
+.appliance-opening output {
+  font-variant-numeric: tabular-nums;
+  color: var(--ui-muted);
+}
+.appliance-opening input {
+  grid-column: 1/-1;
+  width: 100%;
+  min-width: 0;
+  margin: 2px 0;
+  accent-color: var(--teal);
+}
+.appliance-palette button:disabled,
+.appliance-palette input:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+.appliance-palette button:focus-visible,
+.appliance-palette input:focus-visible {
+  outline: 2px solid var(--ui-accent);
+  outline-offset: 3px;
+}
+@media (max-width: 700px) {
+  .appliance-palette {
+    gap: 13px;
+  }
+  .appliance-palette-heading > strong {
+    font-size: 16px;
+  }
+  .appliance-palette-options button {
+    min-height: 70px;
+    padding: 11px;
+  }
+  .appliance-palette-options button strong {
+    font-size: 13px;
+  }
+  .appliance-palette-options button small,
+  .appliance-palette p {
+    font-size: 12px;
+  }
+  .appliance-palate-toggle,
+  .appliance-opening {
+    font-size: 13px;
+  }
+  .appliance-opening input {
+    min-height: 30px;
+  }
+}
+@media (min-width: 1600px) {
+  .appliance-palette-options button strong {
+    font-size: 13px;
+  }
+  .appliance-palette-options button small,
+  .appliance-palette p {
+    font-size: 12px;
+  }
+}

@@ -5,15 +5,25 @@ import { PreviewDecisionBar, type PreviewDecisionBarProps } from './PreviewDecis
 
 function props(overrides: Partial<PreviewDecisionBarProps> = {}): PreviewDecisionBarProps {
   return {
-    pending: { summary: 'Translate upper front teeth 1 mm', collision: 'clear', checkedSteps: 9, canApply: true },
+    pending: {
+      summary: 'Translate upper front teeth 1 mm',
+      collision: 'clear',
+      checkedSteps: 9,
+      canApply: true,
+    },
     affectedCount: 6,
-    onApply: vi.fn(), onDiscard: vi.fn(), onModify: vi.fn(),
+    onApply: vi.fn(),
+    onDiscard: vi.fn(),
+    onModify: vi.fn(),
     ...overrides,
   };
 }
-const render = (value: PreviewDecisionBarProps) => renderToStaticMarkup(createElement(PreviewDecisionBar, value));
+const render = (value: PreviewDecisionBarProps) =>
+  renderToStaticMarkup(createElement(PreviewDecisionBar, value));
 function button(html: string, label: string) {
-  const match = html.match(new RegExp(`<button\\b[^>]*>(?:(?!</button>)[\\s\\S])*${label}</button>`));
+  const match = html.match(
+    new RegExp(`<button\\b[^>]*>(?:(?!</button>)[\\s\\S])*${label}</button>`),
+  );
   expect(match, `Button ${label} should be present`).not.toBeNull();
   return match![0];
 }
@@ -54,13 +64,16 @@ describe('persistent preview decision bar', () => {
     ['limited', 'Path check reached its sample limit'],
     ['checking', 'Checking the movement path'],
     ['unchecked', 'Movement path not checked'],
-  ] as const)('preserves shared eligibility and accurately reports %s paths', (collision, message) => {
-    const value = props();
-    value.pending = { ...value.pending!, collision, canApply: false };
-    const html = render(value);
-    expect(html).toContain(message);
-    expect(button(html, 'Apply')).toContain('disabled');
-  });
+  ] as const)(
+    'preserves shared eligibility and accurately reports %s paths',
+    (collision, message) => {
+      const value = props();
+      value.pending = { ...value.pending!, collision, canApply: false };
+      const html = render(value);
+      expect(html).toContain(message);
+      expect(button(html, 'Apply')).toContain('disabled');
+    },
+  );
 
   it('only enables an explicitly unrestricted crossing when shared eligibility permits it', () => {
     const value = props({ unrestricted: true, affectedCount: 1 });
@@ -78,7 +91,8 @@ describe('persistent preview decision bar', () => {
 
   it('disables every decision during an in-flight operation, including unrestricted Apply', () => {
     const html = render(props({ busy: true, unrestricted: true }));
-    for (const label of ['Apply', 'Discard', 'Modify']) expect(button(html, label)).toContain('disabled');
+    for (const label of ['Apply', 'Discard', 'Modify'])
+      expect(button(html, label)).toContain('disabled');
   });
 
   it('does not invent an affected count when the host has not supplied one', () => {
