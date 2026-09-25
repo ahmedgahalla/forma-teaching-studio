@@ -1,6 +1,6 @@
 'use client';
 import type { CaseStudioApi } from './api';
-import { CaseScenarioPanel } from '../StudioExperience';
+import { CaseScenarioPanel } from './StudioExperience';
 
 export function InspectorScenario({ api }: { api: CaseStudioApi }) {
   const { scenario, caseDefinition, caseVariant } = api;

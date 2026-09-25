@@ -9,8 +9,8 @@ import type { MechanicsExperiment } from '@/lib/mechanics';
 import type { MechanicsFocus, PointedReference } from '@/lib/mechanics-commands';
 import type { WorkflowTransfer } from '@/lib/workflow-transfer';
 import type { Landmark } from '@/lib/appliances';
-import type { WirePreset } from '../MechanicsPanel';
-import type { ArchView, ViewName, ViewerCamera } from '../Viewer';
+import type { WirePreset } from '../mechanics/MechanicsPanel';
+import type { ArchView, ViewName, ViewerCamera } from '../viewer/Viewer';
 
 /** A workflow setup transferred into the case workspace, with the way back. */
 export type WorkflowOriginState = { setup: WorkflowTransfer; snapshot: unknown } | null;

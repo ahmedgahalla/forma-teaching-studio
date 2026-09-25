@@ -11,36 +11,35 @@ const MAX_LINE_LENGTH = 500;
 // Do NOT add entries: new files must respect the limit. Remove entries as
 // Phase 2 lands. Counts recorded 2026-09-25 for reference.
 const OVERSIZE_ALLOWLIST = new Set([
-  'backend/main.py', // 1178 — Phase 2.5 splits into routers
-  'backend/mechanics.py', // 576
-  'src/app/globals.css', // 4987 — Phase 2.3 splits per component
-  'src/components/MechanicsPanel.tsx', // 903
-  'src/components/Studio.tsx', // 5123 — Phase 2.2
-  'src/components/StudioExperience.tsx', // 617
-  'src/components/TeachingController.tsx', // 856
-  'src/components/TryPanel.tsx', // 927
-  'src/components/Viewer.tsx', // 1331
-  'src/components/WorkflowStudio.tsx', // 767
-  'src/components/classroom-workspace.css', // 544
-  'src/components/lecture-console.css', // 316
-  'src/components/mechanics.css', // 1239
-  'src/components/studio-experience.css', // 2175
-  'src/components/try-mode.css', // 699
-  'src/lib/classroom/advance.ts', // ~350 - one context-simulation switch; splitting the single function would scatter one algorithm
-  'src/lib/commands.ts', // 379
-  'src/lib/demo.ts', // 347
-  'src/lib/geometry.ts', // 341
-  'src/lib/lecture.ts', // 522
-  'src/lib/mechanics-commands.ts', // 760
-  'src/lib/mechanics/solver.ts', // 476
-  'src/lib/mechanics/state.ts', // 435
-  'src/lib/teaching-anatomy.ts', // 546 — content-heavy; may stay data in Phase 2
-  'src/lib/teaching-cases.ts', // 786 — content as data
-  'src/lib/teaching-runtime.ts', // 391
-  'src/lib/try-mode.ts', // 973
-  'src/lib/workflow-appliances.ts', // 454
-  'src/lib/workflow-scene.ts', // 364
-  'src/lib/workflows.ts', // 551 — content as data
+  // Feature UIs kept whole after the Phase 2 split (each is one panel's
+  // self-contained view; further cuts would scatter one feature's markup).
+  // Counts as of 2026-09-25; do not add entries, and shrink on any rework.
+  'src/components/Studio.tsx', // 1011 - CaseStudio orchestrator: hooks, derived state, api assembly, root layout
+  'src/components/viewer/Viewer.tsx', // 1332 - one WebGL scene lifecycle; splitting the renderer effect risks disposal bugs
+  'src/components/try/TryPanel.tsx', // 928 - Try Mode's single control surface
+  'src/components/mechanics/MechanicsPanel.tsx', // 904 - the experiment builder panel
+  'src/components/workflow/WorkflowStudio.tsx', // 772 - the guided-classroom scene
+  'src/components/case/StudioExperience.tsx', // 618 - case library + scenario presentation set
+  'src/components/teaching/TeachingController.tsx', // 570 - runtime host + provider wiring
+  // Parsers/engines whose function boundaries are the natural unit.
+  'src/lib/try-mode.ts', // 974 - Try state machine + geometry objectives (follow-up candidate)
+  'src/lib/mechanics-commands.ts', // 761 - bounded mechanics grammar
+  'src/lib/mechanics/solver.ts', // 477 - the elastic solver
+  'src/lib/mechanics/state.ts', // 436 - experiment reducer + validation
+  'src/lib/classroom/advance.ts', // 354 - one context-simulation switch
+  'src/lib/commands.ts', // 380 - the dental command grammar
+  'src/lib/lecture.ts', // 413 - TeachingAction union + single-action parser
+  'src/lib/teaching-runtime.ts', // 392 - request lifecycle in one place
+  'src/lib/geometry.ts', // 320 - case (de)serialization contract
+  'src/lib/demo.ts', // 348 - procedural fallback model builder
+  'src/lib/workflow-scene.ts', // 365 - workflow scene reducer + lesson content
+  'src/lib/workflow-appliances.ts', // 455 - workflow appliance mesh builders
+  'src/lib/teaching-anatomy.ts', // 547 - anatomy mesh builders
+  // Content as data (AGENTS.md): prose-heavy authored material.
+  'src/lib/teaching-cases.ts', // 787
+  'src/lib/workflows.ts', // 552
+  // Backend model+grammar pair mirrored by the frontend contract.
+  'backend/mechanics.py', // 577
 ]);
 
 // Single lines over MAX_LINE_LENGTH (long regex/string literals) pending Phase 2.

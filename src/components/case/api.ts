@@ -24,9 +24,9 @@ import type {
   useServiceDraft,
   useStagePlayback,
 } from './state';
-import type { useTeaching } from '../TeachingController';
-import type { ViewerCamera, ViewerHandle, ViewName } from '../Viewer';
-import type { TryPanelProps } from '../TryPanel';
+import type { useTeaching } from '../teaching/TeachingController';
+import type { ViewerCamera, ViewerHandle, ViewName } from '../viewer/Viewer';
+import type { TryPanelProps } from '../try/TryPanel';
 import type { DentalCase } from '@/lib/geometry';
 import type { CaseSession } from '@/lib/planning';
 import type { anatomicalFrame, Pose, Transforms, Vec3 } from '@/lib/model';

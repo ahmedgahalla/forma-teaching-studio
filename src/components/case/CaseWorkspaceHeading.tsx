@@ -1,7 +1,7 @@
 'use client';
 import type { CaseStudioApi } from './api';
 import { Camera, ChevronRight, CircleHelp, Focus, Maximize } from 'lucide-react';
-import { LectureViewTools } from '../LectureViewTools';
+import { LectureViewTools } from '../lecture/LectureViewTools';
 
 export function CaseWorkspaceHeading({ api }: { api: CaseStudioApi }) {
   const { viewer } = api;

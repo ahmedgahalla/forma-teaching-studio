@@ -2,7 +2,7 @@ import type { MovementDirection, Vec3 } from '@/lib/model';
 import type { AttachmentSpec } from '@/lib/attachments';
 import type { Command } from '@/lib/commands';
 import { TEACHING_CASES, type TeachingCaseId } from '@/lib/teaching-cases';
-import type { CaseDiagramKind } from '../StudioExperience';
+import type { CaseDiagramKind } from './StudioExperience';
 
 export const directions: { id: MovementDirection; label: string; detail: string }[] = [
   { id: 'buccal', label: 'Buccal', detail: 'Labial / outward' },

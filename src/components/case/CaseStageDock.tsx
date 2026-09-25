@@ -1,6 +1,6 @@
 'use client';
 import type { CaseStudioApi } from './api';
-import StageBar from '../StageBar';
+import StageBar from '../shared/StageBar';
 import { hasMechanicsMovement } from '@/lib/mechanics-presentation';
 
 export function CaseStageDock({ api }: { api: CaseStudioApi }) {

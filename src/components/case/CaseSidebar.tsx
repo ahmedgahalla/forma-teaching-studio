@@ -1,9 +1,9 @@
 'use client';
 import type { CaseStudioApi } from './api';
-import { MobilePanelHeading } from '../StudioExperience';
+import { MobilePanelHeading } from './StudioExperience';
 import { ArrowUpRight, BookOpen, Box, ChevronRight, CircleHelp, Plus, Upload } from 'lucide-react';
 import { Toggle } from './ui';
-import AnatomyPanel from '../AnatomyPanel';
+import AnatomyPanel from '../viewer/AnatomyPanel';
 import { orderedArchIds } from '@/lib/appliances';
 
 export function CaseSidebar({ api }: { api: CaseStudioApi }) {

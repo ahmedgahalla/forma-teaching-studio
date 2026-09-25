@@ -1,8 +1,8 @@
 'use client';
 import type { CaseStudioApi } from './api';
 import { Box, ShieldCheck, SlidersHorizontal } from 'lucide-react';
-import MechanicsPanel from '../MechanicsPanel';
-import AppliancePalette from '../AppliancePalette';
+import MechanicsPanel from '../mechanics/MechanicsPanel';
+import AppliancePalette from '../mechanics/AppliancePalette';
 import { Toggle } from './ui';
 import { hasMechanicsMovement } from '@/lib/mechanics-presentation';
 import type { AttachmentSpec } from '@/lib/attachments';

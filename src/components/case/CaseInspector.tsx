@@ -9,8 +9,8 @@ import {
   SlidersHorizontal,
   Undo2,
 } from 'lucide-react';
-import { MobilePanelHeading } from '../StudioExperience';
-import TryPanel from '../TryPanel';
+import { MobilePanelHeading } from './StudioExperience';
+import TryPanel from '../try/TryPanel';
 import { toothArch } from '@/lib/appliances';
 import { InspectorScenario } from './InspectorScenario';
 import { InspectorMove } from './InspectorMove';

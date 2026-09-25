@@ -17,10 +17,10 @@ import {
   RotateCcw,
   X,
 } from 'lucide-react';
-import { StudioThemeToggle } from './StudioTheme';
-import { LectureConsole } from './LectureConsole';
-import { LecturePointer, LectureViewTools } from './LectureViewTools';
-import Viewer, { type ViewerCamera, type ViewerHandle, type ViewName } from './Viewer';
+import { StudioThemeToggle } from '../shared/StudioTheme';
+import { LectureConsole } from '../lecture/LectureConsole';
+import { LecturePointer, LectureViewTools } from '../lecture/LectureViewTools';
+import Viewer, { type ViewerCamera, type ViewerHandle, type ViewName } from '../viewer/Viewer';
 import { createDemo } from '@/lib/geometry';
 import { WORKFLOWS } from '@/lib/workflows';
 import {
@@ -31,8 +31,12 @@ import {
   workflowSceneStep,
   type WorkflowScene,
 } from '@/lib/workflow-scene';
-import AnatomyPanel from './AnatomyPanel';
-import { TeachingCommandBar, useTeaching, useTeachingAdapter } from './TeachingController';
+import AnatomyPanel from '../viewer/AnatomyPanel';
+import {
+  TeachingCommandBar,
+  useTeaching,
+  useTeachingAdapter,
+} from '../teaching/TeachingController';
 import { captureWorkflowArrangement } from '@/lib/workflow-transfer';
 import { sceneAnalysisContext } from '@/lib/scene-analysis';
 

@@ -1,7 +1,7 @@
 'use client';
 import type { CaseStudioApi } from './api';
 import { Download, Layers3, Presentation, Settings2, Upload } from 'lucide-react';
-import { StudioThemeToggle } from '../StudioTheme';
+import { StudioThemeToggle } from '../shared/StudioTheme';
 
 export function CaseTopbar({ api }: { api: CaseStudioApi }) {
   return (

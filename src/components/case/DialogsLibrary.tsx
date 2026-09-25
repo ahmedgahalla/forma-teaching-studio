@@ -2,8 +2,8 @@
 import type { CaseStudioApi } from './api';
 import { ArrowUpRight } from 'lucide-react';
 import { Dialog } from './ui';
-import { TeachingCaseLibrary } from '../StudioExperience';
-import { WorkflowLibrary } from '../WorkflowStudio';
+import { TeachingCaseLibrary } from './StudioExperience';
+import { WorkflowLibrary } from '../workflow/WorkflowStudio';
 import { CASE_CARDS } from './constants';
 import { DENTAL_ARRANGEMENTS } from '@/lib/dental-arrangements';
 import { LESSONS } from '@/lib/lecture';

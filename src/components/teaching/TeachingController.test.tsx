@@ -9,8 +9,8 @@ import {
   useTeaching,
   useTeachingAdapter,
 } from './TeachingController';
-import type { SpeechRecognitionLike, SpeechResultEvent } from '../lib/speech';
-import type { TeachingAction } from '../lib/lecture';
+import type { SpeechRecognitionLike, SpeechResultEvent } from '../../lib/speech';
+import type { TeachingAction } from '../../lib/lecture';
 
 class FakeRecognition implements SpeechRecognitionLike {
   static instances: FakeRecognition[] = [];

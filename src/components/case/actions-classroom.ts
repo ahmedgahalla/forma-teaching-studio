@@ -1,8 +1,8 @@
 import type { CaseRefs, CaseStudioApi } from './api';
 import type { ClassroomSnapshot } from './types';
 import type { WorkflowTransfer } from '@/lib/workflow-transfer';
-import type { ViewerCamera } from '../Viewer';
-import { DEFAULT_WIRE_PRESET } from '../MechanicsPanel';
+import type { ViewerCamera } from '../viewer/Viewer';
+import { DEFAULT_WIRE_PRESET } from '../mechanics/MechanicsPanel';
 import { createWorkflowTryState } from '@/lib/workflow-transfer';
 import { mapWorkflowAppliance } from '@/lib/appliance-display';
 

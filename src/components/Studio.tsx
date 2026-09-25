@@ -14,13 +14,13 @@ import {
   SlidersHorizontal,
   Undo2,
 } from 'lucide-react';
-import ModelBootstrap from './ModelBootstrap';
+import ModelBootstrap from './viewer/ModelBootstrap';
 import { getTeachingAssetCase } from '@/lib/anatomy-assets';
 import { casePathAudit } from '@/lib/case-path-audit';
 import { DENTAL_ARRANGEMENTS } from '@/lib/dental-arrangements';
 import { getTeachingCase, sampleCaseDemonstration } from '@/lib/teaching-cases';
-import { MobileStudioDock } from './StudioExperience';
-import { type ViewerCamera, type ViewerHandle, type ViewName } from './Viewer';
+import { MobileStudioDock } from './case/StudioExperience';
+import { type ViewerCamera, type ViewerHandle, type ViewName } from './viewer/Viewer';
 import {} from '@/lib/geometry';
 import { anatomicalFrame, emptyPose, type Vec3 } from '@/lib/model';
 import { interpolateTransforms, stageTransforms } from '@/lib/planning';
@@ -28,16 +28,16 @@ import { archSpans, centreDistance, toothMatrix } from '@/lib/analysis';
 import { toothArch } from '@/lib/appliances';
 import {} from '@/lib/attachments';
 import { LESSONS } from '@/lib/lecture';
-import { TeachingProvider, useTeaching, useTeachingAdapter } from './TeachingController';
-import WorkflowStudio from './WorkflowStudio';
+import { TeachingProvider, useTeaching, useTeachingAdapter } from './teaching/TeachingController';
+import WorkflowStudio from './workflow/WorkflowStudio';
 import {} from '@/lib/appliance-display';
-import './combined-workspace.css';
-import { PreviewDecisionBar } from './PreviewDecisionBar';
+import './shared/combined-workspace.css';
+import { PreviewDecisionBar } from './try/PreviewDecisionBar';
 import { createMechanicsExperiment } from '@/lib/mechanics';
 import { mechanicsDisplayPoses, explainMechanics } from '@/lib/mechanics-presentation';
 import { sceneAnalysisContext } from '@/lib/scene-analysis';
-import './mechanics.css';
-import './classroom-workspace.css';
+import './mechanics/mechanics.css';
+import './case/classroom-workspace.css';
 import { mechanicsCommandContext } from '@/lib/mechanics-commands';
 import { previewPose, archCurvePoints } from '@/lib/try-mode';
 

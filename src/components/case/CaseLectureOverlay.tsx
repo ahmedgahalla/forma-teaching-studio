@@ -1,6 +1,6 @@
 'use client';
 import type { CaseStudioApi } from './api';
-import { LectureConsole } from '../LectureConsole';
+import { LectureConsole } from '../lecture/LectureConsole';
 
 export function CaseLectureOverlay({ api }: { api: CaseStudioApi }) {
   return (

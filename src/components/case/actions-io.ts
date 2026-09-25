@@ -2,7 +2,7 @@ import type { CaseRefs, CaseStudioApi } from './api';
 import type { DentalCase } from '@/lib/geometry';
 import type { Transforms } from '@/lib/model';
 import type { CaseSession } from '@/lib/planning';
-import type { ViewName } from '../Viewer';
+import type { ViewName } from '../viewer/Viewer';
 import { errorText } from './constants';
 import { toothArch } from '@/lib/appliances';
 import { DEFAULT_APPLIANCE_DISPLAY } from '@/lib/appliance-display';

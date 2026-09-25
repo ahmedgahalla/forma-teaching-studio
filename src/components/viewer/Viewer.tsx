@@ -37,7 +37,7 @@ import {
 } from '@/lib/teaching-anatomy';
 import { createRenderBarrier } from '@/lib/render-barrier';
 import { createRemovableRetainer } from '@/lib/removable-retainer';
-import { useStudioTheme } from './StudioTheme';
+import { useStudioTheme } from '../shared/StudioTheme';
 import {
   cameraViewDirection,
   displayedToothBounds,

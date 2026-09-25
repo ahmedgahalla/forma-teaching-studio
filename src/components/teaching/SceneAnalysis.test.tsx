@@ -8,7 +8,7 @@ import {
   useTeaching,
   useTeachingAdapter,
 } from './TeachingController';
-import { sceneAnalysisContext, type SceneAnalysis } from '../lib/scene-analysis';
+import { sceneAnalysisContext, type SceneAnalysis } from '../../lib/scene-analysis';
 
 let teaching: ReturnType<typeof useTeaching>, root: Root, container: HTMLDivElement;
 const applied = vi.fn(),

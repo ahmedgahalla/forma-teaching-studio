@@ -17,9 +17,9 @@ import type { SurfaceIntersection } from '@/lib/analysis';
 import type { Landmark } from '@/lib/appliances';
 import type { Axis, MovementDirection, Transforms } from '@/lib/model';
 import type { AttachmentSpec } from '@/lib/attachments';
-import { DEFAULT_WIRE_PRESET, type WirePreset } from '../MechanicsPanel';
-import type { MobileStudioPanel } from '../StudioExperience';
-import type { ArchView, ViewName } from '../Viewer';
+import { DEFAULT_WIRE_PRESET, type WirePreset } from '../mechanics/MechanicsPanel';
+import type { MobileStudioPanel } from './StudioExperience';
+import type { ArchView, ViewName } from '../viewer/Viewer';
 import { DEFAULT_ATTACHMENT } from './constants';
 import type { PreparedScenario, WorkflowOriginState } from './types';
 

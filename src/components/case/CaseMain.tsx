@@ -1,8 +1,8 @@
 'use client';
 import type { CaseStudioApi } from './api';
-import type { ViewName } from '../Viewer';
-import { TeachingCommandBar } from '../TeachingController';
-import { wireSizeLabel } from '../MechanicsPanel';
+import type { ViewName } from '../viewer/Viewer';
+import { TeachingCommandBar } from '../teaching/TeachingController';
+import { wireSizeLabel } from '../mechanics/MechanicsPanel';
 import { CaseWorkspaceHeading } from './CaseWorkspaceHeading';
 import { CaseArchToolbar } from './CaseArchToolbar';
 import { CaseViewport } from './CaseViewport';

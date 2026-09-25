@@ -1,6 +1,6 @@
 'use client';
 import type { CaseStudioApi } from './api';
-import type { ArchView } from '../Viewer';
+import type { ArchView } from '../viewer/Viewer';
 import { BookOpen, ChevronLeft, ChevronRight, Eye, Ruler, X } from 'lucide-react';
 
 export function CaseArchToolbar({ api }: { api: CaseStudioApi }) {
