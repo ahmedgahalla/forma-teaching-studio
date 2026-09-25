@@ -288,6 +288,7 @@ export default function WorkflowStudio({ active }: { active: boolean }) {
     };
     window.addEventListener('keydown', key);
     return () => window.removeEventListener('keydown', key);
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- TODO(phase-2): revisit effect deps; adding them may change behavior
   }, [active]);
 
   const lectureProgress = (value: number) =>

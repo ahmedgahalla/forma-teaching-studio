@@ -4,6 +4,7 @@ import { createSpeechController, speechConstructor, type SpeechState } from '@/l
 
 export function useSpeech(onFinal: (text: string) => void, onError: (message: string) => void) {
   const callbacks = useRef({ onFinal, onError });
+  // eslint-disable-next-line react-hooks/refs -- TODO(phase-2): move this ref access out of render
   callbacks.current = { onFinal, onError };
   const controller = useRef<ReturnType<typeof createSpeechController> | null>(null);
   const [state, setState] = useState<SpeechState>({

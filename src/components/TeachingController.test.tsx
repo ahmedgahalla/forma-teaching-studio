@@ -53,6 +53,7 @@ const synthesis = {
 };
 
 function Harness() {
+  // eslint-disable-next-line react-hooks/globals -- TODO(phase-2): test harness reassigns a module-level double
   teaching = useTeaching();
   const [scene, setScene] = useState<Scene>({ selected: '11', roots: false, gums: true });
   useTeachingAdapter('case', {
@@ -175,16 +176,14 @@ describe('hosted command service discovery', () => {
       button.click();
     });
     expect(teaching.preferAI).toBe(true);
-    const fetcher = vi
-      .fn()
-      .mockResolvedValue({
-        ok: true,
-        json: async () => ({
-          actions: [{ kind: 'toggle', target: 'roots', visible: true }],
-          summary: 'Roots are now visible for your students.',
-          clarification: null,
-        }),
-      });
+    const fetcher = vi.fn().mockResolvedValue({
+      ok: true,
+      json: async () => ({
+        actions: [{ kind: 'toggle', target: 'roots', visible: true }],
+        summary: 'Roots are now visible for your students.',
+        clarification: null,
+      }),
+    });
     vi.stubGlobal('fetch', fetcher);
     await act(async () => {
       await teaching.run('show roots');

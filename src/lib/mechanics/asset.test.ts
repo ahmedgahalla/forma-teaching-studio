@@ -107,8 +107,8 @@ describe('shipped synthetic geometry and absolute mechanics stages', () => {
     expect(norm(moment)).toBeLessThan(1e-7);
   });
   it('keeps configured reference tooth poses after Apply, re-solve and save/load', () => {
-    let state = install(),
-      first = solveMechanics(state),
+    let state = install();
+    const first = solveMechanics(state),
       before = JSON.stringify(state.reference);
     state = transitionMechanics(attachMechanicsResult(state, first), { type: 'apply' });
     expect(solveMechanics(state).transforms).toEqual(first.transforms);

@@ -36,7 +36,8 @@ export function createPushToTalk(
     if (r) {
       detach(r);
       try {
-        r.abort ? r.abort() : r.stop();
+        if (r.abort) r.abort();
+        else r.stop();
       } catch {
         /* Already ended. */
       }

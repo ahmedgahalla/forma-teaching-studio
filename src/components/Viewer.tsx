@@ -1309,6 +1309,7 @@ const Viewer = forwardRef<ViewerHandle, Props>(function Viewer(props, ref) {
         ...[...wireMeshes.values()].map(m => m.geometry),
       ].forEach(g => g.dispose());
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- TODO(phase-2): revisit effect deps; adding them may change behavior
   }, [props.model]);
   return (
     <>

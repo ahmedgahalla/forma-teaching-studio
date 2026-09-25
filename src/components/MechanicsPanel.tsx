@@ -65,6 +65,7 @@ export default function MechanicsPanel(p: Props) {
     ? undefined
     : config.wires.find(item => item.id === p.focus.wireId) || config.wires.at(-1);
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- TODO(phase-2): derive this state or move the sync out of the effect
     setNewWire(false);
   }, [p.focus.wireId]);
   const tad = config.tads.find(item => item.id === p.focus.tadId) || config.tads.at(-1);
@@ -82,13 +83,16 @@ export default function MechanicsPanel(p: Props) {
     [palate, setPalate] = useState('100');
   useEffect(() => {
     if (wire) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- TODO(phase-2): derive this state or move the sync out of the effect
       setExpansion(String(wire.expansionMm));
       setTwist(String(wire.torqueDeg));
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- TODO(phase-2): revisit effect deps; adding them may change behavior
   }, [wire?.id, wire?.expansionMm, wire?.torqueDeg]);
   const expander = config.expanders[0];
   useEffect(() => {
     if (expander) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- TODO(phase-2): derive this state or move the sync out of the effect
       setLeft(expander.left.join(', '));
       setRight(expander.right.join(', '));
       setActivation(String(expander.activationMm));

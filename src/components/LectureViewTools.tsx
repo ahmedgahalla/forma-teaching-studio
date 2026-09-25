@@ -58,6 +58,7 @@ export function LectureViewTools({
 export function LecturePointer({ enabled, onExit }: { enabled: boolean; onExit: () => void }) {
   const spot = useRef<HTMLSpanElement>(null);
   const exit = useRef(onExit);
+  // eslint-disable-next-line react-hooks/refs -- TODO(phase-2): move this ref access out of render
   exit.current = onExit;
   useEffect(() => {
     if (!enabled) return;

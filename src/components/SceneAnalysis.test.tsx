@@ -16,6 +16,7 @@ const applied = vi.fn(),
   paused = vi.fn();
 
 function Harness() {
+  // eslint-disable-next-line react-hooks/globals -- TODO(phase-2): test harness reassigns a module-level double
   teaching = useTeaching();
   const [roots, setRoots] = useState(false);
   useTeachingAdapter('case', {

@@ -238,10 +238,13 @@ export default function TryPanel(props: TryPanelProps) {
   const arches = new Set(selectedIds.map(tooth => (Number(tooth[0]) <= 2 ? 'upper' : 'lower')));
   const arch = arches.size === 1 ? ([...arches][0] as 'upper' | 'lower') : null;
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- TODO(phase-2): derive this state or move the sync out of the effect
     setReplacement(lastEdit ? String(lastEdit.amount) : '');
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- TODO(phase-2): revisit effect deps; adding them may change behavior
   }, [lastEdit?.amount, lastEdit?.summary]);
   useEffect(() => {
     if (arch && archTargets) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- TODO(phase-2): derive this state or move the sync out of the effect
       setWidth(String(archTargets[arch].width));
       setDepth(String(archTargets[arch].depth));
     }

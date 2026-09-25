@@ -385,6 +385,7 @@ function CaseStudio({ active }: { active: boolean }) {
   const prepared = !!scenario && !scenario.exploring;
   const caseDefinition = useMemo(
     () => (scenario ? getTeachingCase(scenario.caseId) : null),
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- TODO(phase-2): revisit effect deps; adding them may change behavior
     [scenario?.caseId],
   );
   const caseVariant = caseDefinition?.variants.find(item => item.id === scenario?.variantId);
@@ -393,10 +394,12 @@ function CaseStudio({ active }: { active: boolean }) {
       scenario && getTeachingAssetCase()
         ? casePathAudit(scenario.caseId, scenario.variantId)
         : null,
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- TODO(phase-2): revisit effect deps; adding them may change behavior
     [scenario?.caseId, scenario?.variantId],
   );
   const caseStart = useMemo(
     () => (scenario ? sampleCaseDemonstration(scenario.caseId, scenario.variantId, 0) : undefined),
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- TODO(phase-2): revisit effect deps; adding them may change behavior
     [scenario?.caseId, scenario?.variantId],
   );
   const [anatomy, setAnatomy] = useState<AnatomyViewState>({ ...DEFAULT_ANATOMY });
@@ -513,6 +516,7 @@ function CaseStudio({ active }: { active: boolean }) {
   };
   const moved = model.teeth.filter(item => toothMoved(item.id)).length;
   const tryActive = sandbox.active && !lessonId && !prepared;
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- TODO(phase-2): revisit effect deps; adding them may change behavior
   const tryState = useMemo(() => ({ ...sandbox, current: plan.current }), [sandbox, plan.current]);
   const demonstration = tryActive ? sandbox.pending || sandbox.lastEdit : null;
   const curveArch =
@@ -528,6 +532,7 @@ function CaseStudio({ active }: { active: boolean }) {
         : demonstration
           ? previewPose(demonstration, stage / stages)
           : stageTransforms(plan.current, checkpoints, stage, stages, sandbox.original),
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- TODO(phase-2): revisit effect deps; adding them may change behavior
     [
       prepared,
       scenario?.caseId,
@@ -545,6 +550,7 @@ function CaseStudio({ active }: { active: boolean }) {
       model.demo && model.teeth.every(item => item.calibrated)
         ? createMechanicsExperiment(model, plan.current)
         : null,
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- TODO(phase-2): revisit effect deps; adding them may change behavior
     [model, plan.current],
   );
   const activeExperiment = mechanics || emptyExperiment;
@@ -611,6 +617,7 @@ function CaseStudio({ active }: { active: boolean }) {
   const spans = useMemo(
     () =>
       archSpans(model, prepared ? shown : plan.current, prepared ? caseStart : sandbox.original),
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- TODO(phase-2): revisit effect deps; adding them may change behavior
     [model, prepared, shown, plan.current, caseStart, sandbox.original],
   );
   const note = (text: string, error = false) => {
@@ -687,6 +694,7 @@ function CaseStudio({ active }: { active: boolean }) {
     }
   };
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- TODO(phase-2): derive this state or move the sync out of the effect
     setAttachmentDraft(tooth.attachment || DEFAULT_ATTACHMENT);
   }, [tooth]);
   useEffect(() => {
@@ -705,14 +713,17 @@ function CaseStudio({ active }: { active: boolean }) {
     return () => clearInterval(timer);
   }, [playing, stages, playbackSpeed, reverse, mechanics?.result]);
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- TODO(phase-2): derive this state or move the sync out of the effect
     if (playing && (reverse ? stage <= 0 : stage >= stages)) setPlaying(false);
   }, [playing, stage, stages, reverse]);
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- TODO(phase-2): derive this state or move the sync out of the effect
     setContacts(null);
     setChecking(false);
     return () => {
       if (contactTimer.current) clearTimeout(contactTimer.current);
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- TODO(phase-2): revisit effect deps; adding them may change behavior
   }, [model, plan.current]);
   useEffect(() => {
     if (!active) return;
@@ -730,6 +741,7 @@ function CaseStudio({ active }: { active: boolean }) {
     };
     window.addEventListener('keydown', fn);
     return () => window.removeEventListener('keydown', fn);
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- TODO(phase-2): revisit effect deps; adding them may change behavior
   }, [stages, active]);
 
   const applyTry = (action: TryAction): boolean => {
@@ -1627,6 +1639,7 @@ function CaseStudio({ active }: { active: boolean }) {
   };
   useEffect(() => {
     if (!active) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- TODO(phase-2): derive this state or move the sync out of the effect
       setPlaying(false);
       setModal(null);
       setDragPreview(null);
@@ -2541,6 +2554,7 @@ function CaseStudio({ active }: { active: boolean }) {
       onChangeCapture={sceneInteraction}
     >
       <header className="topbar">
+        {/* eslint-disable-next-line @next/next/no-html-link-for-pages -- TODO(phase-3): intentional full reload of the static export */}
         <a className="brand" href="/" aria-label="Forma home">
           <span className="brand-icon">
             <Layers3 size={22} />
@@ -3008,6 +3022,7 @@ function CaseStudio({ active }: { active: boolean }) {
                 <button onClick={() => setLecture(!lecture)}>
                   {lecture ? 'Editing workspace' : 'Professor controls'}
                 </button>
+                {/* eslint-disable-next-line react-hooks/refs -- TODO(phase-2): move this ref access out of render */}
                 {returnWorkspace.current && (
                   <button
                     onClick={() =>
