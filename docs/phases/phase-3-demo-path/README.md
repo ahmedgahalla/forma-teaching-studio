@@ -1,6 +1,6 @@
 # Phase 3 — demo path
 
-**Status:** planned, not started · **Branch:** — · **PR:** — 
+**Status:** planned, not started · **Branch:** — · **PR:** —
 
 **Goal:** the app opens straight into a large full-bite view, advanced tooling moves into a drawer, and a scripted 3–4 minute walkthrough supports the lecture demo (audience: an orthodontist who lectures at universities). Builds on `docs/PRODUCT_DIRECTION.md`'s consolidation direction.
 

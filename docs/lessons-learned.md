@@ -49,3 +49,10 @@ Entry format: mistake (with link) · root cause · prevention · status (`noted`
 - **Root cause:** no `.gitattributes`; line-ending policy was left to each machine's git config.
 - **Prevention:** `.gitattributes` with `* text=auto eol=lf` plus binary rules; `format:check` in CI confirms LF end to end.
 - **Status:** automated · **Count:** 1
+
+## 7. Manual setup steps get skipped
+
+- **Mistake:** environment setup (venv creation, pip installs, `blame.ignoreRevsFile`, dependency re-installs after pulls) lived only as instructions in READMEs; steps got skipped, producing "works on my machine" drift between the two developers.
+- **Root cause:** humans and tools follow the shortest path; anything not automated silently decays.
+- **Prevention:** `npm run setup` is the single entry point (version checks, npm ci, venv + requirements, git config), and `.githooks/` post-merge/post-checkout hooks re-sync dependencies only when the lockfiles actually changed, enabled automatically by the npm `prepare` script. The session start protocol verifies sync.
+- **Status:** automated · **Count:** 1

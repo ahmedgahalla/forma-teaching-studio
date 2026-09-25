@@ -4,6 +4,14 @@ A local 3D dental workspace for university lectures, geometric demonstrations an
 
 Start with the [combined workspace guide](docs/COMBINED_WORKSPACE.md) to move between prepared lessons and free experiments, the [Try Mode guide](docs/TRY_MODE.md) for the default editing workspace, and the [Voice Classroom guide](docs/VOICE_CLASSROOM.md) for microphone controls, anatomy layers and lesson commands.
 
+## Getting started (development)
+
+1. Install Git, Node 22, and Python 3.13.
+2. Clone the repo.
+3. Run `npm run setup`.
+
+Everything after that is automatic: setup installs frontend and backend dependencies, configures git, and enables hooks that re-sync dependencies whenever a pull changes `package-lock.json` or `backend/requirements.txt`. Developers and AI tools follow [AGENTS.md](AGENTS.md).
+
 ## Conversational control and model explanation
 
 Use **Ask AI** to control the scene in natural language, or **Analyze** to discuss the current setup without editing it. Try “For this lecture, could you make the gums disappear and reveal the roots?” or “Would you mind moving the upper front teeth buccally half a millimeter?” The application still validates every action, target and numeric amount; broad wording does not become unrestricted treatment planning.

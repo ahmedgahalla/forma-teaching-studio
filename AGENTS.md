@@ -17,13 +17,14 @@ This file is the complete shared context for every AI tool working in this repo.
 ## Session start protocol — run before any work, every session
 
 1. `git pull` on main. Note which branch you are on; never work directly on main.
-2. Read, in order:
+2. Verify dependencies are in sync (`node_modules` and `backend/.venv` match the lockfiles); if unsure or anything is missing, run `npm run setup` — it is safe to rerun and configures git hooks that keep dependencies synced after pulls.
+3. Read, in order:
    - `docs/STATUS.md` — current state
    - `docs/lessons-learned.md` — mistakes already made; do not repeat them
    - your inbox: `docs/reviews/from-auditor/` if you are the builder, `docs/reviews/from-builder/` if you are the auditor — every file with `status: open`
    - the current phase doc under `docs/phases/`
    - the latest handoff note in `docs/handoffs/`
-3. Before starting the task, summarize in 3–5 lines: the current phase, open inbox items, and the lessons relevant to this task.
+4. Before starting the task, summarize in 3–5 lines: the current phase, open inbox items, and the lessons relevant to this task.
 
 ## Session end protocol — run before finishing any task
 

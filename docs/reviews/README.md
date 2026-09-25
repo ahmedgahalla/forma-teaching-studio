@@ -17,6 +17,7 @@ status: open <!-- open | resolved | wontfix -->
 **Suggested fix:** …
 
 <!-- On resolution, the addressee appends: -->
+
 **Resolution (YYYY-MM-DD):** what was done, or why wontfix.
 ```
 

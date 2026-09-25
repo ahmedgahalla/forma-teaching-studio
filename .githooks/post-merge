@@ -1,0 +1,4 @@
+#!/bin/sh
+# Auto-sync dependencies after a merge/pull. Enabled by `npm run setup` or the
+# npm `prepare` script (git config core.hooksPath .githooks).
+. "$(dirname "$0")/sync-deps.sh" ORIG_HEAD HEAD
