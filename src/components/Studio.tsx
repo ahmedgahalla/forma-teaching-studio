@@ -3,54 +3,21 @@ import { useEffect, useMemo, useRef } from 'react';
 import { flushSync } from 'react-dom';
 import { Vector3 } from 'three';
 import {
-  ArrowDownToLine,
-  ArrowRight,
-  ArrowUpRight,
   BookOpen,
   Box,
-  Camera,
-  Check,
-  ChevronLeft,
-  ChevronRight,
   CircleHelp,
-  Download,
-  Eye,
-  Focus,
-  History,
   Layers3,
-  Maximize,
   MousePointer2,
-  Move3D,
-  Plus,
-  Presentation,
-  Redo2,
-  Rotate3D,
-  RotateCcw,
-  Ruler,
-  Settings2,
-  ShieldCheck,
   SlidersHorizontal,
   Undo2,
-  Upload,
-  X,
 } from 'lucide-react';
 import ModelBootstrap from './ModelBootstrap';
 import { getTeachingAssetCase } from '@/lib/anatomy-assets';
 import { casePathAudit } from '@/lib/case-path-audit';
 import { createDentalArrangement, DENTAL_ARRANGEMENTS } from '@/lib/dental-arrangements';
 import { createTeachingCase, getTeachingCase, sampleCaseDemonstration } from '@/lib/teaching-cases';
-import {
-  TeachingCaseLibrary,
-  CaseScenarioPanel,
-  MobileStudioDock,
-  MobilePanelHeading,
-} from './StudioExperience';
-import Viewer, {
-  type ArchView,
-  type ViewerCamera,
-  type ViewerHandle,
-  type ViewName,
-} from './Viewer';
+import { MobileStudioDock } from './StudioExperience';
+import { type ViewerCamera, type ViewerHandle, type ViewName } from './Viewer';
 import {
   createDemo,
   download,
@@ -77,7 +44,7 @@ import {
   movementRows,
   toothMatrix,
 } from '@/lib/analysis';
-import { orderedArchIds, toothArch } from '@/lib/appliances';
+import { toothArch } from '@/lib/appliances';
 import {
   createAttachmentGeometry,
   validateAttachment,
@@ -85,29 +52,18 @@ import {
 } from '@/lib/attachments';
 import { LESSONS, parseTeachingCommand, type TeachingAction } from '@/lib/lecture';
 import { exportStage, exportStageSequence } from '@/lib/stage-export';
-import {
-  TeachingProvider,
-  TeachingCommandBar,
-  useTeaching,
-  useTeachingAdapter,
-} from './TeachingController';
-import AnatomyPanel from './AnatomyPanel';
+import { TeachingProvider, useTeaching, useTeachingAdapter } from './TeachingController';
 import { DEFAULT_ANATOMY } from '@/lib/teaching-anatomy';
-import WorkflowStudio, { WorkflowLibrary } from './WorkflowStudio';
-import AppliancePalette from './AppliancePalette';
+import WorkflowStudio from './WorkflowStudio';
 import {
   DEFAULT_APPLIANCE_DISPLAY,
-  applianceView,
   mapWorkflowAppliance,
   validateApplianceDisplay,
 } from '@/lib/appliance-display';
 import { createWorkflowTryState, type WorkflowTransfer } from '@/lib/workflow-transfer';
 import './combined-workspace.css';
-import TryPanel, { type TryPanelProps } from './TryPanel';
+import { type TryPanelProps } from './TryPanel';
 import { PreviewDecisionBar } from './PreviewDecisionBar';
-import { StudioThemeToggle } from './StudioTheme';
-import { LectureConsole } from './LectureConsole';
-import { LecturePointer, LectureViewTools } from './LectureViewTools';
 import {
   createMechanicsExperiment,
   transitionMechanics,
@@ -124,8 +80,7 @@ import {
   recommendedMechanicsMagnification,
 } from '@/lib/mechanics-presentation';
 import { sceneAnalysisContext } from '@/lib/scene-analysis';
-import StageBar from './StageBar';
-import MechanicsPanel, { DEFAULT_WIRE_PRESET, wireSizeLabel } from './MechanicsPanel';
+import { DEFAULT_WIRE_PRESET } from './MechanicsPanel';
 import './mechanics.css';
 import './classroom-workspace.css';
 import { mechanicsCommandContext, reduceMechanicsFocus } from '@/lib/mechanics-commands';
@@ -140,18 +95,14 @@ import {
   type TryAction,
 } from '@/lib/try-mode';
 
-import { Dialog, Toggle } from './case/ui';
-import {
-  directions,
-  axisVectors,
-  pretty,
-  DEFAULT_ATTACHMENT,
-  errorText,
-  EXAMPLES,
-  commandLabel,
-  CASE_CARDS,
-} from './case/constants';
+import { DEFAULT_ATTACHMENT, errorText, commandLabel } from './case/constants';
 import type { ClassroomSnapshot, LessonSnapshot } from './case/types';
+import type { CaseStudioApi } from './case/api';
+import { CaseDialogs } from './case/CaseDialogs';
+import { CaseMain } from './case/CaseMain';
+import { CaseInspector } from './case/CaseInspector';
+import { CaseSidebar } from './case/CaseSidebar';
+import { CaseTopbar } from './case/CaseTopbar';
 import {
   useAttachmentState,
   useCalibrationInputs,
@@ -2345,6 +2296,238 @@ function CaseStudio({ active }: { active: boolean }) {
     )
       teaching.interact();
   };
+  // eslint-disable-next-line react-hooks/refs -- TODO(phase-2): mirror the saved-workspace marker into state
+  const canRestoreWorkspace = !!returnWorkspace.current;
+  const api: CaseStudioApi = {
+    pointed,
+    setPointed,
+    mechanics,
+    setMechanics,
+    wirePreset,
+    setWirePreset,
+    magnification,
+    setMagnification,
+    predictResponse,
+    setPredictResponse,
+    responseRevealed,
+    setResponseRevealed,
+    forceVectors,
+    setForceVectors,
+    mechanicsFocus,
+    setMechanicsFocus,
+    scenario,
+    setScenario,
+    anatomy,
+    setAnatomy,
+    model,
+    setModel,
+    plan,
+    dispatch,
+    sandbox,
+    setSandbox,
+    applianceDisplay,
+    setApplianceDisplay,
+    workflowOrigin,
+    setWorkflowOrigin,
+    comparisonName,
+    setComparisonName,
+    traces,
+    setTraces,
+    curveVisible,
+    setCurveVisible,
+    reverse,
+    setReverse,
+    arch,
+    setArch,
+    ghost,
+    setGhost,
+    gums,
+    setGums,
+    labels,
+    setLabels,
+    grid,
+    setGrid,
+    braces,
+    setBraces,
+    roots,
+    setRoots,
+    bracketStyle,
+    setBracketStyle,
+    ligatureColor,
+    setLigatureColor,
+    opening,
+    setOpening,
+    view,
+    setView,
+    selectedIds,
+    setSelectedIds,
+    selected,
+    setSelected,
+    multi,
+    setMulti,
+    stages,
+    setStages,
+    stage,
+    setStage,
+    playing,
+    setPlaying,
+    checkpoints,
+    setCheckpoints,
+    checkpointName,
+    setCheckpointName,
+    direction,
+    setDirection,
+    distance,
+    setDistance,
+    degrees,
+    setDegrees,
+    rotationMode,
+    setRotationMode,
+    axis,
+    setAxis,
+    command,
+    setCommand,
+    status,
+    setStatus,
+    statusError,
+    setStatusError,
+    mobilePanel,
+    setMobilePanel,
+    toolsOpen,
+    setToolsOpen,
+    modal,
+    setModal,
+    panel,
+    setPanel,
+    lecture,
+    setLecture,
+    playbackSpeed,
+    setPlaybackSpeed,
+    isolated,
+    setIsolated,
+    pointer,
+    setPointer,
+    files,
+    setFiles,
+    scale,
+    setScale,
+    busy,
+    setBusy,
+    importError,
+    setImportError,
+    measureTo,
+    setMeasureTo,
+    measureMode,
+    setMeasureMode,
+    landmarks,
+    setLandmarks,
+    contacts,
+    setContacts,
+    checking,
+    setChecking,
+    lessonId,
+    setLessonId,
+    lessonStep,
+    setLessonStep,
+    attachments,
+    setAttachments,
+    attachmentDraft,
+    setAttachmentDraft,
+    tool,
+    setTool,
+    dragPreview,
+    setDragPreview,
+    bAxis,
+    setBAxis,
+    mAxis,
+    setMAxis,
+    oAxis,
+    setOAxis,
+    apiDraft,
+    setApiDraft,
+    teaching,
+    active,
+    viewer,
+    caseInput,
+    commandInput,
+    pendingCamera,
+    pendingView,
+    contactTimer,
+    importAbort,
+    lessonSnapshots,
+    prepared,
+    caseDefinition,
+    caseVariant,
+    pathAudit,
+    caseStart,
+    dentalArrangement,
+    apiUrl,
+    aiEnabled,
+    tooth,
+    pose,
+    ids,
+    calibrated,
+    toothMoved,
+    moved,
+    tryActive,
+    tryState,
+    demonstration,
+    curveArch,
+    geometricShown,
+    emptyExperiment,
+    activeExperiment,
+    actualShown,
+    shown,
+    physicalPoint,
+    mechanicsGhost,
+    curve,
+    currentLesson,
+    spans,
+    actualCalibration,
+    tryPanelProps,
+    canRestoreWorkspace,
+    note,
+    session,
+    selectTooth,
+    selectGroup,
+    save,
+    applyTry,
+    sendTry,
+    toggleApplianceVisibility,
+    apply,
+    load,
+    importFiles,
+    importCase,
+    setCamera,
+    addCheckpoint,
+    scanContacts,
+    openCalibration,
+    csv,
+    editAttachments,
+    poseCommit,
+    snapshot,
+    restoreSnapshot,
+    advanceLesson,
+    applyTeaching,
+    runTeaching,
+    captureClassroom,
+    restoreClassroom,
+    importWorkflowSetup,
+    applyMechanics,
+    sendMechanics,
+    chooseTool,
+    exportShown,
+    exportSequence,
+    setAiEnabled,
+    pointDistance,
+    distanceTo,
+    highlightedContacts,
+    latestEdit,
+    numericEdit,
+    collision,
+    sceneInteraction,
+  };
+
   return (
     <div
       className={`app-shell braces-studio teaching-studio try-studio studio-experience ${lecture ? 'lecture-mode' : ''}`}
@@ -2356,63 +2539,7 @@ function CaseStudio({ active }: { active: boolean }) {
       onClickCapture={sceneInteraction}
       onChangeCapture={sceneInteraction}
     >
-      <header className="topbar">
-        {/* eslint-disable-next-line @next/next/no-html-link-for-pages -- TODO(phase-3): intentional full reload of the static export */}
-        <a className="brand" href="/" aria-label="Forma home">
-          <span className="brand-icon">
-            <Layers3 size={22} />
-          </span>
-          forma
-          <span className="brand-divider" />
-          <span className="brand-sub">TEACHING STUDIO</span>
-        </a>
-        <div className="top-center">
-          <span className="studio-live-dot" />
-          Interactive classroom
-        </div>
-        <div className="header-actions">
-          <StudioThemeToggle />
-          <button
-            className="button light small workflows-button"
-            aria-label="Teaching library"
-            onClick={() => setModal('workflows')}
-          >
-            <Layers3 size={16} />
-            <span>Teaching library</span>
-          </button>
-          <button
-            className={`button small presentation-button ${lecture ? 'active' : ''}`}
-            aria-pressed={lecture}
-            aria-label={lecture ? 'Exit lecture mode' : 'Enter lecture mode'}
-            onClick={() => setLecture(!lecture)}
-          >
-            <Presentation size={16} />
-            <span>{lecture ? 'Exit lecture' : 'Lecture mode'}</span>
-          </button>
-          <button
-            className="text-button open-case-button"
-            onClick={() => caseInput.current?.click()}
-            disabled={busy}
-          >
-            <Upload size={16} />
-            Open case
-          </button>
-          <button className="button dark small" aria-label="Save case" onClick={save}>
-            <Download size={15} />
-            <span>Save case</span>
-          </button>
-          <button
-            className="avatar"
-            onClick={() => {
-              setApiDraft(apiUrl || 'http://127.0.0.1:8000');
-              setModal('settings');
-            }}
-            aria-label="Open settings"
-          >
-            <Settings2 size={18} />
-          </button>
-        </div>
-      </header>
+      <CaseTopbar api={api} />
       {tryActive && (
         <PreviewDecisionBar
           pending={tryPanelProps.pending || null}
@@ -2487,1889 +2614,11 @@ function CaseStudio({ active }: { active: boolean }) {
             <span>Guide</span>
           </button>
         </nav>
-        <aside className="sidebar">
-          <MobilePanelHeading
-            title={mobilePanel === 'layers' ? 'Layers' : 'Selection'}
-            onClose={() => setMobilePanel('model')}
-          />
-          <div className="case-heading">
-            <div className="eyebrow">
-              {prepared
-                ? 'PREPARED TEACHING CASE'
-                : tryActive
-                  ? 'TRY MODE · FREE EXPLORATION'
-                  : currentLesson
-                    ? 'GUIDED TEACHING'
-                    : 'CASE EDITOR'}
-            </div>
-            <h1>
-              {caseDefinition?.title ||
-                (model.name.includes('Dental Class')
-                  ? model.name.split(' · synthetic')[0]
-                  : model.demo
-                    ? 'Complete dentition'
-                    : model.name)}
-            </h1>
-            <div className="case-meta">
-              {model.demo ? 'Illustrative anatomy' : 'Imported meshes'}
-              <span>·</span>
-              {model.teeth.length} teeth
-            </div>
-          </div>
-          <button
-            className="import-button"
-            onClick={() => {
-              setImportError('');
-              setModal('import');
-            }}
-          >
-            <Upload size={17} />
-            Import STL models
-            <Plus size={15} />
-          </button>
-          <div className="section-heading">
-            TOOTH SELECTION<span className="count">{selectedIds.length}</span>
-          </div>
-          <div className="tooth-chart">
-            {(['upper', 'lower'] as const).map(a => (
-              <div className="chart-arch" key={a}>
-                <div className="chart-title">
-                  <span>{a === 'upper' ? 'Upper · maxillary' : 'Lower · mandibular'}</span>
-                  <button onClick={() => selectGroup(`${a} teeth`)}>Select arch</button>
-                </div>
-                <div className="chart-teeth">
-                  {orderedArchIds(ids, a).map(id => (
-                    <button
-                      key={id}
-                      className={`${selectedIds.includes(id) ? 'selected' : ''} ${sandbox.lockedIds.includes(id) ? 'tooth-locked' : ''} ${toothMoved(id) ? 'moved' : ''}`}
-                      title={
-                        sandbox.lockedIds.includes(id) ? `Tooth ${id} · locked` : `Tooth ${id}`
-                      }
-                      aria-label={`Select tooth ${id}`}
-                      aria-pressed={selectedIds.includes(id)}
-                      onClick={e => selectTooth(id, e.shiftKey || e.ctrlKey || e.metaKey)}
-                    >
-                      {id}
-                    </button>
-                  ))}
-                </div>
-              </div>
-            ))}
-          </div>
-          <Toggle label="Multi-select teeth" value={multi} onChange={() => setMulti(!multi)} />
-          <div className="group-shortcuts">
-            {[
-              'all teeth',
-              'upper anterior',
-              'lower anterior',
-              'upper posterior',
-              'lower posterior',
-              'molars',
-            ].map(scope => (
-              <button key={scope} onClick={() => selectGroup(scope)}>
-                {scope}
-              </button>
-            ))}
-          </div>
-          <p className="selection-hint">
-            Shift-click adds or removes a tooth. Every group edit is one undo step.
-          </p>
-          <div className="display-controls">
-            <div className="section-heading">MODEL DISPLAY</div>
-            <Toggle
-              label="Appliance display"
-              value={
-                braces &&
-                (!!mechanics ||
-                  applianceDisplay.preset !== 'none' ||
-                  !!caseVariant?.removableRetainer)
-              }
-              onChange={toggleApplianceVisibility}
-            />
-            <Toggle
-              label="Aligner attachments"
-              value={attachments}
-              onChange={() => setAttachments(!attachments)}
-            />
-            <Toggle label="Gingiva" value={gums} onChange={() => setGums(!gums)} />
-            <AnatomyPanel
-              value={anatomy}
-              available={model.demo}
-              selected={selected}
-              onChange={value => {
-                teaching.interact();
-                if (value.cutaway && !anatomy.cutaway) {
-                  setRoots(true);
-                  setGums(true);
-                }
-                setAnatomy(value);
-              }}
-            />
-            <Toggle
-              label="Schematic roots"
-              value={roots}
-              onChange={() => {
-                if (!model.teeth.some(t => t.rootGeometry)) {
-                  note(
-                    'This case has no root geometry. Roots are not reconstructed from crowns.',
-                    true,
-                  );
-                  return;
-                }
-                setRoots(!roots);
-              }}
-            />
-            <Toggle label="Tooth numbers" value={labels} onChange={() => setLabels(!labels)} />
-            <Toggle label="Reference grid" value={grid} onChange={() => setGrid(!grid)} />
-            <Toggle
-              label="Displacement traces"
-              value={traces}
-              onChange={() => setTraces(!traces)}
-            />
-            <Toggle
-              label="Arch reference curve"
-              value={curveVisible}
-              onChange={() => setCurveVisible(!curveVisible)}
-            />
-          </div>
-          <button className="lesson-launch" onClick={() => setModal('lessons')}>
-            <BookOpen size={21} />
-            <span>
-              <strong>Teach it step by step</strong>
-              <small>Guided movement demonstrations</small>
-            </span>
-            <ChevronRight size={16} />
-          </button>
-          <div className="sidebar-bottom">
-            <span className="local-badge">
-              <Box size={14} />
-              Local study · mm · FDI
-            </span>
-            <button className="text-button" onClick={() => setModal('guide')}>
-              <CircleHelp size={16} />
-              Movement & voice guide
-              <ArrowUpRight size={14} />
-            </button>
-          </div>
-        </aside>
+        <CaseSidebar api={api} />
 
-        <main className="main-workspace">
-          <div className="workspace-scene">
-            <div className="workspace-heading">
-              <div>
-                <div className="breadcrumbs">
-                  {prepared
-                    ? 'Case library'
-                    : tryActive
-                      ? 'Try Mode'
-                      : currentLesson
-                        ? 'Prepared lesson'
-                        : 'Case editor'}{' '}
-                  <ChevronRight size={12} />
-                  <span>
-                    {prepared ? (
-                      caseDefinition?.category
-                    ) : tryActive ? (
-                      scenario ? (
-                        'Case variation'
-                      ) : (
-                        'No lesson required'
-                      )
-                    ) : (
-                      <button onClick={() => sendTry({ type: 'enter' }, 'Return to Try Mode')}>
-                        Return to Try Mode
-                      </button>
-                    )}
-                  </span>
-                </div>
-                <h2>
-                  {prepared
-                    ? caseDefinition?.title
-                    : tryActive
-                      ? dentalArrangement?.title || 'Your orthodontic sandbox'
-                      : currentLesson
-                        ? 'Explain one step at a time.'
-                        : 'Explore the case geometry.'}
-                </h2>
-              </div>
-              <div className="view-actions">
-                {dentalArrangement && (
-                  <button
-                    className="icon-button"
-                    aria-label="About this dental arrangement"
-                    onClick={() => setModal('arrangement')}
-                  >
-                    <CircleHelp size={17} />
-                  </button>
-                )}
-                <details className="presentation-view-menu">
-                  <summary title="Model presentation tools">
-                    <Focus size={16} />
-                    View tools
-                  </summary>
-                  <LectureViewTools
-                    isolated={isolated}
-                    pointer={pointer}
-                    onIsolate={() => setIsolated(!isolated)}
-                    onPointer={() => setPointer(!pointer)}
-                    onFocus={() => {
-                      teaching.referenceInteraction();
-                      viewer.current?.focus();
-                    }}
-                    onFit={() => {
-                      teaching.referenceInteraction();
-                      viewer.current?.fit();
-                    }}
-                  />
-                </details>
-                <button
-                  className="icon-button"
-                  title="Export 3D image"
-                  aria-label="Export 3D image"
-                  onClick={() => viewer.current?.snapshot()}
-                >
-                  <Camera size={18} />
-                </button>
-                <button
-                  className="icon-button"
-                  title="Fit model"
-                  aria-label="Fit model"
-                  onClick={() => viewer.current?.fit()}
-                >
-                  <Maximize size={18} />
-                </button>
-              </div>
-            </div>
-            <div className="arch-toolbar">
-              <div className="segmented">
-                {(['both', 'upper', 'lower'] as ArchView[]).map(a => (
-                  <button
-                    key={a}
-                    className={arch === a ? 'active' : ''}
-                    onClick={() => {
-                      setArch(a);
-                      if (a === 'both' && view === 'occlusal') setCamera('perspective');
-                    }}
-                    aria-pressed={arch === a}
-                  >
-                    {a === 'both' ? (
-                      <>
-                        <span className="arch-button-full">Both arches</span>
-                        <span className="arch-button-short">Both</span>
-                      </>
-                    ) : (
-                      `${a[0].toUpperCase()}${a.slice(1)}`
-                    )}
-                  </button>
-                ))}
-              </div>
-              <div className="comparison-strip">
-                <button
-                  className={stage === 0 ? 'active' : ''}
-                  onClick={() =>
-                    void teaching.execute(
-                      [{ kind: 'comparison', mode: 'before' }],
-                      'Show the edit start',
-                    )
-                  }
-                >
-                  Before
-                </button>
-                <button
-                  className={stage === stages && !ghost ? 'active' : ''}
-                  onClick={() =>
-                    void teaching.execute(
-                      [{ kind: 'comparison', mode: 'after' }],
-                      'Show the endpoint',
-                    )
-                  }
-                >
-                  After
-                </button>
-                <button
-                  className={ghost ? 'active' : ''}
-                  aria-pressed={ghost}
-                  disabled={!!sandbox.pending}
-                  onClick={() =>
-                    void teaching.execute(
-                      [{ kind: 'comparison', mode: ghost ? 'off' : 'overlay' }],
-                      ghost ? 'Hide original overlay' : 'Compare with the original',
-                    )
-                  }
-                >
-                  <Eye size={13} />
-                  Overlay
-                </button>
-              </div>
-              <button
-                className={`measure-tool ${measureMode ? 'active' : ''}`}
-                onClick={() => {
-                  setMeasureMode(!measureMode);
-                  setTool('orbit');
-                  setToolsOpen(true);
-                  setPanel('analysis');
-                  setMobilePanel('tools');
-                }}
-                aria-pressed={measureMode}
-              >
-                <Ruler size={14} />
-                Measure
-              </button>
-            </div>
-            {scenario && caseDefinition && caseVariant && (
-              <div className="case-lesson-summary">
-                <span>
-                  <strong>{caseVariant.title}</strong> ·{' '}
-                  {scenario.exploring ? 'Free variation' : 'Prepared illustration'}
-                </span>
-                <button onClick={() => setLecture(!lecture)}>
-                  {lecture ? 'Editing workspace' : 'Professor controls'}
-                </button>
-                {/* eslint-disable-next-line react-hooks/refs -- TODO(phase-2): move this ref access out of render */}
-                {returnWorkspace.current && (
-                  <button
-                    onClick={() =>
-                      void teaching.execute(
-                        [{ kind: 'workspace', action: 'restore' }],
-                        'Restore my workspace',
-                      )
-                    }
-                  >
-                    Restore workspace
-                  </button>
-                )}
-              </div>
-            )}
-            {prepared && pathAudit && pathAudit.pairs.length > 0 && (
-              <details className="case-path-note">
-                <summary>
-                  {pathAudit.pairs.length} known surface-crossing pairs in {pathAudit.samples}{' '}
-                  sampled frames · involved teeth marked amber
-                </summary>
-                <p>
-                  {pathAudit.pairs.map(pair => `${pair.a}–${pair.b} (${pair.tissue})`).join(', ')}.
-                  Highlighting covers the sampled sequence, not only the current stage.
-                </p>
-                <p>{pathAudit.limitation}</p>
-              </details>
-            )}
-            {workflowOrigin && (
-              <section
-                className="workspace-origin"
-                aria-label="Source lesson and preserved workspace"
-              >
-                <div>
-                  <span className="eyebrow">FREE EXPLORATION FROM A LESSON</span>
-                  <strong>{workflowOrigin.setup.source.stepTitle}</strong>
-                  <span>
-                    {workflowOrigin.setup.source.title} ·{' '}
-                    {Math.round(workflowOrigin.setup.source.progress * 100)}% shown
-                  </span>
-                </div>
-                <div className="workspace-origin-actions">
-                  <button
-                    onClick={() =>
-                      void teaching.execute(
-                        [{ kind: 'workspace', action: 'lesson' }],
-                        'Return to the source lesson',
-                      )
-                    }
-                  >
-                    Return to source lesson
-                  </button>
-                  <button
-                    onClick={() =>
-                      void teaching.execute(
-                        [{ kind: 'workspace', action: 'restore' }],
-                        'Restore my workspace',
-                      )
-                    }
-                  >
-                    Restore my workspace
-                  </button>
-                </div>
-                <details>
-                  <summary>Lesson explanation & question</summary>
-                  <p>{workflowOrigin.setup.source.explanation}</p>
-                  <p>
-                    <strong>Ask the class:</strong> {workflowOrigin.setup.source.question}
-                  </p>
-                  <details>
-                    <summary>Reveal answer</summary>
-                    <p>{workflowOrigin.setup.source.answer}</p>
-                  </details>
-                  <div className="workspace-source-links">
-                    {workflowOrigin.setup.source.sources.map(source => (
-                      <a href={source.url} key={source.url} target="_blank" rel="noreferrer">
-                        {source.title}
-                      </a>
-                    ))}
-                  </div>
-                  <p>
-                    The copied arrangement and hardware are editable. Authored arrows and the
-                    conceptual palate split remain in the source lesson. Your previous workspace is
-                    held only for this session; use Save case to keep an arrangement.
-                  </p>
-                </details>
-              </section>
-            )}
-            {currentLesson && (
-              <section className="lesson-ribbon" aria-label="Current lesson">
-                <BookOpen size={21} />
-                <div>
-                  <strong>
-                    {currentLesson.title}
-                    <span>
-                      {Math.max(0, lessonStep + 1)} / {currentLesson.steps.length}
-                    </span>
-                  </strong>
-                  <p>
-                    {lessonStep < 0
-                      ? currentLesson.description
-                      : currentLesson.steps[lessonStep].caption}
-                  </p>
-                </div>
-                <button
-                  className="icon-button"
-                  aria-label="Previous lesson step"
-                  disabled={lessonStep < 0}
-                  onClick={() =>
-                    void teaching.execute(
-                      [{ kind: 'lesson-step', action: 'previous' }],
-                      'Previous lesson step',
-                    )
-                  }
-                >
-                  <ChevronLeft size={18} />
-                </button>
-                <button
-                  className="button primary small"
-                  disabled={lessonStep >= currentLesson.steps.length - 1}
-                  onClick={() =>
-                    void teaching.execute(
-                      [{ kind: 'lesson-step', action: 'next' }],
-                      'Next lesson step',
-                    )
-                  }
-                >
-                  Next step
-                  <ChevronRight size={16} />
-                </button>
-                <button
-                  className="icon-button"
-                  aria-label="Close lesson"
-                  onClick={() => {
-                    setLessonId('');
-                    setLessonStep(-1);
-                    setSandbox({ ...sandbox, active: true, pending: null, lastEdit: null });
-                  }}
-                >
-                  <X size={16} />
-                </button>
-              </section>
-            )}
+        <CaseMain api={api} />
 
-            <div className="workspace-cameras" role="group" aria-label="Camera views">
-              {(['perspective', 'front', 'occlusal', 'right', 'left'] as ViewName[]).map(v => (
-                <button
-                  key={v}
-                  className={view === v ? 'active' : ''}
-                  onClick={() => {
-                    teaching.referenceInteraction();
-                    setCamera(v);
-                  }}
-                  aria-pressed={view === v}
-                >
-                  {v === 'perspective' ? '3D view' : v[0].toUpperCase() + v.slice(1)}
-                </button>
-              ))}
-            </div>
-            <div className="lecture-stage">
-              <section
-                className="viewport"
-                onPointerDownCapture={sceneInteraction}
-                aria-label="3D workspace"
-              >
-                <Viewer
-                  onReferenceInteraction={teaching.referenceInteraction}
-                  mechanics={
-                    sandbox.pending && mechanics ? { ...mechanics, result: null } : mechanics
-                  }
-                  mechanicsForces={forceVectors}
-                  mechanicsRevealed={responseRevealed}
-                  pointed={pointed}
-                  pointing={teaching.capture.phase !== 'idle'}
-                  onPoint={point => {
-                    teaching.referenceInteraction();
-                    if (point) {
-                      const tooth = model.teeth.find(item => item.id === point.tooth)!;
-                      setPointed(
-                        point.surface === 'gingiva'
-                          ? point
-                          : {
-                              ...point,
-                              worldPoint: new Vector3(...point.localPoint)
-                                .applyMatrix4(toothMatrix(tooth, actualShown))
-                                .toArray() as Vec3,
-                            },
-                      );
-                    } else setPointed(null);
-                  }}
-                  paused={!active}
-                  isolateSelection={isolated}
-                  anatomy={anatomy}
-                  removableRetainer={
-                    !!caseVariant?.removableRetainer && braces && applianceDisplay.preset === 'none'
-                  }
-                  workflow={braces ? applianceView(applianceDisplay) : undefined}
-                  ref={viewer}
-                  model={model}
-                  transforms={dragPreview || shown}
-                  selected={selected}
-                  selectedIds={selectedIds}
-                  onSelect={selectTooth}
-                  ghost={ghost || !!sandbox.pending || comparisonName !== null || !!mechanicsGhost}
-                  ghostTransforms={
-                    mechanicsGhost ||
-                    sandbox.pending?.to ||
-                    (mechanics?.result && ghost && !comparisonName
-                      ? mechanics.reference.transforms
-                      : undefined) ||
-                    (comparisonName === 'original' || (scenario && ghost)
-                      ? caseStart || sandbox.original || {}
-                      : sandbox.snapshots.find(item => item.name === comparisonName)?.transforms)
-                  }
-                  lockedIds={sandbox.lockedIds}
-                  traceFrom={
-                    traces
-                      ? mechanics?.reference.transforms ||
-                        demonstration?.from ||
-                        caseStart ||
-                        sandbox.original ||
-                        {}
-                      : undefined
-                  }
-                  archCurve={curve}
-                  gums={gums}
-                  labels={labels}
-                  grid={grid}
-                  arch={arch}
-                  braces={braces && (!!mechanics || applianceDisplay.preset !== 'none')}
-                  roots={roots}
-                  bracketStyle={bracketStyle}
-                  ligatureColor={ligatureColor}
-                  opening={opening}
-                  measureMode={measureMode}
-                  landmarks={landmarks}
-                  onLandmark={point => {
-                    setLandmarks(previous =>
-                      previous.length >= 2 ? [point] : [...previous, point],
-                    );
-                    note('Surface landmark captured.');
-                  }}
-                  intersections={highlightedContacts}
-                  attachments={attachments}
-                  tool={tool}
-                  onPosePreview={(id, next) => {
-                    teaching.interact();
-                    if (!sandbox.lockedIds.includes(id))
-                      setDragPreview({ ...plan.current, [id]: next });
-                  }}
-                  onPoseCommit={poseCommit}
-                />
-                {pointed && (
-                  <div className="pointed-target-caption" role="status">
-                    {pointed.surface === 'gingiva'
-                      ? 'Gingiva near'
-                      : pointed.surface === 'root'
-                        ? 'Root'
-                        : 'Target'}{' '}
-                    · {pointed.tooth}
-                    <span>
-                      {teaching.capture.phase !== 'idle'
-                        ? 'Keep speaking — this point is captured'
-                        : 'Say “install brackets here”'}
-                    </span>
-                    <button
-                      aria-label="Clear pointed target"
-                      onClick={() => {
-                        teaching.referenceInteraction();
-                        setPointed(null);
-                      }}
-                    >
-                      ×
-                    </button>
-                  </div>
-                )}
-                <div className="viewport-top">
-                  <span className="view-badge">
-                    <span />
-                    {sandbox.pending
-                      ? 'UNAPPLIED PREVIEW'
-                      : sandbox.unrestricted
-                        ? 'UNRESTRICTED ILLUSTRATION'
-                        : prepared
-                          ? 'AUTHORED TEACHING EXAMPLE'
-                          : model.demo
-                            ? 'SYNTHETIC SANDBOX'
-                            : 'IMPORTED CASE'}
-                  </span>
-                  <span className="unit-badge">mm · FDI numbering</span>
-                </div>
-                <div className="model-tools" aria-label="3D tools">
-                  <button
-                    aria-label="Orbit tool"
-                    title="Orbit"
-                    className={tool === 'orbit' ? 'active' : ''}
-                    onClick={() => chooseTool('orbit')}
-                  >
-                    <MousePointer2 size={19} />
-                  </button>
-                  <button
-                    aria-label="Move with handles"
-                    title="Move with world-axis handles"
-                    className={tool === 'translate' ? 'active' : ''}
-                    onClick={() => chooseTool('translate')}
-                  >
-                    <Move3D size={19} />
-                  </button>
-                  <button
-                    aria-label="Rotate with handles"
-                    title="Rotate with world-axis handles"
-                    className={tool === 'rotate' ? 'active' : ''}
-                    onClick={() => chooseTool('rotate')}
-                  >
-                    <Rotate3D size={19} />
-                  </button>
-                  <span />
-                  <button
-                    aria-label="Focus selected teeth"
-                    title="Focus selected teeth"
-                    onClick={() => {
-                      teaching.referenceInteraction();
-                      viewer.current?.focus();
-                    }}
-                  >
-                    <Focus size={19} />
-                  </button>
-                  <button
-                    aria-label="Toggle tooth numbers"
-                    title="Tooth numbers"
-                    className={labels ? 'active' : ''}
-                    onClick={() => setLabels(!labels)}
-                  >
-                    11
-                  </button>
-                </div>
-                <div className="viewport-selection">
-                  <MousePointer2 size={14} />
-                  <span>
-                    {selectedIds.length === 1 ? (
-                      <>
-                        Tooth <strong>{selected}</strong>
-                      </>
-                    ) : (
-                      <strong>{selectedIds.length} teeth selected</strong>
-                    )}
-                  </span>
-                  <span className="selection-line" />
-                  <span>{selectedIds.length === 1 ? tooth.name : selectedIds.join(' · ')}</span>
-                </div>
-                <div className="orientation">
-                  <span className="axis-y">Y</span>
-                  <span className="axis-x">X</span>
-                  <span className="axis-z">Z</span>
-                  <i />
-                </div>
-                <div className="viewport-hint">
-                  {measureMode
-                    ? 'Pick two crown-surface points'
-                    : 'Drag to orbit · Scroll to zoom · Shift-click to select'}
-                </div>
-                <LecturePointer enabled={pointer && active} onExit={() => setPointer(false)} />
-                {pointer && (
-                  <span className="lecture-pointer-notice">
-                    Lecture pointer · Escape or Exit pointer to orbit
-                  </span>
-                )}
-                {mechanics?.result && !sandbox.pending && (
-                  <div className="mechanics-scale-badge">
-                    {responseRevealed
-                      ? mechanicsResponseCaption(mechanics.result.diagnostics, magnification)
-                      : 'Predict first · calculated response hidden'}
-                  </div>
-                )}
-                {mechanics?.result && !sandbox.pending && forceVectors && responseRevealed && (
-                  <div className="mechanics-vector-legend">
-                    <span>↗ Force direction</span>
-                    <span>↻ Moment</span>
-                    <small>Arrow size is schematic</small>
-                  </div>
-                )}
-                {stage < stages && (
-                  <div className="stage-preview-badge">
-                    Stage {stage.toFixed(1)} / {stages}
-                  </div>
-                )}
-                {opening > 0 && (
-                  <div className="opening-badge">Display separation {opening} mm</div>
-                )}
-                {roots && <div className="roots-badge">Schematic roots · not reconstructed</div>}
-              </section>
-              {lecture && (
-                <LectureConsole
-                  compact={!caseVariant}
-                  collapsible={!!caseVariant}
-                  showPlayback={false}
-                  title={caseVariant?.title || 'Explore and explain'}
-                  objective={
-                    caseDefinition?.learningGoal ||
-                    'Select a group, preview a geometric change, and invite students to compare it with the starting arrangement.'
-                  }
-                  question={caseVariant?.question}
-                  answer={caseVariant?.answer}
-                  answerVisible={scenario?.answerVisible ?? false}
-                  onToggleAnswer={() =>
-                    void teaching.execute(
-                      [{ kind: 'question', visible: !scenario?.answerVisible }],
-                      'Toggle the prepared answer',
-                    )
-                  }
-                  playing={playing}
-                  progress={stage / stages}
-                  speed={playbackSpeed}
-                  canPlay={prepared || !!demonstration || moved > 0}
-                  disabled={busy}
-                  onPlayPause={() =>
-                    void teaching.execute(
-                      [
-                        playing
-                          ? { kind: 'stop' }
-                          : prepared
-                            ? { kind: 'case', action: 'play' }
-                            : { kind: 'dental', command: { type: 'play' } },
-                      ],
-                      playing ? 'Pause demonstration' : 'Play demonstration',
-                    )
-                  }
-                  onRestart={() =>
-                    void teaching.execute(
-                      [
-                        { kind: 'progress', value: 0 },
-                        ...(scenario ? [{ kind: 'question' as const, visible: false }] : []),
-                      ],
-                      'Return to the starting arrangement',
-                    )
-                  }
-                  onHalf={() =>
-                    void teaching.execute([{ kind: 'progress', value: 0.5 }], 'Pause at 50 percent')
-                  }
-                  onProgress={progress =>
-                    void teaching.execute(
-                      [{ kind: 'progress', value: progress }],
-                      'Set demonstration progress',
-                    )
-                  }
-                  onSpeed={value =>
-                    void teaching.execute(
-                      [{ kind: 'speed', value: value as 0.5 | 1 | 2 }],
-                      'Set presentation speed',
-                    )
-                  }
-                  variants={
-                    prepared
-                      ? caseDefinition?.variants.map(item => ({ id: item.id, label: item.title }))
-                      : undefined
-                  }
-                  variantId={scenario?.variantId}
-                  onVariant={id =>
-                    void teaching.execute(
-                      [{ kind: 'case', action: 'variant', id }],
-                      'Compare an authored demonstration from its start',
-                    )
-                  }
-                  explorationAction={
-                    scenario
-                      ? {
-                          label: prepared ? 'Try this arrangement' : 'Return to prepared case',
-                          onClick: () =>
-                            void teaching.execute(
-                              [{ kind: 'case', action: prepared ? 'explore' : 'return' }],
-                              prepared
-                                ? 'Explore the displayed arrangement'
-                                : 'Return to the prepared case',
-                            ),
-                        }
-                      : undefined
-                  }
-                  note={
-                    scenario
-                      ? undefined
-                      : 'Geometric illustration · playback speed is presentation speed · no biological prediction'
-                  }
-                >
-                  <div className="lecture-quick-layers">
-                    <button
-                      aria-pressed={roots}
-                      onClick={() => void teaching.runControl(roots ? 'hide roots' : 'show roots')}
-                    >
-                      Roots
-                    </button>
-                    <button
-                      aria-pressed={gums}
-                      onClick={() => void teaching.runControl(gums ? 'hide gums' : 'show gums')}
-                    >
-                      Gingiva
-                    </button>
-                    <button
-                      aria-pressed={labels}
-                      onClick={() =>
-                        void teaching.runControl(labels ? 'hide labels' : 'show labels')
-                      }
-                    >
-                      Tooth numbers
-                    </button>
-                    <button
-                      aria-pressed={ghost}
-                      disabled={!!sandbox.pending}
-                      onClick={() =>
-                        void teaching.execute(
-                          [{ kind: 'comparison', mode: ghost ? 'off' : 'overlay' }],
-                          'Toggle original overlay',
-                        )
-                      }
-                    >
-                      Original overlay
-                    </button>
-                    {scenario && (
-                      <button onClick={() => void teaching.runControl('explain this step')}>
-                        Explain aloud
-                      </button>
-                    )}
-                    {tryActive && demonstration && (
-                      <button
-                        onClick={() =>
-                          void teaching.execute(
-                            [{ kind: 'try-playback', direction: 'reverse' }],
-                            'Reverse the geometric edit',
-                          )
-                        }
-                      >
-                        Reverse edit
-                      </button>
-                    )}
-                  </div>
-                </LectureConsole>
-              )}
-            </div>
-            {(prepared ||
-              !!demonstration ||
-              moved > 0 ||
-              !!sandbox.pending ||
-              !!mechanics?.result) && (
-              <StageBar
-                label={
-                  mechanics
-                    ? mechanics.result
-                      ? 'Calculated initial response'
-                      : 'Appliance setup · calculate to see a response'
-                    : prepared
-                      ? 'Authored demonstration'
-                      : sandbox.pending
-                        ? 'Geometric preview'
-                        : 'Geometric movement'
-                }
-                progress={stage / stages}
-                stages={stages}
-                playing={playing}
-                speed={playbackSpeed}
-                canPlay={
-                  mechanics
-                    ? !!mechanics.result && hasMechanicsMovement(mechanics.result.diagnostics)
-                    : prepared || !!demonstration || moved > 0
-                }
-                onPlay={() =>
-                  void teaching.execute(
-                    [
-                      playing
-                        ? { kind: 'stop' }
-                        : prepared
-                          ? { kind: 'case', action: 'play' }
-                          : { kind: 'dental', command: { type: 'play' } },
-                    ],
-                    playing ? 'Pause demonstration' : 'Play demonstration',
-                  )
-                }
-                onProgress={value => {
-                  teaching.interact();
-                  setPlaying(false);
-                  setStage(value * stages);
-                }}
-                onSpeed={value => setPlaybackSpeed(value as 0.5 | 1 | 2)}
-                onStages={value => {
-                  setStages(value);
-                  setStage((stage / stages) * value);
-                }}
-                onReverse={() =>
-                  void teaching.execute(
-                    [{ kind: 'try-playback', direction: 'reverse' }],
-                    'Play in reverse',
-                  )
-                }
-                revealed={mechanics?.result ? responseRevealed : undefined}
-                onReveal={() => {
-                  setResponseRevealed(true);
-                  setReverse(false);
-                  setStage(0);
-                  setPlaying(
-                    !!mechanics?.result && hasMechanicsMovement(mechanics.result.diagnostics),
-                  );
-                }}
-                onExplore={
-                  prepared
-                    ? () =>
-                        void teaching.execute(
-                          [{ kind: 'case', action: 'explore' }],
-                          'Explore this arrangement',
-                        )
-                    : undefined
-                }
-              />
-            )}
-          </div>
-          <div className="workspace-command-dock">
-            {!prepared &&
-              model.demo &&
-              mechanics &&
-              Object.keys(mechanics.config.brackets).length > 0 && (
-                <div className="command-context-strip">
-                  <button
-                    onClick={() => {
-                      setToolsOpen(true);
-                      setPanel('braces');
-                      setMobilePanel('tools');
-                    }}
-                  >
-                    New wire preset ·{' '}
-                    {wirePreset.material === 'stainless-steel' ? 'Steel' : 'Beta titanium'} ·{' '}
-                    {wireSizeLabel(wirePreset.section)}
-                  </button>
-                  <span>
-                    {mechanicsFocus.wireId
-                      ? `Focus: ${mechanicsFocus.wireId}`
-                      : 'Point → hold Space → speak'}
-                  </span>
-                </div>
-              )}
-            <TeachingCommandBar
-              suggestions={
-                sandbox.pending
-                  ? ['apply preview', 'discard preview']
-                  : prepared
-                    ? [
-                        'play demonstration',
-                        'show roots',
-                        'reveal answer',
-                        'explore this arrangement',
-                      ]
-                    : mechanics?.result
-                      ? [
-                          'repeat that more slowly',
-                          'show roots',
-                          'show displacement traces',
-                          'compare with original',
-                        ]
-                      : mechanics?.config.wires.length
-                        ? [
-                            'activate that wire by 0.5 mm',
-                            'show what happens',
-                            'show roots',
-                            'undo that',
-                          ]
-                        : mechanics && Object.keys(mechanics.config.brackets).length
-                          ? ['put a wire through these brackets', 'show roots', 'undo that']
-                          : [
-                              'select upper teeth',
-                              'put brackets in top',
-                              'show roots',
-                              'compare with original',
-                            ]
-              }
-              placeholder={
-                prepared
-                  ? 'Try “show roots, then reveal answer”'
-                  : 'Try “select upper front six, then move them buccally 1 mm”'
-              }
-              value={command}
-              onChange={setCommand}
-              inputRef={commandInput}
-            />
-            {statusError && (
-              <div className="case-action-status error" role="status">
-                {status}
-              </div>
-            )}
-          </div>
-        </main>
-
-        <aside className="inspector">
-          <MobilePanelHeading title="Tools" onClose={() => setMobilePanel('model')} />
-          <div className="inspector-heading">
-            <span className="eyebrow">
-              {selectedIds.length === 1 ? 'TOOTH INSPECTOR' : 'GROUP INSPECTOR'}
-            </span>
-            <div className="history-buttons">
-              <button
-                className="icon-button"
-                onClick={() => void teaching.runControl('undo that')}
-                aria-label="Undo"
-                title="Ctrl / Cmd + Z"
-              >
-                <Undo2 size={17} />
-              </button>
-              <button
-                className="icon-button"
-                onClick={() => void teaching.runControl('redo')}
-                aria-label="Redo"
-                title="Ctrl / Cmd + Shift + Z"
-              >
-                <Redo2 size={17} />
-              </button>
-            </div>
-          </div>
-          <div className="tooth-card">
-            <div className="large-number">
-              {selectedIds.length === 1 ? selected : selectedIds.length}
-            </div>
-            <div>
-              <h3>{selectedIds.length === 1 ? tooth.name : 'Selected teeth'}</h3>
-              <span>
-                {selectedIds.length === 1
-                  ? `${toothArch(selected)} arch · FDI ${selected}`
-                  : selectedIds.join(' · ')}
-              </span>
-              <div className="selected-tag">
-                {calibrated ? 'Reference axes set' : 'Calibration needed'}
-              </div>
-            </div>
-          </div>
-          <label className="mobile-tooth-selector">
-            Selected tooth
-            <select value={selected} onChange={e => selectTooth(e.target.value)}>
-              {model.teeth.map(t => (
-                <option key={t.id} value={t.id}>
-                  {t.id} · {t.name}
-                </option>
-              ))}
-            </select>
-          </label>
-          <div className="mobile-groups">
-            <button onClick={() => selectGroup('upper incisors')}>Upper incisors</button>
-            <button onClick={() => selectGroup('lower incisors')}>Lower incisors</button>
-            <button onClick={() => selectGroup('all teeth')}>All teeth</button>
-          </div>
-          <div className="inspector-tabs four-tabs">
-            {(
-              [
-                { id: 'move', label: 'Move', icon: <Move3D size={14} /> },
-                { id: 'braces', label: 'Appliances', icon: <SlidersHorizontal size={14} /> },
-                { id: 'analysis', label: 'Measure', icon: <Ruler size={14} /> },
-                { id: 'history', label: 'Stages', icon: <History size={14} /> },
-              ] as const
-            ).map(t => (
-              <button
-                key={t.id}
-                className={panel === t.id ? 'active' : ''}
-                onClick={() => setPanel(t.id)}
-              >
-                {t.icon}
-                {t.label}
-              </button>
-            ))}
-          </div>
-
-          {panel === 'move' && scenario && caseDefinition && caseVariant && (
-            <>
-              <CaseScenarioPanel
-                showPlayback={false}
-                title={caseDefinition.title}
-                description={caseDefinition.description}
-                category={caseDefinition.category}
-                observe={caseDefinition.learningGoal}
-                question={caseVariant.question}
-                answer={caseVariant.answer}
-                answerVisible={scenario.answerVisible}
-                onToggleAnswer={() =>
-                  void teaching.execute(
-                    [{ kind: 'question', visible: !scenario.answerVisible }],
-                    scenario.answerVisible ? 'Hide answer' : 'Reveal answer',
-                  )
-                }
-                variants={caseDefinition.variants.map(item => ({
-                  id: item.id,
-                  label: item.title,
-                  description: item.description,
-                }))}
-                variantId={scenario.variantId}
-                onVariantChange={id =>
-                  void teaching.execute(
-                    [{ kind: 'case', action: 'variant', id }],
-                    'Choose case demonstration',
-                  )
-                }
-                progress={scenario.exploring ? scenario.returnProgress : stage / stages}
-                playing={playing}
-                speed={playbackSpeed}
-                compare={ghost}
-                onProgressChange={value =>
-                  void teaching.execute(
-                    [{ kind: 'case', action: 'progress', value }],
-                    'Set demonstration progress',
-                  )
-                }
-                onSpeedChange={value =>
-                  void teaching.execute([{ kind: 'speed', value }], 'Set playback speed')
-                }
-                onTogglePlaying={() =>
-                  void teaching.execute(
-                    [{ kind: 'case', action: playing ? 'pause' : 'play' }],
-                    playing ? 'Pause case' : 'Play case',
-                  )
-                }
-                onReset={() =>
-                  void teaching.execute([{ kind: 'case', action: 'reset' }], 'Reset prepared case')
-                }
-                onCompare={() =>
-                  void teaching.execute(
-                    [{ kind: 'comparison', mode: ghost ? 'off' : 'overlay' }],
-                    'Compare the case start',
-                  )
-                }
-                onExplore={() =>
-                  void teaching.execute(
-                    [{ kind: 'case', action: 'explore' }],
-                    'Explore this arrangement',
-                  )
-                }
-                onReturn={() =>
-                  void teaching.execute(
-                    [{ kind: 'case', action: 'return' }],
-                    'Return to prepared case',
-                  )
-                }
-                edited={scenario.exploring}
-                disabled={!!sandbox.pending || busy}
-              />
-              <details className="case-sources">
-                <summary>Assumptions & reading · educator review pending</summary>
-                <ul>
-                  {[...caseDefinition.assumptions, ...caseVariant.assumptions].map((item, i) => (
-                    <li key={i}>{item}</li>
-                  ))}
-                </ul>
-                <div>
-                  {caseVariant.sources.map(source => (
-                    <a key={source.url} href={source.url} target="_blank" rel="noreferrer">
-                      {source.title}
-                    </a>
-                  ))}
-                </div>
-              </details>
-            </>
-          )}
-          {panel === 'move' && tryActive && (
-            <>
-              {!calibrated && (
-                <div className="calibration-notice">
-                  Imported teeth need reference directions for named movements. Case axes work
-                  immediately.
-                  <button disabled={!!sandbox.pending} onClick={openCalibration}>
-                    Calibrate tooth {selected}
-                    <ArrowUpRight size={12} />
-                  </button>
-                </div>
-              )}
-              <TryPanel {...tryPanelProps} hidePreview={lecture} />
-            </>
-          )}
-          {panel === 'move' && !tryActive && !prepared && (
-            <div className="inspector-content">
-              <div className="control-heading">
-                <Move3D size={16} />
-                <h3>Translate {selectedIds.length > 1 ? 'selection' : 'tooth'}</h3>
-                <span>mm / tooth</span>
-              </div>
-              {!calibrated && (
-                <div className="calibration-notice">
-                  Use world axes until reference directions are set.
-                  <button onClick={openCalibration}>
-                    Calibrate tooth {selected}
-                    <ArrowUpRight size={12} />
-                  </button>
-                </div>
-              )}
-              <div className="direction-grid">
-                {directions.map(d => (
-                  <button
-                    key={d.id}
-                    className={direction === d.id ? 'active' : ''}
-                    onClick={() => setDirection(d.id)}
-                    disabled={!calibrated}
-                  >
-                    <strong>{d.label}</strong>
-                    <span>{d.detail}</span>
-                  </button>
-                ))}
-              </div>
-              <div className="world-axes">
-                <span>World axis</span>
-                {(['x', 'y', 'z'] as const).map(a => (
-                  <button
-                    className={direction === a ? 'active' : ''}
-                    onClick={() => setDirection(a)}
-                    key={a}
-                  >
-                    {a.toUpperCase()}
-                  </button>
-                ))}
-              </div>
-              <div className="amount-row">
-                <label className="number-field">
-                  <input
-                    aria-label="Movement distance"
-                    type="number"
-                    value={distance}
-                    step="0.05"
-                    min="-10"
-                    max="10"
-                    onChange={e => setDistance(e.target.value)}
-                  />
-                  <span>mm</span>
-                </label>
-                <button
-                  className="button primary"
-                  onClick={() =>
-                    apply({
-                      type: 'move_group',
-                      teeth: selectedIds,
-                      direction,
-                      amount: Number(distance),
-                    })
-                  }
-                >
-                  Move <ArrowRight size={15} />
-                </button>
-              </div>
-              <div className="presets">
-                {['0.1', '0.25', '0.5', '1'].map(n => (
-                  <button
-                    key={n}
-                    className={distance === n ? 'active' : ''}
-                    onClick={() => setDistance(n)}
-                  >
-                    {n} mm
-                  </button>
-                ))}
-              </div>
-              <div className="divider" />
-              <div className="control-heading">
-                <Rotate3D size={16} />
-                <h3>Angular movement</h3>
-                <span>degrees</span>
-              </div>
-              <div className="rotation-modes">
-                {(
-                  [
-                    { id: 'tip', label: 'Tip' },
-                    { id: 'torque', label: 'Torque' },
-                    { id: 'rotate', label: 'Axial' },
-                    { id: 'world', label: 'World' },
-                  ] as const
-                ).map(m => (
-                  <button
-                    key={m.id}
-                    onClick={() => setRotationMode(m.id)}
-                    disabled={m.id !== 'world' && !calibrated}
-                    className={rotationMode === m.id ? 'active' : ''}
-                  >
-                    {m.label}
-                  </button>
-                ))}
-              </div>
-              <p className="rotation-explanation">
-                {rotationMode === 'tip'
-                  ? 'About each tooth’s buccolingual axis.'
-                  : rotationMode === 'torque'
-                    ? 'About each tooth’s mesiodistal axis.'
-                    : rotationMode === 'rotate'
-                      ? 'About each tooth’s occlusal / long axis.'
-                      : 'About a fixed axis of the case.'}
-              </p>
-              {rotationMode === 'world' && (
-                <div className="rotation-axis">
-                  <span>World axis</span>
-                  <div>
-                    {(['x', 'y', 'z'] as const).map(a => (
-                      <button
-                        key={a}
-                        onClick={() => setAxis(a)}
-                        className={axis === a ? 'active' : ''}
-                      >
-                        {a.toUpperCase()}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              )}
-              <div className="amount-row">
-                <label className="number-field">
-                  <input
-                    aria-label="Rotation angle"
-                    type="number"
-                    value={degrees}
-                    min="-180"
-                    max="180"
-                    step="1"
-                    onChange={e => setDegrees(e.target.value)}
-                  />
-                  <span>°</span>
-                </label>
-                <button
-                  className="button light"
-                  onClick={() =>
-                    apply(
-                      rotationMode === 'world'
-                        ? {
-                            type: 'rotate_group',
-                            teeth: selectedIds,
-                            axis,
-                            amount: Number(degrees),
-                          }
-                        : {
-                            type: 'orthodontic',
-                            teeth: selectedIds,
-                            movement: rotationMode,
-                            amount: Number(degrees),
-                          },
-                    )
-                  }
-                >
-                  Apply <RotateCcw size={15} />
-                </button>
-              </div>
-              <p className="field-hint">
-                Right-hand sign · fixed reference axes · crown-centre pivot. No force or
-                root-control prediction.
-              </p>
-              <div className="divider" />
-              <div className="control-heading">
-                <Focus size={16} />
-                <h3>Tooth {selected} · final change</h3>
-                <button
-                  className="reset-link"
-                  onClick={() => apply({ type: 'reset', teeth: selectedIds })}
-                >
-                  Reset {selectedIds.length > 1 ? 'group' : ''}
-                </button>
-              </div>
-              <div className="position-values">
-                {['X', 'Y', 'Z'].map((a, i) => (
-                  <div key={a}>
-                    <span>{a}</span>
-                    <strong>{pretty(pose.translation[i])}</strong>
-                    <small>mm</small>
-                  </div>
-                ))}
-              </div>
-              <div className="rotation-values">
-                Euler XYZ<span>{pose.rotation.map(n => `${n.toFixed(1)}°`).join(' / ')}</span>
-              </div>
-              <button className="axis-details" onClick={openCalibration}>
-                {actualCalibration
-                  ? 'Inspect / adjust reference directions'
-                  : 'Set anatomical reference directions'}
-                <ChevronRight size={13} />
-              </button>
-            </div>
-          )}
-
-          {panel === 'braces' && (
-            <div className="braces-panel">
-              {activeExperiment && !prepared && (
-                <MechanicsPanel
-                  experiment={activeExperiment}
-                  selectedIds={selectedIds}
-                  pointed={physicalPoint}
-                  focus={mechanicsFocus}
-                  preset={wirePreset}
-                  onPreset={value => {
-                    teaching.interact();
-                    setWirePreset(value);
-                  }}
-                  onFocus={value => {
-                    teaching.referenceInteraction();
-                    setMechanicsFocus(value);
-                  }}
-                  onActions={sendMechanics}
-                  busy={teaching.runtime.phase !== 'idle'}
-                  magnification={magnification}
-                  onMagnification={setMagnification}
-                  onReplay={() =>
-                    void teaching.execute(
-                      [{ kind: 'dental', command: { type: 'play' } }],
-                      'Replay the calculated response from the same unloaded reference',
-                    )
-                  }
-                  onFrame={() => {
-                    teaching.referenceInteraction();
-                    viewer.current?.focus();
-                  }}
-                  predict={predictResponse}
-                  onPredict={setPredictResponse}
-                  revealed={responseRevealed}
-                  onReveal={() => {
-                    setResponseRevealed(true);
-                    setReverse(false);
-                    setStage(0);
-                    setPlaying(
-                      !!mechanics?.result && hasMechanicsMovement(mechanics.result.diagnostics),
-                    );
-                  }}
-                  forces={forceVectors}
-                  onForces={() => setForceVectors(!forceVectors)}
-                  onExplain={() => void teaching.runControl('explain that movement')}
-                />
-              )}
-              <details className="appearance-details">
-                <summary>Authored appliance illustrations & appearance</summary>
-                <AppliancePalette
-                  value={applianceDisplay}
-                  available={model.demo}
-                  busy={teaching.runtime.phase !== 'idle'}
-                  onChange={value =>
-                    void teaching.execute(
-                      [{ kind: 'appliance-display', ...value }],
-                      'Change teaching appliance',
-                    )
-                  }
-                />
-                {anatomy.cutaway &&
-                  ['expander-bands', 'palatal-expander', 'retainer'].includes(
-                    applianceDisplay.preset,
-                  ) && (
-                    <p className="form-note">
-                      Turn off the anatomy cutaway to see the complete appliance.
-                    </p>
-                  )}
-                <div className="appliance-intro">
-                  Show how appliances relate to the teeth. Select a tooth or group to add
-                  attachments.
-                </div>
-                <div className="control-heading">
-                  <SlidersHorizontal size={16} />
-                  <h3>Fixed appliance</h3>
-                </div>
-                <Toggle
-                  label="Show chosen appliance"
-                  value={
-                    braces &&
-                    (!!mechanics ||
-                      applianceDisplay.preset !== 'none' ||
-                      !!caseVariant?.removableRetainer)
-                  }
-                  onChange={toggleApplianceVisibility}
-                />
-                <label className="form-label">
-                  Bracket appearance
-                  <select
-                    value={bracketStyle}
-                    onChange={e => setBracketStyle(e.target.value as 'metal' | 'ceramic')}
-                  >
-                    <option value="metal">Metal</option>
-                    <option value="ceramic">Ceramic</option>
-                  </select>
-                </label>
-                <label className="form-label">Ligature colour</label>
-                <div className="colour-swatches">
-                  {['#299f9b', '#889ba6', '#547aca', '#bd5b87', '#946fbe', '#e4d5ac'].map(c => (
-                    <button
-                      key={c}
-                      aria-label={`Ligature colour ${c}`}
-                      aria-pressed={ligatureColor === c}
-                      className={ligatureColor === c ? 'active' : ''}
-                      style={{ background: c }}
-                      onClick={() => setLigatureColor(c)}
-                    />
-                  ))}
-                </div>
-                <div className="divider" />
-                <div className="control-heading">
-                  <Box size={16} />
-                  <h3>Aligner attachments</h3>
-                  <span>{model.teeth.filter(t => t.attachment).length} placed</span>
-                </div>
-                <Toggle
-                  label="Show attachments"
-                  value={attachments}
-                  onChange={() => setAttachments(!attachments)}
-                />
-                <label className="form-label">
-                  Attachment shape
-                  <select
-                    aria-label="Attachment shape"
-                    value={attachmentDraft.shape}
-                    onChange={e =>
-                      setAttachmentDraft({
-                        ...attachmentDraft,
-                        shape: e.target.value as AttachmentSpec['shape'],
-                      })
-                    }
-                  >
-                    <option value="rectangle">Rectangular</option>
-                    <option value="ellipsoid">Ellipsoid</option>
-                    <option value="beveled">Beveled</option>
-                  </select>
-                </label>
-                <div className="attachment-fields">
-                  {(
-                    [
-                      { key: 'width', label: 'Width', unit: 'mm', min: 0.2, max: 6 },
-                      { key: 'height', label: 'Height', unit: 'mm', min: 0.2, max: 6 },
-                      { key: 'depth', label: 'Depth', unit: 'mm', min: 0.2, max: 6 },
-                      { key: 'rotation', label: 'Rotation', unit: '°', min: -180, max: 180 },
-                      { key: 'offsetMesial', label: 'Mesial offset', unit: 'mm', min: -5, max: 5 },
-                      {
-                        key: 'offsetOcclusal',
-                        label: 'Occlusal offset',
-                        unit: 'mm',
-                        min: -5,
-                        max: 5,
-                      },
-                    ] as const
-                  ).map(f => (
-                    <label key={f.key}>
-                      {f.label}
-                      <span>
-                        <input
-                          type="number"
-                          aria-label={`Attachment ${f.label.toLowerCase()}`}
-                          min={f.min}
-                          max={f.max}
-                          step={f.key === 'rotation' ? 1 : 0.1}
-                          value={
-                            Number.isFinite(attachmentDraft[f.key]) ? attachmentDraft[f.key] : ''
-                          }
-                          onChange={e =>
-                            setAttachmentDraft({
-                              ...attachmentDraft,
-                              [f.key]: e.target.value === '' ? NaN : Number(e.target.value),
-                            })
-                          }
-                        />
-                        <small>{f.unit}</small>
-                      </span>
-                    </label>
-                  ))}
-                </div>
-                <div className="attachment-actions">
-                  <button
-                    className="button primary"
-                    disabled={!calibrated}
-                    onClick={() => editAttachments(attachmentDraft)}
-                  >
-                    Apply to {selectedIds.length === 1 ? selected : `${selectedIds.length} teeth`}
-                  </button>
-                  <button
-                    className="button light"
-                    disabled={!model.teeth.some(t => selectedIds.includes(t.id) && t.attachment)}
-                    onClick={() => editAttachments(null)}
-                  >
-                    Remove
-                  </button>
-                </div>
-                <p className="field-hint">
-                  Placed on the crown surface. Changes apply to the selection; Remove reverses an
-                  appliance edit.
-                </p>
-                <div className="divider" />
-                <Toggle label="Show gingiva" value={gums} onChange={() => setGums(!gums)} />
-                <Toggle
-                  label="Show schematic roots"
-                  value={roots}
-                  onChange={() => {
-                    if (!model.teeth.some(t => t.rootGeometry)) {
-                      note('No root geometry in this case.', true);
-                      return;
-                    }
-                    setRoots(!roots);
-                  }}
-                />
-                <label className="form-label">
-                  Separate arches for inspection <span>{opening} mm</span>
-                  <input
-                    aria-label="Display arch separation"
-                    type="range"
-                    min="0"
-                    max="25"
-                    step="1"
-                    value={opening}
-                    onChange={e => setOpening(Number(e.target.value))}
-                    style={{ '--progress': `${opening * 4}%` } as React.CSSProperties}
-                  />
-                </label>
-                <p className="field-hint">
-                  Display separation does not change saved tooth movements, exported geometry, or
-                  measurements.
-                </p>
-                <div className="information-card">
-                  <ShieldCheck size={18} />
-                  <p>
-                    These appearance presets are authored illustrations. The experiment controls
-                    above separately calculate supported initial wire, elastic and expander
-                    responses with declared virtual supports.
-                  </p>
-                </div>
-                {!model.demo && (
-                  <p className="field-hint">
-                    Imported teeth need reference calibration. Bracket placement is an estimate on
-                    the buccal surface.
-                  </p>
-                )}
-              </details>
-            </div>
-          )}
-
-          {panel === 'analysis' && (
-            <div className="analysis-panel">
-              <div className="control-heading">
-                <Ruler size={16} />
-                <h3>Surface landmarks</h3>
-              </div>
-              <button
-                className={`button ${measureMode ? 'primary' : 'light'} full-button`}
-                onClick={() => setMeasureMode(!measureMode)}
-              >
-                {measureMode ? 'Finish picking' : 'Pick two crown points'}
-                <Ruler size={15} />
-              </button>
-              <div className="measure-result">
-                <strong>
-                  {pointDistance === null ? '—' : pointDistance.toFixed(2)}
-                  <small> mm</small>
-                </strong>
-                <span>
-                  {landmarks.length === 2
-                    ? `${landmarks[0].tooth} → ${landmarks[1].tooth} · shown stage`
-                    : `${landmarks.length}/2 points selected`}
-                </span>
-                {landmarks.length > 0 && (
-                  <button onClick={() => setLandmarks([])}>Clear points</button>
-                )}
-              </div>
-              <p className="field-hint">
-                Straight 3D distance between your landmarks. Display arch separation is excluded.
-              </p>
-              <div className="divider" />
-              <div className="control-heading">
-                <Focus size={16} />
-                <h3>Crown-centre spans</h3>
-              </div>
-              <div className="span-table">
-                {spans.map(s => (
-                  <div key={s.name}>
-                    <span>
-                      {s.name}
-                      <small>
-                        {s.initial!.toFixed(2)} → {s.final!.toFixed(2)} mm
-                      </small>
-                    </span>
-                    <strong>
-                      {pretty(s.final! - s.initial!)}
-                      <small> mm</small>
-                    </strong>
-                  </div>
-                ))}
-              </div>
-              <p className="field-hint">
-                Crown-centre distances, not clinical cusp-tip arch widths.
-              </p>
-              <div className="measurement">
-                <label htmlFor="measure-to">Tooth {selected} centre to</label>
-                <select
-                  id="measure-to"
-                  value={measureTo}
-                  onChange={e => setMeasureTo(e.target.value)}
-                >
-                  <option value="">Choose tooth</option>
-                  {model.teeth
-                    .filter(t => t.id !== selected)
-                    .map(t => (
-                      <option key={t.id} value={t.id}>
-                        Tooth {t.id}
-                      </option>
-                    ))}
-                </select>
-                {distanceTo !== null && (
-                  <span className="measurement-result">
-                    {distanceTo.toFixed(2)} mm <small>At final positions</small>
-                  </span>
-                )}
-              </div>
-              <div className="divider" />
-              <div className="control-heading">
-                <Box size={16} />
-                <h3>Surface intersections</h3>
-              </div>
-              <button
-                className="button light full-button"
-                onClick={scanContacts}
-                disabled={checking || !!sandbox.pending}
-              >
-                {checking ? 'Checking triangle surfaces…' : 'Check final crown surfaces'}
-              </button>
-              {contacts !== null && (
-                <div className="contact-results">
-                  <strong>{contacts.length} intersecting pairs</strong>
-                  {contacts.map(c => (
-                    <button
-                      key={`${c.a}-${c.b}`}
-                      onClick={() => {
-                        setSelectedIds([c.a, c.b]);
-                        setSelected(c.a);
-                        setArch(toothArch(c.a) === toothArch(c.b) ? toothArch(c.a) : 'both');
-                      }}
-                    >
-                      {c.a} ↔ {c.b}
-                    </button>
-                  ))}
-                </div>
-              )}
-              <p className="field-hint">
-                Tests triangle-surface crossings at the final pose only. Does not measure clearance,
-                containment, gums, roots, bone, or intermediate-stage intersections.
-              </p>
-              <button className="text-button" onClick={csv}>
-                <Download size={15} />
-                Export movement summary
-              </button>
-            </div>
-          )}
-
-          {panel === 'history' && (
-            <div className="history-panel">
-              <div className="stage-export-card">
-                <span className="eyebrow">TEACHING MODEL EXPORTS</span>
-                <h3>Take the sequence with you.</h3>
-                <p>Export the nearest whole stage, or every stage with a movement manifest.</p>
-                <button className="button light full-button" onClick={exportShown}>
-                  <Download size={15} />
-                  Export stage {Math.round(stage)} · STL
-                </button>
-                <button
-                  className="button primary full-button"
-                  disabled={busy}
-                  onClick={exportSequence}
-                >
-                  <Layers3 size={15} />
-                  {busy ? 'Preparing…' : `Export ${stages + 1} stages · ZIP`}
-                </button>
-                <p className="field-hint">
-                  Crowns + gingiva{attachments ? ' + placed attachments' : ''}. Teaching geometry;
-                  no aligner shells or manufacturing preparation.
-                </p>
-              </div>
-              <div className="divider" />
-              {!tryActive && !prepared && (
-                <>
-                  <div className="control-heading">
-                    <Layers3 size={16} />
-                    <h3>Planning checkpoints</h3>
-                    <span>{checkpoints.length}/20</span>
-                  </div>
-                  <p>
-                    Capture an intermediate setup. Playback follows the saved order, then reaches
-                    your current final target.
-                  </p>
-                  <div className="checkpoint-input">
-                    <input
-                      aria-label="Checkpoint name"
-                      placeholder="e.g. Alignment study"
-                      maxLength={60}
-                      value={checkpointName}
-                      onChange={e => setCheckpointName(e.target.value)}
-                    />
-                    <button
-                      className="icon-button"
-                      onClick={addCheckpoint}
-                      disabled={checkpoints.length >= 20}
-                      aria-label="Capture checkpoint"
-                    >
-                      <Plus size={18} />
-                    </button>
-                  </div>
-                  <div className="checkpoint-list">
-                    {checkpoints.map((c, i) => (
-                      <div key={c.id}>
-                        <span>{i + 1}</span>
-                        <button
-                          onClick={() => {
-                            setPlaying(false);
-                            setStage(((i + 1) / (checkpoints.length + 1)) * stages);
-                          }}
-                        >
-                          {c.name}
-                        </button>
-                        <button
-                          className="icon-button"
-                          aria-label={`Remove checkpoint ${c.name}`}
-                          onClick={() => {
-                            setCheckpoints(checkpoints.filter(p => p.id !== c.id));
-                            setStage(stages);
-                          }}
-                        >
-                          <X size={13} />
-                        </button>
-                      </div>
-                    ))}
-                  </div>
-                  <div className="divider" />
-                </>
-              )}
-              <div className="control-heading">
-                <History size={16} />
-                <h3>Movement history</h3>
-                <span>{plan.past.length}</span>
-              </div>
-              {!plan.past.length ? (
-                <div className="empty-history">
-                  <History size={24} />
-                  <span>Your first movement will appear here.</span>
-                </div>
-              ) : (
-                [...plan.past].reverse().map((entry, i) => (
-                  <div className="history-entry" key={i}>
-                    <span>{plan.past.length - i}</span>
-                    <div>{entry.label}</div>
-                  </div>
-                ))
-              )}
-            </div>
-          )}
-          <div className="inspector-bottom">
-            <div>
-              <span>Teeth adjusted</span>
-              <strong>
-                {moved}
-                <small> / {model.teeth.length}</small>
-              </strong>
-            </div>
-            <button className="button export-button" onClick={exportShown}>
-              <ArrowDownToLine size={16} />
-              Export stage {Math.round(stage)} STL
-              <ArrowUpRight size={14} />
-            </button>
-          </div>
-        </aside>
+        <CaseInspector api={api} />
       </div>
       <MobileStudioDock
         activePanel={mobilePanel}
@@ -4390,518 +2639,7 @@ function CaseStudio({ active }: { active: boolean }) {
         </button>
       </footer>
 
-      {modal === 'workflows' && (
-        <Dialog title="Teaching library" onClose={() => setModal(null)}>
-          <section className="dental-arrangement-library">
-            <span className="eyebrow">START A FREE EXPERIMENT</span>
-            <h3>Dental relationships</h3>
-            <p>
-              Prepared starting arrangements for free exploration. Dental and skeletal
-              classification remain separate.
-            </p>
-            <div>
-              {DENTAL_ARRANGEMENTS.map(item => (
-                <button
-                  disabled={!!sandbox.pending || busy}
-                  key={item.id}
-                  title={item.description}
-                  onClick={() =>
-                    void teaching.execute(
-                      [{ kind: 'dental-arrangement', id: item.id }],
-                      `Load ${item.title}`,
-                    )
-                  }
-                >
-                  {item.title}
-                  <ArrowUpRight size={14} />
-                </button>
-              ))}
-            </div>
-          </section>
-          <TeachingCaseLibrary
-            cases={CASE_CARDS}
-            selectedId={scenario?.caseId}
-            disabled={!!sandbox.pending || busy}
-            onChoose={id => {
-              setModal(null);
-              void teaching.execute(
-                [{ kind: 'case', action: 'load', id }],
-                'Load prepared teaching case',
-              );
-            }}
-          />
-          <details className="appliance-workflow-library">
-            <summary>Appliance workflows & anatomy classroom</summary>
-            <WorkflowLibrary
-              onChoose={id => {
-                setModal(null);
-                void teaching.runControl(
-                  id === 'anatomy'
-                    ? 'start anatomy lesson'
-                    : `start ${id === 'fixed-braces' ? 'braces' : id.replace('-', ' ')} workflow`,
-                );
-              }}
-            />
-          </details>
-          <div className="combined-library-link">
-            <p>Prefer a short sequence of tooth edits on this case?</p>
-            <button onClick={() => setModal('lessons')}>Short guided lessons</button>
-          </div>
-        </Dialog>
-      )}
-      {modal === 'lessons' && (
-        <Dialog title="Ready for the next demonstration?" onClose={() => setModal(null)}>
-          <p>
-            Choose a short teaching sequence. Say “next step”, “previous step”, or “restart lesson”
-            as you explain.
-          </p>
-          <div className="lesson-cards">
-            {LESSONS.map((lesson, i) => (
-              <button
-                key={lesson.id}
-                onClick={() => {
-                  if (workflowOrigin || scenario) {
-                    note('Restore your workspace before starting another short lesson.', true);
-                    setModal(null);
-                    return;
-                  }
-                  if (sandbox.pending) {
-                    note('Apply or discard the preview before opening a lesson.', true);
-                    setModal(null);
-                    return;
-                  }
-                  setSandbox({ ...sandbox, pending: null, lastEdit: null });
-                  setLessonId(lesson.id);
-                  setLessonStep(-1);
-                  lessonSnapshots.current = [];
-                  setLecture(true);
-                  setModal(null);
-                  setPlaying(false);
-                  note('Lesson ready. Say “next step” or press Next step to begin.');
-                }}
-              >
-                <span className="lesson-number">0{i + 1}</span>
-                <div>
-                  <strong>{lesson.title}</strong>
-                  <p>{lesson.description}</p>
-                  <small>{lesson.steps.length} steps · voice controlled</small>
-                </div>
-                <ArrowUpRight size={19} />
-              </button>
-            ))}
-          </div>
-          <p className="form-note">
-            The first step resets tooth movements. Save your case first if needed. Previous step
-            restores the setup before that step. Demonstrations use illustrative geometry.
-          </p>
-        </Dialog>
-      )}
-      {modal === 'import' && (
-        <Dialog title="Import segmented dental meshes" onClose={() => setModal(null)}>
-          <p>
-            Select already-segmented STL teeth using FDI names such as <code>11.stl</code>,{' '}
-            <code>21.stl</code>, <code>31.stl</code>, and <code>41.stl</code>. Gums can be named{' '}
-            <code>upper_gum.stl</code> and <code>lower_gum.stl</code>.
-          </p>
-          <label className="upload-zone">
-            <Upload size={26} />
-            <strong>{files.length ? `${files.length} files selected` : 'Choose STL files'}</strong>
-            <span>Shared coordinates · 100 MB total</span>
-            <input
-              type="file"
-              accept=".stl"
-              multiple
-              onChange={e => setFiles(Array.from(e.target.files || []))}
-            />
-          </label>
-          {files.length > 0 && (
-            <div className="file-chips">
-              {files.map(f => (
-                <span key={f.name}>{f.name}</span>
-              ))}
-            </div>
-          )}
-          <label className="form-label">
-            Source units
-            <select value={scale} onChange={e => setScale(e.target.value)}>
-              <option value="1">Millimetres</option>
-              <option value="10">Centimetres</option>
-              <option value="1000">Metres</option>
-              <option value="25.4">Inches</option>
-            </select>
-          </label>
-          <p className="form-note">
-            Replaces the current case. Save first if needed. All shared positions are preserved.
-            Anatomical orientation, tooth segmentation, roots, and bite registration are not
-            inferred.
-          </p>
-          {importError && (
-            <p className="inline-error" role="alert">
-              {importError}
-            </p>
-          )}
-          <div className="dialog-actions">
-            <button className="button light" onClick={() => setModal(null)}>
-              Cancel
-            </button>
-            <button
-              className="button primary"
-              disabled={!files.length || busy}
-              onClick={importFiles}
-            >
-              {busy ? 'Importing…' : 'Import models'}
-              <ArrowRight size={16} />
-            </button>
-          </div>
-        </Dialog>
-      )}
-      {modal === 'calibrate' && (
-        <Dialog title={`Reference axes · tooth ${selected}`} onClose={() => setModal(null)}>
-          <p>
-            Named movements require the tooth’s original anatomical axes. The occlusal axis points
-            from the root toward the biting surface; intrusion moves in the opposite direction.
-          </p>
-          {actualCalibration && (
-            <div className="frame-readout">
-              {Object.entries(actualCalibration).map(([key, vector]) => (
-                <div key={key}>
-                  <span>{key}</span>
-                  <code>[{vector.map(n => n.toFixed(3)).join(', ')}]</code>
-                </div>
-              ))}
-            </div>
-          )}
-          <p className="form-note">
-            These selectors assign an axis-aligned frame for this tooth. They do not rotate the
-            mesh. Use world movement for tilted imports until an appropriate frame is assigned.
-            Existing transformations are kept.
-          </p>
-          <div className="calibration-fields">
-            {[
-              { label: 'Buccal', value: bAxis, set: setBAxis },
-              { label: 'Mesial', value: mAxis, set: setMAxis },
-              { label: 'Occlusal', value: oAxis, set: setOAxis },
-            ].map(f => (
-              <label className="form-label" key={f.label}>
-                {f.label}
-                <select value={f.value} onChange={e => f.set(e.target.value)}>
-                  {Object.keys(axisVectors).map(a => (
-                    <option key={a}>{a}</option>
-                  ))}
-                </select>
-              </label>
-            ))}
-          </div>
-          <div className="dialog-actions">
-            <button className="button light" onClick={() => setModal(null)}>
-              Cancel
-            </button>
-            <button
-              className="button primary"
-              disabled={new Set([bAxis[1], mAxis[1], oAxis[1]]).size !== 3}
-              onClick={() => {
-                setModel({
-                  ...model,
-                  teeth: model.teeth.map(t =>
-                    t.id === selected
-                      ? {
-                          ...t,
-                          calibrated: true,
-                          buccal: axisVectors[bAxis],
-                          mesial: axisVectors[mAxis],
-                          occlusal: axisVectors[oAxis],
-                          bracketPosition: undefined,
-                        }
-                      : t,
-                  ),
-                });
-                setModal(null);
-                note(
-                  `Tooth ${selected} reference axes assigned. Bracket placement is estimated from the buccal surface.`,
-                );
-              }}
-            >
-              Assign axes
-              <Check size={16} />
-            </button>
-          </div>
-        </Dialog>
-      )}
-      {modal === 'settings' && (
-        <Dialog title="Workspace settings" onClose={() => setModal(null)}>
-          <div className="settings-file-actions">
-            <button
-              className="button light"
-              onClick={() => {
-                setModal(null);
-                caseInput.current?.click();
-              }}
-            >
-              <Upload size={15} />
-              Open saved case
-            </button>
-            <button
-              className="button light"
-              onClick={() => {
-                setImportError('');
-                setModal('import');
-              }}
-            >
-              Import STL models
-            </button>
-          </div>
-          <h3>Command interpretation</h3>
-          <p>
-            Try Mode commands work locally in English without a key. The optional AI service
-            interprets flexible wording. Every action is independently validated before the geometry
-            engine runs.
-          </p>
-          <Toggle
-            label="Use AI command service"
-            value={aiEnabled}
-            onChange={() => {
-              if (!aiEnabled && !apiUrl) {
-                note('Connect the service below first.', true);
-                return;
-              }
-              setAiEnabled(!aiEnabled);
-            }}
-          />
-          <label className="form-label">
-            Service URL
-            <input value={apiDraft} onChange={e => setApiDraft(e.target.value)} />
-          </label>
-          <button
-            className="button light"
-            disabled={busy}
-            onClick={async () => {
-              setBusy(true);
-              try {
-                const url = new URL(apiDraft);
-                if (!['http:', 'https:'].includes(url.protocol) || url.username || url.password)
-                  throw new Error('Use an http or https URL.');
-                const base = url.href.replace(/\/$/, '');
-                const response = await fetch(`${base}/health`, {
-                  signal: AbortSignal.timeout(5000),
-                });
-                if (!response.ok) throw new Error('Service unavailable.');
-                const result = await response.json();
-                if (!result.ai_enabled)
-                  throw new Error('Service is running but OPENAI_API_KEY is not configured.');
-                teaching.setConfig({
-                  url: base,
-                  enabled: true,
-                  provider: result.provider || 'Configured AI provider',
-                });
-                note(
-                  'AI service connected. Clear validated classroom and geometric commands execute immediately; manual previews retain Apply and Cancel. Undo restores the whole request.',
-                );
-              } catch (e) {
-                note(errorText(e), true);
-              } finally {
-                setBusy(false);
-              }
-            }}
-          >
-            Connect service
-            <ArrowUpRight size={15} />
-          </button>
-          <p className="form-note">
-            Command text and minimal scene references go to your configured AI provider. Meshes
-            remain local. Voice uses the browser’s speech service. API keys belong only in the
-            backend environment.
-          </p>
-          <p className={statusError ? 'inline-error' : 'form-note'}>{status}</p>
-          <div className="divider" />
-          <button className="text-button" onClick={() => setModal('demo')}>
-            <RotateCcw size={16} />
-            Reload synthetic study
-          </button>
-          <button className="text-button" onClick={() => setModal('guide')}>
-            <CircleHelp size={16} />
-            Movement guide and sources
-          </button>
-        </Dialog>
-      )}
-      {modal === 'arrangement' && dentalArrangement && (
-        <Dialog title={dentalArrangement.title} onClose={() => setModal(null)}>
-          <p>{dentalArrangement.description}</p>
-          <ul className="arrangement-assumptions">
-            {dentalArrangement.assumptions.map(item => (
-              <li key={item}>{item}</li>
-            ))}
-          </ul>
-          <p className="form-note">Source-linked draft · educator review pending.</p>
-          <ul className="source-links">
-            {dentalArrangement.sources.map(item => (
-              <li key={item.url}>
-                <a href={item.url} target="_blank" rel="noreferrer">
-                  {item.title}
-                </a>
-              </li>
-            ))}
-          </ul>
-        </Dialog>
-      )}
-      {modal === 'demo' && (
-        <Dialog title="Reload the synthetic study?" onClose={() => setModal(null)}>
-          <p>
-            This replaces the current case, movements, and checkpoints. Save your current case first
-            to keep it.
-          </p>
-          <div className="dialog-actions">
-            <button className="button light" onClick={() => setModal(null)}>
-              Cancel
-            </button>
-            <button className="button primary" onClick={() => load(createDemo())}>
-              Reload study
-            </button>
-          </div>
-        </Dialog>
-      )}
-      {modal === 'guide' && (
-        <Dialog title="Orthodontic movement guide" onClose={() => setModal(null)}>
-          <p>
-            Try Mode is a free teaching workspace. Clear validated spoken or typed instructions
-            execute immediately; manual controls offer a preview with Apply or Discard. Per-tooth
-            anatomical movements and rigid segment movements are different controls.
-          </p>
-          <div className="movement-guide-table">
-            <div>
-              <strong>Translation</strong>
-              <span>
-                Buccal/lingual, mesial/distal, and intrusion/extrusion. Intrusion follows the
-                rootward direction; upper and lower signs differ.
-              </span>
-            </div>
-            <div>
-              <strong>Tip</strong>
-              <span>Rotation about the buccolingual axis.</span>
-            </div>
-            <div>
-              <strong>Torque</strong>
-              <span>
-                Rotation about the mesiodistal axis. This geometric preview does not predict
-                isolated root movement.
-              </span>
-            </div>
-            <div>
-              <strong>Axial rotation</strong>
-              <span>Rotation about the root-to-occlusal axis.</span>
-            </div>
-          </div>
-          <p className="form-note">
-            Positive angles use the right-hand rule about the stored positive axis. Rotations use
-            fixed original reference axes and the crown’s bounding-box centre, not a physiological
-            centre of resistance. “Expand” means buccal displacement per tooth, not a requested
-            total arch-width increase. “Retract” means lingual displacement in this editor.
-          </p>
-          <h3>Voice in a lecture</h3>
-          <p className="form-note">
-            Hold Space outside an input, or hold the microphone button, and release to run your
-            instruction. Try Mode commands run locally in English. The optional AI service
-            translates flexible wording into the same bounded classroom, geometry and appliance
-            actions. The application validates the complete request and calculates supported
-            mechanics independently. Stop or Escape cancels pending work. “Undo that” restores the
-            whole request. Explanations are spoken only when you ask.
-          </p>
-          <h3>Build an appliance experiment</h3>
-          <p className="form-note">
-            Point to a crown, root or gingiva while speaking. “Install brackets here” targets the
-            associated tooth; a TAD uses the indicated point. A passive bracket and wire setup does
-            not move teeth. Specify activation, tension or spring parameters, then say “show what
-            happens”. Parameter replacements recalculate from the unchanged unloaded reference. Save
-            named experiment stages to compare configurations.
-          </p>
-          <h3>Geometric objectives</h3>
-          <p className="form-note">
-            Gap closure requires two teeth and an explicit equal/first/second rule. Pair span
-            changes the 3D distance between crown centres. The editable arch ellipse changes
-            positions while preserving each tooth’s height and orientation. All calculate targets
-            from the committed arrangement. Manual objectives show a preview; clear command requests
-            apply only after validation.
-          </p>
-          <p className="form-note">
-            Crown crossings are checked at bounded samples along the displayed path. Starting
-            intersections are reported separately. Roots, bone, enclosed volumes, and crossings
-            between samples are not assessed. Unrestricted illustration can bypass collision
-            constraints, but never tooth locks.
-          </p>
-          <h3>Try a command</h3>
-          <div className="example-commands">
-            {EXAMPLES.map(s => (
-              <button
-                key={s}
-                onClick={() => {
-                  setCommand(s);
-                  setModal(null);
-                  setTimeout(() => commandInput.current?.focus(), 0);
-                }}
-              >
-                <code>{s}</code>
-                <ArrowUpRight size={15} />
-              </button>
-            ))}
-          </div>
-          <p className="form-note">
-            Combine up to eight supported actions with “and” or “then”; an explicit list is written
-            “teeth 11,12,21,22”. For a single “rotate it”, the legacy default is world Y. For a
-            group “rotate teeth …”, the default is each tooth’s long axis. Use “around x/y/z” for
-            world rotations.
-          </p>
-          <h3>What the display means</h3>
-          <p className="form-note">
-            Crowns and roots in the demo are synthetic Blender teaching meshes, with a built-in
-            basic model as a loading fallback. Brackets and wires are schematic. The optional
-            mechanics experiment calculates a reduced initial elastic response with declared virtual
-            support, wire, elastic and expander assumptions. Hardware curves and force-arrow sizes
-            remain schematic. No biological progression, patient-specific bone limits, clinical
-            treatment feasibility or aligner production is computed. Numeric input limits are
-            software limits, not safe clinical movement ranges.
-          </p>
-          <h3>Evidence and reading</h3>
-          <ul className="source-links">
-            <li>
-              <a
-                href="https://link.springer.com/article/10.1186/s40510-022-00402-x"
-                target="_blank"
-                rel="noreferrer"
-              >
-                Tip, torque and rotation: digital measurement study
-              </a>
-            </li>
-            <li>
-              <a
-                href="https://aaoinfo.org/resources/glossary-of-orthodontic-terms/"
-                target="_blank"
-                rel="noreferrer"
-              >
-                American Association of Orthodontists glossary
-              </a>
-            </li>
-            <li>
-              <a
-                href="https://pmc.ncbi.nlm.nih.gov/articles/PMC9995625/"
-                target="_blank"
-                rel="noreferrer"
-              >
-                Centre of resistance: evidence and limitations
-              </a>
-            </li>
-          </ul>
-          <div className="shortcut-list">
-            <span>
-              Focus command bar<kbd>/</kbd>
-            </span>
-            <span>
-              Undo<kbd>Ctrl / ⌘ + Z</kbd>
-            </span>
-            <span>
-              Redo<kbd>Ctrl / ⌘ + Shift + Z</kbd>
-            </span>
-          </div>
-        </Dialog>
-      )}
+      <CaseDialogs api={api} />
     </div>
   );
 }
