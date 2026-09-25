@@ -52,7 +52,7 @@ Read [docs/architecture/overview.md](docs/architecture/overview.md) before touch
 ## Repository layout
 
 - `src/app/` — Next.js entry (layout, page, global CSS)
-- `src/components/` — React components with co-located `*.css` and `*.test.ts(x)`
+- `src/components/` — React components in feature folders (`case/`, `viewer/`, `teaching/`, `workflow/`, `lecture/`, `mechanics/`, `try/`, `shared/`) with co-located `*.css` and tests; see [docs/architecture/folder-structure.md](docs/architecture/folder-structure.md)
 - `src/lib/` — parsing, runtime, geometry, persistence; `src/lib/mechanics/` is the pure solver
 - `src/workers/` — the mechanics worker entry (esbuild-bundled to `public/workers/`, gitignored)
 - `backend/` — optional FastAPI AI interpreter + pytest suite (Python 3.13)
