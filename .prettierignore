@@ -1,0 +1,15 @@
+# Build output and generated files
+out/
+.next/
+public/workers/
+package-lock.json
+src/lib/teaching-case-audit.json
+next-env.d.ts
+
+# Python (not Prettier's domain)
+backend/.venv/
+
+# Binary asset folders
+assets/
+sample-models/
+public/models/
