@@ -1,0 +1,279 @@
+@media (max-width: 700px) {
+  .teaching-studio .workflows-button span {
+    display: none;
+  }
+  .teaching-studio.workflow-studio {
+    height: auto;
+    min-height: 100dvh;
+    overflow: visible;
+    display: block;
+  }
+  .workflow-layout {
+    display: flex;
+    flex-direction: column;
+  }
+  .workflow-main {
+    padding: 16px 11px 13px;
+  }
+  .workflow-studio .workflow-viewport {
+    height: 410px;
+    min-height: 410px;
+    flex: auto;
+  }
+  .workflow-stage-heading {
+    align-items: center;
+    margin-bottom: 13px;
+  }
+  .workflow-stage-heading h1 {
+    font-size: 20px;
+    max-width: 235px;
+  }
+  .workflow-stage-heading .eyebrow {
+    font-size: 11px;
+    letter-spacing: 0.7px;
+  }
+  .workflow-navigation .button {
+    padding: 0 8px;
+  }
+  .workflow-studio .workflow-back span {
+    display: none;
+  }
+  .workflow-studio .topbar {
+    height: 59px;
+    gap: 12px;
+  }
+  .workflow-studio .brand {
+    font-size: 22px;
+    margin-right: auto;
+  }
+  .workflow-studio .brand-icon {
+    width: 29px;
+    height: 29px;
+  }
+  .workflow-studio .header-actions {
+    gap: 4px;
+  }
+  .workflow-studio .header-actions > .button {
+    font-size: 13px;
+    padding: 0 9px;
+  }
+  .workflow-studio .header-actions > .icon-button {
+    width: 44px;
+  }
+  .workflow-studio .header-actions > .icon-button:last-child {
+    display: none;
+  }
+  .workflow-back {
+    width: 23px;
+    justify-content: center;
+  }
+  .workflow-studio .command-input {
+    height: 48px;
+  }
+  .workflow-studio .command-title > span {
+    font-size: 12px;
+  }
+  .workflow-studio .command-status {
+    font-size: 12px;
+  }
+  .workflow-animation {
+    margin-top: 9px;
+  }
+  .workflow-speed {
+    flex-direction: row;
+  }
+  .workflow-animation > .button {
+    width: 36px;
+    min-width: 36px;
+  }
+  .workflow-explanation {
+    border-left: 0;
+    border-top: 1px solid var(--ui-line);
+    padding: 21px 22px;
+    overflow: visible;
+  }
+  .workflow-purpose p {
+    font-size: 14px;
+  }
+  .workflow-step-list {
+    justify-content: flex-start;
+    gap: 9px;
+  }
+  .workflow-step-list button {
+    height: 44px;
+    max-width: 46px;
+    font-size: 13px;
+  }
+  .workflow-explain-section p {
+    font-size: 14px;
+  }
+  .workflow-question > p {
+    font-size: 14px;
+  }
+  .workflow-visual-note {
+    font-size: 12px !important;
+    right: 40px;
+    left: 13px;
+    background: var(--ui-panel);
+    border-radius: 4px;
+    padding: 3px 6px;
+  }
+  .workflow-studio .orientation {
+    display: none;
+  }
+  .workflow-library-card {
+    padding: 15px;
+    gap: 11px;
+  }
+  .workflow-library-card strong {
+    font-size: 14px;
+  }
+  .workflow-library-card p {
+    font-size: 13px;
+  }
+  .workflow-library-number {
+    font-size: 20px;
+  }
+  .workflow-library-card small {
+    font-size: 12px;
+  }
+}
+
+/* Voice classroom controls */
+
+.teaching-command-bar .command-title {
+  gap: 10px;
+}
+
+.teaching-command-bar .command-title > span:first-child {
+  margin-right: auto;
+}
+
+.teaching-phase {
+  font-size: 12px;
+  text-transform: capitalize;
+  border-radius: 20px;
+  padding: 3px 9px;
+  background: var(--ui-raised);
+  color: var(--ui-accent);
+}
+
+.teaching-phase.executing,
+.teaching-phase.interpreting {
+  background: var(--ui-warning-bg);
+  color: var(--ui-warning);
+}
+
+.teaching-phase.listening,
+.teaching-phase.starting {
+  background: var(--ui-soft);
+  color: var(--ui-accent);
+}
+
+.teaching-command-bar .command-title > .teaching-stop {
+  display: flex;
+  gap: 5px;
+  align-items: center;
+  color: var(--ui-error) !important;
+}
+
+.teaching-command-bar .voice-button {
+  touch-action: none;
+  user-select: none;
+}
+
+.teaching-command-bar .command-status {
+  align-items: flex-start;
+  min-height: 25px;
+  gap: 12px;
+}
+
+.teaching-command-bar .command-status > span {
+  flex: 1;
+  max-height: 58px;
+  overflow: auto;
+}
+
+.teaching-command-bar .command-status .text-button {
+  flex-shrink: 0;
+  padding: 0;
+}
+
+.teaching-command-bar .speech-caption {
+  max-height: 44px;
+  overflow: auto;
+}
+
+.case-action-status {
+  font-size: 12px;
+  color: var(--ui-muted);
+  padding-top: 4px;
+  min-height: 18px;
+}
+
+.case-action-status.error {
+  color: var(--ui-error);
+}
+
+.teaching-experiment {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  justify-content: space-between;
+  background: var(--ui-warning-bg);
+  color: var(--ui-warning);
+  border: 1px solid var(--ui-warning);
+  padding: 7px 12px;
+  margin-bottom: 8px;
+  border-radius: 7px;
+  font-size: 12px;
+}
+
+.teaching-experiment button {
+  font-weight: 700;
+  color: var(--ui-warning);
+  white-space: nowrap;
+}
+
+.anatomy-compare-buttons {
+  display: flex;
+  gap: 5px;
+  flex-wrap: wrap;
+  margin: 12px 0;
+}
+
+.anatomy-compare-buttons button {
+  padding: 7px 10px;
+  border: 1px solid var(--ui-line);
+  border-radius: 6px;
+  background: var(--ui-panel);
+  font-size: 13px;
+}
+
+.workflow-studio .teaching-command-bar {
+  margin-top: 10px;
+}
+
+.workflow-studio .teaching-command-bar .command-input {
+  min-height: 42px;
+}
+
+.workflow-studio .teaching-command-bar .command-status {
+  font-size: 12px;
+}
+
+.workflow-studio .workflow-explain-section .text-button {
+  color: var(--ui-accent);
+}
+
+.workflow-studio .workflow-main {
+  overflow: auto;
+}
+
+.workflow-studio .workflow-viewport {
+  min-height: 240px;
+}
+
+.sidebar .anatomy-panel {
+  margin: 8px 0;
+}

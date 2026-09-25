@@ -1,0 +1,272 @@
+.studio-experience .case-sources summary,
+.studio-experience .appliance-workflow-library summary {
+  cursor: pointer;
+  font-weight: 650;
+  color: var(--ui-text);
+  padding: 10px 0;
+}
+
+.studio-experience .case-sources ul {
+  padding-left: 18px;
+  margin: 10px 0;
+}
+
+.studio-experience .case-sources a {
+  display: block;
+  color: var(--ui-accent);
+  text-decoration: underline;
+  margin: 7px 0;
+}
+
+.studio-experience .appliance-workflow-library {
+  margin: 24px 0 12px;
+  border-top: 1px solid var(--ui-line);
+  padding-top: 10px;
+}
+
+.studio-experience .case-path-note {
+  border: 1px solid var(--ui-warning);
+  background: var(--ui-warning-bg);
+  padding: 10px 12px;
+  border-radius: 9px;
+  margin-bottom: 10px;
+  font-size: 12px;
+  line-height: 1.6;
+  color: var(--ui-warning);
+}
+
+/* Midnight Lab / Clinical Studio share a compact, model-first shell. */
+
+.studio-live-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--ui-accent);
+  margin-right: 8px;
+}
+
+.studio-rail {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 7px;
+  padding: 18px 8px;
+  border-right: 1px solid var(--ui-line);
+  background: var(--ui-panel);
+}
+
+.studio-rail button {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  min-height: 62px;
+  border: 1px solid transparent;
+  border-radius: 12px;
+  color: var(--ui-muted);
+  font-size: 12px;
+  font-weight: 550;
+}
+
+.studio-rail button:hover {
+  color: var(--ui-text);
+  background: var(--ui-raised);
+}
+
+.studio-rail button[aria-pressed='true'] {
+  color: var(--ui-accent);
+  background: var(--ui-soft);
+  border-color: var(--ui-line);
+}
+
+.studio-rail .rail-help {
+  margin-top: auto;
+}
+
+.rail-divider {
+  height: 1px;
+  background: var(--ui-line);
+  margin: 10px 8px;
+}
+
+.studio-experience.teaching-studio .header-actions .button,
+.studio-experience.teaching-studio .avatar {
+  min-height: 44px;
+}
+
+.studio-experience.teaching-studio .try-action,
+.studio-experience.teaching-studio .command-submit {
+  background: var(--ui-accent);
+  border-color: var(--ui-accent);
+  color: var(--ui-accent-text);
+}
+
+.studio-experience.teaching-studio .try-preview {
+  background: var(--ui-preview-bg);
+  border-color: var(--ui-preview);
+}
+
+.studio-experience.teaching-studio .chart-teeth button.selected {
+  background: var(--ui-accent);
+  color: var(--ui-accent-text);
+  border-color: var(--ui-accent);
+}
+
+.studio-experience.teaching-studio .on .switch {
+  background: var(--ui-accent);
+}
+
+.studio-experience.teaching-studio .on .switch > span {
+  background: var(--ui-accent-text);
+}
+
+.studio-experience.teaching-studio .viewport {
+  box-shadow: 0 12px 36px var(--ui-shadow);
+}
+
+.studio-experience.teaching-studio .workspace-heading {
+  align-items: center;
+}
+
+.studio-experience.teaching-studio .workspace-heading h2 {
+  font-size: 23px;
+  letter-spacing: -0.7px;
+}
+
+.studio-experience.teaching-studio .try-intro,
+.studio-experience.teaching-studio .try-hint,
+.studio-experience.teaching-studio .try-detail {
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+.studio-experience.teaching-studio .camera-tabs button {
+  min-height: 44px;
+  font-size: 13px;
+}
+
+.studio-experience.teaching-studio .model-tools button {
+  width: 44px;
+  height: 44px;
+}
+
+.studio-experience.teaching-studio .command-input {
+  min-height: 58px;
+}
+
+.studio-experience.teaching-studio .command-status,
+.studio-experience.teaching-studio .case-action-status {
+  font-size: 13px;
+}
+
+.studio-experience.teaching-studio.lecture-mode .workspace-heading h2 {
+  font-size: 30px;
+}
+
+.studio-experience.teaching-studio.lecture-mode .lesson-ribbon p,
+.studio-experience.teaching-studio.lecture-mode .speech-caption {
+  font-size: 20px;
+  line-height: 1.5;
+}
+
+.studio-experience.teaching-studio.lecture-mode .studio-rail {
+  display: none;
+}
+
+/* A preview decision is outside every scrolling/hideable panel. */
+
+.preview-decision-bar {
+  position: fixed;
+  z-index: 95;
+  left: 94px;
+  right: 322px;
+  bottom: 32px;
+  display: flex;
+  gap: 18px;
+  align-items: center;
+  padding: 15px 18px;
+  background: var(--ui-panel);
+  border: 1px solid var(--ui-preview);
+  border-radius: 14px;
+  box-shadow: 0 12px 45px var(--ui-shadow);
+}
+
+.preview-decision-summary {
+  display: flex;
+  flex: 1;
+  min-width: 0;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.preview-decision-eyebrow {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: var(--ui-preview);
+}
+
+.preview-decision-summary > strong {
+  font-size: 14px;
+  line-height: 1.4;
+  overflow-wrap: anywhere;
+  color: var(--ui-text);
+}
+
+.preview-decision-report {
+  font-size: 12px;
+  line-height: 1.45;
+  color: var(--ui-muted);
+}
+
+.preview-decision-bar[data-status='blocked'] .preview-decision-report,
+.preview-decision-bar[data-status='limited'] .preview-decision-report,
+.preview-decision-unrestricted {
+  color: var(--ui-warning);
+}
+
+.preview-decision-unrestricted {
+  font-size: 12px;
+}
+
+.preview-decision-actions {
+  display: flex;
+  gap: 7px;
+  flex-shrink: 0;
+}
+
+.preview-decision-actions button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  min-height: 44px;
+  padding: 0 12px;
+  border: 1px solid var(--ui-line);
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 650;
+  color: var(--ui-text);
+  background: var(--ui-raised);
+}
+
+.preview-decision-actions .preview-decision-apply {
+  background: var(--ui-accent);
+  color: var(--ui-accent-text);
+  border-color: var(--ui-accent);
+}
+
+.preview-decision-actions button:disabled {
+  opacity: 0.45;
+}
+
+.studio-experience[data-tools-open='false'] .preview-decision-bar,
+.studio-experience.lecture-mode .preview-decision-bar {
+  right: 24px;
+}
+
+.studio-experience.lecture-mode .preview-decision-bar {
+  left: 24px;
+}

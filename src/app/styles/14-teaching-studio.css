@@ -1,0 +1,266 @@
+.teaching-studio .reset-link,
+.teaching-studio .axis-details {
+  color: var(--ui-accent);
+  font-size: 12px;
+}
+
+.teaching-studio .position-values span,
+.teaching-studio .position-values small,
+.teaching-studio .rotation-values {
+  color: var(--ui-muted);
+  font-size: 12px;
+}
+
+.teaching-studio .rotation-values > span {
+  color: var(--ui-muted);
+}
+
+.teaching-studio .information-card {
+  background: var(--ui-panel);
+  color: var(--ui-accent);
+}
+
+.teaching-studio .inspector-bottom > div {
+  color: var(--ui-muted);
+}
+
+.teaching-studio .export-button {
+  color: var(--ui-accent);
+  background: var(--ui-panel);
+  border-color: var(--ui-line);
+}
+
+.appliance-intro {
+  font-size: 12px;
+  line-height: 1.7;
+  color: var(--ui-muted);
+  margin-bottom: 20px;
+}
+
+.attachment-fields {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.attachment-fields > label {
+  font-size: 12px;
+  color: var(--ui-muted);
+}
+
+.attachment-fields > label > span {
+  display: flex;
+  align-items: center;
+  border: 1px solid var(--ui-line);
+  border-radius: 6px;
+  background: var(--ui-panel);
+  height: 37px;
+  margin-top: 5px;
+  padding-right: 9px;
+}
+
+.attachment-fields input {
+  border: 0;
+  background: transparent;
+  min-width: 0;
+  width: 100%;
+  padding: 8px;
+  color: var(--ui-text);
+  font-size: 13px;
+}
+
+.attachment-fields small {
+  font-size: 12px;
+  color: var(--ui-muted);
+}
+
+.attachment-actions {
+  display: flex;
+  gap: 6px;
+  margin-top: 13px;
+}
+
+.attachment-actions .button {
+  font-size: 13px;
+  padding: 0 12px;
+}
+
+.attachment-actions .button:first-child {
+  flex: 1;
+}
+
+.stage-export-card {
+  padding: 14px;
+  background: var(--ui-panel);
+  border: 1px solid var(--ui-line);
+  border-radius: 9px;
+}
+
+.stage-export-card h3 {
+  font-size: 15px;
+  margin: 6px 0 9px;
+  line-height: 1.6;
+}
+
+.stage-export-card > p {
+  font-size: 13px;
+  line-height: 1.7;
+  color: var(--ui-muted);
+  margin-bottom: 12px;
+}
+
+.stage-export-card .button {
+  margin-top: 7px;
+}
+
+.stage-export-card > p:last-child {
+  font-size: 12px;
+  margin-top: 12px;
+  margin-bottom: 0;
+}
+
+.teaching-studio .dialog {
+  max-width: 680px;
+}
+
+.teaching-studio .dialog > p,
+.teaching-studio .dialog .form-note {
+  color: var(--ui-muted);
+}
+
+.teaching-studio .example-commands button {
+  color: var(--ui-accent);
+  background: var(--ui-panel);
+}
+
+.teaching-studio .movement-guide-table span {
+  color: var(--ui-muted);
+}
+
+.teaching-studio .movement-guide-table strong {
+  color: var(--ui-text);
+}
+
+.lesson-cards {
+  display: grid;
+  gap: 10px;
+  margin-top: 22px;
+}
+
+.lesson-cards > button {
+  display: flex;
+  align-items: flex-start;
+  gap: 15px;
+  padding: 18px;
+  text-align: left;
+  background: var(--ui-panel);
+  border: 1px solid var(--ui-line);
+  border-radius: 10px;
+}
+
+.lesson-cards > button:hover {
+  background: var(--ui-soft);
+  border-color: var(--ui-accent);
+}
+
+.lesson-cards .lesson-number {
+  font-family: Manrope, sans-serif;
+  font-size: 21px;
+  font-weight: 600;
+  color: var(--ui-accent);
+}
+
+.lesson-cards > button > div {
+  flex: 1;
+}
+
+.lesson-cards strong {
+  font-size: 14px;
+  color: var(--ui-text);
+}
+
+.lesson-cards p {
+  font-size: 13px;
+  line-height: 1.7;
+  color: var(--ui-accent);
+  margin-top: 5px;
+}
+
+.lesson-cards small {
+  font-size: 12px;
+  color: var(--ui-accent);
+  display: block;
+  margin-top: 8px;
+}
+
+.lesson-cards svg {
+  color: var(--ui-accent);
+}
+
+.teaching-studio .statusbar {
+  color: var(--ui-muted);
+  background: var(--ui-panel);
+  border-color: var(--ui-line);
+  font-size: 12px;
+}
+
+.teaching-studio.lecture-mode .workspace {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.teaching-studio.lecture-mode .sidebar,
+.teaching-studio.lecture-mode .inspector,
+.teaching-studio.lecture-mode .workspace-heading {
+  display: none;
+}
+
+.teaching-studio.lecture-mode .main-workspace {
+  padding: 12px 24px 8px;
+}
+
+.teaching-studio.lecture-mode .viewport {
+  min-height: 240px;
+}
+
+.teaching-studio.lecture-mode .viewport-selection {
+  font-size: 15px;
+}
+
+.teaching-studio.lecture-mode .lesson-ribbon strong {
+  font-size: 16px;
+}
+
+.teaching-studio.lecture-mode .lesson-ribbon p {
+  font-size: 14px;
+}
+
+.teaching-studio.lecture-mode .command-input input {
+  font-size: 16px;
+}
+
+.teaching-studio.lecture-mode .speech-caption {
+  font-size: 16px;
+}
+
+.teaching-studio.lecture-mode .command-status {
+  font-size: 13px;
+}
+
+@media (min-width: 1600px) {
+  .teaching-studio .workspace {
+    grid-template-columns: 245px minmax(450px, 1fr) 340px;
+  }
+  .teaching-studio .main-workspace {
+    padding-left: 26px;
+    padding-right: 26px;
+  }
+  .teaching-studio .four-tabs > button {
+    font-size: 13px;
+  }
+  .teaching-studio .viewport {
+    min-height: 280px;
+  }
+  .teaching-studio .command-input input {
+    font-size: 14px;
+  }
+}

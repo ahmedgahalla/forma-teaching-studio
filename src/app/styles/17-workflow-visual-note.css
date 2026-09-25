@@ -1,0 +1,275 @@
+.workflow-visual-note {
+  position: absolute;
+  bottom: 17px;
+  left: 18px;
+  right: 80px;
+  font-size: 12px;
+  color: var(--ui-muted);
+  pointer-events: none;
+  line-height: 1.5;
+  background: var(--ui-panel);
+  border-radius: 4px;
+  padding: 3px 6px;
+}
+
+.workflow-studio .camera-tabs {
+  top: 47px;
+}
+
+.workflow-animation {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  flex-shrink: 0;
+  padding: 12px 14px;
+  background: var(--ui-panel);
+  border: 1px solid var(--ui-line);
+  border-radius: 9px;
+  margin-top: 11px;
+}
+
+.workflow-animation > .button {
+  font-size: 13px;
+  height: 37px;
+  padding: 0 12px;
+  min-width: 151px;
+}
+
+.workflow-scrubber {
+  flex: 1;
+  min-width: 0;
+  padding-top: 4px;
+}
+
+.workflow-scrubber > div {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 12px;
+  color: var(--ui-muted);
+  gap: 8px;
+}
+
+.workflow-scrubber strong {
+  font-size: 12px;
+  font-weight: 550;
+  min-width: 35px;
+  text-align: center;
+  color: var(--ui-text);
+}
+
+.workflow-scrubber input {
+  margin-top: 6px;
+  margin-bottom: 10px;
+}
+
+.workflow-scrubber input:disabled {
+  cursor: default;
+  opacity: 0.6;
+}
+
+.workflow-speed {
+  font-size: 12px;
+  color: var(--ui-muted);
+  display: flex;
+  align-items: center;
+  gap: 7px;
+}
+
+.workflow-speed select {
+  color: var(--ui-text);
+  border: 1px solid var(--ui-line);
+  background: var(--ui-panel);
+  border-radius: 5px;
+  font-size: 13px;
+  padding: 5px;
+}
+
+.workflow-studio .command-section {
+  padding-top: 11px;
+}
+
+.workflow-studio .command-input {
+  height: 47px;
+}
+
+.workflow-studio .command-input input {
+  font-size: 14px;
+}
+
+.workflow-studio .command-status {
+  font-size: 12px;
+  min-height: 20px;
+}
+
+.workflow-command-examples {
+  display: flex;
+  gap: 5px;
+  flex-wrap: wrap;
+  margin-bottom: 8px;
+  padding: 9px;
+  background: var(--ui-raised);
+  border-radius: 7px;
+}
+
+.workflow-command-examples button {
+  font-size: 13px;
+  color: var(--ui-accent);
+  background: var(--ui-panel);
+  border: 1px solid var(--ui-line);
+  border-radius: 4px;
+  padding: 4px 7px;
+}
+
+.workflow-studio .speech-caption {
+  font-size: 13px;
+  padding: 6px 10px;
+}
+
+.workflow-explanation {
+  padding: 23px 23px 20px;
+  overflow-y: auto;
+  border-left: 1px solid var(--ui-line);
+  background: var(--ui-panel);
+  scrollbar-width: thin;
+  scrollbar-color: var(--ui-line) transparent;
+  min-height: 0;
+}
+
+.workflow-purpose .eyebrow {
+  font-size: 13px;
+  color: var(--ui-muted);
+  letter-spacing: 1.2px;
+}
+
+.workflow-purpose p {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--ui-accent);
+  line-height: 1.8;
+  margin-top: 7px;
+}
+
+.workflow-step-list {
+  display: flex;
+  justify-content: space-between;
+  gap: 6px;
+  margin: 19px 0 23px;
+  padding-bottom: 20px;
+  border-bottom: 1px solid var(--ui-line);
+}
+
+.workflow-step-list button {
+  flex: 1;
+  border-radius: 6px;
+  padding: 0;
+  position: relative;
+  height: 36px;
+  background: var(--ui-panel);
+  border: 1px solid var(--ui-line);
+  color: var(--ui-muted);
+  display: grid;
+  place-items: center;
+  font-size: 13px;
+}
+
+.workflow-step-list button > span {
+  display: grid;
+  place-items: center;
+}
+
+.workflow-step-list button:hover {
+  background: var(--ui-soft);
+  color: var(--ui-accent);
+}
+
+.workflow-step-list button.active {
+  background: var(--ui-accent);
+  color: var(--ui-accent-text);
+  border-color: var(--ui-accent);
+  box-shadow: 0 2px 4px var(--ui-shadow);
+}
+
+.workflow-explain-section {
+  margin-bottom: 22px;
+}
+
+.workflow-explain-section .eyebrow {
+  font-size: 13px;
+  color: var(--ui-muted);
+  letter-spacing: 1.3px;
+}
+
+.workflow-explain-section p {
+  font-size: 13px;
+  line-height: 1.85;
+  color: var(--ui-accent);
+  margin-top: 7px;
+}
+
+.workflow-explain-section.effect .eyebrow {
+  color: var(--ui-accent);
+}
+
+.workflow-explain-section.effect p {
+  color: var(--ui-accent);
+}
+
+.workflow-observe {
+  display: flex;
+  gap: 10px;
+  padding: 14px;
+  background: var(--ui-panel);
+  border: 1px solid var(--ui-line);
+  border-radius: 8px;
+  margin-bottom: 20px;
+  color: var(--ui-accent);
+}
+
+.workflow-observe > svg {
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+
+.workflow-observe strong {
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.workflow-observe p {
+  font-size: 13px;
+  line-height: 1.8;
+  margin-top: 5px;
+  color: var(--ui-accent);
+}
+
+.workflow-question {
+  padding: 16px;
+  background: var(--ui-warning-bg);
+  border: 1px solid var(--ui-warning);
+  border-radius: 8px;
+  margin-bottom: 20px;
+}
+
+.workflow-question .eyebrow {
+  color: var(--ui-warning);
+  font-size: 13px;
+}
+
+.workflow-question > p {
+  font-size: 13px;
+  line-height: 1.8;
+  color: var(--ui-warning);
+  margin-top: 7px;
+}
+
+.workflow-question > button {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  color: var(--ui-warning);
+  font-size: 13px;
+  padding: 0;
+  margin-top: 10px;
+  font-weight: 600;
+}

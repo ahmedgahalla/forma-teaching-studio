@@ -1,0 +1,279 @@
+.studio-experience.teaching-studio .brand {
+  font-size: 27px;
+  letter-spacing: -1.2px;
+  color: var(--ui-text);
+}
+
+.studio-experience.teaching-studio .brand-icon {
+  background: var(--ui-raised);
+  color: var(--ui-accent);
+  width: 34px;
+  height: 34px;
+  border-radius: 10px;
+}
+
+.studio-experience.teaching-studio .brand-divider {
+  background: var(--ui-raised);
+}
+
+.studio-experience.teaching-studio .brand-sub,
+.studio-experience.teaching-studio .top-center {
+  color: var(--ui-muted);
+  font-size: 12px;
+}
+
+.studio-experience.teaching-studio .header-actions {
+  gap: 9px;
+}
+
+.studio-experience.teaching-studio .header-actions .button {
+  min-height: 37px;
+  font-size: 12px;
+}
+
+.studio-experience.teaching-studio .workflows-button {
+  background: var(--ui-raised);
+  border-color: var(--ui-line);
+  color: var(--ui-accent);
+  font-weight: 700;
+}
+
+.studio-experience.teaching-studio .header-actions .presentation-button {
+  color: var(--ui-text);
+  border: 1px solid var(--ui-line);
+  background: transparent;
+}
+
+.studio-experience.teaching-studio .header-actions .presentation-button[aria-pressed='true'] {
+  background: var(--ui-panel);
+}
+
+.studio-experience.teaching-studio .header-actions .button.dark {
+  background: var(--ui-raised);
+  border: 1px solid var(--ui-line);
+  color: var(--ui-text);
+}
+
+.studio-experience.teaching-studio .header-actions .text-button {
+  color: var(--ui-text);
+}
+
+.studio-experience.teaching-studio .avatar {
+  background: var(--ui-panel);
+  color: var(--ui-text);
+  border: 1px solid var(--ui-line);
+  width: 37px;
+  height: 37px;
+}
+
+.studio-experience.teaching-studio .workspace {
+  grid-template-columns: 72px minmax(0, 1fr) 300px;
+  position: relative;
+  min-height: 0;
+}
+
+.studio-experience.teaching-studio .sidebar {
+  display: flex;
+  padding: 23px 16px;
+  background: var(--ui-raised);
+  border-right: 1px solid var(--ui-line);
+  scrollbar-width: thin;
+}
+
+.studio-experience.teaching-studio .inspector {
+  padding: 22px 18px;
+  background: var(--ui-panel);
+  border-left: 1px solid var(--ui-line);
+  scrollbar-width: thin;
+}
+
+.studio-experience.teaching-studio .main-workspace {
+  padding: 18px 22px 14px;
+  background: var(--ui-bg);
+  overflow-y: auto;
+  scrollbar-width: thin;
+}
+
+.studio-experience.teaching-studio .workspace-heading {
+  margin-bottom: 16px;
+}
+
+.studio-experience.teaching-studio .workspace-heading h2 {
+  font-size: 23px;
+  font-weight: 650;
+  line-height: 1.18;
+  letter-spacing: -1px;
+  color: var(--ui-text);
+}
+
+.studio-experience.teaching-studio .breadcrumbs {
+  font-size: 13px;
+  color: var(--ui-muted);
+  margin-bottom: 7px;
+}
+
+.studio-experience.teaching-studio .breadcrumbs > span {
+  color: var(--ui-muted);
+}
+
+.studio-experience.teaching-studio .view-actions .icon-button {
+  width: 44px;
+  height: 44px;
+  background: var(--ui-panel);
+  border: 1px solid var(--ui-line);
+  color: var(--ui-muted);
+}
+
+.studio-experience.teaching-studio .case-heading {
+  padding: 0 2px;
+}
+
+.studio-experience.teaching-studio .case-heading h1 {
+  font-size: 18px;
+  letter-spacing: -0.5px;
+  color: var(--ui-text);
+}
+
+.studio-experience.teaching-studio .eyebrow,
+.studio-experience.teaching-studio .section-heading {
+  color: var(--ui-muted);
+  font-size: 12px;
+  letter-spacing: 1.1px;
+}
+
+.studio-experience.teaching-studio .case-meta {
+  color: var(--ui-muted);
+  font-size: 13px;
+}
+
+.studio-experience.teaching-studio .import-button {
+  margin: 17px 0 23px;
+  font-size: 12px;
+  color: var(--ui-muted);
+  border-color: var(--ui-line);
+  background: var(--ui-panel);
+  min-height: 39px;
+}
+
+.studio-experience.teaching-studio .chart-title {
+  font-size: 13px;
+  color: var(--ui-muted);
+  line-height: 1.5;
+}
+
+.studio-experience.teaching-studio .chart-title button {
+  font-size: 12px;
+  color: var(--ui-accent);
+}
+
+.studio-experience.teaching-studio .chart-teeth {
+  gap: 5px;
+}
+
+.studio-experience.teaching-studio .chart-teeth button {
+  height: 31px;
+  font-size: 12px;
+  color: var(--ui-muted);
+  border-color: var(--ui-line);
+  background: var(--ui-panel);
+}
+
+.studio-experience.teaching-studio .chart-teeth button.selected {
+  background: var(--ui-panel);
+  color: var(--ui-text);
+  border-color: var(--ui-line);
+}
+
+.studio-experience.teaching-studio .selection-hint {
+  color: var(--ui-muted);
+  font-size: 13px;
+  line-height: 1.65;
+}
+
+.studio-experience.teaching-studio .group-shortcuts button {
+  font-size: 13px;
+  min-height: 40px;
+  color: var(--ui-muted);
+  background: var(--ui-raised);
+  border: 1px solid var(--ui-line);
+  padding: 4px 7px;
+}
+
+.studio-experience.teaching-studio .toggle-row {
+  font-size: 12px;
+  min-height: 39px;
+  color: var(--ui-muted);
+}
+
+.studio-experience.teaching-studio .display-controls {
+  margin-top: 15px;
+}
+
+.studio-experience.teaching-studio .switch {
+  background: var(--ui-raised);
+}
+
+.studio-experience.teaching-studio .on .switch {
+  background: var(--ui-panel);
+}
+
+.studio-experience.teaching-studio .arch-toolbar {
+  margin-bottom: 13px;
+  gap: 9px;
+  flex-wrap: wrap;
+}
+
+.studio-experience.teaching-studio .segmented,
+.studio-experience.teaching-studio .comparison-strip {
+  padding: 3px;
+  background: var(--ui-raised);
+  border-radius: 8px;
+  border: 1px solid var(--ui-line);
+}
+
+.studio-experience.teaching-studio .segmented button,
+.studio-experience.teaching-studio .comparison-strip button {
+  min-height: 44px;
+  font-size: 13px;
+  padding: 5px 10px;
+  color: var(--ui-muted);
+  border-radius: 5px;
+}
+
+.studio-experience.teaching-studio .segmented button.active,
+.studio-experience.teaching-studio .comparison-strip button.active {
+  background: var(--ui-panel);
+  color: var(--ui-accent);
+  box-shadow: 0 1px 3px var(--ui-shadow);
+  font-weight: 650;
+}
+
+.studio-experience.teaching-studio .viewport {
+  border: 1px solid var(--ui-line);
+  border-radius: 15px;
+  min-height: 390px;
+  box-shadow: 0 8px 26px var(--ui-shadow);
+  flex-shrink: 0;
+}
+
+.studio-experience.teaching-studio .command-title > span {
+  font-size: 12px;
+  color: var(--ui-muted);
+}
+
+.studio-experience.teaching-studio .command-input {
+  height: 51px;
+  border-color: var(--ui-line);
+  box-shadow: 0 3px 8px var(--ui-shadow);
+  background: var(--ui-panel);
+  border-radius: 10px;
+}
+
+.studio-experience.teaching-studio .command-input input {
+  font-size: 14px;
+  color: var(--ui-text);
+}
+
+.studio-experience.teaching-studio .command-input input::placeholder {
+  color: var(--ui-muted);
+}

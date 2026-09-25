@@ -1,0 +1,279 @@
+@media (max-width: 1200px) {
+  .teaching-studio .workspace {
+    grid-template-columns: 200px minmax(310px, 1fr) 290px;
+  }
+  .teaching-studio .main-workspace {
+    padding-left: 14px;
+    padding-right: 14px;
+  }
+  .teaching-studio .inspector {
+    padding-left: 13px;
+    padding-right: 13px;
+  }
+  .teaching-studio .top-center {
+    display: none;
+  }
+  .teaching-studio .header-actions {
+    gap: 11px;
+  }
+  .teaching-studio .comparison-strip {
+    margin-left: 0;
+  }
+  .teaching-studio .measure-tool {
+    margin-left: auto;
+  }
+  .teaching-studio .command-title > button {
+    display: none;
+  }
+  .teaching-studio .command-input input {
+    font-size: 13px;
+  }
+  .teaching-studio .voice-button {
+    padding: 8px;
+  }
+  .teaching-studio .voice-button > span {
+    display: none;
+  }
+  .teaching-studio .four-tabs > button > svg {
+    display: none;
+  }
+}
+
+@media (max-width: 1050px) {
+  .teaching-studio .workspace {
+    grid-template-columns: minmax(0, 1fr) 290px;
+  }
+  .teaching-studio .sidebar {
+    display: none;
+  }
+  .teaching-studio .mobile-tooth-selector {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    margin-bottom: 16px;
+    color: var(--ui-text);
+    font-size: 13px;
+  }
+  .teaching-studio .mobile-tooth-selector select {
+    max-width: 170px;
+    border: 1px solid var(--ui-line);
+    border-radius: 5px;
+    padding: 6px;
+    color: var(--ui-text);
+    background: var(--ui-panel);
+  }
+  .teaching-studio .mobile-groups {
+    display: flex;
+    gap: 5px;
+    flex-wrap: wrap;
+    margin-bottom: 16px;
+  }
+  .teaching-studio .mobile-groups button {
+    font-size: 13px;
+    background: var(--ui-panel);
+    padding: 4px 6px;
+    color: var(--ui-accent);
+    border-radius: 4px;
+  }
+  .teaching-studio .open-case-button {
+    display: none;
+  }
+  .teaching-studio .viewport {
+    min-height: 240px;
+  }
+}
+
+@media (max-width: 700px) {
+  .teaching-studio .topbar {
+    padding: 0 12px;
+    height: 61px;
+    gap: 10px;
+  }
+  .teaching-studio .header-actions {
+    gap: 6px;
+  }
+  .teaching-studio .brand {
+    font-size: 23px;
+    gap: 6px;
+  }
+  .teaching-studio .brand-icon {
+    width: 31px;
+    height: 31px;
+  }
+  .teaching-studio .brand-sub,
+  .teaching-studio .brand-divider {
+    display: none;
+  }
+  .teaching-studio .header-actions .button {
+    padding: 0 9px;
+  }
+  .teaching-studio .header-actions .dark span {
+    display: none;
+  }
+  .teaching-studio .workspace {
+    display: flex;
+  }
+  .teaching-studio .main-workspace {
+    padding: 15px 10px;
+  }
+  .teaching-studio .workspace-heading h2 {
+    font-size: 21px;
+  }
+  .teaching-studio .viewport {
+    height: 430px;
+    min-height: 430px;
+  }
+  .teaching-studio .arch-toolbar {
+    gap: 7px;
+  }
+  .teaching-studio .comparison-strip {
+    margin-left: auto;
+  }
+  .teaching-studio .measure-tool {
+    display: none;
+  }
+  .teaching-studio .segmented button,
+  .teaching-studio .comparison-strip button {
+    padding: 5px 7px;
+    font-size: 13px;
+  }
+  .teaching-studio .camera-tabs button {
+    font-size: 13px;
+    padding: 5px 8px;
+  }
+  .teaching-studio .unit-badge {
+    font-size: 11px;
+  }
+  .teaching-studio .model-tools {
+    left: 12px;
+    top: 97px;
+  }
+  .teaching-studio .viewport-selection {
+    font-size: 13px;
+  }
+  .teaching-studio .viewport-hint {
+    font-size: 12px;
+  }
+  .teaching-studio .command-title > span {
+    font-size: 12px;
+  }
+  .teaching-studio .command-input {
+    gap: 6px;
+    padding-left: 9px;
+  }
+  .teaching-studio .command-input > svg {
+    display: none;
+  }
+  .teaching-studio .command-input input {
+    font-size: 13px;
+  }
+  .teaching-studio .command-status {
+    font-size: 12px;
+  }
+  .teaching-studio .inspector {
+    padding: 22px;
+  }
+  .teaching-studio .four-tabs > button {
+    font-size: 13px;
+  }
+  .teaching-studio .four-tabs > button > svg {
+    display: block;
+  }
+  .teaching-studio .lesson-ribbon {
+    gap: 6px;
+    padding: 10px;
+  }
+  .teaching-studio .lesson-ribbon > svg {
+    display: none;
+  }
+  .teaching-studio .lesson-ribbon strong {
+    font-size: 12px;
+    gap: 5px;
+    flex-wrap: wrap;
+  }
+  .teaching-studio .lesson-ribbon p {
+    font-size: 13px;
+  }
+  .teaching-studio .lesson-ribbon .button {
+    padding: 0 8px;
+    font-size: 13px;
+  }
+  .teaching-studio .lesson-ribbon > .icon-button {
+    width: 44px;
+  }
+  .teaching-studio .dialog {
+    width: calc(100% - 24px);
+  }
+  .lesson-cards > button {
+    padding: 12px;
+    gap: 10px;
+  }
+  .teaching-studio.lecture-mode {
+    display: flex;
+    height: 100dvh;
+    min-height: 700px;
+    overflow: hidden;
+  }
+  .teaching-studio.lecture-mode .workspace {
+    display: flex;
+    flex: 1;
+    overflow: hidden;
+  }
+  .teaching-studio.lecture-mode .main-workspace {
+    padding: 10px;
+    flex: 1;
+    min-height: 0;
+  }
+  .teaching-studio.lecture-mode .viewport {
+    flex: 1;
+    height: auto;
+    min-height: 230px;
+  }
+  .teaching-studio.lecture-mode .lesson-ribbon strong {
+    font-size: 13px;
+  }
+  .teaching-studio.lecture-mode .lesson-ribbon p {
+    font-size: 13px;
+  }
+  .teaching-studio.lecture-mode .command-input input {
+    font-size: 13px;
+  }
+  .teaching-studio.lecture-mode .speech-caption {
+    font-size: 12px;
+  }
+  .teaching-studio.lecture-mode .command-status {
+    font-size: 12px;
+  }
+  .teaching-studio.lecture-mode .statusbar {
+    display: none;
+  }
+}
+
+.teaching-studio .model-tools {
+  flex-direction: row;
+  top: 98px;
+  gap: 3px;
+}
+
+.teaching-studio .model-tools > span {
+  height: 23px;
+  width: 1px;
+  margin: 5px 2px;
+}
+
+.teaching-studio .case-meta {
+  display: block;
+}
+
+.teaching-studio .case-meta > span {
+  margin: 0 5px;
+}
+
+.teaching-studio.lecture-mode .topbar {
+  height: 56px;
+}
+
+.teaching-studio.lecture-mode .statusbar {
+  display: none;
+}

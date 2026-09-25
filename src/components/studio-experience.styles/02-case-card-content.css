@@ -1,0 +1,276 @@
+.case-card-content {
+  padding: 17px 16px 14px;
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+}
+
+.case-card-content h3 {
+  font-size: 16px;
+  line-height: 1.35;
+  font-weight: 700;
+  letter-spacing: -0.35px;
+  margin: 0 0 8px !important;
+  color: var(--exp-ink);
+}
+
+.case-card-content p {
+  font-size: 12px !important;
+  line-height: 1.65 !important;
+  color: var(--exp-muted) !important;
+  margin: 0 0 18px !important;
+  flex: 1;
+}
+
+.case-card-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--exp-teal-dark);
+  border-top: 1px solid var(--ui-line);
+  padding-top: 12px;
+}
+
+.case-card-footer > svg {
+  flex-shrink: 0;
+}
+
+.case-diagram {
+  width: 100%;
+  max-width: 240px;
+  height: 122px;
+  overflow: visible;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  fill: none;
+}
+
+.diagram-guide {
+  stroke: #bacdd0;
+  stroke-width: 1;
+  stroke-dasharray: 2 6;
+  opacity: 0.5;
+}
+
+.diagram-arch {
+  stroke: #cc9d9a;
+  stroke-width: 23;
+  opacity: 0.3;
+}
+
+.diagram-tooth {
+  fill: #fff;
+  stroke: #728f96;
+  stroke-width: 1.4;
+}
+
+.diagram-highlight {
+  fill: #b9e1d9;
+  stroke: #167c71;
+}
+
+.diagram-secondary {
+  fill: #edf3f6;
+  stroke: #9aafb6;
+}
+
+.diagram-wire {
+  stroke: #607c91;
+  stroke-width: 1.4;
+}
+
+.diagram-bracket {
+  fill: #8296a2;
+  stroke: #f4f8fb;
+  stroke-width: 0.8;
+}
+
+.diagram-arrow {
+  stroke: #087d73;
+  stroke-width: 2.3;
+}
+
+.diagram-bone {
+  fill: #e1d5b7;
+  stroke: #bca77d;
+  stroke-width: 1;
+}
+
+.diagram-ligament {
+  stroke: #bc9481;
+  stroke-width: 6;
+}
+
+.diagram-root-line {
+  stroke: #8bafb0;
+  stroke-width: 1;
+}
+
+.diagram-gum {
+  stroke: #c38e91;
+  stroke-width: 9;
+}
+
+.diagram-callout {
+  stroke: #679899;
+  stroke-width: 1.2;
+}
+
+.diagram-dot {
+  fill: #168879;
+  stroke: none;
+}
+
+.case-library-empty {
+  display: flex;
+  align-items: center;
+  flex-direction: column;
+  padding: 42px 20px;
+  text-align: center;
+  background: var(--ui-raised);
+  border: 1px dashed var(--ui-line);
+  border-radius: 12px;
+  color: var(--ui-muted);
+}
+
+.case-library-empty h3 {
+  font-size: 18px;
+  color: var(--exp-ink);
+  margin: 12px 0 4px;
+}
+
+.case-library-empty p {
+  margin: 0 0 14px !important;
+  font-size: 14px !important;
+}
+
+.case-library-empty button {
+  min-height: 40px;
+  background: var(--ui-panel);
+  border: 1px solid var(--ui-line);
+  border-radius: 7px;
+  padding: 7px 14px;
+  color: var(--exp-teal-dark);
+}
+
+.case-library-note {
+  display: flex;
+  align-items: flex-start;
+  gap: 9px;
+  margin-top: 22px;
+  color: var(--exp-muted);
+  padding: 15px 0 0;
+  border-top: 1px solid var(--exp-line);
+}
+
+.case-library-note svg {
+  flex-shrink: 0;
+  margin-top: 2px;
+  color: var(--ui-muted);
+}
+
+.case-library-note p {
+  margin: 0 !important;
+  font-size: 12px !important;
+  line-height: 1.65 !important;
+  color: var(--exp-muted) !important;
+}
+
+.dialog:has(.teaching-case-library) {
+  width: min(1060px, calc(100vw - 48px));
+  max-width: 1060px !important;
+  max-height: calc(100dvh - 48px);
+  padding: 26px 30px;
+  border-radius: 18px;
+  background: var(--ui-panel);
+}
+
+.dialog:has(.teaching-case-library) > .dialog-heading {
+  margin-bottom: 17px;
+}
+
+.dialog:has(.teaching-case-library) > .dialog-heading h2 {
+  font-size: 15px;
+  font-weight: 650;
+  letter-spacing: 0;
+  color: var(--ui-muted);
+}
+
+.dialog:has(.teaching-case-library) > .dialog-heading .icon-button {
+  width: 40px;
+  height: 40px;
+  background: var(--ui-raised);
+  color: var(--ui-muted);
+}
+
+/* The active case is a readable teaching card, separate from editing tools. */
+
+.case-scenario-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 17px;
+  padding: 20px;
+  border: 1px solid var(--ui-line);
+  border-top: 3px solid var(--exp-teal);
+  border-radius: 13px;
+  background: var(--ui-panel);
+  color: var(--exp-ink);
+  font-size: 13px;
+  line-height: 1.6;
+  margin-bottom: 20px;
+}
+
+.scenario-heading {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+}
+
+.scenario-icon {
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  width: 37px;
+  height: 37px;
+  border-radius: 10px;
+  color: var(--exp-teal-dark);
+  background: var(--ui-raised);
+}
+
+.scenario-heading .experience-eyebrow {
+  font-size: 9px;
+  letter-spacing: 1px;
+}
+
+.scenario-heading h3 {
+  font-size: 19px;
+  font-weight: 700;
+  line-height: 1.25;
+  letter-spacing: -0.5px;
+  margin: 4px 0 0;
+  color: var(--exp-ink);
+}
+
+.scenario-description {
+  font-size: 13px;
+  line-height: 1.7;
+  color: var(--exp-muted);
+  margin: 0;
+}
+
+.scenario-variants {
+  padding: 0;
+  margin: 0;
+  min-width: 0;
+  border: 0;
+}
+
+.scenario-variants legend {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--ui-text);
+  margin-bottom: 8px;
+}

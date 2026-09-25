@@ -1,0 +1,277 @@
+.teaching-studio .selection-hint {
+  color: var(--ui-text);
+  font-size: 13px;
+}
+
+.teaching-studio .group-shortcuts button {
+  color: var(--ui-muted);
+  background: var(--ui-panel);
+  border-color: var(--ui-line);
+  font-size: 13px;
+}
+
+.teaching-studio .sidebar-bottom {
+  padding-left: 4px;
+  padding-right: 4px;
+}
+
+.teaching-studio .local-badge {
+  color: var(--ui-muted);
+  font-size: 12px;
+}
+
+.teaching-studio .sidebar-bottom .text-button {
+  color: var(--ui-accent);
+  font-size: 13px;
+}
+
+.teaching-studio .lesson-launch {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  text-align: left;
+  padding: 13px 10px;
+  border: 1px solid var(--ui-line);
+  border-radius: 9px;
+  background: var(--ui-panel);
+  color: var(--ui-accent);
+  margin-top: 22px;
+}
+
+.lesson-launch > span {
+  flex: 1;
+}
+
+.lesson-launch strong {
+  font-size: 12px;
+  display: block;
+}
+
+.lesson-launch small {
+  font-size: 12px;
+  line-height: 1.5;
+  display: block;
+  color: var(--ui-muted);
+  margin-top: 4px;
+}
+
+.lesson-launch:hover {
+  background: var(--ui-soft);
+}
+
+.teaching-studio .arch-toolbar {
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.teaching-studio .segmented {
+  background: var(--ui-raised);
+  border-color: var(--ui-line);
+  gap: 1px;
+}
+
+.teaching-studio .segmented button {
+  font-size: 13px;
+  color: var(--ui-muted);
+  padding: 5px 9px;
+}
+
+.teaching-studio .segmented button.active {
+  color: var(--ui-accent);
+}
+
+.comparison-strip {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  padding: 3px;
+  border: 1px solid var(--ui-line);
+  border-radius: 7px;
+  background: var(--ui-panel);
+  margin-left: auto;
+}
+
+.comparison-strip button {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 5px 8px;
+  border-radius: 4px;
+  font-size: 13px;
+  color: var(--ui-muted);
+}
+
+.comparison-strip button.active {
+  background: var(--ui-soft);
+  color: var(--ui-accent);
+  font-weight: 600;
+}
+
+.teaching-studio .measure-tool {
+  font-size: 12px;
+  color: var(--ui-muted);
+  border-color: var(--ui-line);
+}
+
+.teaching-studio .viewport {
+  background: var(--ui-bg);
+  border-color: var(--ui-line);
+  border-radius: 12px;
+  min-height: 240px;
+  box-shadow: 0 5px 14px var(--ui-shadow);
+}
+
+.teaching-studio .view-badge,
+.teaching-studio .unit-badge {
+  color: var(--ui-muted);
+  font-size: 11px;
+}
+
+.teaching-studio .view-badge > span {
+  background: var(--ui-accent);
+}
+
+.teaching-studio .camera-tabs {
+  background: var(--ui-soft);
+  border-color: var(--ui-line);
+  backdrop-filter: blur(10px);
+}
+
+.teaching-studio .camera-tabs button {
+  font-size: 13px;
+  color: var(--ui-muted);
+  padding: 6px 11px;
+}
+
+.teaching-studio .camera-tabs button.active {
+  background: var(--ui-soft);
+  color: var(--ui-accent);
+}
+
+.teaching-studio .viewport-selection {
+  background: var(--ui-soft);
+  border-color: var(--ui-line);
+  color: var(--ui-text);
+  font-size: 13px;
+  bottom: 40px;
+  padding: 7px 11px;
+}
+
+.teaching-studio .viewport-selection strong,
+.teaching-studio .viewport-selection > svg {
+  color: var(--ui-text);
+}
+
+.teaching-studio .selection-line {
+  background: var(--ui-soft);
+}
+
+.teaching-studio .viewport-hint {
+  color: var(--ui-muted);
+  font-size: 12px;
+  bottom: 13px;
+}
+
+.teaching-studio .tooth-label {
+  font-size: 12px;
+  color: var(--ui-muted);
+  background: var(--ui-soft);
+  border-color: var(--ui-line);
+}
+
+.teaching-studio .tooth-label.selected {
+  color: var(--ui-accent-text);
+  background: var(--ui-accent);
+  border-color: var(--ui-accent);
+}
+
+.teaching-studio .opening-badge,
+.teaching-studio .roots-badge {
+  color: var(--ui-muted);
+  background: var(--ui-soft);
+  border-color: var(--ui-line);
+  font-size: 12px;
+}
+
+.teaching-studio .stage-preview-badge {
+  background: var(--ui-accent);
+  color: var(--ui-accent-text);
+  font-size: 11px;
+  bottom: 14px;
+}
+
+.teaching-studio .axis-y {
+  color: #8ae0b1;
+}
+
+.teaching-studio .axis-x {
+  color: #f5adad;
+}
+
+.teaching-studio .axis-z {
+  color: #91c4ff;
+}
+
+.model-tools {
+  position: absolute;
+  top: 103px;
+  left: 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  background: var(--ui-soft);
+  border: 1px solid var(--ui-line);
+  padding: 5px;
+  border-radius: 8px;
+  color: var(--ui-muted);
+}
+
+.model-tools button {
+  height: 33px;
+  width: 33px;
+  display: grid;
+  place-items: center;
+  border-radius: 5px;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.model-tools button:hover {
+  background: var(--ui-soft);
+}
+
+.model-tools button.active {
+  background: var(--ui-accent);
+  color: var(--ui-accent-text);
+}
+
+.model-tools > span {
+  height: 1px;
+  background: var(--ui-soft);
+  margin: 2px;
+}
+
+.lesson-ribbon {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 14px;
+  background: var(--ui-soft);
+  border: 1px solid var(--ui-line);
+  border-radius: 9px;
+  margin-bottom: 10px;
+  flex-shrink: 0;
+  color: var(--ui-accent);
+}
+
+.lesson-ribbon > div {
+  flex: 1;
+  min-width: 0;
+}
+
+.lesson-ribbon strong {
+  font-size: 13px;
+  display: flex;
+  align-items: center;
+  gap: 13px;
+}

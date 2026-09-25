@@ -1,0 +1,275 @@
+.mechanics-panel {
+  color: var(--ui-text);
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.mechanics-panel fieldset {
+  border: 0;
+  padding: 0;
+  margin: 0;
+  min-width: 0;
+}
+
+.mechanics-intro {
+  padding: 3px 0 17px;
+}
+
+.mechanics-intro h3 {
+  font-size: 20px;
+  letter-spacing: -0.5px;
+  margin: 6px 0;
+}
+
+.mechanics-intro p,
+.mechanics-panel p {
+  color: var(--ui-muted);
+  font-size: 12px;
+  margin: 7px 0 11px;
+}
+
+.mechanics-section {
+  border-top: 1px solid var(--ui-line);
+  padding: 15px 0;
+}
+
+.mechanics-section-heading {
+  display: flex;
+  justify-content: space-between;
+  gap: 9px;
+  margin-bottom: 9px;
+  font-size: 12px;
+}
+
+.mechanics-section-heading > span,
+.mechanics-section summary > span {
+  font-size: 11px;
+  color: var(--ui-muted);
+  font-weight: 400;
+}
+
+.mechanics-section summary {
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 650;
+  padding: 2px 0;
+}
+
+.mechanics-section summary > span {
+  float: right;
+}
+
+.mechanics-panel label {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin: 10px 0;
+  color: var(--ui-muted);
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.mechanics-panel input,
+.mechanics-panel select {
+  min-width: 0;
+  width: 100%;
+  min-height: 37px;
+  border: 1px solid var(--ui-line);
+  border-radius: 7px;
+  background: var(--ui-raised);
+  color: var(--ui-text);
+  padding: 7px 9px;
+  font: inherit;
+  font-size: 12px;
+}
+
+.mechanics-panel button {
+  border: 1px solid var(--ui-line);
+  background: var(--ui-raised);
+  color: var(--ui-text);
+  border-radius: 7px;
+  padding: 8px 10px;
+  font-size: 12px;
+  min-height: 36px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+}
+
+.mechanics-panel button:hover:not(:disabled) {
+  border-color: var(--ui-accent);
+  color: var(--ui-accent);
+}
+
+.mechanics-panel button:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.mechanics-panel .button.primary {
+  background: var(--ui-accent);
+  color: var(--ui-panel);
+  border-color: var(--ui-accent);
+  min-height: 44px;
+  font-weight: 650;
+}
+
+.mechanics-wide {
+  width: 100%;
+  margin-top: 8px;
+}
+
+.mechanics-actions {
+  display: flex;
+  gap: 6px;
+  margin-top: 8px;
+}
+
+.mechanics-actions > button {
+  flex: 1;
+  white-space: nowrap;
+}
+
+.mechanics-actions > input {
+  flex: 2;
+}
+
+.mechanics-number-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 9px;
+}
+
+.mechanics-panel .mechanics-check {
+  flex-direction: row;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  font-weight: 400;
+}
+
+.mechanics-check input {
+  width: 16px;
+  min-height: 16px;
+  height: 16px;
+  accent-color: var(--ui-accent);
+}
+
+.mechanics-small {
+  display: block;
+  color: var(--ui-muted);
+  font-size: 10px;
+  line-height: 1.5;
+}
+
+.mechanics-panel .mechanics-target {
+  color: var(--ui-accent);
+  font-size: 11px;
+}
+
+.mechanics-result {
+  background: var(--ui-raised);
+  border: 1px solid var(--ui-line);
+  padding: 14px;
+  border-radius: 10px;
+  margin: 0 -3px 13px;
+}
+
+.mechanics-result-values {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin-top: 12px;
+}
+
+.mechanics-result-values > div {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.mechanics-result-values strong {
+  font-size: 20px;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.6px;
+}
+
+.mechanics-result-values small {
+  font-size: 11px;
+  font-weight: 400;
+}
+
+.mechanics-result-values span {
+  font-size: 10px;
+  color: var(--ui-muted);
+}
+
+.mechanics-result .mechanics-warning {
+  color: #bf884d;
+}
+
+.mechanics-assumptions {
+  border-top: 1px solid var(--ui-line);
+  padding: 14px 0;
+}
+
+.mechanics-assumptions summary {
+  font-size: 11px;
+  color: var(--ui-muted);
+  cursor: pointer;
+}
+
+.mechanics-assumptions a {
+  display: block;
+  font-size: 11px;
+  color: var(--ui-accent);
+  text-decoration: underline;
+  margin: 10px 0;
+}
+
+.appearance-details {
+  border-top: 1px solid var(--ui-line);
+  margin-top: 12px;
+  padding-top: 16px;
+}
+
+.appearance-details > summary {
+  font-size: 12px;
+  color: var(--ui-muted);
+  cursor: pointer;
+  margin-bottom: 15px;
+}
+
+.pointed-target-caption {
+  position: absolute;
+  left: 18px;
+  top: 65px;
+  z-index: 8;
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding: 8px 10px;
+  border: 1px solid var(--ui-line);
+  border-left: 3px solid var(--ui-accent);
+  border-radius: 7px;
+  background: var(--ui-panel);
+  color: var(--ui-accent);
+  font-size: 12px;
+  box-shadow: 0 5px 20px var(--ui-shadow);
+  pointer-events: auto;
+}
+
+.pointed-target-caption > span {
+  font-size: 11px;
+  color: var(--ui-muted);
+}
+
+.pointed-target-caption > button {
+  background: none;
+  border: 0;
+  color: var(--ui-muted);
+  font-size: 20px;
+  line-height: 1;
+  cursor: pointer;
+}
