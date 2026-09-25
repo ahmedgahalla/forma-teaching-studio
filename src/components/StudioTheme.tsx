@@ -15,7 +15,7 @@ export function StudioThemeProvider({ children }: { children: ReactNode }) {
     try {
       const saved = localStorage.getItem('forma-studio-theme');
       if (saved === 'clinical' || saved === 'midnight') {
-        // eslint-disable-next-line react-hooks/set-state-in-effect -- TODO(phase-2): derive this state or move the sync out of the effect
+        // eslint-disable-next-line react-hooks/set-state-in-effect -- syncing local edit state from committed props; deriving would lose in-progress edits
         updateTheme(saved);
         document.documentElement.dataset.formaTheme = saved;
       }

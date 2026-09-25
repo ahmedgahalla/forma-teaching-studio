@@ -215,24 +215,27 @@ function CaseStudio({ active }: { active: boolean }) {
   const lessonSnapshots = useRef<LessonSnapshot[]>([]);
   const { bAxis, setBAxis, mAxis, setMAxis, oAxis, setOAxis } = useCalibrationInputs();
   const prepared = !!scenario && !scenario.exploring;
+  const scenarioCaseId = scenario?.caseId;
+  const scenarioVariantId = scenario?.variantId;
+  const current = plan.current;
   const caseDefinition = useMemo(
-    () => (scenario ? getTeachingCase(scenario.caseId) : null),
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- TODO(phase-2): revisit effect deps; adding them may change behavior
-    [scenario?.caseId],
+    () => (scenarioCaseId ? getTeachingCase(scenarioCaseId) : null),
+    [scenarioCaseId],
   );
   const caseVariant = caseDefinition?.variants.find(item => item.id === scenario?.variantId);
   const pathAudit = useMemo(
     () =>
-      scenario && getTeachingAssetCase()
-        ? casePathAudit(scenario.caseId, scenario.variantId)
+      scenarioCaseId && scenarioVariantId && getTeachingAssetCase()
+        ? casePathAudit(scenarioCaseId, scenarioVariantId)
         : null,
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- TODO(phase-2): revisit effect deps; adding them may change behavior
-    [scenario?.caseId, scenario?.variantId],
+    [scenarioCaseId, scenarioVariantId],
   );
   const caseStart = useMemo(
-    () => (scenario ? sampleCaseDemonstration(scenario.caseId, scenario.variantId, 0) : undefined),
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- TODO(phase-2): revisit effect deps; adding them may change behavior
-    [scenario?.caseId, scenario?.variantId],
+    () =>
+      scenarioCaseId && scenarioVariantId
+        ? sampleCaseDemonstration(scenarioCaseId, scenarioVariantId, 0)
+        : undefined,
+    [scenarioCaseId, scenarioVariantId],
   );
   const dentalArrangement = DENTAL_ARRANGEMENTS.find(
     item => model.name === `${item.title} · synthetic teaching arrangement`,
@@ -266,8 +269,7 @@ function CaseStudio({ active }: { active: boolean }) {
   };
   const moved = model.teeth.filter(item => toothMoved(item.id)).length;
   const tryActive = sandbox.active && !lessonId && !prepared;
-  // eslint-disable-next-line react-hooks/exhaustive-deps -- TODO(phase-2): revisit effect deps; adding them may change behavior
-  const tryState = useMemo(() => ({ ...sandbox, current: plan.current }), [sandbox, plan.current]);
+  const tryState = useMemo(() => ({ ...sandbox, current }), [sandbox, current]);
   const demonstration = tryActive ? sandbox.pending || sandbox.lastEdit : null;
   const curveArch =
     arch === 'both'
@@ -277,18 +279,17 @@ function CaseStudio({ active }: { active: boolean }) {
       : arch;
   const geometricShown = useMemo(
     () =>
-      prepared && scenario
-        ? sampleCaseDemonstration(scenario.caseId, scenario.variantId, stage / stages)
+      prepared && scenarioCaseId && scenarioVariantId
+        ? sampleCaseDemonstration(scenarioCaseId, scenarioVariantId, stage / stages)
         : demonstration
           ? previewPose(demonstration, stage / stages)
-          : stageTransforms(plan.current, checkpoints, stage, stages, sandbox.original),
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- TODO(phase-2): revisit effect deps; adding them may change behavior
+          : stageTransforms(current, checkpoints, stage, stages, sandbox.original),
     [
       prepared,
-      scenario?.caseId,
-      scenario?.variantId,
+      scenarioCaseId,
+      scenarioVariantId,
       demonstration,
-      plan.current,
+      current,
       checkpoints,
       stage,
       stages,
@@ -298,10 +299,9 @@ function CaseStudio({ active }: { active: boolean }) {
   const emptyExperiment = useMemo(
     () =>
       model.demo && model.teeth.every(item => item.calibrated)
-        ? createMechanicsExperiment(model, plan.current)
+        ? createMechanicsExperiment(model, current)
         : null,
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- TODO(phase-2): revisit effect deps; adding them may change behavior
-    [model, plan.current],
+    [model, current],
   );
   const activeExperiment = mechanics || emptyExperiment;
   const actualShown = useMemo(
@@ -365,10 +365,8 @@ function CaseStudio({ active }: { active: boolean }) {
   );
   const currentLesson = LESSONS.find(l => l.id === lessonId);
   const spans = useMemo(
-    () =>
-      archSpans(model, prepared ? shown : plan.current, prepared ? caseStart : sandbox.original),
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- TODO(phase-2): revisit effect deps; adding them may change behavior
-    [model, prepared, shown, plan.current, caseStart, sandbox.original],
+    () => archSpans(model, prepared ? shown : current, prepared ? caseStart : sandbox.original),
+    [model, prepared, shown, current, caseStart, sandbox.original],
   );
   useEffect(() => {
     setAttachmentDraft(tooth.attachment || DEFAULT_ATTACHMENT);
@@ -398,8 +396,7 @@ function CaseStudio({ active }: { active: boolean }) {
       // eslint-disable-next-line react-hooks/exhaustive-deps -- cancelling the latest scan timer is the point
       if (contactTimer.current) clearTimeout(contactTimer.current);
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- TODO(phase-2): revisit effect deps; adding them may change behavior
-  }, [model, plan.current]);
+  }, [model, current, setChecking, setContacts]);
   useEffect(() => {
     if (!active) return;
     const fn = (e: KeyboardEvent) => {
@@ -416,8 +413,7 @@ function CaseStudio({ active }: { active: boolean }) {
     };
     window.addEventListener('keydown', fn);
     return () => window.removeEventListener('keydown', fn);
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- TODO(phase-2): revisit effect deps; adding them may change behavior
-  }, [stages, active]);
+  }, [active, teaching, setMobilePanel]);
 
   useEffect(() => {
     if (!active) {

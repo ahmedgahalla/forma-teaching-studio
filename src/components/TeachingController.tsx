@@ -100,8 +100,9 @@ export function TeachingProvider({ children }: { children: ReactNode }) {
     });
   const [config, updateConfig] = useState<Config>({ enabled: false, url: '' }),
     configRef = useRef(config);
-  // eslint-disable-next-line react-hooks/refs -- TODO(phase-2): move this ref access out of render
-  configRef.current = config;
+  useEffect(() => {
+    configRef.current = config;
+  });
   const configRevision = useRef(0);
   const [preferAI, setPreferAI] = useState(false),
     preferAIRef = useRef(false);
@@ -119,7 +120,7 @@ export function TeachingProvider({ children }: { children: ReactNode }) {
       );
       if (saved) {
         configRef.current = saved;
-        // eslint-disable-next-line react-hooks/set-state-in-effect -- TODO(phase-2): derive this state or move the sync out of the effect
+        // eslint-disable-next-line react-hooks/set-state-in-effect -- one-time saved-config hydration on mount; deriving would read localStorage every render
         updateConfig(saved);
         return;
       }
@@ -409,7 +410,7 @@ export function TeachingProvider({ children }: { children: ReactNode }) {
       engine.current?.dispose();
       window.speechSynthesis?.cancel();
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- TODO(phase-2): revisit effect deps; adding them may change behavior
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- mount-only service discovery and speech-synthesis cleanup; deps would re-run discovery
   }, []);
   const start = () => {
     if (held.current) return;
