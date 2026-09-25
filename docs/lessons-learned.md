@@ -12,8 +12,8 @@ Entry format: mistake (with link) · root cause · prevention · status (`noted`
 
 - **Mistake:** `src/lib/teaching-case-audit.json` was committed without rerunning its script after `teaching-cases.ts` changed, so the audit test failed on main (found 2026-09-24; the hash was stale from commit `7fc4d2b`).
 - **Root cause:** the generated file's regeneration step isn't part of anyone's edit workflow; nothing reminded the committer.
-- **Prevention:** `teaching-case-audit.test.ts` pins the source/asset hashes and runs in CI via `npm test` — a stale audit now fails every PR. Regeneration command documented in AGENTS.md and `docs/architecture/overview.md`.
-- **Status:** automated · **Count:** 2 (originally stale on main; stale again after the Phase 1 reformat touched `teaching-cases.ts` — both fixed by regeneration)
+- **Prevention:** `teaching-case-audit.test.ts` pins the source/asset hashes and runs in CI via `npm test` — a stale audit now fails every PR. Regeneration command documented in AGENTS.md and `docs/architecture/overview.md`. Ordering rule: regenerate AFTER any formatting pass over `teaching-cases.ts`, never before — regeneration is the last step before commit.
+- **Status:** automated · **Count:** 3 (stale on main; stale after the Phase 1 reformat; stale again in Phase 2.1 when a Prettier pass ran after regeneration — every one caught by the hash test)
 
 ## 2. Monolithic files
 

@@ -1,6 +1,6 @@
 # Optional command interpretation backend
 
-The browser prototype works without this service. This FastAPI service adds an optional text interpreter using OpenAI or a compatible Responses provider, including OpenRouter. The legacy `/api/interpret` returns one proposed command. The current `/api/interpret-teaching` returns a validated sequence of classroom actions. Neither endpoint changes a model. There is no database, upload endpoint, geometry processor, or patient-record system here; the browser performs geometric edits and supported mechanics calculations.
+The browser prototype works without this service. This FastAPI service adds an optional text interpreter using OpenAI or a compatible Responses provider, including OpenRouter. `/api/interpret-teaching` returns a validated sequence of classroom actions; `/api/analyze-teaching` returns a read-only scene explanation. Neither endpoint changes a model. (The original single-command `/api/interpret` route was removed in Phase 2.1; its command model and target resolution live on inside the teaching endpoint's validation.) There is no database, upload endpoint, geometry processor, or patient-record system here; the browser performs geometric edits and supported mechanics calculations.
 
 This is a nonclinical editor demonstration. Its numeric limits are editor guardrails, not biologically safe movement limits. It cannot decide treatment, segment scans, reconstruct roots, validate movements, or manufacture aligners.
 
@@ -40,22 +40,7 @@ Keep this development server bound to `127.0.0.1`. It has no authentication, ten
 
 `GET /health` returns service status, model name, whether a key is configured, and a safe `provider` label: `OpenAI`, `OpenRouter`, or `Configured AI provider`. It does not call the provider, verify the key, or check available credit. It never returns the key or configured base URL.
 
-The legacy `POST /api/interpret` contract is unchanged. It takes only command text and tooth-selection context:
-
-```json
-{
-  "text": "Move tooth 11 buccally 1 mm",
-  "selected_tooth": "11",
-  "selected_teeth": ["11", "12"],
-  "available_teeth": ["11", "12", "21", "22"]
-}
-```
-
-The successful response is a direct command object:
-
-```json
-{ "type": "move", "tooth": "11", "direction": "buccal", "amount": 1.0 }
-```
+The dental command model below is embedded in teaching actions (a dental step inside a teaching plan carries exactly one of these command objects) and is validated server-side against the request's tooth-selection context (`selected_tooth`, `selected_teeth`, `available_teeth`):
 
 | Type                   | Additional fields                                                                                                                                |
 | ---------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------ |
@@ -80,24 +65,24 @@ Commands are limited to 500 characters. Unknown fields, malformed IDs, missing c
 
 ### Movement examples and conventions
 
-| Example                                 | Proposed action                                                       |
-| --------------------------------------- | --------------------------------------------------------------------- |
-| `intrude upper incisors 0.5 mm`         | `move_group`, `direction: intrude`, all available upper incisors      |
-| `torque lower incisors -3 degrees`      | `orthodontic`, `movement: torque`, available lower incisors           |
-| `expand upper teeth 0.5 mm`             | `move_group`, `direction: buccal`, 0.5 mm **per tooth**               |
-| `retract upper anterior 1 mm`           | `move_group`, `direction: lingual`, 1 mm per selected anterior tooth  |
-| `rotate 11 5 degrees`                   | Legacy single-tooth `rotate`, world `axis: y`                         |
-| `rotate teeth 11,12 5 degrees around x` | `rotate_group`, world `axis: x`, each tooth about its own pivot       |
-| `rotate upper incisors 5 degrees`       | `orthodontic`, `movement: rotate`, each tooth about its own long axis |
-| `axially rotate 11 5 degrees`           | Single-tooth `orthodontic` axial rotation, using `teeth: ["11"]`      |
-| `reset selected teeth`                  | Restore only the explicitly selected group                            |
-| `show braces` / `hide braces`           | Toggle the appliance visualization                                    |
+| Example                                 | Proposed action                                                          |
+| --------------------------------------- | ------------------------------------------------------------------------ |
+| `intrude upper incisors 0.5 mm`         | `move_group`, `direction: intrude`, all available upper incisors         |
+| `torque lower incisors -3 degrees`      | `orthodontic`, `movement: torque`, available lower incisors              |
+| `expand upper teeth 0.5 mm`             | `move_group`, `direction: buccal`, 0.5 mm **per tooth**                  |
+| `retract upper anterior 1 mm`           | `move_group`, `direction: lingual`, 1 mm per selected anterior tooth     |
+| `rotate 11 5 degrees`                   | Single-tooth `rotate`, world `axis: y` (the editor's historical default) |
+| `rotate teeth 11,12 5 degrees around x` | `rotate_group`, world `axis: x`, each tooth about its own pivot          |
+| `rotate upper incisors 5 degrees`       | `orthodontic`, `movement: rotate`, each tooth about its own long axis    |
+| `axially rotate 11 5 degrees`           | Single-tooth `orthodontic` axial rotation, using `teeth: ["11"]`         |
+| `reset selected teeth`                  | Restore only the explicitly selected group                               |
+| `show braces` / `hide braces`           | Toggle the appliance visualization                                       |
 
 The interpreter also understands protract as buccal, constrict as lingual, distalize as distal, and mesialize as mesial. Explicit cm values are converted to mm. Named-group requests remain group operations even if only one tooth matches. A group action should be applied atomically in the frontend and undone in one step.
 
 These are fixed-reference-axis geometric previews. Tip and torque angles are not applied forces, force moments, predicted root movement, or clinical movement prescriptions. The frontend defines and displays the calibrated axis and geometric pivot; single-tooth world rotation remains distinct from orthodontic axial rotation. Arch expansion here is a per-tooth offset, not a measured increase in arch width. Braces visibility does not simulate wire forces or periodontal response.
 
-Errors have the form `{"detail": "Human-readable error"}`. The frontend displays them without applying an invalid plan. Both endpoints use these status mappings:
+Errors have the form `{"detail": "Human-readable error"}`. The frontend displays them without applying an invalid plan. All endpoints use these status mappings:
 
 | HTTP status | Meaning                                                                                     |
 | ----------- | ------------------------------------------------------------------------------------------- |
@@ -107,11 +92,11 @@ Errors have the form `{"detail": "Human-readable error"}`. The frontend displays
 | `429`       | Provider quota exhausted or temporary rate limiting; the message distinguishes these cases  |
 | `502`       | Other provider failure, timeout, or malformed provider output                               |
 
-Provider messages are fixed, actionable text selected from status and allowlisted error codes. Upstream exception text, request URLs, bodies and credentials are not returned. The legacy endpoint still returns a proposal only. The current classroom controller automatically executes clear validated requests after frontend preflight, with Stop and whole-request Undo; explicit `preview` commands and manual numeric controls retain preview/apply behavior. Schema validity alone does not establish correct interpretation or clinical validity.
+Provider messages are fixed, actionable text selected from status and allowlisted error codes. Upstream exception text, request URLs, bodies and credentials are not returned. The classroom controller automatically executes clear validated requests after frontend preflight, with Stop and whole-request Undo; explicit `preview` commands and manual numeric controls retain preview/apply behavior. Schema validity alone does not establish correct interpretation or clinical validity.
 
 ## Data flow
 
-For the legacy endpoint, command text, selected tooth/group IDs, available tooth IDs, and resolved target IDs are sent to the configured provider. For the teaching endpoint, command text and the allowed classroom context below are sent, including visibility, playback, selected references and recent supported actions when supplied.
+For the teaching endpoint, command text and the allowed classroom context below are sent to the configured provider, including visibility, playback, selected references and recent supported actions when supplied.
 
 When a mechanics experiment is active, teaching context also includes appliance configuration, synthetic bracket attachment coordinates, TAD positions, tooth or TAD connection endpoints, wire sizes/materials, activation and force-law parameters, focus IDs, stage index/count, result availability and visible presets. A pointed reference includes the associated tooth, local/world coordinates and optional crown/root/gingiva surface. It does **not** include mesh vertices, full case files, the numerical result, support matrices, saved-stage configurations, or API keys. A result-availability flag is not the result itself; explanations of calculated response are assembled in the frontend from the actual result.
 
@@ -125,7 +110,7 @@ The server reads the API key only from its environment. It writes no application
 .\.venv\Scripts\python.exe -m pytest -q
 ```
 
-Tests mock the OpenAI-compatible SDK and verify the command contract, FDI group resolution, selected-group context, exact output-target auditing, invalid/missing teeth, numeric/schema limits, backward compatibility, ambiguity, missing-key behavior, refusals, CORS, server-only key handling and safe provider errors. The frontend independently validates plans before execution. Whole-request Undo is available. Successful validation does not prove complete natural-language understanding.
+Tests mock the OpenAI-compatible SDK and verify the teaching contract, the shared command model, FDI group resolution, selected-group context, exact output-target auditing, invalid/missing teeth, numeric/schema limits, backward compatibility, ambiguity, missing-key behavior, refusals, CORS, server-only key handling and safe provider errors. The frontend independently validates plans before execution. Whole-request Undo is available. Successful validation does not prove complete natural-language understanding.
 
 ## Teaching-plan endpoint
 

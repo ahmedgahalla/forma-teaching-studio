@@ -50,7 +50,7 @@ Note: `useSpeech.ts` is currently unused (live voice goes through `lib/push-to-t
 
 Optional text-only AI interpreter — the app fully works without it; local deterministic parsing is always tried first. It turns natural-language classroom commands into validated JSON action plans via OpenAI-compatible structured outputs (config in `backend/.env`; see `backend/README.md`). No geometry, no storage, no auth.
 
-- Endpoints: `GET /health`, `POST /api/interpret-teaching` (≤8 actions, server-side audit of the plan against the source text, one repair retry), `POST /api/analyze-teaching` (read-only scene explanation, in `scene_analysis.py` as a router), legacy `POST /api/interpret` (the frontend no longer calls it).
+- Endpoints: `GET /health`, `POST /api/interpret-teaching` (≤8 actions, server-side audit of the plan against the source text, one repair retry), `POST /api/analyze-teaching` (read-only scene explanation, in `scene_analysis.py` as a router); the legacy `POST /api/interpret` route was removed in Phase 2.1.
 - `main.py` is one flat ~1,000-line module; `mechanics.py` (text-intent validation, not physics), `classroom_language.py` (wording normalization, mirrored by frontend fixtures), `phone_bridge.py` (separate token-gated proxy app, port 8001).
 - The frontend discovers the service via Settings (default `http://127.0.0.1:8000`), localStorage, or same-origin `/forma-runtime-config.json`. Both sides validate independently; the AI can never bypass local bounds.
 
