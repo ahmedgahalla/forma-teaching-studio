@@ -26,7 +26,7 @@ const OVERSIZE_ALLOWLIST = new Set([
   'src/components/mechanics.css', // 1239
   'src/components/studio-experience.css', // 2175
   'src/components/try-mode.css', // 699
-  'src/lib/classroom.ts', // 1701
+  'src/lib/classroom/advance.ts', // ~350 - one context-simulation switch; splitting the single function would scatter one algorithm
   'src/lib/commands.ts', // 379
   'src/lib/demo.ts', // 347
   'src/lib/geometry.ts', // 341
@@ -46,7 +46,7 @@ const OVERSIZE_ALLOWLIST = new Set([
 // Single lines over MAX_LINE_LENGTH (long regex/string literals) pending Phase 2.
 const LENGTH_ALLOWLIST = new Set([
   'backend/mechanics.py', // 601-char rule line
-  'src/lib/classroom.ts', // 641-char pattern line
+  'src/lib/classroom/parse-clauses.ts', // 641-char verb-alternation pattern line
   'src/lib/mechanics-commands.ts', // 579-char pattern line
 ]);
 
