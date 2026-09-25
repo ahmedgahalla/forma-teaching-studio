@@ -40,7 +40,7 @@ Entry format: mistake (with link) · root cause · prevention · status (`noted`
 
 - **Mistake:** `docs/PRODUCT_DIRECTION.md` § "Measured responsiveness follow-up" still says the cached-BVH collision optimization "has **not** been applied to production" — it is applied in `src/lib/analysis.ts` (WeakMap-cached `MeshBVH`, with `analysis.bvh.test.ts` as the regression oracle since commit `580bc8c`).
 - **Root cause:** the code changed in a different PR than the doc that described its status; no rule tied them together.
-- **Prevention:** docs are updated in the same PR as the change they describe (AGENTS.md documentation rules); the auditor checks this on every PR. The stale paragraph itself is flagged in STATUS.md for the doc's owner to correct.
+- **Prevention:** docs are updated in the same PR as the change they describe (AGENTS.md documentation rules); the auditor checks this on every PR. The stale paragraph itself was corrected by the auditor on 2026-09-25 (Phase 1), with a correction note left in place.
 - **Status:** rule · **Count:** 1
 
 ## 6. Line-ending drift

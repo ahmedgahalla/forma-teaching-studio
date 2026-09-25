@@ -13,5 +13,5 @@
 
 **Open questions:**
 
-- The stale BVH paragraph in `docs/PRODUCT_DIRECTION.md` (lessons #5) — fix in the next PR that touches that doc, or should the auditor do a one-line docs PR?
+- ~~The stale BVH paragraph in `docs/PRODUCT_DIRECTION.md` (lessons #5) — fix in the next PR that touches that doc, or should the auditor do a one-line docs PR?~~ Resolved 2026-09-25: Naser confirmed it's the auditor's job; corrected on this branch before the merge.
 - `docs/MOBILE_TEST.md` / hosted mobile deployment wasn't touched by Phase 1; its verification status is unchanged.

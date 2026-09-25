@@ -6,12 +6,16 @@ Auditor-owned (Claude Code); updated after each merge. Builder PRs do not edit t
 
 - v0.12 feature set on main (`0b2e7db`): case workspace, workflow classrooms, Try Mode, mechanics experiments, AI command interpretation, lecture mode, the 28-tooth Blender asset. See `docs/VERIFICATION.md` for the running verification log.
 - Builder's first usability pass (`0b2e7db`): pinned command bar, camera row, contextual suggestions, compact phone sheets.
-- Cached-BVH collision optimization **is applied** in `src/lib/analysis.ts` with `analysis.bvh.test.ts` as its regression oracle. ⚠️ `docs/PRODUCT_DIRECTION.md` § "Measured responsiveness follow-up" still claims it is unapplied — that paragraph is stale (see lessons-learned #5); correct it in the next PR that touches that doc.
+- Cached-BVH collision optimization **is applied** in `src/lib/analysis.ts` with `analysis.bvh.test.ts` as its regression oracle. The stale claim in `docs/PRODUCT_DIRECTION.md` § "Measured responsiveness follow-up" was corrected by the auditor on 2026-09-25 (see lessons-learned #5).
 - Baseline verification on main at `0b2e7db` (2026-09-25): frontend 1,598/1,599 passing (the one failure was the stale teaching-case audit, fixed in Phase 1), typecheck clean, build clean, backend 531 passing. Baseline screenshots of the six key screens at 1600×900 captured pre-Phase-1.
 
 ## In progress
 
 - **Phase 1 — tooling** (`naser/phase-1-tooling`, this PR): shared rulebook in AGENTS.md, session protocols, Prettier + repo-wide reformat, ESLint 9, line-ending normalization, environment pinning, CI, PR template, file-limit check, reviews inbox, lessons-learned loop, numbered phase docs, stale-audit fix. See `docs/phases/phase-1-tooling/`.
+
+## Pending (external)
+
+- Owner to apply the GitHub repo settings: branch protection on main (require PR + green CI, block direct pushes), merge-commit-only, and auto-delete of head branches. Naser has no admin access. Until then the auditor self-enforces: never push main, never merge red CI, delete branches manually after merge. Once confirmed, verify via the API and remove this item.
 
 ## Next
 
