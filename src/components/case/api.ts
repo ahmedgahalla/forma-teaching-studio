@@ -60,6 +60,20 @@ type StateBundle = ReturnType<typeof useMechanicsState> &
   ReturnType<typeof useLessonState> &
   ReturnType<typeof useCalibrationInputs>;
 
+/** Mutable refs owned by CaseStudio; handler factories receive them separately
+ * so no render path ever reads a ref through the api bundle. */
+export interface CaseRefs {
+  viewer: RefObject<ViewerHandle | null>;
+  caseInput: RefObject<HTMLInputElement | null>;
+  commandInput: RefObject<HTMLInputElement | null>;
+  pendingCamera: { current: ViewerCamera | null };
+  pendingView: { current: ViewName | null };
+  contactTimer: { current: ReturnType<typeof setTimeout> | null };
+  importAbort: { current: AbortController | null };
+  returnWorkspace: { current: ClassroomSnapshot | null };
+  lessonSnapshots: { current: LessonSnapshot[] };
+}
+
 export interface CaseStudioApi extends StateBundle {
   teaching: ReturnType<typeof useTeaching>;
   active: boolean;

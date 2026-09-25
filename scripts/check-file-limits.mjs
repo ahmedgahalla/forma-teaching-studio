@@ -51,7 +51,7 @@ const LENGTH_ALLOWLIST = new Set([
 ]);
 
 const files = execSync(
-  'git ls-files "src/**/*.ts" "src/**/*.tsx" "src/**/*.css" "backend/*.py" "scripts/**/*.mjs" "scripts/*.mjs" "scripts/**/*.py"',
+  'git ls-files --cached --others --exclude-standard "src/**/*.ts" "src/**/*.tsx" "src/**/*.css" "backend/*.py" "scripts/**/*.mjs" "scripts/*.mjs" "scripts/**/*.py"',
   { encoding: 'utf8' },
 )
   .split('\n')
