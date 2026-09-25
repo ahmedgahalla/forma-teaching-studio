@@ -5,7 +5,7 @@
     "sha256": "b9f009f0dea3e019de180f8b41ab8a5be9a514b851bb969f36da6b700ab02d27",
     "metadataSha256": "12dd26123641fca14dd6c0331fe08e17fc1f37b5fc8c63d3a5da743033ee5afd"
   },
-  "caseSourceSha256": "379f15b4e5794f4ac03e85068d560f2c1c39be5c44abc585e65e61c388aa2a09",
+  "caseSourceSha256": "dec6ce50fd2d84dd19d0a1dc6bc7073871c4a3b81c921e4518a1ccab1366f0a3",
   "referenceShiftMm": 1.5,
   "method": "Exact triangle-surface intersections at nine uniformly spaced poses plus every authored keyframe; unchanged pairs reuse their measured registered-reference result.",
   "limitation": "Not swept collision detection. Crossings between samples, enclosed volumes, crown–root pairs, gingiva, bone and biological limits are not assessed. Empty pairs do not validate a movement or bite.",
