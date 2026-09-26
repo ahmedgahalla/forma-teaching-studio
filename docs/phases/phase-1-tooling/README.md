@@ -10,6 +10,7 @@
 - [1.2 — formatting and linting](1.2-formatting-and-linting.md): Prettier + repo-wide reformat (+blame-ignore), ESLint 9 flat config, line-ending normalization, file-limit CI check
 - [1.3 — test fix and docs](1.3-test-fix-and-docs.md): stale teaching-case audit regenerated (suite fully green), STATUS.md + numbered phases + ADRs 001–002, no-private-state migration
 - [1.4 — setup automation](1.4-setup-automation.md): `npm run setup`, self-enabling git hooks for dependency sync, README getting-started
+- [1.6 — PR lifecycle delegation](1.6-pr-lifecycle-delegation.md) (post-merge follow-up): Naser delegates the full PR lifecycle to Claude Code via `gh`; lesson recorded on a branch-protection required-check-name mismatch found while merging PR #5
 
 ## Outcome — verification gate on the final branch state (2026-09-25)
 
