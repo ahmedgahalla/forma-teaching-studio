@@ -70,3 +70,17 @@ Entry format: mistake (with link) · root cause · prevention · status (`noted`
 - **Root cause:** `tsc --incremental` reused a stale `tsconfig.tsbuildinfo` across large file moves and skipped re-checking affected modules.
 - **Prevention:** the `typecheck` script now runs `tsc --noEmit --incremental false`, so local runs match CI's fresh-checkout behavior.
 - **Status:** automated · **Count:** 1
+
+## 10. Installed runtimes differ from shell defaults
+
+- **Mistake:** the onboarding version check found `node` resolving to 24.14.0 and `python` to 3.10.10 even though Python 3.13.3 was installed; the requested environment was Node 22 / Python 3.13. See [Phase 1.6](phases/phase-1-tooling/1.6-builder-onboarding.md).
+- **Root cause:** executable lookup follows PATH order, and installing a second runtime does not guarantee that a new shell selects it. The setup script permits newer Node versions and can find Python through its launcher, so a successful setup alone does not prove the plain commands match the requested versions.
+- **Prevention:** verify both version and resolved executable in a fresh shell before setup, then run the gate with the intended runtimes. Preserve unrelated runtime installations when correcting PATH precedence.
+- **Status:** noted · **Count:** 1
+
+## 11. Generated caches retain another Windows account's permissions
+
+- **Mistake:** onboarding pytest passed with an inaccessible-cache warning, then ESLint failed while scanning the same old `backend/.pytest_cache`. See [Phase 1.6](phases/phase-1-tooling/1.6-builder-onboarding.md).
+- **Root cause:** the checkout had been created under a different Windows account, and the generated cache's ACL denied access to the current user even though tracked source was readable.
+- **Prevention:** use a fresh user-owned checkout/environment when changing execution accounts. If the active repository cannot be renamed, preserve the affected parent directory, restore its unchanged tracked files and ignored local configuration, and recreate dependencies. Re-run failed checks; do not hide a permissions failure behind a passing test count.
+- **Status:** noted · **Count:** 1
