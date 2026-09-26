@@ -4,7 +4,7 @@
  * useState/useRef cluster and returns named fields; CaseStudio destructures
  * them so downstream code reads exactly as before the Phase 2.2 split.
  */
-import { useReducer, useState } from 'react';
+import { useCallback, useReducer, useState } from 'react';
 import { createDemo, type DentalCase } from '@/lib/geometry';
 import { historyReducer } from '@/lib/planning';
 import type { Checkpoint } from '@/lib/planning';
@@ -200,7 +200,11 @@ export function useCommandState() {
 
 export function useLayoutState() {
   const [mobilePanel, setMobilePanel] = useState<MobileStudioPanel>('model');
-  const [toolsOpen, setToolsOpen] = useState(true);
+  const toolsOpen = mobilePanel === 'tools';
+  const setToolsOpen = useCallback((open: boolean) => {
+    setMobilePanel(previous => (open ? 'tools' : previous === 'tools' ? 'model' : previous));
+  }, []);
+  const [commandsOpen, setCommandsOpen] = useState(false);
   const [modal, setModal] = useState<CaseModal>(null);
   const [panel, setPanel] = useState<'move' | 'braces' | 'analysis' | 'history'>('move');
   const [lecture, setLecture] = useState(false);
@@ -212,6 +216,8 @@ export function useLayoutState() {
     setMobilePanel,
     toolsOpen,
     setToolsOpen,
+    commandsOpen,
+    setCommandsOpen,
     modal,
     setModal,
     panel,

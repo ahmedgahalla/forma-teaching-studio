@@ -1,6 +1,6 @@
 'use client';
 import type { CaseStudioApi } from './api';
-import type { ViewName } from '../viewer/Viewer';
+import { OpeningCommandDock } from './OpeningCommandDock';
 import { TeachingCommandBar } from '../teaching/TeachingController';
 import { wireSizeLabel } from '../mechanics/MechanicsPanel';
 import { CaseWorkspaceHeading } from './CaseWorkspaceHeading';
@@ -16,28 +16,18 @@ export function CaseMain({ api }: { api: CaseStudioApi }) {
         <div className="workspace-scene">
           <CaseWorkspaceHeading api={api} />
           <CaseArchToolbar api={api} />
-          <div className="workspace-cameras" role="group" aria-label="Camera views">
-            {(['perspective', 'front', 'occlusal', 'right', 'left'] as ViewName[]).map(v => (
-              <button
-                key={v}
-                className={api.view === v ? 'active' : ''}
-                onClick={() => {
-                  api.teaching.referenceInteraction();
-                  api.setCamera(v);
-                }}
-                aria-pressed={api.view === v}
-              >
-                {v === 'perspective' ? '3D view' : v[0].toUpperCase() + v.slice(1)}
-              </button>
-            ))}
-          </div>
           <div className="lecture-stage">
             <CaseViewport api={api} />
             <CaseLectureOverlay api={api} />
           </div>
           <CaseStageDock api={api} />
         </div>
-        <div className="workspace-command-dock">
+        <OpeningCommandDock
+          open={api.commandsOpen}
+          onOpenChange={api.setCommandsOpen}
+          playing={api.playing}
+          notice={api.statusError ? api.status : undefined}
+        >
           {!api.prepared &&
             api.model.demo &&
             api.mechanics &&
@@ -62,6 +52,7 @@ export function CaseMain({ api }: { api: CaseStudioApi }) {
               </div>
             )}
           <TeachingCommandBar
+            showUndo={false}
             suggestions={
               api.sandbox.pending
                 ? ['apply preview', 'discard preview']
@@ -104,12 +95,7 @@ export function CaseMain({ api }: { api: CaseStudioApi }) {
             onChange={api.setCommand}
             inputRef={api.commandInput}
           />
-          {api.statusError && (
-            <div className="case-action-status error" role="status">
-              {api.status}
-            </div>
-          )}
-        </div>
+        </OpeningCommandDock>
       </main>
     </>
   );

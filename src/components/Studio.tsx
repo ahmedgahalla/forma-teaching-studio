@@ -5,15 +5,6 @@
    bundle once refs pass through it. Scoped to this orchestrator file only. */
 import { useEffect, useMemo, useRef } from 'react';
 import { Vector3 } from 'three';
-import {
-  BookOpen,
-  Box,
-  CircleHelp,
-  Layers3,
-  MousePointer2,
-  SlidersHorizontal,
-  Undo2,
-} from 'lucide-react';
 import ModelBootstrap from './viewer/ModelBootstrap';
 import { getTeachingAssetCase } from '@/lib/anatomy-assets';
 import { casePathAudit } from '@/lib/case-path-audit';
@@ -104,6 +95,8 @@ function CaseStudio({ active }: { active: boolean }) {
     setMobilePanel,
     toolsOpen,
     setToolsOpen,
+    commandsOpen,
+    setCommandsOpen,
     modal,
     setModal,
     panel,
@@ -400,20 +393,28 @@ function CaseStudio({ active }: { active: boolean }) {
   useEffect(() => {
     if (!active) return;
     const fn = (e: KeyboardEvent) => {
-      if ((e.target as HTMLElement).closest('input, textarea, select, dialog')) return;
+      if (
+        e.isComposing ||
+        (e.target as HTMLElement).closest('input, textarea, select, dialog, [contenteditable]')
+      )
+        return;
       if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'z') {
         e.preventDefault();
         void teaching.runControl(e.shiftKey ? 'redo' : 'undo that');
       }
-      if (e.key === 'Escape') setMobilePanel('model');
-      if (e.key === '/') {
+      if (e.key === 'Escape') {
+        setMobilePanel('model');
+        setToolsOpen(false);
+      }
+      if (e.key === '/' && !e.ctrlKey && !e.metaKey && !e.altKey) {
         e.preventDefault();
-        commandInput.current?.focus();
+        setCommandsOpen(true);
+        requestAnimationFrame(() => commandInput.current?.focus());
       }
     };
     window.addEventListener('keydown', fn);
     return () => window.removeEventListener('keydown', fn);
-  }, [active, teaching, setMobilePanel]);
+  }, [active, teaching, setMobilePanel, setToolsOpen, setCommandsOpen]);
 
   useEffect(() => {
     if (!active) {
@@ -462,7 +463,7 @@ function CaseStudio({ active }: { active: boolean }) {
   const sceneInteraction = (event: { target: EventTarget }) => {
     if (
       !(event.target as HTMLElement).closest(
-        '.teaching-command-bar, .case-scenario-panel, .case-stage-toolbar, .mobile-studio-dock, .mobile-panel-heading, .studio-rail, .studio-theme-toggle, .preview-decision-bar, .lecture-console, .lecture-view-tools, .lecture-pointer, .viewport, .tooth-chart, .selection-groups, .mechanics-panel',
+        '.teaching-command-bar, .case-scenario-panel, .case-stage-toolbar, .mobile-studio-dock, .mobile-panel-heading, .opening-command-controls, .opening-view-menu, .opening-menu, .studio-theme-toggle, .preview-decision-bar, .lecture-console, .lecture-view-tools, .lecture-pointer, .viewport, .tooth-chart, .selection-groups, .mechanics-panel',
       )
     )
       teaching.interact();
@@ -565,6 +566,8 @@ function CaseStudio({ active }: { active: boolean }) {
     setMobilePanel,
     toolsOpen,
     setToolsOpen,
+    commandsOpen,
+    setCommandsOpen,
     modal,
     setModal,
     panel,
@@ -876,7 +879,7 @@ function CaseStudio({ active }: { active: boolean }) {
 
   return (
     <div
-      className={`app-shell braces-studio teaching-studio try-studio studio-experience ${lecture ? 'lecture-mode' : ''}`}
+      className={`app-shell braces-studio teaching-studio try-studio studio-experience lecture-opening ${lecture ? 'lecture-mode' : ''}`}
       data-mobile-panel={mobilePanel}
       data-tools-open={toolsOpen}
       data-preview={!!sandbox.pending}
@@ -885,7 +888,39 @@ function CaseStudio({ active }: { active: boolean }) {
       onClickCapture={sceneInteraction}
       onChangeCapture={sceneInteraction}
     >
-      <CaseTopbar api={api} />
+      <CaseTopbar
+        lecture={lecture}
+        toolsOpen={!lecture && (toolsOpen || mobilePanel === 'tools')}
+        busy={busy}
+        onOpenLibrary={() => setModal('workflows')}
+        onToggleTools={() => {
+          const open = lecture || !(toolsOpen || mobilePanel === 'tools');
+          setLecture(false);
+          setToolsOpen(open);
+          setMobilePanel(open ? 'tools' : 'model');
+        }}
+        onToggleLecture={() => {
+          setLecture(!lecture);
+          setMobilePanel('model');
+        }}
+        onOpenCase={() => caseInput.current?.click()}
+        onSaveCase={api.save}
+        onOpenSettings={() => {
+          setApiDraft(apiUrl || 'http://127.0.0.1:8000');
+          setModal('settings');
+        }}
+        onOpenGuide={() => setModal('guide')}
+        onOpenSelection={() => {
+          setLecture(false);
+          setToolsOpen(false);
+          setMobilePanel('selection');
+        }}
+        onOpenLayers={() => {
+          setLecture(false);
+          setToolsOpen(false);
+          setMobilePanel('layers');
+        }}
+      />
       {tryActive && (
         <PreviewDecisionBar
           pending={api.tryPanelProps.pending || null}
@@ -910,56 +945,6 @@ function CaseStudio({ active }: { active: boolean }) {
         onChange={e => api.importCase(e.target.files?.[0])}
       />
       <div className="workspace">
-        <nav className="studio-rail" aria-label="Studio tools">
-          <button
-            title="Model"
-            aria-pressed={mobilePanel === 'model'}
-            onClick={() => setMobilePanel('model')}
-          >
-            <Box size={21} />
-            <span>Model</span>
-          </button>
-          <button
-            title="Tooth selection"
-            aria-pressed={mobilePanel === 'selection'}
-            onClick={() => setMobilePanel(mobilePanel === 'selection' ? 'model' : 'selection')}
-          >
-            <MousePointer2 size={21} />
-            <span>Select</span>
-          </button>
-          <button
-            title="Anatomy layers"
-            aria-pressed={mobilePanel === 'layers'}
-            onClick={() => setMobilePanel(mobilePanel === 'layers' ? 'model' : 'layers')}
-          >
-            <Layers3 size={21} />
-            <span>Layers</span>
-          </button>
-          <button
-            title="Toggle editing tools"
-            aria-pressed={toolsOpen}
-            onClick={() => {
-              setToolsOpen(!toolsOpen);
-              setMobilePanel('model');
-            }}
-          >
-            <SlidersHorizontal size={21} />
-            <span>Tools</span>
-          </button>
-          <span className="rail-divider" />
-          <button title="Teaching library" onClick={() => setModal('workflows')}>
-            <BookOpen size={21} />
-            <span>Library</span>
-          </button>
-          <button title="Undo request" onClick={() => void teaching.runControl('undo that')}>
-            <Undo2 size={21} />
-            <span>Undo</span>
-          </button>
-          <button className="rail-help" title="Command guide" onClick={() => setModal('guide')}>
-            <CircleHelp size={21} />
-            <span>Guide</span>
-          </button>
-        </nav>
         <CaseSidebar api={api} />
 
         <CaseMain api={api} />
@@ -968,21 +953,16 @@ function CaseStudio({ active }: { active: boolean }) {
       </div>
       <MobileStudioDock
         activePanel={mobilePanel}
-        onChange={setMobilePanel}
+        onChange={next => {
+          if (next !== 'model') setLecture(false);
+          setMobilePanel(next);
+          setToolsOpen(next === 'tools');
+        }}
         onStop={teaching.cancel}
       />
       <footer className="statusbar">
-        <span>
-          <span className="status-dot" />
-          {model.demo ? 'Synthetic study' : 'Local case'}
-          <span className="footer-divider">/</span>
-          {aiEnabled ? `${teaching.config.provider || 'AI'} interpretation` : 'Built-in commands'}
-        </span>
-        <span>Synthetic teaching model · stages, not treatment time</span>
-        <button onClick={() => setModal('guide')}>
-          Movement guide
-          <CircleHelp size={12} />
-        </button>
+        <span>Synthetic teaching model · illustrative movement · not for clinical use</span>
+        <span>{aiEnabled ? 'AI interpretation available' : 'Built-in commands'}</span>
       </footer>
 
       <CaseDialogs api={api} />

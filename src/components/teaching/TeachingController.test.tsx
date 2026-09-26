@@ -457,20 +457,35 @@ describe('persistent teaching speech controller integration', () => {
     });
     expect(scene().selected).toBe('21');
   });
-  it('does not hijack Space while typing and retains one recognizer across provider rerenders', async () => {
-    const input = container.querySelector('input')!;
-    await act(async () => {
-      input.dispatchEvent(new KeyboardEvent('keydown', { key: ' ', code: 'Space', bubbles: true }));
-    });
-    expect(FakeRecognition.instances).toHaveLength(0);
-    const recognition = await start();
-    await act(async () => {
-      (container.querySelector('[data-testid="reference"]') as HTMLButtonElement).click();
-      recognition.result('show roots', false);
-    });
-    expect(FakeRecognition.instances).toHaveLength(1);
-    expect(recognition.abort).not.toHaveBeenCalled();
-    await finish(recognition);
-    expect(applied).toHaveBeenCalledTimes(1);
-  });
+  it.each(['input', 'summary'])(
+    'does not hijack Space on %s and retains one recognizer across provider rerenders',
+    async tag => {
+      const target =
+        tag === 'input'
+          ? container.querySelector('input')!
+          : container
+              .appendChild(document.createElement('details'))
+              .appendChild(document.createElement('summary'));
+      const event = new KeyboardEvent('keydown', {
+        key: ' ',
+        code: 'Space',
+        bubbles: true,
+        cancelable: true,
+      });
+      await act(async () => {
+        target.dispatchEvent(event);
+      });
+      expect(event.defaultPrevented).toBe(false);
+      expect(FakeRecognition.instances).toHaveLength(0);
+      const recognition = await start();
+      await act(async () => {
+        (container.querySelector('[data-testid="reference"]') as HTMLButtonElement).click();
+        recognition.result('show roots', false);
+      });
+      expect(FakeRecognition.instances).toHaveLength(1);
+      expect(recognition.abort).not.toHaveBeenCalled();
+      await finish(recognition);
+      expect(applied).toHaveBeenCalledTimes(1);
+    },
+  );
 });

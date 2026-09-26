@@ -462,7 +462,7 @@ export function TeachingProvider({ children }: { children: ReactNode }) {
         event.altKey ||
         event.metaKey ||
         (event.target as HTMLElement).closest(
-          'input,textarea,select,button,dialog,[contenteditable="true"]',
+          'input,textarea,select,button,summary,dialog,[contenteditable="true"]',
         )
       )
         return;

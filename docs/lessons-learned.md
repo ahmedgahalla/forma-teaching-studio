@@ -84,3 +84,10 @@ Entry format: mistake (with link) · root cause · prevention · status (`noted`
 - **Root cause:** phase/sub-phase numbers are picked by each branch independently from its own base, with no reservation mechanism; two branches open at once will pick the same next number whenever neither has seen the other's doc yet.
 - **Prevention:** no automation yet — sub-phase numbers aren't mechanically checkable across branches the way file limits or formatting are. When auditing a PR that adds a numbered phase/sub-phase doc, check `docs/phases/<phase>/README.md` on main _and_ grep open PRs' diffs for the same number before merging, not just the PR's own diff against its (possibly stale) base. Renumbering is mechanical once caught: rename the file, fix its own heading, the phase README line, and grep the repo for every reference to the old path/number.
 - **Status:** noted · **Count:** 1
+
+## 11. Collapsing UI without preserving active feedback
+
+- **Mistake caught during implementation:** the first [Phase 3.2](phases/phase-3-demo-path/3.2-lecture-ready-opening.md) command disclosure hid local case errors when expanded; separate `toolsOpen` and active-panel states also disagreed after a mobile preview closed the sheet.
+- **Root cause:** visual hiding was changed without treating command feedback and panel selection as shared interaction state. A persistent error could also obscure live voice feedback when combined into one label.
+- **Prevention:** keep local alerts independent of live command status, preserve the mounted input, and derive tools visibility from the active panel. Interaction regressions now cover open/closed alerts, voice status plus Stop, draft preservation and panel consistency; browser checks cover effective viewer tools and preview decisions.
+- **Status:** automated · **Count:** 1

@@ -1,9 +1,24 @@
 'use client';
+import type { ComponentProps } from 'react';
 import type { CaseStudioApi } from './api';
-import { Camera, ChevronRight, CircleHelp, Focus, Maximize } from 'lucide-react';
-import { LectureViewTools } from '../lecture/LectureViewTools';
+import { ChevronRight, CircleHelp, Maximize } from 'lucide-react';
+import { CaseViewControls } from './CaseViewControls';
 
-export function CaseWorkspaceHeading({ api }: { api: CaseStudioApi }) {
+type HeadingApi = Pick<
+  CaseStudioApi,
+  | 'viewer'
+  | 'prepared'
+  | 'tryActive'
+  | 'currentLesson'
+  | 'caseDefinition'
+  | 'scenario'
+  | 'sendTry'
+  | 'dentalArrangement'
+  | 'setModal'
+> &
+  ComponentProps<typeof CaseViewControls>['api'];
+
+export function CaseWorkspaceHeading({ api }: { api: HeadingApi }) {
   const { viewer } = api;
   return (
     <>
@@ -38,7 +53,7 @@ export function CaseWorkspaceHeading({ api }: { api: CaseStudioApi }) {
             {api.prepared
               ? api.caseDefinition?.title
               : api.tryActive
-                ? api.dentalArrangement?.title || 'Your orthodontic sandbox'
+                ? api.dentalArrangement?.title || 'Explore the teaching model'
                 : api.currentLesson
                   ? 'Explain one step at a time.'
                   : 'Explore the case geometry.'}
@@ -54,34 +69,7 @@ export function CaseWorkspaceHeading({ api }: { api: CaseStudioApi }) {
               <CircleHelp size={17} />
             </button>
           )}
-          <details className="presentation-view-menu">
-            <summary title="Model presentation tools">
-              <Focus size={16} />
-              View tools
-            </summary>
-            <LectureViewTools
-              isolated={api.isolated}
-              pointer={api.pointer}
-              onIsolate={() => api.setIsolated(!api.isolated)}
-              onPointer={() => api.setPointer(!api.pointer)}
-              onFocus={() => {
-                api.teaching.referenceInteraction();
-                viewer.current?.focus();
-              }}
-              onFit={() => {
-                api.teaching.referenceInteraction();
-                viewer.current?.fit();
-              }}
-            />
-          </details>
-          <button
-            className="icon-button"
-            title="Export 3D image"
-            aria-label="Export 3D image"
-            onClick={() => viewer.current?.snapshot()}
-          >
-            <Camera size={18} />
-          </button>
+          <CaseViewControls api={api} />
           <button
             className="icon-button"
             title="Fit model"
