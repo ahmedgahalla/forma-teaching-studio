@@ -1517,3 +1517,48 @@ describe('interpretation and replay boundaries', () => {
     expect(runtime.getState().phase).toBe('idle');
   });
 });
+
+describe('local tooth-study requests', () => {
+  it('keeps tooth-study on the local path with the AI preference enabled', async () => {
+    const { host, runtime } = setup();
+    await runtime.submit('show tooth 11', { interpreter: 'ai' });
+    expect(host.interpret).not.toHaveBeenCalled();
+    expect(host.apply).toHaveBeenCalledWith(
+      { kind: 'tooth-study', action: 'open', tooth: '11' },
+      expect.any(AbortSignal),
+    );
+    expect(runtime.getState()).toMatchObject({ error: false, interpreter: 'local' });
+  });
+  it('applies explain before reading narration and uses the shared interruptible speaker', async () => {
+    const { host, runtime, scene } = setup();
+    scene().context.toothStudy = { tooth: '11', view: 'buccal' };
+    const utterance = deferred<void>();
+    host.speak.mockReturnValue(utterance.promise);
+    const request = runtime.submitActions(
+      [{ kind: 'tooth-study', action: 'explain' }],
+      'Explain tooth',
+    );
+    await flush();
+    expect(host.narration).toHaveBeenCalledWith('tooth');
+    expect(host.apply.mock.invocationCallOrder[0]).toBeLessThan(
+      host.narration.mock.invocationCallOrder[0],
+    );
+    expect(runtime.getState().phase).toBe('speaking');
+    const signal = host.speak.mock.calls[0][1];
+    runtime.cancel();
+    await request;
+    expect(signal.aborted).toBe(true);
+    expect(runtime.getState().phase).toBe('idle');
+  });
+  it.each(['next', 'back'])(
+    'clarifies %s in an empty workspace without AI or actions',
+    async text => {
+      const { host, runtime, scene } = setup();
+      scene().context.canStepStages = false;
+      await runtime.submit(text, { interpreter: 'ai' });
+      expect(runtime.getState().message).toContain('Nothing to step through');
+      expect(host.interpret).not.toHaveBeenCalled();
+      expect(host.apply).not.toHaveBeenCalled();
+    },
+  );
+});

@@ -25,7 +25,7 @@ import {} from '@/lib/appliance-display';
 import './shared/combined-workspace.css';
 import { PreviewDecisionBar } from './try/PreviewDecisionBar';
 import { createMechanicsExperiment } from '@/lib/mechanics';
-import { mechanicsDisplayPoses, explainMechanics } from '@/lib/mechanics-presentation';
+import { mechanicsDisplayPoses } from '@/lib/mechanics-presentation';
 import { sceneAnalysisContext } from '@/lib/scene-analysis';
 import './mechanics/mechanics.css';
 import './case/classroom-workspace.css';
@@ -44,6 +44,8 @@ import { createTeachingDispatch } from './case/teaching-dispatch';
 import { createClassroomActions } from './case/actions-classroom';
 import { createMechanicsActions } from './case/actions-mechanics';
 import { createExportActions } from './case/actions-export';
+import { useToothStudyState } from './case/tooth-study';
+import { caseNarration } from './case/narration';
 import { createCasePreflight } from './case/preflight';
 import { CaseDialogs } from './case/CaseDialogs';
 import { CaseMain } from './case/CaseMain';
@@ -124,6 +126,7 @@ function CaseStudio({ active }: { active: boolean }) {
     workflowOrigin,
     setWorkflowOrigin,
   } = useModelState();
+  const { toothStudy, setToothStudy } = useToothStudyState(model);
   const returnWorkspace = useRef<ClassroomSnapshot | null>(null);
   const {
     comparisonName,
@@ -463,13 +466,15 @@ function CaseStudio({ active }: { active: boolean }) {
   const sceneInteraction = (event: { target: EventTarget }) => {
     if (
       !(event.target as HTMLElement).closest(
-        '.teaching-command-bar, .case-scenario-panel, .case-stage-toolbar, .mobile-studio-dock, .mobile-panel-heading, .opening-command-controls, .opening-view-menu, .opening-menu, .studio-theme-toggle, .preview-decision-bar, .lecture-console, .lecture-view-tools, .lecture-pointer, .viewport, .tooth-chart, .selection-groups, .mechanics-panel',
+        '.tooth-study-card, .teaching-command-bar, .case-scenario-panel, .case-stage-toolbar, .mobile-studio-dock, .mobile-panel-heading, .opening-command-controls, .opening-view-menu, .opening-menu, .studio-theme-toggle, .preview-decision-bar, .lecture-console, .lecture-view-tools, .lecture-pointer, .viewport, .tooth-chart, .selection-groups, .mechanics-panel',
       )
     )
       teaching.interact();
   };
   const canRestoreWorkspace = !!returnWorkspace.current;
   const api = {
+    toothStudy,
+    setToothStudy,
     pointed,
     setPointed,
     mechanics,
@@ -796,6 +801,14 @@ function CaseStudio({ active }: { active: boolean }) {
       }),
     context: () => ({
       mode: 'case',
+      toothStudy: toothStudy ? { tooth: toothStudy.tooth, view: toothStudy.view } : undefined,
+      canStepStages: !!(
+        prepared ||
+        demonstration ||
+        checkpoints.length ||
+        moved ||
+        mechanics?.result
+      ),
       autoApply: true,
       ...(activeExperiment
         ? { mechanics: mechanicsCommandContext(activeExperiment, mechanicsFocus, wirePreset) }
@@ -855,26 +868,7 @@ function CaseStudio({ active }: { active: boolean }) {
       setPlaying(false);
       importAbort.current?.abort();
     },
-    narration: target => {
-      if (target === 'mechanics') {
-        if (!mechanics) throw new Error('Calculate an initial response first.');
-        return explainMechanics(mechanics);
-      }
-      if (caseDefinition && caseVariant)
-        return target === 'answer'
-          ? caseVariant.answer
-          : `${caseVariant.description} ${caseDefinition.learningGoal} ${scenario?.exploring ? 'This arrangement is now a free experiment.' : ''}`;
-      if (workflowOrigin)
-        return target === 'answer'
-          ? workflowOrigin.setup.source.answer
-          : `Source lesson: ${workflowOrigin.setup.source.explanation} Your current edits are a free geometric variation, not the authored result.`;
-      if (target === 'answer')
-        return 'Use the lesson explanation to discuss the geometry with your class.';
-      return (
-        currentLesson?.steps[Math.max(0, lessonStep)]?.caption ||
-        'Select a prepared lesson or open the anatomy classroom to hear its explanation.'
-      );
-    },
+    narration: target => caseNarration(api, target),
   });
 
   return (

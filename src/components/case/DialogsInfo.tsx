@@ -96,6 +96,14 @@ export function DialogsInfo({ api }: { api: CaseStudioApi }) {
             transient caption. Optional spoken replies are in Settings; requested explanations
             always speak aloud.
           </p>
+          <h3>Tooth study</h3>
+          <p className="form-note">
+            Say “Forma, show the upper right first molar”, “view it from the mesial”, “explain this
+            tooth”, then “back to the full mouth”. Or select one tooth and choose View → Study this
+            tooth. Next/Back cycles the six tooth views. Names use the patient’s side; an omitted
+            side means right. Closing restores the prior view; Undo restores the whole request.
+            Teaching draft — pending educator review · synthetic model.
+          </p>
           <h3>Build an appliance experiment</h3>
           <p className="form-note">
             Point to a crown, root or gingiva while speaking. “Install brackets here” targets the

@@ -1,5 +1,5 @@
 import type { TeachingAction } from '../lecture';
-import type { TeachingContext } from './types';
+import { LOCAL_ONLY_KINDS, type TeachingContext } from './types';
 
 /** Destination routing and interpreter context are shared with the provider and unit-tested. */
 export function teachingActionMode(
@@ -9,6 +9,7 @@ export function teachingActionMode(
   if (
     action.kind === 'case' ||
     action.kind === 'dental-arrangement' ||
+    action.kind === 'tooth-study' ||
     (action.kind === 'workflow' && action.action === 'exit')
   )
     return 'case';
@@ -33,22 +34,11 @@ export function interpreterTeachingContext(context: TeachingContext): TeachingCo
     'canRestoreWorkspace',
     'hasWorkflowOrigin',
     'autoApply',
+    'toothStudy',
+    'canStepStages',
   ] as const)
     delete wire[field];
-  if (
-    wire.lastActions?.some(action =>
-      [
-        'case',
-        'dental-arrangement',
-        'try',
-        'history',
-        'try-display',
-        'try-playback',
-        'workspace',
-        'appliance-display',
-      ].includes(action.kind),
-    )
-  )
+  if (wire.lastActions?.some(action => LOCAL_ONLY_KINDS.includes(action.kind)))
     delete wire.lastActions;
   return wire;
 }

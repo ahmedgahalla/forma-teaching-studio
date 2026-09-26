@@ -1,4 +1,5 @@
 import { createContext, useContext, useLayoutEffect } from 'react';
+import type { TeachingNarrationTarget } from '@/lib/teaching-narration';
 import type { RuntimeState } from '@/lib/teaching-runtime';
 import type { CaptureState } from '@/lib/push-to-talk';
 import type { HandsFreeState } from '@/lib/voice/hands-free';
@@ -17,7 +18,7 @@ export type TeachingAdapter = {
   apply: (action: TeachingAction, signal?: AbortSignal) => boolean | Promise<boolean>;
   preflight: (actions: TeachingAction[], from?: unknown) => void;
   pause: () => void;
-  narration: (target: 'step' | 'answer' | 'mechanics') => string;
+  narration: (target: TeachingNarrationTarget) => string;
   settle?: (signal: AbortSignal) => Promise<void>;
   exportSetup?: (from?: unknown) => WorkflowTransfer;
   importSetup?: (setup: WorkflowTransfer, originSnapshot: unknown) => void;

@@ -37,6 +37,14 @@ Clear validated voice/text geometric movements execute immediately. Prefix a req
 
 Settings offers a voice mode preference and English **en-US/en-GB** recognition. In hold mode Space retains its usual behavior when hands-free is off; the hold button remains available for interruption. Presenter shortcuts ignore editable fields, open dialogs and menus. Keep typed commands and Stop available while rehearsing; real microphone, projector and DPR checks remain required on the actual device. Details: [Voice Classroom](VOICE_CLASSROOM.md#hands-free-lecture-listening).
 
+## Tooth study
+
+Teaching draft — pending educator review · synthetic model
+
+Select one tooth and choose **View → Study this tooth**, or say **“Forma, show the upper right first molar.”** The tooth opens with its roots, direction labels and an explanation card beside the model. Say **“view it from the mesial”**, **“explain this tooth”**, then **“back to the full mouth”**. Next/Back and presenter keys cycle its six sides while study is open. Closing restores the exact prior view and selection; Undo/Redo restores the whole request.
+
+Names use the patient's side. An omitted side means **right**: “upper first molar” opens **16**. “How many roots does it have” reads the authored explanation; root counts describe Forma's synthetic model, not every real tooth. Explanations use the existing voice captions and Stop/Escape interruption. See [Tooth study](TOOTH_STUDY.md) for names, aliases, camera orientation and review limits.
+
 ## A short lecture
 
 1. Open **Library**, choose a prepared case and choose **Present** to enter Lecture mode.

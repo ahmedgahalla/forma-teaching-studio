@@ -18,22 +18,16 @@ import { download, type DentalCase } from '@/lib/geometry';
 import type { Pose, Transforms, Vec3 } from '@/lib/model';
 import { createMechanicsVisuals } from '@/lib/mechanics-view';
 import type { MechanicsExperiment } from '@/lib/mechanics/types';
-import type { PointedReference } from '@/lib/mechanics-commands';
 import { createAttachmentGeometry } from '@/lib/attachments';
-import { createApplianceKit, orderedArchIds, toothArch, type Landmark } from '@/lib/appliances';
+import { createApplianceKit, orderedArchIds, toothArch } from '@/lib/appliances';
 import { toothMatrix } from '@/lib/analysis';
 import { perspectiveFitDistance } from '@/lib/camera-fit';
 import { sameViewerGeometry } from '@/lib/viewer-model';
-import {
-  createWorkflowAppliances,
-  workflowFixedVisibility,
-  type WorkflowViewState,
-} from '@/lib/workflow-appliances';
+import { createWorkflowAppliances, workflowFixedVisibility } from '@/lib/workflow-appliances';
 import {
   anatomyCutawayTooth,
   createTeachingAnatomy,
   layoutAnatomyLabels,
-  type AnatomyViewState,
 } from '@/lib/teaching-anatomy';
 import { createRenderBarrier } from '@/lib/render-barrier';
 import { createRemovableRetainer } from '@/lib/removable-retainer';
@@ -47,67 +41,11 @@ import {
   type ToothLabelAnchor,
 } from '@/lib/viewer-presentation';
 import './teaching-anatomy.css';
+import './tooth-study-labels.css';
+import { createToothStudyPresentation } from './tooth-study-presentation';
 
-export type ViewName = 'perspective' | 'occlusal' | 'front' | 'right' | 'left';
-export type ArchView = 'both' | 'upper' | 'lower';
-export type ViewerCamera = {
-  position: Vec3;
-  target: Vec3;
-  up: Vec3;
-  view: ViewName;
-  far: number;
-  maxDistance: number;
-};
-export type ViewerHandle = {
-  setView: (view: ViewName) => void;
-  fit: () => void;
-  focus: () => void;
-  snapshot: () => void;
-  getCamera: () => ViewerCamera | null;
-  restoreCamera: (camera: ViewerCamera) => void;
-  whenRendered: (signal: AbortSignal) => Promise<void>;
-};
-type Props = {
-  model: DentalCase;
-  transforms: Transforms;
-  selected: string;
-  selectedIds: string[];
-  onSelect: (id: string, additive: boolean) => void;
-  ghost: boolean;
-  gums: boolean;
-  labels: boolean;
-  grid: boolean;
-  arch: ArchView;
-  braces: boolean;
-  roots: boolean;
-  bracketStyle: 'metal' | 'ceramic';
-  ligatureColor: string;
-  opening: number;
-  measureMode: boolean;
-  landmarks: Landmark[];
-  onLandmark: (landmark: Landmark) => void;
-  intersections: string[];
-  attachments: boolean;
-  tool: 'orbit' | 'translate' | 'rotate';
-  onPosePreview: (id: string, pose: Pose) => void;
-  onPoseCommit: (id: string, pose: Pose) => void;
-  workflow?: WorkflowViewState;
-  paused?: boolean;
-  anatomy?: AnatomyViewState;
-  ghostTransforms?: Transforms;
-  lockedIds?: string[];
-  traceFrom?: Transforms;
-  archCurve?: Vec3[];
-  removableRetainer?: boolean;
-  isolateSelection?: boolean;
-  mechanics?: MechanicsExperiment | null;
-  mechanicsForces?: boolean;
-  mechanicsRevealed?: boolean;
-  pointed?: PointedReference | null;
-  pointing?: boolean;
-  onPoint?: (point: PointedReference | null) => void;
-  onReferenceInteraction?: () => void;
-};
+export type { ViewName, ArchView, ViewerCamera, ViewerHandle } from './viewer-types';
+import type { ViewName, ViewerCamera, ViewerHandle, ViewerProps as Props } from './viewer-types';
 
 const Viewer = forwardRef<ViewerHandle, Props>(function Viewer(props, ref) {
   const { theme } = useStudioTheme();
@@ -209,6 +147,7 @@ const Viewer = forwardRef<ViewerHandle, Props>(function Viewer(props, ref) {
     room.dispose();
     pmrem.dispose();
     const controls = new OrbitControls(camera, renderer.domElement);
+    const toothStudy = createToothStudyPresentation(props.model, labelContainer, camera, controls);
     controls.enableDamping = true;
     controls.dampingFactor = 0.11;
     controls.minDistance = 10;
@@ -1112,6 +1051,7 @@ const Viewer = forwardRef<ViewerHandle, Props>(function Viewer(props, ref) {
         lastAnatomyFit = anatomyFit;
         lastIsolation = isolated;
       }
+      toothStudy.prepare(p.toothStudy, transforms, opening, !!pendingCamera);
       if (pendingCamera) {
         // Drain residual orbit damping before assigning an exact undo snapshot.
         const damping = controls.enableDamping;
@@ -1131,6 +1071,7 @@ const Viewer = forwardRef<ViewerHandle, Props>(function Viewer(props, ref) {
       controls.update();
       inverseCamera.copy(camera.quaternion).invert();
       camera.updateMatrixWorld();
+      toothStudy.render(renderWidth, renderHeight);
       anatomyOverlay.hidden = !cutaway;
       if (showLabels && !cutaway) {
         const anchors: ToothLabelAnchor[] = [];
@@ -1267,6 +1208,7 @@ const Viewer = forwardRef<ViewerHandle, Props>(function Viewer(props, ref) {
       gizmo.dispose();
       attachments.forEach(mesh => mesh.geometry.dispose());
       anatomyKit.dispose();
+      toothStudy.dispose();
       anatomyOverlay.remove();
       mechanicsKit.dispose();
       workflowKit.dispose();

@@ -1,7 +1,8 @@
 import type { TeachingAction } from '../lecture';
 import { advanceMechanicsContext } from '../mechanics-commands';
 import { WORKFLOWS } from '../workflows';
-import { TEACHING_CASES } from '../teaching-cases';
+import { advanceCase } from './advance-case';
+import { advanceToothStudy } from './advance-tooth-study';
 import { DEMO_IDS, type TeachingContext } from './types';
 
 type Overrides = { arch: boolean; view: boolean; selection: boolean };
@@ -48,52 +49,18 @@ export function advance(context: TeachingContext, action: TeachingAction, overri
     if (context.mode === 'case' && context.tryPreview)
       throw new Error('Apply or discard the preview before loading a dental arrangement.');
     context.mode = 'case';
+    delete context.toothStudy;
     context.synthetic = true;
     context.availableIds = [...DEMO_IDS];
     context.workflowId = null;
     context.playing = false;
   } else if (action.kind === 'mechanics') {
     advanceMechanicsContext(context, action.action);
+  } else if (action.kind === 'tooth-study') {
+    const tooth = advanceToothStudy(context, action);
+    if (tooth) select([tooth]);
   } else if (action.kind === 'case') {
-    if (action.action !== 'pause' && context.tryPreview)
-      throw new Error('Apply or discard the preview before changing the prepared case.');
-    if (action.action === 'load') {
-      const definition = TEACHING_CASES.find(item => item.id === action.id);
-      if (!definition) throw new Error('Choose a supported prepared teaching case.');
-      context.mode = 'case';
-      context.workflowId = null;
-      context.caseId = definition.id;
-      context.caseVariantId = definition.variants[0].id;
-      context.caseExploring = false;
-      context.playing = false;
-      return;
-    }
-    const definition =
-      context.mode === 'case' && TEACHING_CASES.find(item => item.id === context.caseId);
-    if (!definition) throw new Error('Load a prepared teaching case first.');
-    if (action.action === 'variant' && !definition.variants.some(item => item.id === action.id))
-      throw new Error(
-        `Choose an authored variation: ${definition.variants.map(item => item.title).join('; ')}.`,
-      );
-    if (context.caseExploring && ['variant', 'play', 'reset', 'progress'].includes(action.action))
-      throw new Error('Return to the prepared case before changing its variation or playback.');
-    if (action.action === 'variant') {
-      context.caseVariantId = action.id;
-      context.playing = false;
-    }
-    if (action.action === 'play') context.playing = true;
-    if (action.action === 'pause' || action.action === 'reset' || action.action === 'progress')
-      context.playing = false;
-    if (action.action === 'explore') {
-      if (context.caseExploring)
-        throw new Error('This arrangement is already open for free exploration.');
-      context.caseExploring = true;
-      context.playing = false;
-    }
-    if (action.action === 'return') {
-      context.caseExploring = false;
-      context.playing = false;
-    }
+    advanceCase(context, action);
   } else if (action.kind === 'workspace') {
     if (context.mode === 'case' && context.tryPreview)
       throw new Error('Apply or discard the preview before changing workspaces.');
@@ -202,6 +169,7 @@ export function advance(context: TeachingContext, action: TeachingAction, overri
     }
   } else if (action.kind === 'workflow') {
     if (action.action === 'start') {
+      delete context.toothStudy;
       context.mode = 'workflow';
       context.workflowId = action.id;
       context.synthetic = true;
@@ -241,6 +209,7 @@ export function advance(context: TeachingContext, action: TeachingAction, overri
     }
     if (action.action === 'pause') context.playing = false;
   } else if (action.kind === 'anatomy-lesson') {
+    delete context.toothStudy;
     context.mode = 'workflow';
     context.workflowId = 'anatomy';
     context.stepIndex = action.action === 'start' ? 0 : action.action === 'translation' ? 1 : 2;

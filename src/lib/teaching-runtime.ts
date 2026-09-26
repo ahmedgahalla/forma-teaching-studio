@@ -1,3 +1,5 @@
+import { teachingNarrationTarget, type TeachingNarrationTarget } from './teaching-narration';
+import { abortable } from './teaching-runtime-async';
 import {
   parseTeachingPlan,
   validateTeachingPlan,
@@ -20,7 +22,7 @@ export type TeachingHost<S> = {
   apply(action: TeachingAction, signal?: AbortSignal): void | Promise<void>;
   settle?(signal: AbortSignal): Promise<void>;
   pause(): void;
-  narration(target: 'step' | 'answer' | 'mechanics'): string;
+  narration(target: TeachingNarrationTarget): string;
   speak(text: string, signal: AbortSignal): Promise<void>;
   interpret(text: string, context: TeachingContext, signal: AbortSignal): Promise<unknown>;
   publish(state: RuntimeState): void;
@@ -67,30 +69,6 @@ export function createTeachingRuntime<S>(host: TeachingHost<S>) {
     interrupt();
     publish({ phase: 'idle', message, error: false });
   };
-  const abortable = <T>(task: Promise<T>, signal: AbortSignal) =>
-    new Promise<T | undefined>((resolve, reject) => {
-      const canceled = () => {
-        signal.removeEventListener('abort', canceled);
-        resolve(undefined);
-      };
-      if (signal.aborted) {
-        task.catch(() => {});
-        resolve(undefined);
-        return;
-      }
-      signal.addEventListener('abort', canceled, { once: true });
-      task.then(
-        value => {
-          signal.removeEventListener('abort', canceled);
-          resolve(value);
-        },
-        error => {
-          signal.removeEventListener('abort', canceled);
-          if (signal.aborted) resolve(undefined);
-          else reject(error);
-        },
-      );
-    });
   const waitForPlayback = async (signal: AbortSignal) => {
     while (host.context().playing && !signal.aborted)
       await new Promise<void>(resolve => {
@@ -236,11 +214,13 @@ export function createTeachingRuntime<S>(host: TeachingHost<S>) {
       }
       for (const action of plan.actions) {
         if (signal.aborted || own !== token) return;
-        if (
-          action.kind === 'narrate' ||
-          (action.kind === 'mechanics' && action.action.type === 'explain')
-        ) {
-          const text = host.narration(action.kind === 'narrate' ? action.target : 'mechanics');
+        const narrationTarget = teachingNarrationTarget(action);
+        if (narrationTarget) {
+          if (action.kind === 'tooth-study') {
+            await abortable(Promise.resolve(host.apply(action, signal)), signal);
+            if (signal.aborted || own !== token) return;
+          }
+          const text = host.narration(narrationTarget);
           publish({ phase: 'speaking', message: text });
           await abortable(host.speak(text, signal), signal);
         } else {
@@ -313,11 +293,12 @@ export function createTeachingRuntime<S>(host: TeachingHost<S>) {
         plan &&
         !plan.clarification &&
         plan.actions.length > 0 &&
-        plan.actions.every(
-          action =>
-            ['stop', 'history', 'replay'].includes(action.kind) ||
-            (action.kind === 'dental' && ['undo', 'redo', 'pause'].includes(action.command.type)),
-        );
+        (plan.actions.some(action => action.kind === 'tooth-study') ||
+          plan.actions.every(
+            action =>
+              ['stop', 'history', 'replay'].includes(action.kind) ||
+              (action.kind === 'dental' && ['undo', 'redo', 'pause'].includes(action.command.type)),
+          ));
       // An explicit ambiguity or failed constraint is not an invitation to invent
       // a replacement, even when the professor has requested AI interpretation.
       if (!plan || (options.interpreter === 'ai' && !localControl && !plan.clarification)) {

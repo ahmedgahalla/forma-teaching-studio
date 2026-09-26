@@ -5,7 +5,7 @@ import { CommandValidationError } from '../commands';
 
 export const VERBS =
   '(?:load|choose|show|hide|highlight|select|focus|zoom|move|rotate|tip|torque|intrude|extrude|retract|protract|expand|constrict|distali[sz]e|mesiali[sz]e|reset|start|open|isolate|switch|install|bond|insert|engage|fit|activate|demonstrate|compare|play|animate|pause|stop|next|previous|continue|' +
-  'restart|create|generate|add|remove|set|make|turn|repeat|replay|do|undo|redo|explain|narrate|read|reveal|return|go|back|lecture|enter|exit|end|leave|lock|unlock|close|change|increase|decrease|save|apply|accept|discard|cancel|try|explore|restore|place|put|connect|use|calculate|solve|fix|release|widen|attach|run|thread|replace|preview)';
+  'study|view|tell|restart|create|generate|add|remove|set|make|turn|repeat|replay|do|undo|redo|explain|narrate|read|reveal|return|go|back|lecture|enter|exit|end|leave|lock|unlock|close|change|increase|decrease|save|apply|accept|discard|cancel|try|explore|restore|place|put|connect|use|calculate|solve|fix|release|widen|attach|run|thread|replace|preview)';
 export function clauses(text: string): string[] {
   // Split only before an action verb: commas/"and" inside tooth lists and appliance names stay intact.
   return text
@@ -113,58 +113,6 @@ export function parseCaseAction(
   throw new CommandValidationError(
     `Choose an authored variation for ${definition.title}: ${definition.variants.map(item => item.title).join('; ')}. These are prepared teaching examples.`,
   );
-}
-
-/** Destination routing and interpreter context are shared with the provider and unit-tested. */
-export function teachingActionMode(
-  action: TeachingAction,
-  current: TeachingContext['mode'],
-): TeachingContext['mode'] {
-  if (
-    action.kind === 'case' ||
-    action.kind === 'dental-arrangement' ||
-    (action.kind === 'workflow' && action.action === 'exit')
-  )
-    return 'case';
-  if (action.kind === 'anatomy-lesson' || (action.kind === 'workflow' && action.action === 'start'))
-    return 'workflow';
-  return current;
-}
-
-export function interpreterTeachingContext(context: TeachingContext): TeachingContext {
-  const wire = { ...context };
-  for (const field of [
-    'caseId',
-    'caseVariantId',
-    'caseExploring',
-    'tryMode',
-    'lockedIds',
-    'tryPreview',
-    'tryLastMovement',
-    'tryLastIds',
-    'savedArrangementNames',
-    'tryArchTargets',
-    'canRestoreWorkspace',
-    'hasWorkflowOrigin',
-    'autoApply',
-  ] as const)
-    delete wire[field];
-  if (
-    wire.lastActions?.some(action =>
-      [
-        'case',
-        'dental-arrangement',
-        'try',
-        'history',
-        'try-display',
-        'try-playback',
-        'workspace',
-        'appliance-display',
-      ].includes(action.kind),
-    )
-  )
-    delete wire.lastActions;
-  return wire;
 }
 
 export function isWorkspaceClause(text: string, context: TeachingContext) {

@@ -80,6 +80,51 @@ The appliance workflows each have seven authored steps. The anatomy lesson has f
 
 To explain a specific appliance stage, first open its workflow, then use `install brackets`, `insert archwire`, `install expander`, `show forces`, `show movement`, or `show retention`. These change a classroom illustration; “activate expander” shows conceptual loading rather than a clinical activation schedule.
 
+## Tooth study and explanations
+
+Teaching draft — pending educator review · synthetic model
+
+Prefix these phrases with “Forma” in hands-free mode; typed commands need no wake phrase:
+
+```text
+show tooth 16
+study tooth 16
+show me the upper right first molar
+show the lower left canine
+show the upper first molar
+tooth one six
+view it from the mesial
+view from the distal
+view from the buccal
+view from the labial
+view from the cheek side
+view from the lingual
+view from the tongue side
+view from the palatal
+view from the occlusal
+view from the biting surface
+view from the incisal
+view from the top
+view from the apical
+view from the root tip
+turn it
+next side
+explain this tooth
+tell me about this tooth
+how many roots does it have
+what is this tooth
+back to the full mouth
+close tooth view
+exit tooth study
+show all teeth
+```
+
+Upper/maxillary and lower/mandibular are interchangeable, as are canine/cuspid/eye tooth, premolar/bicuspid, and first molar/six-year molar. Names use the patient's side; an omitted side defaults to right (upper 1x, lower 4x). An omitted arch uses the selected arch or asks for clarification. “Upper first molar” therefore opens 16.
+
+While study is open, **next/back** and presenter keys cycle tooth sides, and explanation requests use that tooth. Otherwise a single selected tooth is opened and explained; an ambiguous selection asks for clarification. “Show all teeth” closes an active study and retains its ordinary full-arch meaning outside one. **Focus**, **select**, **zoom to** and **show roots** retain their previous meanings. An empty free workspace now clarifies that there is nothing to step through, without calling AI.
+
+The six buttons and Explain aloud use the same validated, undoable local actions as speech. Tooth-study context/actions never enter the AI interpreter schema. The card and labels are authored teaching drafts; explanations use browser narration with HUD captions and Stop/Escape interruption. Full instructions and limitations: [Tooth study](TOOTH_STUDY.md).
+
 ## Look inside a tooth
 
 ```text

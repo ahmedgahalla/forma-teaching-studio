@@ -19,12 +19,18 @@ import { parseTryActions } from './parse-try';
 import type { TeachingContext, TeachingPlan } from './types';
 import { validateTeachingPlan } from './plan-validate';
 import { isDentalArrangementClause, parseArrangement } from './parse-arrangement';
-import { parseNavigation } from './parse-navigation';
+import { isNavigationClause, parseNavigation } from './parse-navigation';
+import {
+  CLOSE_TOOTH_STUDY_LAST,
+  isToothStudyClause,
+  parseToothStudyClause,
+  preserveToothStudyTop,
+} from './parse-tooth-study';
 
 export function buildTeachingPlan(text: string, context: TeachingContext): TeachingPlan {
   if (typeof text !== 'string' || !text.trim() || text.length > 1500)
     throw new Error('Give a classroom request of at most 1500 characters.');
-  const normalized = normalizeSpeechCommand(text);
+  const normalized = normalizeSpeechCommand(preserveToothStudyTop(text, context));
   const source = /^(?:stop|pause)(?:[.;,]| and| then)\s*(?:undo|redo)(?: that)?$/.test(normalized)
     ? normalized.match(/(?:undo|redo)(?: that)?$/)![0]
     : normalized;
@@ -84,7 +90,15 @@ export function buildTeachingPlan(text: string, context: TeachingContext): Teach
   };
   const sourceClauses = clauses(source);
   for (let clauseIndex = 0; clauseIndex < sourceClauses.length; clauseIndex++) {
+    if (actions.some(action => action.kind === 'tooth-study' && action.action === 'close'))
+      throw new CommandValidationError(CLOSE_TOOTH_STUDY_LAST);
     let clause = sourceClauses[clauseIndex];
+    const toothStudy = parseToothStudyClause(clause, next);
+    if (toothStudy) {
+      if (!Array.isArray(toothStudy)) return toothStudy;
+      toothStudy.forEach(append);
+      continue;
+    }
     const mechanicsActions = planMechanicsClause(clause, next);
     if (mechanicsActions) {
       mechanicsActions.forEach(action => append({ kind: 'mechanics', action }));
@@ -249,7 +263,8 @@ export function parseTeachingPlan(text: string, context: TeachingContext): Teach
       (typeof text === 'string' &&
         clauses(normalizeSpeechCommand(text)).some(
           clause =>
-            parseNavigation(clause, context) ||
+            isNavigationClause(clause) ||
+            isToothStudyClause(clause, context) ||
             isDentalArrangementClause(clause) ||
             isMechanicsClause(clause) ||
             isCaseClause(clause, context) ||

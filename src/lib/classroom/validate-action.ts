@@ -1,3 +1,5 @@
+import { validateCaseAction } from './validate-case';
+import { validateToothStudyAction } from './validate-tooth-study';
 import { validateCommand } from '../commands';
 import type { TeachingAction } from '../lecture';
 import { validateTryAction } from '../try-mode';
@@ -32,30 +34,10 @@ export function validateAction(value: unknown, context: TeachingContext): Teachi
           'dental-class-iii',
         ] as const),
       };
-    case 'case': {
-      if (action.action === 'load' || action.action === 'variant') {
-        only('action', 'id');
-        if (typeof action.id !== 'string')
-          throw new Error('Choose an authored teaching case or variation.');
-        return { kind: 'case', action: action.action, id: action.id };
-      }
-      if (action.action === 'progress') {
-        only('action', 'value');
-        if (
-          typeof action.value !== 'number' ||
-          !Number.isFinite(action.value) ||
-          action.value < 0 ||
-          action.value > 1
-        )
-          throw new Error('Set prepared case progress between 0 and 1.');
-        return { kind: 'case', action: 'progress', value: action.value };
-      }
-      only('action');
-      return {
-        kind: 'case',
-        action: oneOf(action.action, ['play', 'pause', 'reset', 'explore', 'return'] as const),
-      };
-    }
+    case 'case':
+      return validateCaseAction(action);
+    case 'tooth-study':
+      return validateToothStudyAction(action, context);
     case 'workspace':
       only('action');
       return {

@@ -274,17 +274,12 @@ export function TeachingProvider({ children }: { children: ReactNode }) {
             changeMode('case');
             return;
           }
-          if (
-            action.kind === 'case' ||
-            (action.kind === 'workflow' && action.action === 'start') ||
-            action.kind === 'anatomy-lesson'
-          )
-            changeMode(teachingActionMode(action, modeRef.current));
           if (action.kind === 'workflow' && action.action === 'exit') {
             current().pause();
             changeMode('case');
             return;
           }
+          changeMode(teachingActionMode(action, modeRef.current));
           applied = current().apply(action, signal);
         });
         if (!(await applied))

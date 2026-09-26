@@ -2,6 +2,8 @@ import type { TeachingAction } from '../lecture';
 import { TEACHING_CASES } from '../teaching-cases';
 import { WORKFLOWS } from '../workflows';
 import type { MechanicsCommandContext, PointedReference } from '../mechanics-commands';
+import { TOOTH_STUDY_VIEWS, type ToothStudyContext } from '../tooth-study/types';
+import { hasToothAnatomy } from '../tooth-anatomy';
 
 export type TeachingContext = {
   mode: 'case' | 'workflow';
@@ -17,6 +19,8 @@ export type TeachingContext = {
   speed: 0.5 | 1 | 2;
   stage?: number;
   stages?: number;
+  canStepStages?: boolean;
+  toothStudy?: Pick<ToothStudyContext, 'tooth' | 'view'>;
   playing?: boolean;
   lessonActive?: boolean;
   canReturnToLesson?: boolean;
@@ -67,6 +71,17 @@ export const DEMO_IDS = [1, 2, 3, 4].flatMap(q =>
 );
 export const VIEWS = ['front', 'right', 'left', 'occlusal', 'perspective'];
 export const PHASES = ['assessment', 'brackets', 'wire', 'forces', 'movement', 'retention'];
+export const LOCAL_ONLY_KINDS: readonly TeachingAction['kind'][] = [
+  'case',
+  'dental-arrangement',
+  'try',
+  'history',
+  'try-display',
+  'try-playback',
+  'workspace',
+  'appliance-display',
+  'tooth-study',
+];
 
 export function record(value: unknown): Record<string, unknown> {
   if (
@@ -133,6 +148,15 @@ export function copyContext(context: TeachingContext): TeachingContext {
     throw new Error('The teaching selection is stale.');
   if (context.mode !== 'case' && context.mode !== 'workflow')
     throw new Error('Invalid teaching mode.');
+  if (
+    context.toothStudy &&
+    (context.mode !== 'case' ||
+      !context.synthetic ||
+      !context.availableIds.includes(context.toothStudy.tooth) ||
+      !hasToothAnatomy(context.toothStudy.tooth) ||
+      !TOOTH_STUDY_VIEWS.includes(context.toothStudy.view))
+  )
+    throw new Error('The tooth study context is stale or unsupported.');
   if (context.caseId !== undefined) {
     const definition = TEACHING_CASES.find(item => item.id === context.caseId);
     if (
@@ -186,6 +210,7 @@ export function copyContext(context: TeachingContext): TeachingContext {
     tryLastIds: context.tryLastIds && [...context.tryLastIds],
     savedArrangementNames: [...(context.savedArrangementNames || [])],
     tryArchTargets: { ...context.tryArchTargets },
+    ...(context.toothStudy ? { toothStudy: { ...context.toothStudy } } : {}),
     ...(context.pointed ? { pointed: structuredClone(context.pointed) } : {}),
     ...(context.mechanics ? { mechanics: structuredClone(context.mechanics) } : {}),
   };

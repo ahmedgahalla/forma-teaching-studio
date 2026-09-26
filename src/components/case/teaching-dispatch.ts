@@ -1,4 +1,5 @@
 import type { CaseRefs, CaseStudioApi } from './api';
+import { applyToothStudy } from './tooth-study';
 import { applyCaseLoadKinds } from './teaching-load-kinds';
 import type { TeachingAction } from '@/lib/lecture';
 import { DEFAULT_ATTACHMENT, errorText } from './constants';
@@ -9,6 +10,13 @@ import { parseTeachingCommand } from '@/lib/lecture';
 export function createTeachingDispatch(api: CaseStudioApi, refs: CaseRefs) {
   const applyTeaching = (action: TeachingAction): boolean => {
     try {
+      if (action.kind === 'tooth-study') return applyToothStudy(api, refs, action);
+      if (
+        api.toothStudy &&
+        action.kind === 'case' &&
+        ['reset', 'return', 'variant'].includes(action.action)
+      )
+        applyToothStudy(api, refs, { kind: 'tooth-study', action: 'close' });
       {
         const handled = applyCaseLoadKinds(api, refs, action);
         if (handled !== null) return handled;

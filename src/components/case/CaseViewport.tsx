@@ -9,10 +9,12 @@ import { toothMatrix } from '@/lib/analysis';
 import { applianceView } from '@/lib/appliance-display';
 import { mechanicsResponseCaption } from '@/lib/mechanics-presentation';
 import { VoiceHud } from '../teaching/VoiceHud';
+import { ToothStudyCard } from './ToothStudyCard';
+import { TOOTH_STUDY_DISPLAY } from '../viewer/tooth-study-display';
 
 export function CaseViewport({ api }: { api: CaseStudioApi }) {
   const { viewer, sceneInteraction } = api;
-  const editing = !api.lecture && (api.toolsOpen || api.mobilePanel === 'tools');
+  const editing = !api.toothStudy && !api.lecture && (api.toolsOpen || api.mobilePanel === 'tools');
   return (
     <>
       <section
@@ -21,6 +23,7 @@ export function CaseViewport({ api }: { api: CaseStudioApi }) {
         aria-label="3D workspace"
       >
         <Viewer
+          toothStudy={api.toothStudy}
           onReferenceInteraction={api.teaching.referenceInteraction}
           mechanics={
             api.sandbox.pending && api.mechanics
@@ -48,7 +51,7 @@ export function CaseViewport({ api }: { api: CaseStudioApi }) {
             } else api.setPointed(null);
           }}
           paused={!api.active}
-          isolateSelection={api.isolated}
+          isolateSelection={!!api.toothStudy || api.isolated}
           anatomy={api.anatomy}
           removableRetainer={
             !!api.caseVariant?.removableRetainer &&
@@ -59,8 +62,8 @@ export function CaseViewport({ api }: { api: CaseStudioApi }) {
           ref={viewer}
           model={api.model}
           transforms={api.dragPreview || api.shown}
-          selected={api.selected}
-          selectedIds={api.selectedIds}
+          selected={api.toothStudy?.tooth || api.selected}
+          selectedIds={api.toothStudy ? [api.toothStudy.tooth] : api.selectedIds}
           onSelect={api.selectTooth}
           ghost={
             api.ghost ||
@@ -113,6 +116,7 @@ export function CaseViewport({ api }: { api: CaseStudioApi }) {
               api.setDragPreview({ ...api.plan.current, [id]: next });
           }}
           onPoseCommit={api.poseCommit}
+          {...(api.toothStudy ? TOOTH_STUDY_DISPLAY : undefined)}
         />
         <VoiceHud />
         {api.pointed && (
@@ -257,6 +261,7 @@ export function CaseViewport({ api }: { api: CaseStudioApi }) {
         )}
         {api.roots && <div className="roots-badge">Schematic roots · not reconstructed</div>}
       </section>
+      <ToothStudyCard api={api} />
     </>
   );
 }

@@ -1,0 +1,149 @@
+.studio-experience.teaching-studio .workspace-scene > .lecture-stage.tooth-study-workspace {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(350px, 410px);
+  grid-template-rows: minmax(0, 1fr) auto;
+  gap: 12px;
+  min-height: 500px;
+}
+
+.tooth-study-workspace > .viewport {
+  grid-column: 1;
+  grid-row: 1;
+  min-width: 0;
+}
+
+.tooth-study-workspace > .lecture-console {
+  grid-column: 1 / -1;
+}
+
+.tooth-study-workspace .viewport-top,
+.tooth-study-workspace .viewport-selection,
+.tooth-study-workspace .pointed-target-caption,
+.tooth-study-workspace .mechanics-scale-badge,
+.tooth-study-workspace .mechanics-vector-legend,
+.tooth-study-workspace .stage-preview-badge,
+.tooth-study-workspace .opening-badge,
+.tooth-study-workspace .roots-badge {
+  display: none;
+}
+
+.tooth-study-card {
+  grid-column: 2;
+  grid-row: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  min-width: 0;
+  min-height: 0;
+  max-height: 100%;
+  padding: 18px;
+  border: 1px solid var(--ui-line);
+  border-radius: 11px;
+  background: var(--ui-panel);
+  color: var(--ui-text);
+  font-size: 18px;
+  line-height: 1.45;
+  overflow: hidden;
+}
+
+.tooth-study-card > header,
+.tooth-study-sides,
+.tooth-study-actions {
+  flex-shrink: 0;
+}
+
+.tooth-study-details {
+  min-height: 80px;
+  overflow-y: auto;
+  scrollbar-width: thin;
+}
+
+.tooth-study-card h2 {
+  margin: 5px 0 10px;
+  font-size: 28px;
+  line-height: 1.15;
+  font-weight: 650;
+}
+
+.tooth-study-card p {
+  margin: 0 0 12px;
+}
+
+.tooth-study-card .tooth-study-number,
+.tooth-study-card .tooth-study-disclaimer {
+  margin: 0;
+  color: var(--ui-muted);
+  font-size: 18px;
+  line-height: 1.35;
+}
+
+.tooth-study-sides {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 7px;
+}
+
+.tooth-study-card button {
+  min-height: 44px;
+  border: 1px solid var(--ui-line);
+  border-radius: 7px;
+  padding: 8px;
+  background: var(--ui-soft);
+  color: var(--ui-text);
+  font-size: 18px;
+  line-height: 1.3;
+}
+
+.tooth-study-card button[aria-pressed='true'] {
+  border-color: var(--ui-accent);
+  color: var(--ui-accent);
+  font-weight: 700;
+}
+
+.tooth-study-card button:focus-visible {
+  outline: 3px solid var(--ui-accent);
+  outline-offset: 2px;
+}
+
+.tooth-study-card ul {
+  margin: 0 0 12px;
+  padding-left: 22px;
+}
+
+.tooth-study-card li + li {
+  margin-top: 6px;
+}
+
+.tooth-study-explanation {
+  border-top: 1px solid var(--ui-line);
+  padding-top: 12px;
+}
+
+.tooth-study-actions {
+  display: grid;
+  gap: 8px;
+  margin-top: auto;
+}
+
+@media (max-width: 1000px) {
+  .studio-experience.teaching-studio .workspace-scene > .lecture-stage.tooth-study-workspace {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: minmax(430px, 55dvh) auto auto;
+    min-height: 430px;
+    flex-shrink: 0;
+  }
+
+  .tooth-study-card {
+    grid-column: 1;
+    grid-row: 2;
+    max-height: none;
+  }
+
+  .tooth-study-details {
+    overflow: visible;
+  }
+
+  .tooth-study-workspace > .lecture-console {
+    grid-row: 3;
+  }
+}

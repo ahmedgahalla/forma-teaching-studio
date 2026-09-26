@@ -8,6 +8,7 @@ import { mapWorkflowAppliance } from '@/lib/appliance-display';
 
 export function createClassroomActions(api: CaseStudioApi, refs: CaseRefs) {
   const captureClassroom = (): ClassroomSnapshot => ({
+    toothStudy: api.toothStudy,
     mechanics: api.mechanics,
     wirePreset: api.wirePreset,
     magnification: api.magnification,
@@ -44,6 +45,7 @@ export function createClassroomActions(api: CaseStudioApi, refs: CaseRefs) {
     landmarks: api.landmarks,
   });
   const restoreClassroom = (saved: ClassroomSnapshot) => {
+    api.setToothStudy(saved.toothStudy ?? null);
     api.setMechanics(saved.mechanics ?? null);
     api.setWirePreset(saved.wirePreset || DEFAULT_WIRE_PRESET);
     api.setMagnification(saved.magnification ?? 10);
@@ -113,6 +115,8 @@ export function createClassroomActions(api: CaseStudioApi, refs: CaseRefs) {
         ...mapWorkflowAppliance(setup.display.workflowOverlay, setup.display.braces),
         palate: false,
       };
+    api.setToothStudy(null);
+    api.setIsolated(false);
     api.setMechanics(null);
     api.setPointed(null);
     api.setMechanicsFocus({});

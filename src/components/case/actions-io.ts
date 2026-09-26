@@ -24,6 +24,8 @@ export function createIoActions(api: CaseStudioApi, refs: CaseRefs) {
       throw new Error(
         'Imported cases support ordinary braces only. Use a synthetic model for the teaching appliance presets.',
       );
+    api.setToothStudy(null);
+    api.setIsolated(false);
     api.setMechanics(saved?.mechanics || null);
     api.setPointed(null);
     api.setMechanicsFocus({});

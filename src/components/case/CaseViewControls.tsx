@@ -16,6 +16,7 @@ export function CaseViewControls({
     | 'measureMode'
     | 'pointer'
     | 'sandbox'
+    | 'selectedIds'
     | 'setArch'
     | 'setCamera'
     | 'setIsolated'
@@ -41,6 +42,20 @@ export function CaseViewControls({
         View
       </summary>
       <div className="opening-view-content">
+        {api.selectedIds.length === 1 && (
+          <button
+            className="button small"
+            onClick={() => {
+              if (menuRef.current) menuRef.current.open = false;
+              void api.teaching.execute(
+                [{ kind: 'tooth-study', action: 'open', tooth: api.selectedIds[0] }],
+                'Study this tooth',
+              );
+            }}
+          >
+            Study this tooth
+          </button>
+        )}
         <div className="workspace-cameras" role="group" aria-label="Camera views">
           {(['perspective', 'front', 'occlusal', 'right', 'left'] as ViewName[]).map(v => (
             <button

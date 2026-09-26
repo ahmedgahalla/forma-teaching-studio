@@ -19,6 +19,7 @@ export function applyCaseLoadKinds(
   if (action.kind === 'dental-arrangement') {
     const next = createDentalArrangement(createDemo(), action.id);
     refs.returnWorkspace.current ||= api.captureClassroom();
+    api.setToothStudy(null);
     api.setScenario(null);
     api.setMechanics(null);
     api.setPointed(null);
@@ -70,6 +71,7 @@ export function applyCaseLoadKinds(
   }
   if (action.kind === 'case') {
     if (action.action === 'load') {
+      api.setToothStudy(null);
       const next = createTeachingCase(createDemo(), action.id),
         variant = next.definition.variants[0];
       refs.returnWorkspace.current ||= api.captureClassroom();

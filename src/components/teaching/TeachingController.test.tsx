@@ -10,6 +10,7 @@ import {
   useTeachingAdapter,
 } from './TeachingController';
 import type { SpeechRecognitionLike, SpeechResultEvent } from '../../lib/speech';
+import type { ToothStudyContext } from '../../lib/tooth-study/types';
 import type { TeachingAction } from '../../lib/lecture';
 import { sceneAnalysisContext } from '../../lib/scene-analysis';
 
@@ -46,7 +47,7 @@ class FakeUtterance {
   onerror: ((event: { error: string }) => void) | null = null;
   constructor(public text: string) {}
 }
-type Scene = { selected: string; roots: boolean; gums: boolean };
+type Scene = { selected: string; roots: boolean; gums: boolean; toothStudy?: ToothStudyContext };
 let teaching: ReturnType<typeof useTeaching>, root: Root, container: HTMLDivElement;
 let asyncSelection: Promise<void> | undefined;
 let playing = false;
@@ -67,6 +68,7 @@ function Harness() {
   useTeachingAdapter('case', {
     context: () => ({
       mode: 'case',
+      toothStudy: scene.toothStudy,
       workflowId: null,
       stepIndex: 0,
       selected: scene.selected,
@@ -102,6 +104,25 @@ function Harness() {
       }),
     apply: action => {
       applied(action);
+      if (action.kind === 'tooth-study') {
+        if (action.action === 'open')
+          setScene(previous => ({
+            ...previous,
+            selected: action.tooth,
+            toothStudy: {
+              tooth: action.tooth,
+              view: action.view ?? 'buccal',
+              explanationVisible: false,
+            },
+          }));
+        if (action.action === 'explain')
+          setScene(previous => ({
+            ...previous,
+            toothStudy: previous.toothStudy
+              ? { ...previous.toothStudy, explanationVisible: true }
+              : undefined,
+          }));
+      }
       if (action.kind === 'select') {
         if (asyncSelection)
           return asyncSelection.then(() => {
@@ -776,5 +797,29 @@ describe('hands-free teaching integration', () => {
     expect(teaching.analysisPending).toBe(false);
     expect(teaching.analysis).toBeNull();
     expect(spoken).toHaveLength(0);
+  });
+});
+
+describe('tooth-study narration through the shared speaker', () => {
+  it('applies explanation state before speaking, captions it, and Escape interrupts it', async () => {
+    let request!: Promise<void>;
+    await act(async () => {
+      request = teaching.run('show tooth 21 then explain this tooth');
+    });
+    expect(scene().toothStudy).toMatchObject({ tooth: '21', explanationVisible: true });
+    expect(teaching.runtime.phase).toBe('speaking');
+    expect(spoken.at(-1)?.text).toBe('Current target is tooth 21.');
+    expect(teaching.narration).toBe('Current target is tooth 21.');
+    await act(async () => {
+      key('keydown', 'Escape');
+      await request;
+    });
+    expect(teaching.narration).toBe('');
+    expect(teaching.runtime.phase).toBe('idle');
+    await act(async () => {
+      await teaching.run('undo');
+    });
+    expect(scene().selected).toBe('11');
+    expect(scene().toothStudy).toBeUndefined();
   });
 });

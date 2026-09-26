@@ -1,3 +1,4 @@
+import type { ToothStudyState } from './tooth-study';
 import type { DentalCase } from '@/lib/geometry';
 import type { Transforms } from '@/lib/model';
 import type { AnatomyViewState } from '@/lib/teaching-anatomy';
@@ -58,6 +59,7 @@ export type PreparedScenario = {
  * "restore my workspace". Restoring one of these is the inverse of capture.
  */
 export type ClassroomSnapshot = {
+  toothStudy: ToothStudyState | null;
   mechanics: MechanicsExperiment | null;
   wirePreset: WirePreset;
   magnification: number;

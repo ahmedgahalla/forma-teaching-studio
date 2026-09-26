@@ -7,11 +7,12 @@ import {
 } from '../mechanics-commands';
 import type { MechanicsAction } from '../mechanics/types';
 import { advance } from './advance';
-import { copyContext } from './types';
+import { copyContext, LOCAL_ONLY_KINDS } from './types';
 import { validateAction } from './validate-action';
 import type { TeachingContext, TeachingPlan } from './types';
 import { clauses } from './parse-clauses';
 import { fields, record, type PlanValidationOptions } from './types';
+import { CLOSE_TOOTH_STUDY_LAST } from './parse-tooth-study';
 
 export function auditNumbers(text: string, actions: TeachingAction[]) {
   const source = normalizeSpeechCommand(text).replace(/°/g, ' degrees');
@@ -141,6 +142,12 @@ export function validateTeachingPlan(
   for (const [index, raw] of requestedActions.entries()) {
     const action = validateAction(raw, next);
     if (
+      action.kind === 'tooth-study' &&
+      action.action === 'close' &&
+      index !== requestedActions.length - 1
+    )
+      throw new Error(CLOSE_TOOTH_STUDY_LAST);
+    if (
       action.kind === 'mechanics' &&
       action.action.type === 'stage' &&
       requestedActions.length !== 1
@@ -170,22 +177,9 @@ export function validateTeachingPlan(
           'The appliance action must match the requested targets, explicit values or visible preset.',
         );
     }
-    if (
-      [
-        'case',
-        'dental-arrangement',
-        'try',
-        'history',
-        'try-display',
-        'try-playback',
-        'workspace',
-        'appliance-display',
-      ].includes(action.kind) &&
-      !options.allowLocalActions &&
-      !automatic.has(raw)
-    )
+    if (LOCAL_ONLY_KINDS.includes(action.kind) && !options.allowLocalActions && !automatic.has(raw))
       throw new Error(
-        'Prepared cases, Try Mode mechanics, workspace transfers, appliance placement and counted history use local commands only.',
+        'Prepared cases, tooth study, Try Mode mechanics, workspace transfers, appliance placement and counted history use local commands only.',
       );
     if (action.kind === 'dental-arrangement' && requestedActions.length !== 1)
       throw new Error(

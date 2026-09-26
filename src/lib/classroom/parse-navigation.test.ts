@@ -18,7 +18,11 @@ const context: TeachingContext = {
   stages: 10,
 };
 const contexts = [
-  { label: 'prepared case', state: { ...context, caseId: 'crowding' }, kind: 'stage' },
+  {
+    label: 'prepared case with the adapter lesson flag',
+    state: { ...context, caseId: 'crowding', lessonActive: true },
+    kind: 'stage',
+  },
   { label: 'short lesson', state: { ...context, lessonActive: true }, kind: 'lesson-step' },
   {
     label: 'workflow with lesson flag',
@@ -29,6 +33,11 @@ const contexts = [
       lessonActive: true,
     },
     kind: 'workflow',
+  },
+  {
+    label: 'workspace explored from a workflow',
+    state: { ...context, hasWorkflowOrigin: true, lessonActive: true, canStepStages: true },
+    kind: 'stage',
   },
 ];
 
@@ -68,6 +77,18 @@ it('retains existing stage bounds and explicit lesson navigation', () => {
   );
   expect(parseNavigation('do not continue', context)).toBeUndefined();
   expect(parseNavigation('next stage', context)).toBeUndefined();
+});
+
+it.each([
+  { ...context, canStepStages: false },
+  { ...context, canStepStages: false, lessonActive: true, hasWorkflowOrigin: true },
+  { ...context, canStepStages: false, lessonActive: true, caseId: 'crowding', caseExploring: true },
+])('clarifies an empty free workspace despite inherited lesson metadata', scene => {
+  for (const text of ['next', 'back'])
+    expect(parseTeachingPlan(text, scene)).toMatchObject({
+      actions: [],
+      clarification: expect.stringMatching(/Nothing to step through here/),
+    });
 });
 
 it.each([

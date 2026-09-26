@@ -1,3 +1,4 @@
+import { preflightToothStudy } from './tooth-study';
 import type { TeachingAction } from '@/lib/lecture';
 import { assertTryRestoreUnlocked, assertTryUnlocked, transitionTryMode } from '@/lib/try-mode';
 import { createMechanicsExperiment, transitionMechanics } from '@/lib/mechanics';
@@ -38,6 +39,12 @@ export function createCasePreflight(api: CaseStudioApi, refs: CaseRefs) {
         plannedSolve = false;
       const sourceScenario = saved ? saved.scenario : api.scenario;
       const sourcePrepared = sourceScenario && !sourceScenario.exploring;
+      preflightToothStudy(
+        actions,
+        source,
+        saved?.lesson.selectedIds ?? api.selectedIds,
+        (saved ? saved.toothStudy : api.toothStudy)?.tooth,
+      );
       for (const action of actions) {
         if (action.kind === 'dental-arrangement') {
           if (candidate.pending || api.busy)
