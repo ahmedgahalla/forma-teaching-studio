@@ -1,0 +1,11 @@
+/* Split in Phase 2.3 into ordered partials under studio-experience.styles/; the import
+   order preserves the original cascade. Edit the partials. */
+@import './studio-experience.styles/01-studio-experience.css';
+@import './studio-experience.styles/02-case-card-content.css';
+@import './studio-experience.styles/03-scenario-variants.css';
+@import './studio-experience.styles/04-studio-experience.css';
+@import './studio-experience.styles/05-studio-experience.css';
+@import './studio-experience.styles/06-media.css';
+@import './studio-experience.styles/07-media.css';
+@import './studio-experience.styles/08-studio-experience.css';
+@import './studio-experience.styles/09-media.css';

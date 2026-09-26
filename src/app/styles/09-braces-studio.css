@@ -1,0 +1,279 @@
+.braces-studio .command-input input {
+  font-size: 13px;
+}
+
+.braces-studio .inspector {
+  padding: 21px 19px;
+}
+
+.braces-studio .tooth-card {
+  margin-bottom: 19px;
+}
+
+.braces-studio .tooth-card > div > span {
+  font-size: 12px;
+  line-height: 1.6;
+  display: block;
+}
+
+.braces-studio .large-number {
+  font-size: 29px;
+}
+
+.braces-studio .selected-tag {
+  font-size: 13px;
+}
+
+.four-tabs {
+  gap: 0;
+  justify-content: space-between;
+}
+
+.four-tabs > button {
+  gap: 4px;
+  font-size: 13px;
+}
+
+.braces-studio .control-heading h3 {
+  font-size: 13px;
+}
+
+.braces-studio .direction-grid {
+  grid-template-columns: repeat(2, 1fr);
+}
+
+.braces-studio .direction-grid button {
+  min-height: 49px;
+  align-items: flex-start;
+  padding: 7px 10px;
+  gap: 1px;
+}
+
+.braces-studio .direction-grid strong {
+  font-size: 12px;
+}
+
+.braces-studio .direction-grid span {
+  font-size: 12px;
+}
+
+.braces-studio .amount-row .button {
+  font-size: 13px;
+}
+
+.braces-studio .number-field input {
+  font-size: 14px;
+}
+
+.braces-studio .world-axes {
+  font-size: 12px;
+}
+
+.braces-studio .presets button {
+  font-size: 13px;
+}
+
+.rotation-modes {
+  display: flex;
+  gap: 3px;
+  padding: 3px;
+  border: 1px solid var(--ui-line);
+  background: var(--ui-panel);
+  border-radius: 6px;
+}
+
+.rotation-modes button {
+  flex: 1;
+  padding: 5px 4px;
+  border-radius: 4px;
+  font-size: 13px;
+  color: var(--ui-muted);
+}
+
+.rotation-modes button.active {
+  background: var(--ui-panel);
+  color: var(--ui-accent);
+  font-weight: 600;
+  box-shadow: 0 1px 3px var(--ui-shadow);
+}
+
+.rotation-explanation {
+  font-size: 12px;
+  color: var(--ui-muted);
+  line-height: 1.6;
+  margin: 10px 0 12px;
+}
+
+.braces-studio .field-hint {
+  font-size: 12px;
+  line-height: 1.65;
+  color: var(--ui-muted);
+}
+
+.braces-studio .divider {
+  margin: 21px 0 19px;
+}
+
+.axis-details {
+  font-size: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  color: var(--ui-accent);
+  width: 100%;
+  padding: 12px 0 3px;
+}
+
+.information-card {
+  padding: 13px;
+  border-radius: 7px;
+  background: var(--ui-panel);
+  display: flex;
+  gap: 9px;
+  margin-top: 19px;
+  color: var(--ui-muted);
+}
+
+.information-card svg {
+  flex-shrink: 0;
+  margin-top: 3px;
+}
+
+.information-card p {
+  font-size: 13px;
+  line-height: 1.8;
+}
+
+.colour-swatches {
+  display: flex;
+  gap: 8px;
+  padding-bottom: 2px;
+}
+
+.colour-swatches button {
+  height: 27px;
+  width: 27px;
+  border-radius: 50%;
+  border: 3px solid var(--ui-line);
+  box-shadow: 0 0 0 1px var(--ui-shadow);
+}
+
+.colour-swatches button.active {
+  box-shadow: 0 0 0 2px var(--ui-shadow);
+}
+
+.full-button {
+  width: 100%;
+  font-size: 13px;
+}
+
+.measure-result {
+  text-align: center;
+  padding: 16px 0 7px;
+  display: flex;
+  align-items: center;
+  flex-direction: column;
+  gap: 7px;
+}
+
+.measure-result strong {
+  font-size: 27px;
+  letter-spacing: -1px;
+  font-family: Manrope, sans-serif;
+  font-weight: 600;
+  color: var(--ui-text);
+}
+
+.measure-result strong small {
+  font-size: 12px;
+  font-weight: 400;
+  letter-spacing: 0;
+  color: var(--ui-text);
+}
+
+.measure-result > span {
+  font-size: 12px;
+  color: var(--ui-muted);
+}
+
+.measure-result button {
+  font-size: 13px;
+  color: var(--ui-accent);
+  text-decoration: underline;
+}
+
+.span-table > div {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 9px 0;
+  border-bottom: 1px solid var(--ui-line);
+  font-size: 12px;
+}
+
+.span-table span {
+  color: var(--ui-muted);
+}
+
+.span-table span small {
+  display: block;
+  color: var(--ui-muted);
+  font-size: 12px;
+  margin-top: 3px;
+}
+
+.span-table strong {
+  font-size: 12px;
+  color: var(--ui-text);
+  font-weight: 550;
+  white-space: nowrap;
+}
+
+.span-table strong small {
+  font-size: 12px;
+  font-weight: 400;
+}
+
+.contact-results {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+  margin-top: 12px;
+}
+
+.contact-results strong {
+  width: 100%;
+  font-size: 12px;
+  font-weight: 550;
+  color: var(--ui-warning);
+  margin-bottom: 3px;
+}
+
+.contact-results button {
+  font-size: 13px;
+  background: var(--ui-warning-bg);
+  border: 1px solid var(--ui-warning);
+  color: var(--ui-warning);
+  border-radius: 4px;
+  padding: 4px 8px;
+}
+
+.checkpoint-input {
+  display: flex;
+  gap: 5px;
+  border: 1px solid var(--ui-line);
+  border-radius: 6px;
+  padding: 4px 5px 4px 10px;
+}
+
+.checkpoint-input input {
+  width: 100%;
+  border: 0;
+  outline: 0;
+  font-size: 13px;
+  background: transparent;
+}
+
+.checkpoint-input input::placeholder {
+  color: var(--ui-muted);
+}

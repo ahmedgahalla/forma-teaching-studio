@@ -10,7 +10,7 @@
     "build": "next build",
     "start": "node scripts/serve.mjs",
     "test": "vitest run",
-    "typecheck": "tsc --noEmit",
+    "typecheck": "tsc --noEmit --incremental false",
     "lint": "eslint . --max-warnings 0",
     "format": "prettier --write .",
     "format:check": "prettier --check .",

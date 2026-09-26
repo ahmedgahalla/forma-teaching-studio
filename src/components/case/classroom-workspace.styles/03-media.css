@@ -1,0 +1,51 @@
+@media (max-width: 700px) {
+  .studio-experience.teaching-studio .workspace-scene .workspace-heading h2 {
+    font-size: 16px;
+  }
+  .studio-experience.teaching-studio .workspace-scene > .workspace-heading .view-actions {
+    display: none;
+  }
+  .workspace-cameras {
+    gap: 2px;
+    margin-bottom: 5px;
+  }
+  .workspace-cameras button {
+    flex: 1;
+    padding: 4px 5px;
+    font-size: 11px;
+    min-height: 34px;
+    min-width: 0;
+  }
+  .studio-experience.teaching-studio .workspace-command-dock .command-title {
+    gap: 4px;
+  }
+  .studio-experience.teaching-studio .workspace-command-dock .command-title .teaching-phase {
+    padding: 3px 4px;
+    font-size: 10px;
+  }
+  .studio-experience.teaching-studio .workspace-command-dock .command-status {
+    font-size: 11px;
+  }
+  .studio-experience.teaching-studio .workspace-command-dock .command-status > span {
+    max-height: 36px;
+  }
+  .lecture-console-compact .lecture-quick-layers button {
+    flex: 1;
+    font-size: 11px;
+    padding: 5px 6px;
+    min-height: 34px;
+  }
+  .workspace-command-dock .command-context-strip > span {
+    display: none;
+  }
+}
+
+@media (max-height: 520px) {
+  .studio-experience.teaching-studio .workspace-scene > .workspace-heading,
+  .studio-experience.teaching-studio .workspace-scene .lecture-console-compact {
+    display: none;
+  }
+  .studio-experience.teaching-studio .workspace-command-dock .speech-caption {
+    display: none;
+  }
+}

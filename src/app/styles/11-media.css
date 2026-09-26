@@ -1,0 +1,276 @@
+@media (max-width: 700px) {
+  .braces-studio .workspace {
+    display: flex;
+  }
+  .braces-studio .main-workspace {
+    padding: 20px 13px;
+  }
+  .braces-studio .viewport {
+    height: 410px;
+    min-height: 410px;
+  }
+  .braces-studio .inspector {
+    padding: 23px 20px;
+  }
+  .braces-studio .topbar .brand-sub {
+    display: none;
+  }
+  .braces-studio .direction-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+  .braces-studio .direction-grid button {
+    padding: 7px;
+    min-height: 60px;
+  }
+  .braces-studio .direction-grid strong {
+    font-size: 13px;
+  }
+  .braces-studio .direction-grid span {
+    font-size: 12px;
+  }
+  .four-tabs > button {
+    font-size: 13px;
+    padding-bottom: 14px;
+    gap: 5px;
+  }
+  .four-tabs svg {
+    width: 15px;
+  }
+  .braces-studio .control-heading h3 {
+    font-size: 14px;
+  }
+  .braces-studio .field-hint {
+    font-size: 12px;
+  }
+  .rotation-modes button {
+    font-size: 13px;
+    padding: 7px;
+  }
+  .rotation-explanation {
+    font-size: 12px;
+  }
+  .braces-studio .form-label {
+    font-size: 13px;
+  }
+  .braces-studio .command-input input {
+    font-size: 13px;
+  }
+  .braces-studio .viewport-selection {
+    font-size: 13px;
+    max-width: calc(100% - 75px);
+  }
+  .braces-studio .selected-tag {
+    font-size: 13px;
+  }
+  .full-button {
+    font-size: 13px;
+  }
+  .arch-toolbar {
+    gap: 6px;
+  }
+  .segmented button {
+    font-size: 13px;
+    padding: 5px 8px;
+  }
+  .measure-tool {
+    font-size: 12px;
+    padding: 7px;
+  }
+  .braces-studio .statusbar {
+    font-size: 12px;
+  }
+  .span-table > div {
+    font-size: 12px;
+  }
+  .braces-studio .history-entry {
+    font-size: 12px;
+  }
+  .braces-studio .history-panel > p {
+    font-size: 13px;
+  }
+}
+
+@media (min-width: 701px) {
+  .app-shell {
+    height: 100dvh;
+    min-height: 650px;
+    overflow: hidden;
+  }
+  .workspace {
+    overflow: hidden;
+    min-height: 0;
+  }
+  .sidebar,
+  .inspector {
+    overflow-y: auto;
+    scrollbar-width: thin;
+    scrollbar-color: var(--ui-line) transparent;
+  }
+  .main-workspace {
+    min-height: 0;
+  }
+  .viewport {
+    min-height: 220px;
+  }
+  .workspace-heading {
+    flex-shrink: 0;
+  }
+  .command-section {
+    flex-shrink: 0;
+  }
+  .sidebar-bottom {
+    margin-top: 0;
+  }
+  .topbar {
+    height: 66px;
+  }
+  .main-workspace {
+    padding-top: 20px;
+    padding-bottom: 14px;
+  }
+  .workspace-heading {
+    margin-bottom: 16px;
+  }
+  .command-section {
+    padding-top: 16px;
+  }
+}
+
+/* Lecture workspace: readable controls around a high-contrast model. */
+
+.teaching-studio {
+  --ink: var(--ui-text);
+  --muted: var(--ui-muted);
+  --line: var(--ui-line);
+  --teal: var(--ui-accent);
+  --mint: var(--ui-soft);
+  background: var(--ui-bg);
+}
+
+.teaching-studio .topbar {
+  height: 66px;
+  padding: 0 24px;
+}
+
+.teaching-studio .brand-icon {
+  background: var(--ui-accent);
+}
+
+.teaching-studio .brand-sub {
+  font-size: 11px;
+  max-width: 88px;
+  color: var(--ui-muted);
+}
+
+.teaching-studio .top-center {
+  color: var(--ui-muted);
+  font-size: 12px;
+}
+
+.teaching-studio .header-actions {
+  gap: 15px;
+}
+
+.teaching-studio .button.dark {
+  background: var(--ui-accent);
+}
+
+.teaching-studio .presentation-button {
+  border-color: var(--ui-line);
+  color: var(--ui-accent);
+  background: var(--ui-panel);
+}
+
+.teaching-studio .presentation-button.active {
+  background: var(--ui-accent);
+  color: var(--ui-accent-text);
+  border-color: var(--ui-accent);
+}
+
+.teaching-studio .workspace {
+  grid-template-columns: 224px minmax(350px, 1fr) 320px;
+}
+
+.teaching-studio .sidebar {
+  padding: 23px 14px 16px;
+}
+
+.teaching-studio .main-workspace {
+  padding: 18px 20px 12px;
+  background: var(--ui-bg);
+}
+
+.teaching-studio .inspector {
+  padding: 20px 18px;
+}
+
+.teaching-studio .workspace-heading {
+  margin-bottom: 14px;
+}
+
+.teaching-studio .workspace-heading h2 {
+  font-size: 23px;
+  letter-spacing: -0.8px;
+}
+
+.teaching-studio .breadcrumbs {
+  font-size: 12px;
+  margin-bottom: 5px;
+  color: var(--ui-muted);
+}
+
+.teaching-studio .view-actions {
+  margin-top: 0;
+}
+
+.teaching-studio .eyebrow,
+.teaching-studio .section-heading {
+  color: var(--ui-muted);
+}
+
+.teaching-studio .case-meta {
+  font-size: 12px;
+  color: var(--ui-muted);
+}
+
+.teaching-studio .case-heading h1 {
+  font-size: 18px;
+}
+
+.teaching-studio .import-button {
+  margin: 17px 0 21px;
+  background: var(--ui-panel);
+  border-color: var(--ui-line);
+}
+
+.teaching-studio .chart-title {
+  color: var(--ui-muted);
+  font-size: 12px;
+}
+
+.teaching-studio .chart-title button {
+  color: var(--ui-accent);
+}
+
+.teaching-studio .chart-teeth button {
+  color: var(--ui-muted);
+  height: 36px;
+  border-color: var(--ui-line);
+}
+
+.teaching-studio .chart-teeth button.selected {
+  background: var(--ui-accent);
+  border-color: var(--ui-accent);
+  color: var(--ui-accent-text);
+}
+
+.teaching-studio .toggle-row {
+  font-size: 12px;
+  color: var(--ui-muted);
+  padding: 8px 5px;
+  gap: 12px;
+}
+
+.teaching-studio .on .switch {
+  background: var(--ui-accent);
+}

@@ -1,0 +1,278 @@
+.lesson-ribbon strong > span {
+  color: var(--ui-text);
+  font-size: 12px;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.lesson-ribbon p {
+  font-size: 13px;
+  color: var(--ui-accent);
+  margin-top: 3px;
+  line-height: 1.5;
+}
+
+.lesson-ribbon > .button {
+  font-size: 13px;
+}
+
+.lesson-ribbon > svg {
+  flex-shrink: 0;
+}
+
+.teaching-studio input[type='range'] {
+  background: linear-gradient(
+    to right,
+    var(--ui-accent) var(--progress),
+    var(--ui-line) var(--progress)
+  );
+}
+
+.teaching-studio input[type='range']::-webkit-slider-thumb {
+  border-color: var(--ui-line);
+}
+
+.teaching-studio .command-section {
+  padding-top: 12px;
+}
+
+.teaching-studio .command-title {
+  gap: 10px;
+  margin-bottom: 7px;
+}
+
+.teaching-studio .command-title > span {
+  color: var(--ui-accent);
+  font-size: 12px;
+  letter-spacing: 0.8px;
+}
+
+.teaching-studio .command-title > button {
+  color: var(--ui-accent);
+  font-size: 13px;
+}
+
+.teaching-studio .command-input {
+  height: 51px;
+  border-color: var(--ui-line);
+  border-radius: 9px;
+  padding-left: 12px;
+  gap: 9px;
+}
+
+.teaching-studio .command-input input {
+  font-size: 13px;
+  color: var(--ui-text);
+}
+
+.teaching-studio .command-input input::placeholder {
+  color: var(--ui-muted);
+}
+
+.teaching-studio .command-input > svg {
+  color: var(--ui-text);
+}
+
+.voice-button {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding: 8px 10px;
+  white-space: nowrap;
+  background: var(--ui-raised);
+  color: var(--ui-accent);
+  border: 1px solid var(--ui-line);
+  border-radius: 6px;
+  font-size: 13px;
+  flex-shrink: 0;
+}
+
+.teaching-studio .command-submit {
+  color: var(--ui-accent-text);
+  background: var(--ui-accent);
+  height: 36px;
+  width: 36px;
+}
+
+.teaching-studio .command-submit:not(:disabled):hover {
+  background: color-mix(in srgb, var(--ui-accent) 86%, var(--ui-text));
+}
+
+.teaching-studio .command-input:focus-within {
+  border-color: var(--ui-accent);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--ui-accent) 24%, transparent);
+}
+
+.teaching-studio .command-status {
+  color: var(--ui-muted);
+  font-size: 12px;
+  min-height: 20px;
+  margin-top: 6px;
+  align-items: center;
+}
+
+.teaching-studio .command-status > span {
+  flex: 1;
+}
+
+.teaching-studio .command-status > button {
+  display: flex;
+  gap: 5px;
+  align-items: center;
+  font-size: 13px;
+  color: var(--ui-accent);
+  white-space: nowrap;
+}
+
+.teaching-studio .command-status.error {
+  color: var(--ui-error);
+}
+
+.speech-caption {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding: 8px 11px;
+  margin-top: 7px;
+  background: var(--ui-raised);
+  border-radius: 6px;
+  font-size: 12px;
+  color: var(--ui-muted);
+}
+
+.speech-caption strong {
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.speech-caption > span:last-child {
+  color: var(--ui-muted);
+  overflow-wrap: anywhere;
+}
+
+.speech-dot {
+  height: 6px;
+  width: 6px;
+  border-radius: 50%;
+  background: var(--ui-accent);
+  flex-shrink: 0;
+}
+
+.speech-caption.live {
+  background: var(--ui-soft);
+}
+
+.speech-caption.live .speech-dot {
+  background: var(--ui-accent);
+  box-shadow: 0 0 0 3px var(--ui-shadow);
+}
+
+.speech-unavailable {
+  font-size: 12px;
+  color: var(--ui-muted);
+  margin-top: 4px;
+}
+
+.teaching-studio .inspector-heading {
+  margin-bottom: 14px;
+}
+
+.teaching-studio .large-number {
+  background: var(--ui-raised);
+  border-color: var(--ui-line);
+  color: var(--ui-accent);
+  letter-spacing: -1px;
+}
+
+.teaching-studio .selected-tag {
+  color: var(--ui-text);
+  background: var(--ui-raised);
+  font-size: 13px;
+}
+
+.teaching-studio .tooth-card > div > span {
+  color: var(--ui-muted);
+}
+
+.teaching-studio .four-tabs {
+  gap: 8px;
+  margin-bottom: 20px;
+}
+
+.teaching-studio .four-tabs > button {
+  font-size: 13px;
+  color: var(--ui-muted);
+  gap: 4px;
+}
+
+.teaching-studio .four-tabs > button.active {
+  color: var(--ui-accent);
+  border-color: var(--ui-accent);
+}
+
+.teaching-studio .control-heading {
+  color: var(--ui-accent);
+}
+
+.teaching-studio .control-heading > span {
+  color: var(--ui-muted);
+  font-size: 12px;
+}
+
+.teaching-studio .control-heading > svg {
+  color: var(--ui-muted);
+}
+
+.teaching-studio .direction-grid button {
+  border-color: var(--ui-line);
+}
+
+.teaching-studio .direction-grid span {
+  color: var(--ui-muted);
+  font-size: 12px;
+}
+
+.teaching-studio .direction-grid button.active {
+  color: var(--ui-accent);
+  background: var(--ui-panel);
+  border-color: var(--ui-accent);
+}
+
+.teaching-studio .direction-grid button.active span {
+  color: var(--ui-accent);
+}
+
+.teaching-studio .world-axes {
+  color: var(--ui-muted);
+}
+
+.teaching-studio .presets button {
+  color: var(--ui-muted);
+  font-size: 13px;
+}
+
+.teaching-studio .rotation-explanation,
+.teaching-studio .field-hint {
+  color: var(--ui-muted);
+  font-size: 12px;
+  line-height: 1.65;
+}
+
+.teaching-studio .rotation-modes button {
+  color: var(--ui-muted);
+  font-size: 13px;
+}
+
+.teaching-studio .rotation-modes button.active {
+  color: var(--ui-accent);
+}
+
+.teaching-studio .form-label {
+  color: var(--ui-text);
+}
+
+.teaching-studio .form-label input,
+.teaching-studio .form-label select {
+  color: var(--ui-text);
+  border-color: var(--ui-line);
+}

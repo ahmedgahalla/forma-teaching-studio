@@ -1,0 +1,146 @@
+.teaching-command-bar .workflow-command-examples {
+  max-height: 90px;
+  overflow: auto;
+}
+
+@media (max-width: 700px) {
+  .teaching-command-bar .command-title {
+    gap: 7px;
+    flex-wrap: wrap;
+  }
+  .teaching-command-bar .command-title > span:first-child {
+    font-size: 12px;
+  }
+  .teaching-command-bar .voice-button span {
+    display: none;
+  }
+  .workflow-studio .workflow-viewport {
+    min-height: 410px;
+  }
+  .teaching-experiment {
+    align-items: flex-start;
+  }
+  .workflow-studio .workflow-main {
+    overflow: visible;
+  }
+  .teaching-command-bar .command-status > span {
+    max-height: 90px;
+  }
+}
+
+/* Coarse pointers need larger hit areas; model labels stay compact. */
+
+@media (pointer: coarse) {
+  .button,
+  .icon-button,
+  .camera-tabs button,
+  .model-tools button,
+  .workflow-step-list button,
+  .workflow-fit,
+  .workflow-switch,
+  .toggle-row,
+  .try-panel button,
+  .try-preview button,
+  .workspace-origin-actions button {
+    min-height: 44px;
+  }
+  .icon-button,
+  .model-tools button,
+  .workflow-fit {
+    min-width: 44px;
+  }
+  .command-input input,
+  .form-label input,
+  .form-label select,
+  .workflow-speed select {
+    font-size: 16px;
+  }
+  .chart-teeth button {
+    min-height: 40px;
+  }
+}
+
+/* Conversation source remains visible beside the actual interpreter response. */
+
+.teaching-command-bar .command-title > .teaching-ai-toggle {
+  display: inline-flex !important;
+  align-items: center;
+  gap: 5px;
+  border: 1px solid var(--ui-line);
+  border-radius: 6px;
+  padding: 4px 8px;
+  color: var(--ui-muted);
+  white-space: nowrap;
+}
+
+.teaching-command-bar .command-title > .teaching-ai-toggle[aria-pressed='true'] {
+  background: var(--ui-soft);
+  border-color: var(--ui-accent);
+  color: var(--ui-accent);
+}
+
+.command-origin {
+  display: inline-block;
+  margin-right: 7px;
+  color: var(--ui-accent);
+  font-size: 10px;
+  font-weight: 650;
+  letter-spacing: 0.2px;
+}
+
+.teaching-analysis-hint {
+  color: var(--ui-muted);
+  font-size: 11px;
+  margin-top: 5px;
+}
+
+.teaching-analysis-card {
+  background: var(--ui-panel);
+  border: 1px solid var(--ui-line);
+  border-radius: 8px;
+  margin-top: 8px;
+  padding: 10px 13px;
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.teaching-analysis-card summary {
+  cursor: pointer;
+  font-weight: 700;
+  color: var(--ui-accent);
+}
+
+.teaching-analysis-card summary small {
+  float: right;
+  font-size: 11px;
+  color: var(--ui-muted);
+  font-weight: 400;
+}
+
+.teaching-analysis-card > div {
+  max-height: 190px;
+  overflow: auto;
+  padding-right: 8px;
+}
+
+.teaching-analysis-card p {
+  margin: 9px 0;
+}
+
+.teaching-analysis-card .analysis-question {
+  font-weight: 600;
+}
+
+.analysis-limits {
+  color: var(--ui-muted);
+}
+
+@media (max-width: 700px) {
+  .teaching-command-bar .command-title > .teaching-ai-toggle {
+    padding: 4px 6px;
+    font-size: 11px;
+  }
+  .teaching-command-bar .command-title > .teaching-ai-toggle svg {
+    display: none;
+  }
+}

@@ -1,0 +1,277 @@
+/* Scoped studio redesign. The existing renderer and editing mechanics are unchanged. */
+
+.studio-experience,
+.teaching-case-library,
+.case-scenario-panel {
+  --exp-ink: var(--ui-text);
+  --exp-muted: var(--ui-muted);
+  --exp-teal: var(--ui-accent);
+  --exp-teal-dark: var(--ui-accent);
+  --exp-line: var(--ui-line);
+  --exp-soft: var(--ui-soft);
+  --exp-paper: var(--ui-panel);
+}
+
+.experience-sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.experience-eyebrow {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 12px;
+  font-weight: 750;
+  line-height: 1.5;
+  letter-spacing: 1.25px;
+  color: var(--exp-teal-dark);
+  text-transform: uppercase;
+}
+
+.teaching-case-library button,
+.case-scenario-panel button,
+.mobile-studio-dock button {
+  font: inherit;
+}
+
+.teaching-case-library :focus-visible,
+.case-scenario-panel :focus-visible,
+.mobile-studio-dock :focus-visible,
+.studio-experience :focus-visible {
+  outline: 3px solid var(--ui-accent);
+  outline-offset: 3px;
+}
+
+.teaching-case-library button:disabled,
+.case-scenario-panel button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* The library is a useful index, with a diagram of each concept. */
+
+.teaching-case-library {
+  color: var(--exp-ink);
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+.case-library-intro {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 30px;
+  padding: 7px 0 27px;
+  border-bottom: 1px solid var(--exp-line);
+}
+
+.case-library-intro h2 {
+  font-size: clamp(25px, 3vw, 36px);
+  font-weight: 700;
+  line-height: 1.14;
+  letter-spacing: -1.3px;
+  margin: 10px 0 12px !important;
+  color: var(--exp-ink);
+}
+
+.case-library-intro p {
+  max-width: 510px;
+  margin: 0 !important;
+  font-size: 14px !important;
+  line-height: 1.65 !important;
+  color: var(--exp-muted) !important;
+}
+
+.case-library-count {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-shrink: 0;
+  border-left: 1px solid var(--exp-line);
+  padding-left: 24px;
+}
+
+.case-library-count strong {
+  font-size: 54px;
+  line-height: 1;
+  font-weight: 500;
+  letter-spacing: -3px;
+  color: var(--exp-teal);
+}
+
+.case-library-count > span {
+  font-size: 13px;
+  line-height: 1.6;
+  color: var(--exp-muted);
+}
+
+.case-library-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  margin: 22px 0 14px;
+}
+
+.case-library-search {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex: 1;
+  min-width: 0;
+  padding: 0 14px;
+  min-height: 46px;
+  background: var(--ui-raised);
+  border: 1px solid var(--ui-line);
+  border-radius: 10px;
+  color: var(--ui-muted);
+}
+
+.case-library-search:focus-within {
+  border-color: var(--exp-teal);
+  box-shadow: 0 0 0 3px var(--ui-shadow);
+}
+
+.case-library-search input {
+  font: inherit;
+  color: var(--exp-ink);
+  width: 100%;
+  min-width: 0;
+  height: 44px;
+  background: transparent;
+  border: 0;
+  outline: 0;
+}
+
+.case-library-search input::placeholder {
+  color: var(--ui-muted);
+}
+
+.case-results {
+  font-size: 12px;
+  font-weight: 600;
+  white-space: nowrap;
+  color: var(--exp-muted);
+}
+
+.case-library-filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+  margin-bottom: 20px;
+}
+
+.case-library-filters button {
+  border: 1px solid var(--exp-line);
+  border-radius: 100px;
+  min-height: 36px;
+  padding: 6px 13px;
+  font-size: 12px;
+  color: var(--ui-muted);
+  background: var(--ui-panel);
+  white-space: nowrap;
+}
+
+.case-library-filters button[aria-pressed='true'] {
+  background: var(--ui-accent);
+  color: var(--ui-accent-text);
+  border-color: var(--ui-accent);
+}
+
+.case-library-filters button:hover:not([aria-pressed='true']) {
+  border-color: var(--ui-line);
+  background: var(--ui-raised);
+}
+
+.teaching-case-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.teaching-case-card {
+  display: flex;
+  flex-direction: column;
+  text-align: left;
+  border: 1px solid var(--ui-line);
+  border-radius: 14px;
+  overflow: hidden;
+  min-width: 0;
+  background: var(--ui-panel);
+  transition:
+    border-color 0.16s,
+    box-shadow 0.16s;
+}
+
+.teaching-case-card:hover:not(:disabled) {
+  border-color: var(--ui-line);
+  box-shadow: 0 7px 22px var(--ui-shadow);
+}
+
+.teaching-case-card.is-current {
+  border-color: var(--exp-teal);
+  box-shadow: 0 0 0 1px var(--exp-teal);
+}
+
+.case-card-visual {
+  position: relative;
+  background: var(--ui-raised);
+  border-bottom: 1px solid var(--ui-line);
+  padding: 12px 15px 24px;
+  min-height: 150px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.teaching-case-card:nth-child(3n + 2) .case-card-visual {
+  background: var(--ui-raised);
+}
+
+.teaching-case-card:nth-child(3n) .case-card-visual {
+  background: var(--ui-raised);
+}
+
+.case-card-index {
+  position: absolute;
+  top: 12px;
+  left: 14px;
+  font-variant-numeric: tabular-nums;
+  font-size: 13px;
+  font-weight: 650;
+  color: var(--ui-muted);
+  z-index: 1;
+}
+
+.case-card-kind {
+  position: absolute;
+  bottom: 11px;
+  left: 14px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  font-size: 9px;
+  font-weight: 700;
+  color: var(--ui-muted);
+}
+
+.case-card-current {
+  position: absolute;
+  top: 9px;
+  right: 10px;
+  display: flex;
+  gap: 4px;
+  align-items: center;
+  padding: 3px 7px;
+  border-radius: 20px;
+  background: var(--ui-raised);
+  color: var(--ui-accent);
+  font-size: 12px;
+  font-weight: 700;
+}

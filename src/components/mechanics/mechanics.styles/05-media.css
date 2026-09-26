@@ -1,0 +1,278 @@
+@media (max-width: 1024px) {
+  .studio-experience.teaching-studio {
+    height: 100dvh;
+    min-height: 100dvh;
+    overflow: hidden;
+    padding-bottom: calc(75px + env(safe-area-inset-bottom));
+  }
+  .studio-experience.teaching-studio .workspace {
+    display: flex;
+    min-height: 0;
+    overflow: hidden;
+  }
+  .studio-experience.teaching-studio .main-workspace {
+    flex: 1;
+    padding: 8px 12px 8px;
+    overflow-y: auto;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+  }
+  .studio-experience.teaching-studio .workspace-heading {
+    min-height: 44px;
+    margin-bottom: 5px;
+    flex-shrink: 0;
+  }
+  .studio-experience.teaching-studio .workspace-heading .breadcrumbs {
+    display: none;
+  }
+  .studio-experience.teaching-studio .workspace-heading h2 {
+    font-size: 17px;
+    line-height: 1.2;
+    letter-spacing: -0.35px;
+  }
+  .studio-experience.teaching-studio .workspace-heading .view-actions {
+    align-self: center;
+    gap: 2px;
+  }
+  .studio-experience.teaching-studio .arch-toolbar {
+    margin-bottom: 7px;
+    gap: 5px;
+    flex-shrink: 0;
+    padding: 0;
+  }
+  .studio-experience.teaching-studio .arch-toolbar button {
+    font-size: 11px;
+    padding: 5px 6px;
+    min-height: 42px;
+  }
+  .studio-experience.teaching-studio .arch-button-full {
+    display: none;
+  }
+  .studio-experience.teaching-studio .arch-button-short {
+    display: inline;
+  }
+  .studio-experience.teaching-studio .lecture-stage {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    min-height: 230px;
+  }
+  .studio-experience.teaching-studio .lecture-stage > .viewport,
+  .studio-experience.teaching-studio.lecture-mode .lecture-stage > .viewport {
+    height: auto;
+    min-height: 230px;
+    flex: 1;
+    margin: 0;
+  }
+  .studio-experience.teaching-studio.lecture-mode .lecture-stage > .lecture-console {
+    max-height: 30dvh;
+    overflow: auto;
+    flex-shrink: 0;
+    margin-top: 8px;
+  }
+  .studio-experience.teaching-studio .classroom-stage-bar {
+    margin-top: 6px;
+    padding: 6px;
+    gap: 6px;
+  }
+  .studio-experience.teaching-studio .command-section {
+    padding-top: 4px;
+    flex-shrink: 0;
+    position: relative;
+  }
+  .studio-experience.teaching-studio .command-title {
+    margin-bottom: 5px;
+    min-height: 20px;
+    flex-wrap: nowrap;
+    gap: 6px;
+  }
+  .studio-experience.teaching-studio .command-title > span:first-child {
+    font-size: 10px;
+    letter-spacing: 0.3px;
+  }
+  .studio-experience.teaching-studio .command-title > span:first-child > svg {
+    display: none;
+  }
+  .studio-experience.teaching-studio .command-title .teaching-phase {
+    font-size: 10px;
+    padding: 3px 6px;
+  }
+  .studio-experience.teaching-studio .command-title .teaching-stop {
+    font-size: 11px;
+  }
+  .studio-experience.teaching-studio .command-input {
+    height: 48px;
+    min-height: 48px;
+  }
+  .studio-experience.teaching-studio .speech-caption {
+    padding: 2px 5px;
+    margin-top: 3px;
+    max-height: 21px;
+    font-size: 10px;
+    line-height: 16px;
+  }
+  .studio-experience.teaching-studio .speech-caption > span:last-child {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .studio-experience.teaching-studio .command-status {
+    font-size: 11px;
+    min-height: 21px;
+    margin-top: 4px;
+    line-height: 16px;
+  }
+  .studio-experience.teaching-studio .command-status > span {
+    max-height: 32px;
+  }
+  .studio-experience.teaching-studio .command-status .text-button {
+    font-size: 11px;
+  }
+  .studio-experience.teaching-studio .workflow-command-examples {
+    position: absolute;
+    bottom: 100%;
+    left: 0;
+    right: 0;
+    z-index: 30;
+    max-height: 160px;
+    background: var(--ui-panel);
+    box-shadow: 0 -8px 25px var(--ui-shadow);
+  }
+  .studio-experience.teaching-studio .case-path-note,
+  .studio-experience.teaching-studio .workspace-origin {
+    max-height: 110px;
+    overflow: auto;
+    flex-shrink: 0;
+    margin-bottom: 5px;
+    font-size: 11px;
+    padding: 7px;
+  }
+  .studio-experience.teaching-studio .case-lesson-summary {
+    margin-bottom: 5px;
+    padding: 6px;
+    font-size: 10px;
+  }
+  .studio-experience.teaching-studio .viewport .viewport-top {
+    left: 10px;
+    right: 10px;
+    top: 10px;
+  }
+  .studio-experience.teaching-studio .viewport .unit-badge {
+    display: none;
+  }
+  .studio-experience.teaching-studio .viewport .camera-tabs {
+    top: 38px;
+    left: 8px;
+    right: 8px;
+  }
+  .studio-experience.teaching-studio .viewport .camera-tabs button {
+    min-height: 36px;
+    height: 36px;
+    font-size: 10px;
+    padding: 4px;
+  }
+  .studio-experience.teaching-studio .viewport .model-tools {
+    top: 82px;
+    left: auto;
+    right: 8px;
+    display: flex;
+    flex-direction: column;
+    padding: 3px;
+    gap: 2px;
+  }
+  .studio-experience.teaching-studio .viewport .model-tools button {
+    height: 32px;
+    min-height: 32px;
+    min-width: 32px;
+    width: 32px;
+  }
+  .studio-experience.teaching-studio .viewport .model-tools > span {
+    height: 1px;
+    width: 25px;
+    margin: 1px;
+  }
+  .studio-experience.teaching-studio .viewport .viewport-selection {
+    bottom: 38px;
+    left: 9px;
+    font-size: 10px;
+    padding: 6px;
+    max-width: calc(100% - 55px);
+  }
+  .studio-experience.teaching-studio .viewport .viewport-selection .selection-line,
+  .studio-experience.teaching-studio .viewport .viewport-selection > span:last-child {
+    display: none;
+  }
+  .studio-experience.teaching-studio .viewport .viewport-hint {
+    left: 8px;
+    bottom: 10px;
+    font-size: 9px;
+    max-width: calc(100% - 16px);
+  }
+  .studio-experience.teaching-studio .viewport .mechanics-vector-legend {
+    bottom: auto;
+    top: 82px;
+    font-size: 9px;
+    padding: 5px;
+  }
+  .studio-experience.teaching-studio .viewport .pointed-target-caption {
+    bottom: 72px;
+    font-size: 10px;
+  }
+  .studio-experience.teaching-studio .viewport .roots-badge {
+    top: 10px;
+    bottom: auto;
+    right: 10px;
+    font-size: 8px;
+  }
+  .studio-experience.teaching-studio .viewport .mechanics-scale-badge {
+    font-size: 9px;
+    bottom: 8px;
+    padding: 4px;
+    max-width: calc(100% - 16px);
+  }
+}
+
+@media (max-width: 1024px) {
+  .studio-experience.teaching-studio .viewport .model-tools button {
+    height: 44px;
+    min-height: 44px;
+    min-width: 44px;
+    width: 44px;
+  }
+  .studio-experience.teaching-studio .viewport .model-tools > button:nth-of-type(n + 4),
+  .studio-experience.teaching-studio .viewport .model-tools > span {
+    display: none;
+  }
+}
+
+@media (max-width: 700px) {
+  .studio-experience.teaching-studio:not([data-mobile-panel='model']) .main-workspace {
+    flex: none;
+    width: 100%;
+    height: calc(52dvh - 140px);
+    min-height: 150px;
+    overflow: hidden;
+  }
+  .studio-experience.teaching-studio:not([data-mobile-panel='model']) .workspace-heading,
+  .studio-experience.teaching-studio:not([data-mobile-panel='model']) .command-section,
+  .studio-experience.teaching-studio:not([data-mobile-panel='model']) .command-context-strip,
+  .studio-experience.teaching-studio:not([data-mobile-panel='model']) .classroom-stage-bar,
+  .studio-experience.teaching-studio:not([data-mobile-panel='model']) .lecture-console {
+    display: none;
+  }
+  .studio-experience.teaching-studio:not([data-mobile-panel='model']) .lecture-stage,
+  .studio-experience.teaching-studio:not([data-mobile-panel='model']) .lecture-stage > .viewport {
+    min-height: 0;
+  }
+  .studio-experience.teaching-studio:not([data-mobile-panel='model']) .viewport .viewport-top,
+  .studio-experience.teaching-studio:not([data-mobile-panel='model']) .viewport .model-tools,
+  .studio-experience.teaching-studio:not([data-mobile-panel='model']) .viewport .viewport-hint,
+  .studio-experience.teaching-studio:not([data-mobile-panel='model']) .viewport .viewport-selection,
+  .studio-experience.teaching-studio:not([data-mobile-panel='model']) .viewport .roots-badge {
+    display: none;
+  }
+  .studio-experience.teaching-studio:not([data-mobile-panel='model']) .viewport .camera-tabs {
+    top: 5px;
+  }
+}

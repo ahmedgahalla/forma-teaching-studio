@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 import './globals.css';
 import './studio-theme.css';
-import { StudioThemeProvider } from '@/components/StudioTheme';
+import { StudioThemeProvider } from '@/components/shared/StudioTheme';
 export const metadata: Metadata = {
   title: 'Forma · Teaching Studio',
   description:

@@ -41,10 +41,10 @@ export type TryAction =
     }
   | { type: 'compare-snapshot'; name: string | null }
   | { type: 'save-group'; name: string; teeth: string[] };
-export type ArchTarget = { width: number; depth: number };
-export type TrySnapshot = { name: string; transforms: Transforms };
-export type TryGroup = { name: string; teeth: string[] };
-export type TryCollisionReport = {
+type ArchTarget = { width: number; depth: number };
+type TrySnapshot = { name: string; transforms: Transforms };
+type TryGroup = { name: string; teeth: string[] };
+type TryCollisionReport = {
   baseline: SurfaceIntersection[];
   crossings: (SurfaceIntersection & { sample: number; t: number })[];
   endpoint: SurfaceIntersection[];
@@ -95,7 +95,7 @@ export const TRY_LIMITS = {
   snapshots: 10,
   groups: 10,
 } as const;
-export const TRY_COLLISION_LIMITATION =
+const TRY_COLLISION_LIMITATION =
   'Bounded sampled crown-surface checks; crossings between samples, enclosed volumes, roots, gums, and biological limits are not assessed.';
 const clone = <T>(value: T): T => structuredClone(value);
 const vector = (value: Vec3) => new Vector3(...value);

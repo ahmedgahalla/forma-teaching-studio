@@ -1,0 +1,79 @@
+@media (max-width: 1050px) {
+  .lecture-console-body.has-question {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .lecture-console-question {
+    border-left: 0;
+    border-top: 1px solid var(--ui-line);
+    padding: 17px 0 0;
+  }
+}
+
+@media (max-width: 700px) {
+  .lecture-console {
+    padding: 16px;
+    margin: 12px 0;
+    border-radius: 12px;
+  }
+  .lecture-console-heading {
+    flex-direction: column;
+    gap: 12px;
+    margin-bottom: 16px;
+  }
+  .lecture-console-heading h2 {
+    font-size: 20px;
+  }
+  .lecture-console-heading p {
+    font-size: 14px;
+  }
+  .lecture-console .lecture-console-explore {
+    max-width: none;
+    width: 100%;
+  }
+  .lecture-console-playback {
+    gap: 7px;
+  }
+  .lecture-console-playback button {
+    flex: 1;
+    min-width: 100px;
+  }
+  .lecture-console-speed {
+    flex: 1;
+    justify-content: space-between;
+  }
+  .lecture-console-speed select {
+    flex: 1;
+    max-width: 105px;
+  }
+  .lecture-console-question > p {
+    font-size: 18px;
+  }
+  .lecture-console-answer {
+    font-size: 16px;
+  }
+  .lecture-console-variants > div {
+    flex-direction: column;
+  }
+  .lecture-console-variants button {
+    width: 100%;
+  }
+}
+
+.lecture-variant-picker {
+  order: 3;
+  border-top: 1px solid var(--ui-line);
+  padding-top: 10px;
+}
+
+.lecture-variant-picker > summary {
+  padding: 8px 0;
+  cursor: pointer;
+  color: var(--ui-accent);
+  font-size: 14px;
+  font-weight: 600;
+  min-height: 36px;
+}
+
+.lecture-variant-picker fieldset {
+  margin-top: 8px;
+}

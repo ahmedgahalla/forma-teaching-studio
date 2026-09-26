@@ -1,0 +1,14 @@
+{
+  "$schema": "https://unpkg.com/knip@5/schema.json",
+  "entry": [
+    "src/app/layout.tsx",
+    "src/app/page.tsx",
+    "src/workers/mechanics.worker.ts",
+    "src/**/*.test.{ts,tsx}",
+    "scripts/*.mjs",
+    "scripts/anatomy/*.mjs"
+  ],
+  "project": ["src/**/*.{ts,tsx}", "scripts/**/*.mjs"],
+  "ignoreDependencies": ["eslint-config-prettier"],
+  "ignoreBinaries": ["blender"]
+}

@@ -1,0 +1,276 @@
+@media (max-width: 1180px) {
+  .workspace {
+    grid-template-columns: 195px minmax(330px, 1fr) 260px;
+  }
+  .sidebar {
+    padding: 23px 12px 15px;
+  }
+  .case-heading h1 {
+    font-size: 16px;
+  }
+  .main-workspace {
+    padding: 24px 17px 18px;
+  }
+  .inspector {
+    padding: 23px 15px 17px;
+  }
+  .workspace-heading {
+    align-items: flex-start;
+  }
+  .workspace-heading h2 {
+    font-size: 21px;
+  }
+  .view-actions .button {
+    font-size: 0;
+    gap: 0;
+    padding: 0;
+    width: 33px;
+  }
+  .top-center {
+    display: none;
+  }
+  .eyebrow {
+    font-size: 11px;
+  }
+  .viewport {
+    min-height: 400px;
+  }
+  .camera-tabs {
+    gap: 0;
+    left: 12px;
+  }
+  .camera-tabs button {
+    padding: 5px 8px;
+    min-height: 36px;
+  }
+  .viewport-selection {
+    left: 12px;
+  }
+  .tooth-card h3 {
+    font-size: 12px;
+  }
+  .inspector-tabs {
+    gap: 15px;
+  }
+  .inspector-tabs button {
+    font-size: 13px;
+  }
+}
+
+@media (max-width: 950px) {
+  .workspace {
+    grid-template-columns: minmax(0, 1fr) 270px;
+  }
+  .sidebar {
+    display: none;
+  }
+  .main-workspace {
+    padding: 23px 20px;
+  }
+  .topbar {
+    padding: 0 20px;
+    height: 66px;
+  }
+  .viewport {
+    min-height: 470px;
+  }
+  .topbar .text-button {
+    display: none;
+  }
+  .workspace-heading h2 {
+    font-size: 23px;
+  }
+  .statusbar button {
+    display: none;
+  }
+  .viewport-hint {
+    font-size: 12px;
+    background: var(--ui-panel);
+    border-radius: 4px;
+    padding: 3px 6px;
+  }
+  .workspace-heading .view-actions {
+    margin-top: 20px;
+  }
+}
+
+@media (max-width: 700px) {
+  .app-shell {
+    display: block;
+  }
+  .workspace {
+    display: flex;
+    flex-direction: column;
+  }
+  .topbar {
+    height: 65px;
+    padding: 0 16px;
+  }
+  .brand {
+    font-size: 25px;
+  }
+  .brand-sub,
+  .brand-divider {
+    display: none;
+  }
+  .header-actions {
+    gap: 8px;
+  }
+  .header-actions .avatar {
+    margin: 0;
+  }
+  .header-actions .button {
+    font-size: 13px;
+    padding: 0 10px;
+  }
+  .main-workspace {
+    padding: 20px 14px 22px;
+  }
+  .workspace-heading {
+    margin-bottom: 16px;
+  }
+  .workspace-heading h2 {
+    font-size: 21px;
+  }
+  .breadcrumbs {
+    font-size: 12px;
+  }
+  .viewport {
+    height: 440px;
+    min-height: 440px;
+    flex: auto;
+  }
+  .command-section {
+    padding-top: 18px;
+  }
+  .inspector {
+    border-left: 0;
+    border-top: 1px solid var(--line);
+    padding: 24px 20px;
+  }
+  .inspector-content {
+    display: grid;
+    grid-template-columns: 1fr;
+    max-width: 100%;
+  }
+  .inspector-heading {
+    margin-bottom: 15px;
+  }
+  .tooth-card {
+    margin-bottom: 20px;
+  }
+  .tooth-card h3 {
+    font-size: 16px;
+  }
+  .inspector-tabs button {
+    font-size: 13px;
+  }
+  .control-heading h3 {
+    font-size: 14px;
+  }
+  .direction-grid button {
+    min-height: 60px;
+  }
+  .direction-grid strong {
+    font-size: 14px;
+  }
+  .direction-grid span {
+    font-size: 12px;
+  }
+  .world-axes {
+    font-size: 12px;
+  }
+  .world-axes button {
+    width: 35px;
+    height: 27px;
+    font-size: 13px;
+  }
+  .amount-row .button {
+    font-size: 13px;
+    min-width: 110px;
+    height: 44px;
+  }
+  .number-field {
+    height: 43px;
+  }
+  .presets button {
+    font-size: 13px;
+    padding: 7px;
+  }
+  .field-hint {
+    font-size: 12px;
+  }
+  .rotation-axis {
+    font-size: 13px;
+  }
+  .rotation-axis button {
+    height: 28px;
+    width: 40px;
+    font-size: 13px;
+  }
+  .position-values strong {
+    font-size: 16px;
+  }
+  .position-values span,
+  .position-values small,
+  .rotation-values {
+    font-size: 12px;
+  }
+  .measurement label,
+  .measurement select {
+    font-size: 13px;
+  }
+  .measurement select {
+    max-width: 140px;
+  }
+  .inspector-bottom > div {
+    font-size: 12px;
+  }
+  .export-button {
+    font-size: 13px;
+  }
+  .statusbar {
+    height: auto;
+    min-height: 46px;
+    flex-direction: column;
+    padding: 10px;
+    gap: 4px;
+    font-size: 12px;
+  }
+  .viewport-selection {
+    font-size: 13px;
+  }
+  .command-input input {
+    font-size: 13px;
+  }
+  .command-status {
+    font-size: 12px;
+  }
+  .inspector-bottom {
+    padding-top: 25px;
+  }
+  .dialog-heading h2 {
+    font-size: 19px;
+  }
+  .viewport-top {
+    left: 14px;
+    right: 14px;
+  }
+  .unit-badge {
+    font-size: 11px;
+    background: var(--ui-panel);
+    border-radius: 4px;
+    padding: 3px 6px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *:before,
+  *:after {
+    transition: none !important;
+    animation-duration: 0.01ms !important;
+  }
+}
+
+/* Keep the canvas, timeline and command bar together in a desktop workspace. */

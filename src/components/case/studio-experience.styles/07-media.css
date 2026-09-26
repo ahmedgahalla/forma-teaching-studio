@@ -1,0 +1,277 @@
+@media (max-width: 700px) {
+  .teaching-case-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 11px;
+  }
+  .dialog:has(.teaching-case-library) {
+    width: calc(100vw - 20px);
+    max-height: calc(100dvh - 24px);
+    padding: 17px 15px;
+    border-radius: 14px;
+  }
+  .case-library-intro {
+    padding: 2px 0 20px;
+    gap: 12px;
+    align-items: flex-start;
+  }
+  .case-library-intro h2 {
+    font-size: 28px;
+    letter-spacing: -1px;
+    line-height: 1.15;
+  }
+  .case-library-intro p {
+    font-size: 13px !important;
+  }
+  .case-library-count {
+    padding-left: 12px;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 5px;
+    margin-top: 6px;
+  }
+  .case-library-count strong {
+    font-size: 39px;
+    letter-spacing: -2px;
+  }
+  .case-library-count > span {
+    font-size: 9px;
+  }
+  .case-library-toolbar {
+    margin-top: 17px;
+    gap: 10px;
+  }
+  .case-library-search {
+    padding: 0 10px;
+  }
+  .case-library-search input {
+    font-size: 16px;
+  }
+  .case-library-filters {
+    gap: 6px;
+  }
+  .case-library-filters button {
+    font-size: 13px;
+    min-height: 44px;
+    padding: 6px 11px;
+  }
+  .case-card-visual {
+    min-height: 122px;
+    padding: 8px 8px 24px;
+  }
+  .case-diagram {
+    height: 104px;
+  }
+  .case-card-content {
+    padding: 13px 12px 11px;
+  }
+  .case-card-content h3 {
+    font-size: 15px;
+  }
+  .case-card-content p {
+    font-size: 12px !important;
+    margin-bottom: 12px !important;
+    line-height: 1.6 !important;
+  }
+  .case-card-kind {
+    font-size: 8px;
+    letter-spacing: 0.7px;
+    bottom: 9px;
+    left: 11px;
+  }
+  .case-card-footer {
+    font-size: 12px;
+    padding-top: 9px;
+  }
+  .studio-experience.teaching-studio .brand {
+    font-size: 24px;
+  }
+  .studio-experience.teaching-studio .brand-icon {
+    width: 31px;
+    height: 31px;
+  }
+  .studio-experience.teaching-studio .brand-sub,
+  .studio-experience.teaching-studio .brand-divider {
+    display: none;
+  }
+  .studio-experience.teaching-studio .header-actions {
+    gap: 5px;
+  }
+  .studio-experience.teaching-studio .header-actions .button {
+    padding: 0 9px;
+    min-width: 40px;
+    min-height: 44px;
+  }
+  .studio-experience.teaching-studio .avatar {
+    width: 44px;
+    height: 44px;
+  }
+  .studio-experience.teaching-studio .header-actions .presentation-button {
+    display: none;
+  }
+  .studio-experience.teaching-studio .header-actions .workflows-button span {
+    display: inline;
+    font-size: 13px;
+  }
+  .studio-experience.teaching-studio .main-workspace {
+    padding: 16px 12px 15px;
+  }
+  .studio-experience.teaching-studio .workspace-heading {
+    gap: 9px;
+    margin-bottom: 14px;
+  }
+  .studio-experience.teaching-studio .workspace-heading h2 {
+    font-size: 24px;
+    line-height: 1.2;
+    letter-spacing: -0.75px;
+  }
+  .studio-experience.teaching-studio .workspace-heading .view-actions {
+    gap: 5px;
+    align-self: flex-end;
+    margin: 0;
+  }
+  .studio-experience.teaching-studio .view-actions .icon-button {
+    width: 44px;
+    height: 44px;
+  }
+  .studio-experience.teaching-studio .arch-toolbar {
+    gap: 7px;
+    justify-content: space-between;
+  }
+  .studio-experience.teaching-studio .comparison-strip {
+    margin-left: 0;
+  }
+  .studio-experience.teaching-studio .segmented button,
+  .studio-experience.teaching-studio .comparison-strip button {
+    font-size: 13px;
+    min-height: 44px;
+    padding: 5px 7px;
+  }
+  .studio-experience.teaching-studio .viewport {
+    height: clamp(360px, 52dvh, 540px);
+    min-height: 360px;
+    border-radius: 13px;
+  }
+  .studio-experience.teaching-studio .camera-tabs {
+    left: 12px;
+    right: auto;
+    top: 45px;
+  }
+  .studio-experience.teaching-studio .camera-tabs button {
+    min-height: 44px;
+    padding: 5px 9px;
+    font-size: 13px;
+  }
+  .studio-experience.teaching-studio .model-tools {
+    top: 92px;
+    left: 12px;
+  }
+  .studio-experience.teaching-studio .model-tools button {
+    width: 40px;
+    height: 40px;
+  }
+  .studio-experience.teaching-studio .viewport-selection {
+    left: 12px;
+    font-size: 13px;
+    max-width: calc(100% - 65px);
+  }
+  .studio-experience.teaching-studio .command-input {
+    height: 54px;
+    padding-left: 10px;
+  }
+  .studio-experience.teaching-studio .command-title > span:first-child {
+    font-size: 12px;
+    letter-spacing: 0.5px;
+  }
+  .studio-experience.teaching-studio .command-submit {
+    min-width: 44px;
+    min-height: 44px;
+  }
+  .studio-experience.teaching-studio .voice-button {
+    min-width: 44px;
+    min-height: 44px;
+    padding: 8px;
+  }
+  .studio-experience.teaching-studio .voice-button > span {
+    display: none;
+  }
+  .studio-experience.teaching-studio .command-status,
+  .studio-experience.teaching-studio .case-action-status {
+    font-size: 12px;
+  }
+  .case-scenario-panel {
+    padding: 17px;
+    gap: 16px;
+  }
+  .scenario-speed select {
+    font-size: 16px;
+  }
+  .scenario-play,
+  .scenario-reset,
+  .scenario-compare,
+  .scenario-explore {
+    min-height: 44px;
+  }
+  .scenario-variants button,
+  .scenario-question > button {
+    min-height: 44px;
+  }
+}
+
+@media (max-width: 370px) {
+  .case-library-count {
+    display: none;
+  }
+  .teaching-case-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .case-card-visual {
+    min-height: 138px;
+  }
+  .studio-experience.teaching-studio .header-actions .workflows-button span {
+    display: none;
+  }
+  .studio-experience.teaching-studio .topbar {
+    padding: 0 10px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .teaching-case-card {
+    transition: none;
+  }
+}
+
+.studio-experience .case-lesson-summary {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 0 0 12px;
+  padding: 10px 12px;
+  background: var(--ui-panel);
+  border: 1px solid var(--ui-line);
+  border-radius: 10px;
+  color: var(--ui-muted);
+  font-size: 12px;
+}
+
+.studio-experience .case-lesson-summary > span {
+  flex: 1;
+  min-width: 150px;
+}
+
+.studio-experience .case-lesson-summary button {
+  padding: 7px 10px;
+  min-height: 36px;
+  background: var(--ui-raised);
+  border-radius: 6px;
+  color: var(--ui-accent);
+  font-size: 12px;
+}
+
+.studio-experience .case-sources {
+  padding: 14px 4px;
+  color: var(--ui-muted);
+  font-size: 12px;
+  line-height: 1.7;
+}

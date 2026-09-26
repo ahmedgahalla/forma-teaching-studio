@@ -1,0 +1,5 @@
+/* Split in Phase 2.3 into ordered partials under classroom-workspace.styles/; the import
+   order preserves the original cascade. Edit the partials. */
+@import './classroom-workspace.styles/01-app-shell.css';
+@import './classroom-workspace.styles/02-workspace-command-dock.css';
+@import './classroom-workspace.styles/03-media.css';

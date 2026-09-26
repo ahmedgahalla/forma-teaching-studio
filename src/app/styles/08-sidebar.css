@@ -1,0 +1,277 @@
+.sidebar > *,
+.inspector > * {
+  flex-shrink: 0;
+}
+
+.command-input input {
+  font-size: 14px;
+}
+
+.mobile-tooth-selector {
+  display: none;
+}
+
+.settings-file-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 18px;
+}
+
+@media (max-width: 950px) {
+  .mobile-tooth-selector {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-size: 13px;
+    color: var(--ui-text);
+    gap: 8px;
+    margin-bottom: 20px;
+  }
+  .mobile-tooth-selector select {
+    border: 1px solid var(--ui-line);
+    border-radius: 5px;
+    padding: 6px;
+    background: var(--ui-panel);
+    color: var(--ui-text);
+    font-size: 13px;
+    max-width: 165px;
+  }
+}
+
+/* Orthodontic workspace */
+
+.braces-studio .brand-sub {
+  max-width: 82px;
+  font-size: 11px;
+}
+
+.braces-studio .workspace {
+  grid-template-columns: 238px minmax(360px, 1fr) 310px;
+}
+
+.braces-studio .main-workspace {
+  padding-left: 22px;
+  padding-right: 22px;
+}
+
+.braces-studio .case-heading h1 {
+  font-size: 18px;
+}
+
+.braces-studio .import-button {
+  margin: 20px 0 24px;
+}
+
+.braces-studio .viewport {
+  background: radial-gradient(ellipse at 50% 46%, var(--ui-bg), var(--ui-bg) 85%);
+}
+
+.tooth-chart {
+  margin: 0 5px 10px;
+}
+
+.chart-arch {
+  margin-bottom: 16px;
+}
+
+.chart-title {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 12px;
+  color: var(--ui-muted);
+  margin-bottom: 9px;
+}
+
+.chart-title button {
+  font-size: 13px;
+  color: var(--ui-accent);
+  padding: 0;
+}
+
+.chart-teeth {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 5px;
+}
+
+.chart-teeth button {
+  position: relative;
+  height: 36px;
+  padding: 0;
+  border: 1px solid var(--ui-line);
+  border-radius: 6px;
+  background: var(--ui-panel);
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--ui-muted);
+}
+
+.chart-teeth button:hover {
+  background: var(--ui-soft);
+  border-color: var(--ui-accent);
+}
+
+.chart-teeth button.selected {
+  background: var(--ui-accent);
+  border-color: var(--ui-accent);
+  color: var(--ui-accent-text);
+  box-shadow: 0 2px 4px var(--ui-shadow);
+}
+
+.chart-teeth button.moved:after {
+  content: '';
+  position: absolute;
+  right: 2px;
+  top: 2px;
+  background: var(--ui-warning);
+  border-radius: 50%;
+  height: 4px;
+  width: 4px;
+}
+
+.group-shortcuts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+  margin: 10px 6px;
+}
+
+.group-shortcuts button {
+  font-size: 13px;
+  padding: 4px 7px;
+  background: var(--ui-panel);
+  border: 1px solid var(--ui-line);
+  border-radius: 5px;
+  color: var(--ui-muted);
+}
+
+.group-shortcuts button:hover {
+  color: var(--ui-accent);
+  background: var(--ui-soft);
+}
+
+.selection-hint {
+  font-size: 13px;
+  line-height: 1.6;
+  color: var(--ui-text);
+  padding: 0 7px;
+  margin-bottom: 20px;
+}
+
+.braces-studio .sidebar-bottom {
+  padding-top: 18px;
+}
+
+.braces-studio .display-controls {
+  padding-top: 19px;
+}
+
+.arch-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-shrink: 0;
+  margin: 0 0 11px;
+}
+
+.segmented {
+  display: flex;
+  border-radius: 7px;
+  padding: 3px;
+  border: 1px solid var(--ui-line);
+  background: var(--ui-panel);
+  gap: 3px;
+}
+
+.segmented button {
+  font-size: 13px;
+  border-radius: 4px;
+  padding: 5px 10px;
+  color: var(--ui-muted);
+}
+
+.segmented button.active {
+  background: var(--ui-panel);
+  box-shadow: 0 1px 3px var(--ui-shadow);
+  color: var(--ui-accent);
+  font-weight: 600;
+}
+
+.measure-tool {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 12px;
+  color: var(--ui-muted);
+  padding: 6px 9px;
+  border: 1px solid var(--ui-line);
+  border-radius: 6px;
+  background: var(--ui-panel);
+}
+
+.measure-tool.active {
+  border-color: var(--ui-accent);
+  background: var(--ui-soft);
+  color: var(--ui-accent);
+}
+
+.braces-studio .viewport-selection {
+  max-width: calc(100% - 92px);
+  bottom: 44px;
+}
+
+.braces-studio .viewport-selection > span:last-child {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.braces-studio .viewport-hint {
+  font-size: 12px;
+}
+
+.braces-studio .unit-badge {
+  font-family: inherit;
+}
+
+.braces-studio .orientation span {
+  right: auto;
+  bottom: auto;
+  transition: none;
+}
+
+.braces-studio .orientation span:before,
+.braces-studio .orientation span:after {
+  display: none;
+}
+
+.opening-badge,
+.roots-badge {
+  position: absolute;
+  right: 14px;
+  font-size: 12px;
+  color: var(--ui-muted);
+  background: var(--ui-panel);
+  border: 1px solid var(--ui-line);
+  padding: 4px 6px;
+  border-radius: 4px;
+  pointer-events: none;
+}
+
+.opening-badge {
+  top: 48px;
+}
+
+.roots-badge {
+  top: 77px;
+}
+
+.three-canvas.measuring {
+  cursor: crosshair;
+}
+
+.braces-studio .command-status {
+  font-size: 12px;
+}

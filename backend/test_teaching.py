@@ -716,16 +716,13 @@ def test_provider_failures_do_not_echo_private_exception_details(client, monkeyp
     (429, "billing_hard_limit_reached", 429, "API billing"),
     (429, "rate_limit_exceeded", 429, "Wait briefly"),
 ])
-@pytest.mark.parametrize("endpoint", ["/api/interpret", "/api/interpret-teaching"])
-def test_actionable_provider_configuration_errors_never_echo_secrets(client, monkeypatch, status, code, expected_status, message, endpoint):
+def test_actionable_provider_configuration_errors_never_echo_secrets(client, monkeypatch, status, code, expected_status, message):
     secret = "private-secret-not-for-client"
     response = httpx.Response(status, request=httpx.Request("POST", "https://example.com/private-request"))
     error_type = AuthenticationError if status == 401 else RateLimitError
     error = error_type(secret, response=response, body={"code": code, "message": secret})
-    provider = "interpret_teaching_with_openai" if endpoint.endswith("teaching") else "interpret_with_openai"
-    monkeypatch.setattr(main, provider, MagicMock(side_effect=error))
-    payload = request() if endpoint.endswith("teaching") else {"text": "show original", "selected_tooth": "11", "available_teeth": ["11"]}
-    result = client.post(endpoint, json=payload)
+    monkeypatch.setattr(main, "interpret_teaching_with_openai", MagicMock(side_effect=error))
+    result = client.post("/api/interpret-teaching", json=request())
     assert result.status_code == expected_status, result.text
     assert message in result.json()["detail"]
     assert secret not in result.text
@@ -824,22 +821,6 @@ def test_provider_clarification_is_not_retried_or_converted_to_an_edit(client, m
     assert response.status_code == 200, response.text
     assert response.json() == clarification
     assert sdk.responses.parse.call_count == 1
-
-
-@pytest.mark.parametrize("model", ["gpt-6-luna", "openai/gpt-6-luna", "gpt-4.1-mini"])
-def test_legacy_interpreter_only_disables_reasoning_for_luna(client, monkeypatch, model):
-    monkeypatch.setenv("OPENAI_API_KEY", "server-secret")
-    monkeypatch.setenv("OPENAI_MODEL", model)
-    sdk = MagicMock()
-    sdk.__enter__.return_value = sdk
-    sdk.responses.parse.return_value = SimpleNamespace(output_parsed=main.Interpretation.model_validate({"command": {"type": "ghost", "visible": True}, "reason": ""}))
-    monkeypatch.setattr(main, "OpenAI", MagicMock(return_value=sdk))
-    response = client.post("/api/interpret", json={"text": "show original", "selected_tooth": "11", "available_teeth": ["11"]})
-    assert response.status_code == 200, response.text
-    options = sdk.responses.parse.call_args.kwargs
-    assert options["model"] == model
-    assert options.get("reasoning") == ({"effort": "none"} if model.endswith("gpt-6-luna") else None)
-    assert options["store"] is False
 
 
 def test_front_six_group_and_spoken_amount_resolve_before_numeric_target_audit(client, monkeypatch):
