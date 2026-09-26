@@ -527,7 +527,7 @@ describe('hands-free teaching integration', () => {
     await act(async () => {
       recognition.result('students should consider the roots', false);
     });
-    expect(teaching.voice.transcript).toContain('students');
+    expect(teaching.voice.transcript).toBe('');
     await act(async () => {
       recognition.result('students should consider the roots');
       window.dispatchEvent(new Event('blur'));
