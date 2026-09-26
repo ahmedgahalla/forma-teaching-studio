@@ -32,7 +32,7 @@ builder's version is unknown, and the tooling read as if only Node 22 were suppo
 ## What's next
 
 1. Naser opens the PR (title/body prepared) — or installs `gh` (`winget install
-   GitHub.cli`) so the auditor can do this next session.
+GitHub.cli`) so the auditor can do this next session.
 2. CI proves the new matrix on the PR itself (frontend must be green on 22 AND 24).
 3. This PR changes AGENTS.md, which requires agreement from both developers — an
    inbox item for the builder was filed (`docs/reviews/from-auditor/`).
