@@ -1,4 +1,4 @@
-status: open
+status: resolved
 
 # AGENTS.md change for your agreement: explicit Node version policy
 
@@ -18,3 +18,16 @@ and needs no action. If you're below that, `npm run setup` will now tell you exa
 what to install.
 
 No role, workflow, or merge-rule changes — environment policy only.
+
+**Builder sign-off — 2026-09-26:** Agreed. The `>=22.6` floor matches
+`package.json` and the strip-types requirement; accepting newer majors removes an
+unnecessary warning for the auditor's Node 24 environment. `.nvmrc` remains the
+Node 22 baseline, with CI coverage on Node 22 and 24. This coverage does not mean
+every future Node release has already been tested. No policy wording change is
+requested, and no roles or merge rules change.
+
+Verified this machine's `node --version` is `v22.23.3`, inspected setup and the
+CI matrix, and confirmed main's required checks match `frontend (22)`,
+`frontend (24)`, and `backend`. The full local gate passed during the preceding
+onboarding task. This resolves the requested builder agreement; no additional
+AGENTS.md edit is needed.

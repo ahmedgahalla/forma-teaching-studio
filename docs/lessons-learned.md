@@ -84,3 +84,12 @@ Entry format: mistake (with link) · root cause · prevention · status (`noted`
 - **Root cause:** phase/sub-phase numbers are picked by each branch independently from its own base, with no reservation mechanism; two branches open at once will pick the same next number whenever neither has seen the other's doc yet.
 - **Prevention:** no automation yet — sub-phase numbers aren't mechanically checkable across branches the way file limits or formatting are. When auditing a PR that adds a numbered phase/sub-phase doc, check `docs/phases/<phase>/README.md` on main _and_ grep open PRs' diffs for the same number before merging, not just the PR's own diff against its (possibly stale) base. Renumbering is mechanical once caught: rename the file, fix its own heading, the phase README line, and grep the repo for every reference to the old path/number.
 - **Status:** noted · **Count:** 1
+
+## 12. Repeated timeouts are not evidence of a proven cause
+
+Lesson 11 is reserved by the separate Phase 3.2 implementation PR #13.
+
+- **Mistake class:** the unchanged real-GLB geometry oracle exceeded its 30-second budget during Phase 3 verification, both in the opening work and the later docs-only proposal check. See the [verification follow-up](reviews/from-builder/2026-09-26-geometry-oracle-timeout.md). The proposal's lower-worker experiment also timed out.
+- **Root cause:** the environment-sensitive timeout is established, but the underlying slowdown is not isolated. A retry passing in one session does not establish why another run failed.
+- **Prevention:** preserve the assertion and timeout, record failed runs as well as any successful controls, and investigate repeatability separately from the product change. Do not attribute the problem to worker contention without evidence. The auditor should determine a reproducible check before proposing any shared-rule or tooling change.
+- **Status:** noted, pending auditor investigation and joint agreement on any promoted rule · **Count:** 2 verification sessions (PR #13 opening work and PR #12 proposal follow-up; retries within a session are not additional occurrences)
