@@ -1,0 +1,205 @@
+.try-name-row {
+  display: flex;
+  gap: 6px;
+}
+
+.try-name-row input {
+  flex: 1;
+  min-width: 0;
+  font-size: 13px;
+}
+
+.try-name-row button {
+  flex-shrink: 0;
+  min-width: 41px;
+  border: 1px solid var(--ui-line);
+  background: var(--ui-panel);
+  border-radius: 6px;
+  font-size: 13px;
+  padding: 7px 10px;
+}
+
+.try-snapshot-tools {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.try-snapshot-tools > .try-secondary {
+  align-self: flex-start;
+}
+
+.try-group-list {
+  display: flex;
+  gap: 5px;
+  flex-wrap: wrap;
+  margin-top: 8px;
+}
+
+.try-group-list button {
+  border: 1px solid var(--ui-line);
+  background: var(--ui-panel);
+  border-radius: 5px;
+  padding: 6px 8px;
+  color: var(--ui-muted);
+  font-size: 13px;
+  min-height: 36px;
+}
+
+.try-group-list button span {
+  margin-left: 5px;
+  font-size: 13px;
+  opacity: 0.75;
+}
+
+.try-help {
+  border-top: 1px solid var(--line);
+  padding-top: 12px;
+}
+
+.try-help p {
+  font-size: 13px;
+  color: var(--ui-muted);
+  line-height: 1.75;
+  margin-top: 8px;
+}
+
+.try-status {
+  font-size: 12px;
+  line-height: 1.6;
+  color: var(--ui-muted);
+  overflow-wrap: anywhere;
+}
+
+.try-status.error {
+  color: var(--ui-error);
+}
+
+.try-collision.limited {
+  background: var(--ui-warning-bg);
+  border-color: var(--ui-warning);
+  color: var(--ui-warning);
+}
+
+.main-workspace:has(> .try-preview) {
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: var(--ui-line) transparent;
+}
+
+.main-workspace > .try-preview,
+.main-workspace:has(> .try-preview) > .viewport {
+  flex-shrink: 0;
+}
+
+.main-workspace > .try-preview {
+  margin-top: 12px;
+}
+
+.chart-teeth button.tooth-locked {
+  position: relative;
+  border-style: dashed !important;
+  border-color: var(--ui-warning) !important;
+  box-shadow: inset 0 -3px var(--ui-warning);
+}
+
+.chart-teeth button.tooth-locked::after {
+  content: '';
+  position: absolute;
+  right: 2px;
+  top: 2px;
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: var(--ui-warning);
+}
+
+.chart-teeth button.tooth-locked.selected::after {
+  background: var(--ui-warning);
+}
+
+@media (max-width: 700px) {
+  .main-workspace > .try-preview {
+    margin-top: 14px;
+  }
+}
+
+@media (min-width: 1600px) {
+  .try-panel {
+    font-size: 14px;
+  }
+  .try-intro,
+  .try-hint,
+  .try-preview-legend,
+  .try-fields legend,
+  .try-field > span {
+    font-size: 13px;
+  }
+  .try-tabs button,
+  .try-mode-options label,
+  .try-selection-actions button {
+    font-size: 13px;
+  }
+  .try-action {
+    min-height: 45px;
+  }
+  .try-field select,
+  .try-input-unit input {
+    font-size: 15px;
+  }
+}
+
+@media (max-width: 700px) {
+  .try-panel {
+    gap: 20px;
+  }
+  .try-heading h3 {
+    font-size: 22px;
+  }
+  .try-tabs button {
+    min-height: 44px;
+    font-size: 14px;
+  }
+  .try-intro,
+  .try-hint,
+  .try-field > span,
+  .try-fields legend,
+  .try-mode-options label,
+  .try-selection-actions button {
+    font-size: 13px;
+  }
+  .try-action,
+  .try-secondary {
+    min-height: 44px;
+    font-size: 14px;
+  }
+  .try-field select,
+  .try-field > input,
+  .try-input-unit input,
+  .try-name-row input,
+  .try-saved select {
+    font-size: 16px;
+    min-height: 44px;
+  }
+  .try-tooth-chip {
+    font-size: 13px;
+    min-width: 32px;
+  }
+  .try-presets button {
+    min-height: 44px;
+    font-size: 13px;
+  }
+  .try-preview {
+    font-size: 14px;
+    padding: 14px;
+  }
+  .try-preview > p {
+    font-size: 14px;
+  }
+  .try-saved summary,
+  .try-help summary,
+  .try-unrestricted,
+  .try-distribution label {
+    font-size: 13px;
+  }
+}

@@ -1,0 +1,8 @@
+/* Split in Phase 2.3 into ordered partials under mechanics.styles/; the import
+   order preserves the original cascade. Edit the partials. */
+@import './mechanics.styles/01-mechanics-panel.css';
+@import './mechanics.styles/02-mechanics-scale-badge.css';
+@import './mechanics.styles/03-media.css';
+@import './mechanics.styles/04-media.css';
+@import './mechanics.styles/05-media.css';
+@import './mechanics.styles/06-media.css';

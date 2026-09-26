@@ -9,7 +9,7 @@ export type MechanicsEndpoint =
 export type ForceLaw =
   | { kind: 'constant'; forceN: number }
   | { kind: 'spring'; stiffnessNPerMm: number; restLengthMm: number };
-export type SupportPreset = 'standard' | 'soft' | 'firm';
+type SupportPreset = 'standard' | 'soft' | 'firm';
 export type MechanicsAction =
   | { type: 'brackets'; teeth: string[]; installed: boolean }
   | { type: 'bracket-position'; tooth: string; local: Vec3 }
@@ -56,7 +56,7 @@ export type MechanicsTooth = {
   supportLocal: Vec3;
   rootLengthMm: number;
 };
-export type MechanicsWire = {
+type MechanicsWire = {
   id: string;
   teeth: string[];
   material: WireMaterial;
@@ -64,14 +64,14 @@ export type MechanicsWire = {
   expansionMm: number;
   torqueDeg: number;
 };
-export type MechanicsTad = { id: string; position: Vec3 };
-export type MechanicsElastic = {
+type MechanicsTad = { id: string; position: Vec3 };
+type MechanicsElastic = {
   id: string;
   from: MechanicsEndpoint;
   to: MechanicsEndpoint;
   law: ForceLaw;
 };
-export type MechanicsExpander = {
+type MechanicsExpander = {
   id: string;
   left: string[];
   right: string[];
@@ -89,7 +89,7 @@ export type MechanicsConfig = {
   support: SupportPreset;
   fixedTeeth: string[];
 };
-export type MechanicsStage = { label: string; config: MechanicsConfig };
+type MechanicsStage = { label: string; config: MechanicsConfig };
 export type MechanicsExperiment = {
   version: 1;
   revision: number;
@@ -101,7 +101,7 @@ export type MechanicsExperiment = {
   applied: MechanicsResult | null;
   comparison: MechanicsResult | null;
 };
-export type ToothMechanicsResult = {
+type ToothMechanicsResult = {
   id: string;
   displacementMm: Vec3;
   rotationRad: Vec3;
@@ -111,7 +111,7 @@ export type ToothMechanicsResult = {
   supportReactionNmm: Vec3;
   fixed: boolean;
 };
-export type MechanicsLine = { id: string; from: Vec3; to: Vec3; forceN: number; direction: Vec3 };
+type MechanicsLine = { id: string; from: Vec3; to: Vec3; forceN: number; direction: Vec3 };
 export type MechanicsResult = {
   revision: number;
   transforms: Transforms;

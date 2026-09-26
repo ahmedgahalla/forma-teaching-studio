@@ -1,0 +1,5 @@
+/* Split in Phase 2.3 into ordered partials under try-mode.styles/; the import
+   order preserves the original cascade. Edit the partials. */
+@import './try-mode.styles/01-try-panel.css';
+@import './try-mode.styles/02-try-field-pair.css';
+@import './try-mode.styles/03-try-name-row.css';

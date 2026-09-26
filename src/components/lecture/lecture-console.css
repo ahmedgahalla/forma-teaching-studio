@@ -1,0 +1,4 @@
+/* Split in Phase 2.3 into ordered partials under lecture-console.styles/; the import
+   order preserves the original cascade. Edit the partials. */
+@import './lecture-console.styles/01-lecture-console.css';
+@import './lecture-console.styles/02-media.css';

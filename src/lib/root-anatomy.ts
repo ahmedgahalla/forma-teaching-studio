@@ -3,7 +3,7 @@ import type { Vec3 } from './model';
 /** Centers use the crown/root's shared local case-XYZ frame, in millimetres.
  * Radii are along rootward × buccal, then buccal. These are display envelopes,
  * not measured periodontal thickness or patient anatomy. */
-export type RootSection = { center: Vec3; radii: [number, number] };
+type RootSection = { center: Vec3; radii: [number, number] };
 export type RootAnatomy = { version: 1; trunk?: RootSection[]; branches: RootSection[][] };
 
 export function validateRootAnatomy(raw: unknown, occlusal?: Vec3): RootAnatomy {

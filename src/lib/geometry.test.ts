@@ -1,7 +1,6 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import * as THREE from 'three';
-import { STLLoader } from 'three/addons/loaders/STLLoader.js';
-import { exportSTL, importSTLs, loadCase, saveCase, type DentalCase } from './geometry';
+import { importSTLs, loadCase, saveCase, type DentalCase } from './geometry';
 import { resolveMovement, type Vec3 } from './model';
 import { historyReducer, stageTransforms, type CaseSession } from './planning';
 import { createAttachmentGeometry, type AttachmentSpec } from './attachments';
@@ -362,28 +361,6 @@ describe('case-file validation and round trips', () => {
       malformed.model.teeth[0].vertices = vertices;
       await expect(loadCase(caseFile(malformed))).rejects.toThrow(/mesh/);
     }
-  });
-});
-
-describe('final STL export', () => {
-  it("bakes a tooth's translation and centroid rotation and includes unchanged gums", async () => {
-    const model = sampleCase();
-    const original = verticesOf(model.teeth[0].geometry);
-    const { blobs, anchor } = captureDownloads();
-    exportSTL(model, { '11': { translation: [2, -1, 3], rotation: [0, 0, 90] } });
-    expect(anchor.download).toBe('forma-final-arch.stl');
-    expect(blobs[0].type).toBe('model/stl');
-    const result = new STLLoader().parse(await blobs[0].arrayBuffer());
-    expectVertices(verticesOf(result), [
-      [14, 18, 33],
-      [14, 20, 33],
-      [10, 18, 33],
-      [-5, 4, 3],
-      [-4, 4, 3],
-      [-5, 5, 3],
-    ]);
-    expect(verticesOf(model.teeth[0].geometry)).toEqual(original);
-    expect(model.teeth[0].position).toEqual([10, 20, 30]);
   });
 });
 

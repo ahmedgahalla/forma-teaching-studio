@@ -1,0 +1,271 @@
+@media (min-width: 1025px) {
+  .studio-experience.teaching-studio .main-workspace {
+    overflow: hidden;
+    padding: 12px 20px 8px;
+    min-height: 0;
+  }
+  .studio-experience.teaching-studio .workspace-heading {
+    margin-bottom: 8px;
+    flex-shrink: 0;
+  }
+  .studio-experience.teaching-studio .workspace-heading h2 {
+    font-size: 21px;
+    line-height: 1.15;
+  }
+  .studio-experience.teaching-studio .arch-toolbar {
+    margin-bottom: 6px;
+  }
+  .studio-experience.teaching-studio .lecture-view-tools {
+    margin-bottom: 6px;
+    padding-bottom: 0;
+    flex-shrink: 0;
+  }
+  .studio-experience.teaching-studio .lecture-stage {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    min-height: 0;
+  }
+  .studio-experience.teaching-studio .lecture-stage > .viewport {
+    height: auto;
+    min-height: 210px;
+    flex: 1;
+    margin: 0;
+  }
+  .studio-experience.teaching-studio.lecture-mode .lecture-stage {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 300px;
+    gap: 12px;
+    min-height: 0;
+    flex: 1;
+  }
+  .studio-experience.teaching-studio.lecture-mode .lecture-stage > .viewport {
+    height: 100%;
+    min-height: 210px;
+  }
+  .studio-experience.teaching-studio.lecture-mode .lecture-stage > .lecture-console {
+    max-height: none;
+    min-height: 0;
+    overflow: auto;
+    padding: 14px;
+  }
+  .studio-experience.teaching-studio .command-section {
+    padding-top: 5px;
+    flex-shrink: 0;
+    position: relative;
+  }
+  .studio-experience.teaching-studio .command-title {
+    margin-bottom: 5px;
+    min-height: 20px;
+  }
+  .studio-experience.teaching-studio .command-input {
+    height: 44px;
+    min-height: 44px;
+  }
+  .studio-experience.teaching-studio .command-input input {
+    font-size: 13px;
+  }
+  .studio-experience.teaching-studio .command-status {
+    margin-top: 4px;
+    min-height: 19px;
+    font-size: 11px;
+    line-height: 1.4;
+  }
+  .studio-experience.teaching-studio .speech-caption {
+    padding: 3px 8px;
+    font-size: 10px;
+    max-height: 22px;
+    margin-top: 4px;
+  }
+  .studio-experience.teaching-studio .speech-caption > span:last-child {
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    overflow: hidden;
+  }
+  .studio-experience.teaching-studio .workflow-command-examples {
+    position: absolute;
+    bottom: 100%;
+    left: 0;
+    right: 0;
+    z-index: 30;
+    max-height: 140px;
+    box-shadow: 0 -8px 25px var(--ui-shadow);
+  }
+  .studio-experience.teaching-studio .case-lesson-summary {
+    padding: 6px 10px;
+    margin-bottom: 6px;
+    font-size: 11px;
+    flex-shrink: 0;
+  }
+  .studio-experience.teaching-studio .case-path-note {
+    flex-shrink: 0;
+    max-height: 90px;
+    overflow: auto;
+  }
+  .studio-experience.teaching-studio .workspace-origin {
+    max-height: 120px;
+    overflow: auto;
+    padding: 8px 12px;
+    margin-bottom: 6px;
+  }
+  .studio-experience.teaching-studio .inspector-tabs button {
+    font-size: 11px;
+    padding: 8px 4px;
+    gap: 3px;
+  }
+}
+
+@media (max-width: 1024px) {
+  .classroom-stage-bar {
+    padding: 9px;
+    gap: 7px;
+  }
+  .classroom-stage-bar button {
+    min-height: 40px;
+    min-width: 32px;
+  }
+  .classroom-stage-progress > span {
+    font-size: 11px;
+  }
+  .classroom-stage-progress input {
+    height: 14px;
+  }
+  .classroom-stage-number {
+    font-size: 14px;
+  }
+  .classroom-stage-bar .stage-reset {
+    display: none;
+  }
+  .classroom-stage-bar .stage-explore {
+    font-size: 11px;
+    padding: 0 7px;
+  }
+  .studio-experience .command-context-strip {
+    margin-top: 8px;
+  }
+  .studio-experience .case-action-status {
+    max-height: 50px;
+    overflow: auto;
+  }
+}
+
+.presentation-view-menu {
+  position: relative;
+  z-index: 20;
+}
+
+.presentation-view-menu > summary {
+  list-style: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  color: var(--ui-muted);
+  font-size: 11px;
+  border: 1px solid var(--ui-line);
+  border-radius: 7px;
+  padding: 9px 11px;
+  white-space: nowrap;
+}
+
+.presentation-view-menu > summary::-webkit-details-marker {
+  display: none;
+}
+
+.presentation-view-menu > .lecture-view-tools {
+  position: absolute;
+  right: 0;
+  top: calc(100% + 8px);
+  width: 230px;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 4px;
+  background: var(--ui-panel);
+  border: 1px solid var(--ui-line);
+  box-shadow: 0 12px 30px var(--ui-shadow);
+  border-radius: 10px;
+  padding: 10px !important;
+  margin: 0 !important;
+}
+
+.presentation-view-menu > .lecture-view-tools > button {
+  justify-content: flex-start;
+  min-height: 42px;
+  font-size: 12px;
+}
+
+.dental-arrangement-library {
+  padding: 0 0 22px;
+  border-bottom: 1px solid var(--ui-line);
+  margin-bottom: 22px;
+}
+
+.dental-arrangement-library h3 {
+  margin-top: 8px;
+  font-size: 20px;
+}
+
+.dental-arrangement-library p {
+  font-size: 12px;
+  color: var(--ui-muted);
+  line-height: 1.6;
+  margin: 8px 0 13px;
+}
+
+.dental-arrangement-library > div {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+.dental-arrangement-library button {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px;
+  background: var(--ui-raised);
+  border: 1px solid var(--ui-line);
+  border-radius: 8px;
+  font-size: 12px;
+  min-height: 46px;
+  padding: 9px;
+  text-align: left;
+}
+
+.dental-arrangement-library button:hover {
+  border-color: var(--ui-accent);
+  color: var(--ui-accent);
+}
+
+.dental-arrangement-library button:disabled {
+  opacity: 0.4;
+}
+
+.mechanics-load-table {
+  font-variant-numeric: tabular-nums;
+  font-size: 11px;
+  margin: 13px 0;
+}
+
+.mechanics-load-table > div {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1.3fr;
+  gap: 5px;
+  border-bottom: 1px solid var(--ui-line);
+  padding: 6px 0;
+}
+
+.mechanics-load-table strong {
+  font-size: 10px;
+  font-weight: 500;
+  color: var(--ui-muted);
+}
+
+.mechanics-load-table small {
+  display: block;
+  color: var(--ui-muted);
+  font-size: 10px;
+  line-height: 1.5;
+  margin-top: 7px;
+}
