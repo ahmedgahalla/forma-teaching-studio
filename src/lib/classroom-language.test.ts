@@ -5,6 +5,27 @@ import { normalizeSpeechCommand, parseTeachingCommand } from './lecture';
 import { parseTeachingPlan, validateTeachingPlan, type TeachingContext } from './classroom';
 
 describe('bounded everyday classroom wording', () => {
+  it.each([
+    ['select tooth one six', ['16']],
+    ['select tooth four one', ['41']],
+    ['select teeth one one and two one', ['11', '21']],
+  ])('resolves spoken FDI targets through the dental parser: %s', (text, teeth) => {
+    expect(parseTeachingCommand(text as string, '11', ['11', '16', '21', '41'])).toEqual({
+      kind: 'select',
+      teeth,
+    });
+  });
+  it('keeps spoken FDI targets distinct from explicit movement quantities', () => {
+    expect(normalizeSpeechCommand('move tooth one six buccally one point five millimeters')).toBe(
+      'move tooth 16 buccally 1.5 mm',
+    );
+    expect(
+      parseTeachingCommand('move tooth one six buccally one millimeter', '11', ['11', '16']),
+    ).toEqual({
+      kind: 'dental',
+      command: { type: 'move', tooth: '16', direction: 'buccal', amount: 1 },
+    });
+  });
   it.each(fixtures)('normalizes without filling missing intent: %s', (input, expected) => {
     expect(normalizeClassroomLanguage(input)).toBe(expected);
     expect(normalizeClassroomLanguage(expected)).toBe(expected);

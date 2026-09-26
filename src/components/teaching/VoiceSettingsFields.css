@@ -1,0 +1,36 @@
+.voice-settings-fields {
+  min-width: 0;
+  margin: 20px 0;
+  padding: 14px;
+  border: 1px solid var(--ui-line, #657386);
+  border-radius: 10px;
+}
+
+.voice-settings-fields legend {
+  padding: 0 5px;
+  font-size: 16px;
+  font-weight: 700;
+}
+
+.voice-settings-fields select {
+  width: 100%;
+  min-height: 38px;
+  padding: 7px;
+  border: 1px solid var(--ui-line, #657386);
+  border-radius: 6px;
+  color: var(--ui-text, #eaf0f6);
+  background: var(--ui-panel, #192334);
+}
+
+.voice-settings-replies {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 14px 0;
+}
+
+.voice-settings-replies input {
+  width: 18px;
+  height: 18px;
+  margin: 0;
+}

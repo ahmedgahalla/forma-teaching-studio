@@ -91,3 +91,11 @@ Entry format: mistake (with link) · root cause · prevention · status (`noted`
 - **Root cause:** visual hiding was changed without treating command feedback and panel selection as shared interaction state. A persistent error could also obscure live voice feedback when combined into one label.
 - **Prevention:** keep local alerts independent of live command status, preserve the mounted input, and derive tools visibility from the active panel. Interaction regressions now cover open/closed alerts, voice status plus Stop, draft preservation and panel consistency; browser checks cover effective viewer tools and preview decisions.
 - **Status:** automated · **Count:** 1
+
+## 13. Recursive tooling crosses into a parallel worktree
+
+- **Mistake:** during [Phase 4.1](phases/phase-4-voice-lecture-assistant/4.1-hands-free-voice.md), broad Prettier and Vitest discovery traversed the orchestrator's nested `.claude/worktrees/` checkout. Targeted tests included duplicate baseline files; formatting also rewrote two generated JSON files there. The JSON changes were checked against the original parsed content and restored byte-for-byte from their own HEAD, leaving the parallel builder's work intact.
+- **Root cause:** the orchestrator created the parallel worktree inside the project directory (`.claude/worktrees/`), and every root tool (Prettier, ESLint, Vitest, TypeScript) assumes one checkout under the project root. Separately, the Python cache's denied directory access stopped Prettier inside the builder's sandbox only; the same gate passed on the host.
+- **Prevention:** create parallel worktrees outside the project directory. The orchestrator removed the nested worktree and reverted the temporary tool-config exclusions the builder had added, so root tooling configuration is unchanged. Before running recursive tools, check `git worktree list` for worktrees under the project root.
+- **Status:** noted · **Count:** 1
+- **Numbering:** 13 was chosen after checking the local open-PR worktrees: Phase 3.2 reserves 11 and the Phase 3 proposal reserves 12. Preserve those entries when merging; recheck later concurrent reservations per lesson 10.

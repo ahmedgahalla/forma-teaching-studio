@@ -1,103 +1,31 @@
 'use client';
-import {
-  createContext,
-  useContext,
-  useEffect,
-  useLayoutEffect,
-  useRef,
-  useState,
-  type ReactNode,
-} from 'react';
+import { useEffect, useRef, useState, type ReactNode } from 'react';
 import { flushSync } from 'react-dom';
 import { createTeachingRuntime, type RuntimeState } from '@/lib/teaching-runtime';
-import { createPushToTalk, type CaptureState } from '@/lib/push-to-talk';
-import { speechConstructor } from '@/lib/speech';
 import type { TeachingAction } from '@/lib/lecture';
-import {
-  interpreterTeachingContext,
-  teachingActionMode,
-  type TeachingContext,
-} from '@/lib/classroom';
-import type { WorkflowTransfer } from '@/lib/workflow-transfer';
+import { interpreterTeachingContext, teachingActionMode } from '@/lib/classroom';
 import {
   hostedCommandService,
   savedCommandService,
   type CommandServiceConfig as Config,
 } from '@/lib/command-service';
-import {
-  validateSceneAnalysis,
-  type SceneAnalysis,
-  type SceneAnalysisContext,
-} from '@/lib/scene-analysis';
+import { validateSceneAnalysis, type SceneAnalysis } from '@/lib/scene-analysis';
 
-type Mode = 'case' | 'workflow';
-export type TeachingAdapter = {
-  context: () => Omit<TeachingContext, 'revision'>;
-  capture: () => unknown;
-  restore: (snapshot: unknown) => void;
-  apply: (action: TeachingAction, signal?: AbortSignal) => boolean | Promise<boolean>;
-  preflight: (actions: TeachingAction[], from?: unknown) => void;
-  pause: () => void;
-  narration: (target: 'step' | 'answer' | 'mechanics') => string;
-  settle?: (signal: AbortSignal) => Promise<void>;
-  exportSetup?: (from?: unknown) => WorkflowTransfer;
-  importSetup?: (setup: WorkflowTransfer, originSnapshot: unknown) => void;
-  sourceLesson?: (from?: unknown) => unknown;
-  analysisContext?: () => SceneAnalysisContext;
-};
-type Snapshot = { mode: Mode; scenes: Partial<Record<Mode, unknown>> };
-const initialRuntime: RuntimeState = {
-  phase: 'idle',
-  message: 'Hold Space to speak, or type an instruction.',
-  error: false,
-  transcript: '',
-};
-type Controller = {
-  mode: Mode;
-  runtime: RuntimeState;
-  capture: CaptureState;
-  config: Config;
-  preferAI: boolean;
-  setPreferAI: (enabled: boolean) => void;
-  analyzeMode: boolean;
-  setAnalyzeMode: (enabled: boolean) => void;
-  analysis: SceneAnalysis | null;
-  analysisPending: boolean;
-  analysisError: string;
-  analysisQuestion: string;
-  dismissAnalysis: () => void;
-  run: (text: string) => Promise<void>;
-  runControl: (text: string) => Promise<void>;
-  start: () => void;
-  finish: () => void;
-  cancel: () => void;
-  execute: (actions: TeachingAction[], summary: string) => Promise<void>;
-  interact: () => void;
-  referenceInteraction: () => void;
-  resetHistory: () => void;
-  setConfig: (config: Config) => void;
-  register: (mode: Mode, adapter: TeachingAdapter) => () => void;
-};
-const Context = createContext<Controller | null>(null);
-export const useTeaching = () => {
-  const value = useContext(Context);
-  if (!value) throw new Error('Teaching controller is unavailable.');
-  return value;
-};
-export function useTeachingAdapter(mode: Mode, adapter: TeachingAdapter) {
-  const teaching = useTeaching();
-  useLayoutEffect(() => teaching.register(mode, adapter));
-}
+import {
+  Context,
+  initialRuntime,
+  type Mode,
+  type Snapshot,
+  type TeachingAdapter,
+} from './teaching-context';
+import { useTeachingVoice } from './useTeachingVoice';
+import { usePresenterKeys } from './usePresenterKeys';
+export { useTeaching, useTeachingAdapter, type TeachingAdapter } from './teaching-context';
 
 export function TeachingProvider({ children }: { children: ReactNode }) {
   const [mode, setMode] = useState<Mode>('case'),
     modeRef = useRef<Mode>('case');
-  const [runtime, setRuntime] = useState(initialRuntime),
-    [capture, setCapture] = useState<CaptureState>({
-      supported: false,
-      phase: 'idle',
-      transcript: '',
-    });
+  const [runtime, setRuntime] = useState(initialRuntime);
   const [config, updateConfig] = useState<Config>({ enabled: false, url: '' }),
     configRef = useRef(config);
   useEffect(() => {
@@ -167,8 +95,17 @@ export function TeachingProvider({ children }: { children: ReactNode }) {
   const adapters = useRef<Partial<Record<Mode, TeachingAdapter>>>({}),
     revision = useRef(0);
   const engine = useRef<ReturnType<typeof createTeachingRuntime<Snapshot>> | null>(null);
-  const mic = useRef<ReturnType<typeof createPushToTalk> | null>(null),
-    held = useRef(false);
+  const voiceControl = useTeachingVoice({
+    submit: text => submitText(text),
+    interrupt: () => {
+      cancelAnalysis();
+      engine.current?.cancel('Listening for your instruction…');
+    },
+    cancel: () => cancel(),
+    canStop: () => !!adapters.current[modeRef.current]?.context().playing,
+    message: (message, error = false, transcript = '') =>
+      setRuntime(state => ({ ...state, phase: 'idle', message, error, transcript })),
+  });
   const current = () => {
     const adapter = adapters.current[modeRef.current];
     if (!adapter) throw new Error('The teaching model is loading.');
@@ -176,13 +113,14 @@ export function TeachingProvider({ children }: { children: ReactNode }) {
   };
   const pause = () => {
     Object.values(adapters.current).forEach(adapter => adapter.pause());
-    if (typeof window !== 'undefined') window.speechSynthesis?.cancel();
+    voiceControl.stopSpeaking();
   };
   const changeMode = (next: Mode) => {
     modeRef.current = next;
     setMode(next);
   };
   const cancelAnalysis = () => {
+    if (analysisRequest.current) setRuntime(engine.current?.getState() ?? initialRuntime);
     analysisRequest.current?.abort();
     analysisRequest.current = null;
     setAnalysisPending(false);
@@ -198,6 +136,18 @@ export function TeachingProvider({ children }: { children: ReactNode }) {
       requestedMode = modeRef.current;
     analysisRequest.current = controller;
     setAnalysisPending(true);
+    const report = (message: string, error = false, phase: RuntimeState['phase'] = 'idle') => {
+      const feedback: RuntimeState = {
+        message,
+        error,
+        phase,
+        transcript: question,
+        interpreter: 'ai',
+      };
+      setRuntime(feedback);
+      return feedback;
+    };
+    report('Explaining the current model…', false, 'interpreting');
     try {
       const settings = configRef.current,
         context = current().analysisContext?.();
@@ -224,15 +174,18 @@ export function TeachingProvider({ children }: { children: ReactNode }) {
             : 'The model explanation is unavailable. Try again.',
         );
       setAnalysis(validateSceneAnalysis(value));
+      return report('Model explanation ready. Open Commands to read it.');
     } catch (error) {
       if (
         !controller.signal.aborted &&
         requestedRevision === revision.current &&
         requestedMode === modeRef.current
-      )
-        setAnalysisError(
-          error instanceof Error ? error.message : 'The model explanation is unavailable.',
-        );
+      ) {
+        const message =
+          error instanceof Error ? error.message : 'The model explanation is unavailable.';
+        setAnalysisError(message);
+        return report(message, true);
+      }
     } finally {
       if (analysisRequest.current === controller) {
         analysisRequest.current = null;
@@ -241,12 +194,15 @@ export function TeachingProvider({ children }: { children: ReactNode }) {
     }
   };
   const submitText = async (text: string) => {
+    if (/^stop listening[.!?]?$/i.test(text.trim())) {
+      voiceControl.stopListening();
+      return;
+    }
     if (
       analyzeModeRef.current &&
       !/^(?:stop|cancel|undo(?: that)?|redo(?: that)?)\.?$/i.test(text.trim())
     ) {
-      await runAnalysis(text);
-      return;
+      return runAnalysis(text);
     }
     cancelAnalysis();
     setAnalysis(null);
@@ -254,6 +210,7 @@ export function TeachingProvider({ children }: { children: ReactNode }) {
     await engine.current?.submit(text, {
       interpreter: preferAIRef.current && configRef.current.enabled ? 'ai' : 'auto',
     });
+    return engine.current?.getState();
   };
   useEffect(() => {
     let alive = true;
@@ -337,33 +294,7 @@ export function TeachingProvider({ children }: { children: ReactNode }) {
         if (alive) flushSync(pause);
       },
       narration: target => current().narration(target),
-      speak: (text, signal) =>
-        new Promise<void>((resolve, reject) => {
-          if (!window.speechSynthesis || !window.SpeechSynthesisUtterance) {
-            reject(new Error(`Speech output is unavailable. ${text}`));
-            return;
-          }
-          const utterance = new SpeechSynthesisUtterance(text);
-          utterance.lang = 'en-US';
-          utterance.rate = 0.95;
-          const finish = () => {
-            signal.removeEventListener('abort', abort);
-            resolve();
-          };
-          const abort = () => {
-            window.speechSynthesis.cancel();
-            finish();
-          };
-          utterance.onend = finish;
-          utterance.onerror = event => {
-            signal.removeEventListener('abort', abort);
-            if (signal.aborted || event.error === 'interrupted' || event.error === 'canceled')
-              resolve();
-            else reject(new Error(`Speech output could not start. ${text}`));
-          };
-          signal.addEventListener('abort', abort, { once: true });
-          window.speechSynthesis.speak(utterance);
-        }),
+      speak: voiceControl.speak,
       interpret: async (text, context, signal) => {
         const settings = configRef.current;
         if (!settings.enabled || !settings.url)
@@ -388,55 +319,26 @@ export function TeachingProvider({ children }: { children: ReactNode }) {
       },
       publish: setRuntime,
     });
-    const browser = window as Window & {
-      SpeechRecognition?: unknown;
-      webkitSpeechRecognition?: unknown;
-    };
-    mic.current = createPushToTalk(speechConstructor(browser), {
-      state: setCapture,
-      final: text => {
-        held.current = false;
-        void submitText(text);
-      },
-      error: message => {
-        held.current = false;
-        setRuntime(state => ({ ...state, phase: 'idle', message, error: true }));
-      },
-    });
     return () => {
       alive = false;
       analysisRequest.current?.abort();
-      mic.current?.dispose();
       engine.current?.dispose();
-      window.speechSynthesis?.cancel();
+      voiceControl.stopSpeaking();
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps -- mount-only service discovery and speech-synthesis cleanup; deps would re-run discovery
   }, []);
-  const start = () => {
-    if (held.current) return;
-    cancelAnalysis();
-    held.current = true;
-    engine.current?.cancel('Listening for your instruction…');
-    mic.current?.start();
-  };
-  const finish = () => {
-    held.current = false;
-    mic.current?.finish();
-  };
   const cancel = () => {
     cancelAnalysis();
-    held.current = false;
-    mic.current?.cancel();
+    voiceControl.cancelCapture();
+    voiceControl.invalidate();
     engine.current?.cancel();
   };
   const interact = () => {
     revision.current++;
     cancelAnalysis();
     setAnalysis(null);
-    if (held.current || mic.current?.getState().phase !== 'idle') {
-      held.current = false;
-      mic.current?.cancel();
-    }
+    voiceControl.cancelCapture();
+    voiceControl.invalidate();
     if (engine.current?.getState().phase !== 'idle')
       engine.current?.cancel('The scene changed. Give the next instruction when ready.');
   };
@@ -446,56 +348,30 @@ export function TeachingProvider({ children }: { children: ReactNode }) {
     revision.current++;
     cancelAnalysis();
     setAnalysis(null);
+    voiceControl.invalidate();
     if (engine.current?.getState().phase !== 'idle')
       engine.current?.cancel('The target changed. Give the next instruction when ready.');
   };
-  useEffect(() => {
-    const down = (event: KeyboardEvent) => {
-      if (event.key === 'Escape') {
-        cancel();
-        return;
-      }
-      if (
-        event.code !== 'Space' ||
-        event.repeat ||
-        event.ctrlKey ||
-        event.altKey ||
-        event.metaKey ||
-        (event.target as HTMLElement).closest(
-          'input,textarea,select,button,summary,dialog,[contenteditable="true"]',
-        )
-      )
-        return;
-      event.preventDefault();
-      start();
-    };
-    const up = (event: KeyboardEvent) => {
-      if (event.code === 'Space' && held.current) {
-        event.preventDefault();
-        finish();
-      }
-    };
-    const blur = () => {
-      if (held.current || mic.current?.getState().phase !== 'idle') {
-        held.current = false;
-        mic.current?.cancel();
-      }
-    };
-    window.addEventListener('keydown', down);
-    window.addEventListener('keyup', up);
-    window.addEventListener('blur', blur);
-    return () => {
-      window.removeEventListener('keydown', down);
-      window.removeEventListener('keyup', up);
-      window.removeEventListener('blur', blur);
-    };
-  });
+  const runControl = async (text: string) => {
+    cancelAnalysis();
+    setAnalysis(null);
+    setAnalysisError('');
+    voiceControl.cancelCapture();
+    voiceControl.invalidate();
+    await engine.current?.submit(text);
+  };
+  usePresenterKeys(runControl, voiceControl.toggleHandsFree);
   return (
     <Context.Provider
       value={{
         mode,
         runtime,
-        capture,
+        capture: voiceControl.capture,
+        voice: voiceControl.voice,
+        voiceSettings: voiceControl.voiceSettings,
+        setVoiceSettings: voiceControl.setVoiceSettings,
+        toggleHandsFree: voiceControl.toggleHandsFree,
+        narration: voiceControl.narration,
         config,
         preferAI: preferAI && config.enabled,
         setPreferAI: enabled => {
@@ -521,29 +397,26 @@ export function TeachingProvider({ children }: { children: ReactNode }) {
           setAnalysisError('');
         },
         run: async text => {
-          mic.current?.cancel();
+          voiceControl.cancelCapture();
+          voiceControl.invalidate();
           await submitText(text);
         },
-        runControl: async text => {
-          cancelAnalysis();
-          setAnalysis(null);
-          setAnalysisError('');
-          mic.current?.cancel();
-          await engine.current?.submit(text);
-        },
+        runControl,
         execute: async (actions, summary) => {
           cancelAnalysis();
           setAnalysis(null);
-          mic.current?.cancel();
+          voiceControl.cancelCapture();
+          voiceControl.invalidate();
           await engine.current?.submitActions(actions, summary);
         },
-        start,
-        finish,
+        start: voiceControl.start,
+        finish: voiceControl.finish,
         cancel,
         interact,
         referenceInteraction,
         resetHistory: () => {
           revision.current++;
+          voiceControl.invalidate();
           cancelAnalysis();
           setAnalysis(null);
           setAnalysisError('');

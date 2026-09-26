@@ -757,9 +757,9 @@ describe('local compound classroom planning', () => {
     expect(parseTeachingPlan('demonstrate tipping then next step', imported).actions).toHaveLength(
       3,
     );
-    expect(() =>
+    expect(
       parseTeachingPlan('demonstrate tipping then next step then next step', imported),
-    ).toThrow(/outside/);
+    ).toMatchObject({ actions: [], clarification: expect.stringMatching(/outside/) });
     expect(
       parseTeachingPlan('compare translation and tipping then show bone', imported).actions,
     ).toEqual([

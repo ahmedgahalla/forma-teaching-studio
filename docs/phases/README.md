@@ -9,3 +9,5 @@ Numbered work phases, in execution order. Every feature — including builder wo
 | [3 — demo path](phase-3-demo-path/README.md) | started; 3.2 under review | Large full-bite opening view, advanced-tool drawer, scripted 3–4 min walkthrough                    |
 
 Historical pre-phase work is recorded in `docs/VERIFICATION.md` (v0.2 → v0.12) and `docs/UPGRADE_PLAN.md`.
+
+Phase [4 — voice-led lecture assistant](phase-4-voice-lecture-assistant/README.md) begins with 4.1 hands-free control on top of the Phase 3.2 PR #13 dependency. Tooth study (4.2) is separately owned in parallel; visual clarity (4.3) is planned.

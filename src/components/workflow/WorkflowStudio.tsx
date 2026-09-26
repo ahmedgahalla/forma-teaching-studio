@@ -39,6 +39,8 @@ import {
 } from '../teaching/TeachingController';
 import { captureWorkflowArrangement } from '@/lib/workflow-transfer';
 import { sceneAnalysisContext } from '@/lib/scene-analysis';
+import { VoiceHud } from '../teaching/VoiceHud';
+import { HandsFreeToggle } from '../teaching/HandsFreeToggle';
 
 export function WorkflowLibrary({ onChoose }: { onChoose: (id: string) => void }) {
   return (
@@ -281,20 +283,6 @@ export default function WorkflowStudio({ active }: { active: boolean }) {
   useEffect(() => {
     if (library) dialog.current?.showModal();
   }, [library]);
-  useEffect(() => {
-    if (!active) return;
-    const key = (event: KeyboardEvent) => {
-      if ((event.target as HTMLElement).closest('input,select,textarea,dialog,button')) return;
-      if (event.key === 'ArrowRight' || event.key === 'ArrowLeft') {
-        event.preventDefault();
-        run(event.key === 'ArrowRight' ? 'next step' : 'previous step');
-      }
-    };
-    window.addEventListener('keydown', key);
-    return () => window.removeEventListener('keydown', key);
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- intentional dep subset: the effect must not re-run on the excluded values
-  }, [active]);
-
   const lectureProgress = (value: number) =>
     void teaching.execute(
       [{ kind: 'progress', value }],
@@ -463,6 +451,7 @@ export default function WorkflowStudio({ active }: { active: boolean }) {
                 anatomy={scene.anatomy}
                 paused={!active}
               />
+              <VoiceHud />
               <div className="viewport-top">
                 <span className="view-badge">
                   <span />
@@ -645,6 +634,7 @@ export default function WorkflowStudio({ active }: { active: boolean }) {
             workspace stays available through Restore my workspace.
           </p>
           <TeachingCommandBar label="Workflow command" />
+          <HandsFreeToggle />
         </main>
         <aside ref={explanation} className="workflow-explanation" aria-label="Workflow explanation">
           <div className="workflow-purpose">

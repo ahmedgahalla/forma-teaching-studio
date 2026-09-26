@@ -26,6 +26,17 @@ Hold Space outside an editable field, including when Commands is closed, or open
 
 Clear validated voice/text geometric movements execute immediately. Prefix a request with **preview** to inspect it before Apply; manual numeric tools retain their preview decision. **Undo** restores the whole request, including its scene/appliance changes. No recognition service or AI key is required for typed built-in commands.
 
+## Lecturing hands-free
+
+1. Open a prepared case or workflow and choose Present/Lecture mode if desired. Hold-to-talk remains the default; the visible **Hands-free** toggle beside Commands enables listening for this session. A presenter clicker's **B** or **.** button, or keyboard **M**, does the same.
+2. Check the persistent red **Listening** pill on the model. The browser vendor's speech service receives audio while recognition is running. Activate this only when that is appropriate for the room; the wake word does not keep lecture audio on the device.
+3. Say **“Forma, show the upper arch”**, then **“Forma, show the roots.”** Students see the interim caption, accepted request and confirmation. Non-wake final speech is discarded by Forma without storage, submission, logging or AI use. A bare **“Forma”** gives six seconds for the next utterance without repeating the name.
+4. Ask students to predict, then say **“Forma, play.”** Use **“Forma, next step”** or PageDown/Right to advance; PageUp/Left or **“Forma, go back”** goes back. This follows the workflow step, active short lesson, or otherwise the case demonstration stage. Button focus does not disable the clicker.
+5. Say **“Forma, explain this step”** to narrate and caption the current explanation. Recognition pauses during speech output. Bare **“stop”** stops a playing demonstration while listening; during narration use **Stop**, **Escape**, or hold the microphone button to interrupt before speaking. Optional **Spoken replies** in Settings gives short voice confirmations and is off by default.
+6. Say **“Forma, stop listening”**, click Listening, or press M/B/. to turn the microphone off. Window blur does not turn it off. Navigation/pagehide, mode/language changes and unrecoverable recognition errors do. It never restarts from a saved preference or page reload.
+
+Settings offers a voice mode preference and English **en-US/en-GB** recognition. In hold mode Space retains its usual behavior when hands-free is off; the hold button remains available for interruption. Presenter shortcuts ignore editable fields, open dialogs and menus. Keep typed commands and Stop available while rehearsing; real microphone, projector and DPR checks remain required on the actual device. Details: [Voice Classroom](VOICE_CLASSROOM.md#hands-free-lecture-listening).
+
 ## A short lecture
 
 1. Open **Library**, choose a prepared case and choose **Present** to enter Lecture mode.
@@ -66,4 +77,4 @@ The revised Blender model has 28 differentiated permanent crowns, connected root
 
 Prepared cases and appliance workflows remain authored illustrations. The separate mechanics module calculates an initial elastic response under declared virtual-support and material assumptions. It does not calculate bone remodeling, tissue adaptation, clinical timing or patient outcome. Displayed support tissue is schematic; sampled crown checks do not establish root/bone clearance. Draft morphology, numerical examples and explanations still need orthodontic educator review before curriculum use.
 
-Voice uses the existing hold-to-talk controller where browser support permits. Actual English microphone capture on a real device is a separate manual acceptance check; typed commands do not depend on it.
+Voice offers default hold-to-talk and explicitly enabled hands-free capture where browser support permits. Actual English microphone capture on a real device is a separate manual acceptance check; typed commands do not depend on it.

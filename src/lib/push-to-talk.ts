@@ -13,6 +13,7 @@ export function createPushToTalk(
     final: (text: string) => void;
     error: (message: string) => void;
   },
+  language = 'en-US',
 ) {
   let state: CaptureState = { supported: !!Recognition, phase: 'idle', transcript: '' };
   let active: SpeechRecognitionLike | null = null,
@@ -85,7 +86,7 @@ export function createPushToTalk(
     active = r;
     const finals = new Map<number, string>();
     const current = () => !disposed && token === generation && active === r;
-    r.lang = 'en-US';
+    r.lang = language;
     r.continuous = true;
     r.interimResults = true;
     r.maxAlternatives = 1;

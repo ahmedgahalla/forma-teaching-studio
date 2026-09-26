@@ -1,0 +1,113 @@
+.voice-hud {
+  position: absolute;
+  z-index: 25;
+  bottom: 54px;
+  left: 50%;
+  width: min(1060px, calc(100% - 48px));
+  transform: translateX(-50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  pointer-events: none;
+  text-align: center;
+}
+
+.voice-hud-listening {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 7px 13px;
+  border: 1px solid #ff9ca3;
+  border-radius: 999px;
+  background: #8b1523;
+  color: #fff;
+  font-size: 15px;
+  font-weight: 700;
+  line-height: 1.3;
+}
+
+.voice-hud-listening i {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: #fff;
+}
+
+.voice-hud-caption {
+  max-width: 100%;
+  padding: 14px 22px;
+  border: 1px solid #76869b;
+  border-radius: 14px;
+  background: #101b2a;
+  color: #fff;
+  box-shadow: 0 5px 20px #0004;
+  font-size: clamp(20px, 2vw, 34px);
+  font-weight: 600;
+  line-height: 1.35;
+  overflow-wrap: anywhere;
+}
+
+.voice-hud-caption p {
+  margin: 0;
+}
+
+.voice-hud-caption .voice-hud-heard {
+  margin-bottom: 6px;
+  font-size: 0.75em;
+  font-weight: 400;
+  color: #d6e2ef;
+}
+
+.voice-hud-caption .voice-hud-error {
+  color: #ffd4b6;
+}
+
+.voice-hud-result {
+  animation: voice-hud-fade 4s ease forwards;
+}
+
+[data-forma-theme='clinical'] .voice-hud-caption {
+  border-color: #617082;
+  background: #fff;
+  color: #142238;
+}
+
+[data-forma-theme='clinical'] .voice-hud-heard {
+  color: #35475d;
+}
+
+[data-forma-theme='clinical'] .voice-hud-error {
+  color: #8e2900;
+}
+
+@keyframes voice-hud-fade {
+  0%,
+  94% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+
+@media (max-width: 600px) {
+  .voice-hud {
+    bottom: 42px;
+    width: calc(100% - 20px);
+    gap: 5px;
+  }
+  .voice-hud-caption {
+    padding: 10px 12px;
+    font-size: 20px;
+  }
+  .voice-hud-listening {
+    font-size: 13px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .voice-hud-result {
+    animation: none;
+  }
+}

@@ -11,6 +11,7 @@ import {
 } from './TeachingController';
 import type { SpeechRecognitionLike, SpeechResultEvent } from '../../lib/speech';
 import type { TeachingAction } from '../../lib/lecture';
+import { sceneAnalysisContext } from '../../lib/scene-analysis';
 
 class FakeRecognition implements SpeechRecognitionLike {
   static instances: FakeRecognition[] = [];
@@ -28,8 +29,14 @@ class FakeRecognition implements SpeechRecognitionLike {
   start = vi.fn(() => this.onstart?.());
   stop = vi.fn();
   abort = vi.fn();
-  result(text: string, final = true) {
-    this.onresult?.({ resultIndex: 0, results: [{ isFinal: final, 0: { transcript: text } }] });
+  result(text: string, final = true, index = 0) {
+    this.onresult?.({
+      resultIndex: index,
+      results: Array.from({ length: index + 1 }, (_, i) => ({
+        isFinal: i === index && final,
+        0: { transcript: i === index ? text : '' },
+      })),
+    });
   }
 }
 class FakeUtterance {
@@ -42,6 +49,7 @@ class FakeUtterance {
 type Scene = { selected: string; roots: boolean; gums: boolean };
 let teaching: ReturnType<typeof useTeaching>, root: Root, container: HTMLDivElement;
 let asyncSelection: Promise<void> | undefined;
+let playing = false;
 const applied = vi.fn(),
   paused = vi.fn(),
   preflight = vi.fn();
@@ -68,7 +76,7 @@ function Harness() {
       view: 'front',
       arch: 'both',
       speed: 1,
-      playing: false,
+      playing,
       lessonActive: true,
       layers: { roots: scene.roots, gums: scene.gums },
     }),
@@ -81,6 +89,17 @@ function Harness() {
     preflight,
     pause: paused,
     narration: () => `Current target is tooth ${scene.selected}.`,
+    analysisContext: () =>
+      sceneAnalysisContext({
+        synthetic: true,
+        ids: ['11', '21'],
+        transforms: {},
+        selectedIds: [scene.selected],
+        arch: 'both',
+        roots: scene.roots,
+        gums: scene.gums,
+        bone: false,
+      }),
     apply: action => {
       applied(action);
       if (action.kind === 'select') {
@@ -147,6 +166,7 @@ beforeEach(async () => {
   captured.length = 0;
   spoken.length = 0;
   asyncSelection = undefined;
+  playing = false;
   localStorage.clear();
   vi.stubGlobal('IS_REACT_ACT_ENVIRONMENT', true);
   vi.stubGlobal('SpeechRecognition', FakeRecognition);
@@ -488,4 +508,273 @@ describe('persistent teaching speech controller integration', () => {
       expect(applied).toHaveBeenCalledTimes(1);
     },
   );
+});
+
+describe('hands-free teaching integration', () => {
+  async function listen() {
+    await act(async () => {
+      teaching.toggleHandsFree();
+    });
+    return FakeRecognition.instances.at(-1)!;
+  }
+  it('requires session opt-in, ignores non-wake finals without AI or stored transcripts, and survives blur', async () => {
+    expect(teaching.voice.active).toBe(false);
+    expect(FakeRecognition.instances).toHaveLength(0);
+    const recognition = await listen();
+    const initial = teaching.runtime;
+    const fetcher = vi.fn();
+    vi.stubGlobal('fetch', fetcher);
+    await act(async () => {
+      recognition.result('students should consider the roots', false);
+    });
+    expect(teaching.voice.transcript).toContain('students');
+    await act(async () => {
+      recognition.result('students should consider the roots');
+      window.dispatchEvent(new Event('blur'));
+    });
+    expect(teaching.voice.active).toBe(true);
+    expect(teaching.voice.transcript).toBe('');
+    expect(teaching.runtime).toEqual(initial);
+    expect(recognition.abort).not.toHaveBeenCalled();
+    expect(applied).not.toHaveBeenCalled();
+    expect(fetcher).not.toHaveBeenCalled();
+    await act(async () => {
+      recognition.result('Forma, show roots', true, 1);
+    });
+    expect(scene().roots).toBe(true);
+    expect(teaching.runtime.transcript).toBe('show roots');
+    expect(teaching.runtime.interpreter).toBe('local');
+    await act(async () => {
+      recognition.result('Forma undo', true, 2);
+    });
+    expect(scene().roots).toBe(false);
+    expect(fetcher).not.toHaveBeenCalled();
+  });
+  it('stops listening at controller level even with Analyze enabled', async () => {
+    await act(async () => {
+      teaching.setAnalyzeMode(true);
+    });
+    const recognition = await listen();
+    await act(async () => {
+      recognition.result('Forma stop listening');
+    });
+    expect(teaching.voice.active).toBe(false);
+    expect(teaching.runtime.message).toBe('Hands-free is off.');
+    expect(applied).not.toHaveBeenCalled();
+  });
+  it('accepts bare stop during playback but ignores it when idle', async () => {
+    const recognition = await listen();
+    const before = paused.mock.calls.length;
+    await act(async () => {
+      recognition.result('stop');
+    });
+    expect(paused).toHaveBeenCalledTimes(before);
+    playing = true;
+    await act(async () => {
+      recognition.result('stop', true, 1);
+    });
+    expect(paused.mock.calls.length).toBeGreaterThan(before);
+    expect(teaching.runtime.message).toContain('Stopped');
+  });
+  it('pauses recognition for narration, shows the caption, and resumes after speech', async () => {
+    const recognition = await listen();
+    await act(async () => {
+      recognition.result('Forma explain this step');
+    });
+    expect(teaching.voice.phase).toBe('paused');
+    expect(teaching.voice.active).toBe(true);
+    expect(recognition.abort).toHaveBeenCalledOnce();
+    expect(teaching.narration).toBe('Current target is tooth 11.');
+    await act(async () => {
+      spoken[0].onend?.();
+    });
+    expect(teaching.narration).toBe('');
+    expect(teaching.voice.phase).toBe('listening');
+    expect(FakeRecognition.instances).toHaveLength(2);
+  });
+  it('speaks only voice confirmations when opted in and interrupts them with new hold speech', async () => {
+    await act(async () => {
+      teaching.setVoiceSettings({ mode: 'hold', language: 'en-GB', spokenReplies: true });
+      await teaching.run('hide roots');
+    });
+    expect(spoken).toHaveLength(0);
+    const recognition = await listen();
+    expect(recognition.lang).toBe('en-GB');
+    await act(async () => {
+      recognition.result('Forma show roots');
+    });
+    expect(scene().roots).toBe(true);
+    expect(spoken).toHaveLength(1);
+    expect(spoken[0].text.split(/\s+/).length).toBeLessThanOrEqual(12);
+    expect(spoken[0].lang).toBe('en-GB');
+    expect(teaching.voice.phase).toBe('paused');
+    await act(async () => {
+      teaching.start();
+    });
+    expect(teaching.narration).toBe('');
+    expect(teaching.capture.phase).toBe('listening');
+    expect(teaching.voice.phase).toBe('paused');
+    await act(async () => {
+      teaching.cancel();
+    });
+    expect(teaching.capture.phase).toBe('idle');
+    expect(teaching.voice.phase).toBe('listening');
+  });
+  it('does not repeat authored narration as a spoken confirmation', async () => {
+    await act(async () => {
+      teaching.setVoiceSettings({ mode: 'hold', language: 'en-US', spokenReplies: true });
+    });
+    const recognition = await listen();
+    await act(async () => {
+      recognition.result('Forma explain this step');
+    });
+    await act(async () => {
+      spoken[0].onend?.();
+    });
+    expect(spoken).toHaveLength(1);
+  });
+  it('turns off on pagehide and setting changes without restarting on focus', async () => {
+    await listen();
+    await act(async () => {
+      window.dispatchEvent(new Event('pagehide'));
+    });
+    expect(teaching.voice.active).toBe(false);
+    await act(async () => {
+      window.dispatchEvent(new Event('focus'));
+    });
+    expect(teaching.voice.active).toBe(false);
+    await listen();
+    await act(async () => {
+      teaching.setVoiceSettings({ mode: 'hands-free', language: 'en-GB', spokenReplies: false });
+    });
+    expect(teaching.voice.active).toBe(false);
+    expect(JSON.parse(localStorage.getItem('forma-voice-settings')!)).toEqual({
+      mode: 'hands-free',
+      language: 'en-GB',
+      spokenReplies: false,
+    });
+    await act(async () => {
+      key('keydown', 'm');
+    });
+    expect(teaching.voice.active).toBe(true);
+  });
+  it('hydrates a hands-free preference without activating the microphone', async () => {
+    localStorage.setItem(
+      'forma-voice-settings',
+      JSON.stringify({
+        mode: 'hands-free',
+        language: 'en-GB',
+        spokenReplies: false,
+      }),
+    );
+    await act(async () => {
+      root.unmount();
+    });
+    FakeRecognition.instances = [];
+    root = createRoot(container);
+    await act(async () => {
+      root.render(
+        <TeachingProvider>
+          <Harness />
+        </TeachingProvider>,
+      );
+    });
+    expect(teaching.voiceSettings.mode).toBe('hands-free');
+    expect(teaching.voice.active).toBe(false);
+    expect(FakeRecognition.instances).toHaveLength(0);
+  });
+  it('keeps spoken replies off by default', async () => {
+    const recognition = await listen();
+    await act(async () => {
+      recognition.result('Forma show roots');
+    });
+    expect(spoken).toHaveLength(0);
+  });
+  it('shows and speaks an Analyze clarification for an accepted voice request', async () => {
+    await act(async () => {
+      teaching.setAnalyzeMode(true);
+      teaching.setVoiceSettings({ mode: 'hold', language: 'en-US', spokenReplies: true });
+    });
+    const recognition = await listen();
+    await act(async () => {
+      recognition.result('Forma explain the model');
+    });
+    expect(teaching.runtime.transcript).toBe('explain the model');
+    expect(teaching.runtime.error).toBe(true);
+    expect(teaching.runtime.message).toContain('Connect the AI service');
+    expect(spoken[0].text).toContain('Connect the AI service');
+    expect(teaching.voice.phase).toBe('paused');
+    await act(async () => {
+      teaching.cancel();
+    });
+    expect(teaching.voice.phase).toBe('listening');
+  });
+  it.each(['listening off', 'history reset', 'new control'])(
+    'does not speak a stale voice confirmation after %s',
+    async reason => {
+      await act(async () => {
+        teaching.setVoiceSettings({ mode: 'hold', language: 'en-US', spokenReplies: true });
+        teaching.setConfig({ enabled: true, url: 'https://forma.example' });
+        teaching.setPreferAI(true);
+      });
+      let resolve!: (value: unknown) => void;
+      vi.stubGlobal(
+        'fetch',
+        vi.fn(
+          () =>
+            new Promise(done => {
+              resolve = done;
+            }),
+        ),
+      );
+      const recognition = await listen();
+      await act(async () => {
+        recognition.result('Forma show roots');
+      });
+      expect(teaching.runtime.phase).toBe('interpreting');
+      await act(async () => {
+        if (reason === 'listening off') teaching.toggleHandsFree();
+        else if (reason === 'history reset') teaching.resetHistory();
+        else await teaching.runControl('hide gums');
+        resolve({
+          ok: true,
+          json: async () => ({
+            actions: [{ kind: 'toggle', target: 'roots', visible: true }],
+            summary: 'Roots are visible.',
+            clarification: null,
+          }),
+        });
+      });
+      expect(spoken).toHaveLength(0);
+    },
+  );
+  it('clears pending Analyze feedback when the scene changes and ignores a late reply', async () => {
+    await act(async () => {
+      teaching.setConfig({ enabled: true, url: 'https://forma.example' });
+      teaching.setAnalyzeMode(true);
+    });
+    let resolve!: (value: unknown) => void;
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(
+        () =>
+          new Promise(done => {
+            resolve = done;
+          }),
+      ),
+    );
+    const recognition = await listen();
+    await act(async () => {
+      recognition.result('Forma explain the model');
+    });
+    expect(teaching.runtime.phase).toBe('interpreting');
+    await act(async () => {
+      teaching.interact();
+      resolve({ ok: true, json: async () => ({}) });
+    });
+    expect(teaching.runtime.phase).toBe('idle');
+    expect(teaching.analysisPending).toBe(false);
+    expect(teaching.analysis).toBeNull();
+    expect(spoken).toHaveLength(0);
+  });
 });

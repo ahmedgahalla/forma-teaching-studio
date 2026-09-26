@@ -5,7 +5,6 @@ import {
   type TeachingPlan,
 } from './classroom';
 import type { TeachingAction } from './lecture';
-
 export type RuntimeState = {
   phase: 'idle' | 'interpreting' | 'executing' | 'speaking';
   message: string;
@@ -283,6 +282,7 @@ export function createTeachingRuntime<S>(host: TeachingHost<S>) {
     if (disposed || !text.trim()) return;
     if (/^(stop|cancel|pause everything)$/i.test(text.trim())) {
       cancel();
+      publish({ transcript: text });
       return;
     }
     interrupt();

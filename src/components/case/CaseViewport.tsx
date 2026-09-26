@@ -8,6 +8,7 @@ import { LecturePointer } from '../lecture/LectureViewTools';
 import { toothMatrix } from '@/lib/analysis';
 import { applianceView } from '@/lib/appliance-display';
 import { mechanicsResponseCaption } from '@/lib/mechanics-presentation';
+import { VoiceHud } from '../teaching/VoiceHud';
 
 export function CaseViewport({ api }: { api: CaseStudioApi }) {
   const { viewer, sceneInteraction } = api;
@@ -113,6 +114,7 @@ export function CaseViewport({ api }: { api: CaseStudioApi }) {
           }}
           onPoseCommit={api.poseCommit}
         />
+        <VoiceHud />
         {api.pointed && (
           <div className="pointed-target-caption" role="status">
             {api.pointed.surface === 'gingiva'

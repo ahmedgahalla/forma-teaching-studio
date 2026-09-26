@@ -31,7 +31,36 @@ Say `return to try mode` as a separate request to leave a workflow and return to
 3. Alternatively, type a request and press Enter or the arrow button.
 4. Press **Stop** or **Escape** to cancel listening or a pending request, pause animation and stop narration. Use **Undo** to reverse already displayed changes.
 
-The microphone only listens while you request capture. There is no always-listening mode. If microphone recognition is unavailable or permission is denied, use typed commands in the same bar.
+Hold-to-talk remains the default. If microphone recognition is unavailable or permission is denied, use typed commands in the same bar.
+
+## Hands-free lecture listening
+
+Choose **Hands-free** beside the command dock, or press **M**, **B** or **.** outside editable fields, dialogs and menus. A red **Listening** pill remains on the model while enabled. Activation is explicit every page session; saving a hands-free preference in Settings never starts the microphone automatically. Blur keeps this mode running; it still discards unfinished hold-to-talk capture.
+
+```text
+Forma, show the upper arch
+Forma, show the roots
+Forma, play
+Forma, next step
+Forma, explain this step
+Forma, stop listening
+```
+
+Begin a final utterance with **Forma**, **hey Forma**, **okay Forma** or **ok Forma**. Common recognizer outputs **former**, **for ma**, **forma's** and **fauna** are accepted too. Saying only the wake phrase arms one follow-up utterance for six seconds. Interim captions do not execute anything. Speech without the wake phrase is silently discarded after its transient interim caption; it is never submitted, stored, logged or sent to AI. The student HUD shows the accepted request and its result or clarification, then fades the completed feedback after about four seconds.
+
+**Privacy:** while recognition is running, the browser vendor's speech service receives audio, including ordinary lecture speech. The wake gate filters recognized text locally; it cannot prevent that audio transmission. This is not offline recognition or an OpenAI audio connection. Turn hands-free off before private discussion. See [ADR 004](decisions/004-hands-free-voice.md).
+
+Bare **stop** or **cancel** works without Forma during a playing demonstration when recognition is running. Recognition pauses while Forma speaks so it cannot hear itself; the HUD displays the narration and a paused indicator. During that pause a spoken Stop cannot be heard: use **Stop**, **Escape** or the **Hold to talk** button to interrupt, then give the next instruction. Hold Space also interrupts in the default hold mode. Pausing clears any armed follow-up.
+
+Ordinary browser recognition endings restart automatically with bounded backoff. Permission denial, speech-service denial, an unavailable microphone, initialization/start failure or three network errors turn hands-free off with a message. Page navigation/pagehide, closing the workspace, and changing voice mode or language also turn it off. Correct the problem and explicitly enable it again; window focus never enables it.
+
+In **Settings → Lecture voice**, choose the voice mode preference, **en-US** (default) or **en-GB**, and optional **Spoken replies** (off by default). Preferences are saved in this browser. Spoken replies give a short confirmation or clarification only after voice requests; explicit “explain” narration remains available regardless of that setting.
+
+## Presenter clicker and navigation
+
+**PageDown / Right** advances; **PageUp / Left** goes back. In a workflow classroom this changes the authored workflow step. In the case workspace an active short lesson takes priority; otherwise it changes the prepared-case/demonstration stage. Keys continue working after clicking a plain button such as Next step. Editable fields, visible dialogs and open menus retain their own keys. **M / B / .** toggles hands-free; **Space** retains hold-to-talk in hold mode.
+
+Say **next**, **next step**, **go on**, **continue**, or **go to the next step** for the same forward mapping. **Back**, **previous**, **go back**, and **previous step** use the same reverse mapping. Spoken FDI pairs are accepted: “tooth one six”, “tooth four one”, or “teeth one one and two one”. Ordinary movement quantities keep their existing normalization.
 
 ## Start a demonstration
 
@@ -97,7 +126,7 @@ Each tooth movement needs its amount, unit and direction. `move it a little` is 
 | `explain the answer`                         | Reads the lesson's answer aloud.                                                                                                   |
 | `half speed`, `normal speed`, `double speed` | Changes animation playback speed, not clinical treatment time.                                                                     |
 
-Undo, redo and replay must be separate requests. Returning to the lesson or exiting a workflow must be the final action in a compound request. Narration starts only when you ask for it; it is not automatic after every action.
+Undo, redo and replay must be separate requests. Returning to the lesson or exiting a workflow must be the final action in a compound request. Authored narration starts when requested; optional Spoken replies adds short voice confirmations when enabled in Settings.
 
 ## Optional flexible interpretation
 

@@ -1,4 +1,5 @@
 'use client';
+import { VoiceSettingsFields } from '../teaching/VoiceSettingsFields';
 import type { CaseStudioApi } from './api';
 import { ArrowRight, ArrowUpRight, Check, CircleHelp, RotateCcw, Upload } from 'lucide-react';
 import { Dialog, Toggle } from './ui';
@@ -164,6 +165,7 @@ export function DialogsSetup({ api }: { api: CaseStudioApi }) {
               Import STL models
             </button>
           </div>
+          <VoiceSettingsFields />
           <h3>Command interpretation</h3>
           <p>
             Try Mode commands work locally in English without a key. The optional AI service

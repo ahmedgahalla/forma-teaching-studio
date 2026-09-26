@@ -1,0 +1,32 @@
+button.hands-free-toggle {
+  display: inline-flex;
+  flex: 0 0 auto;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  min-height: 36px;
+  padding: 7px 11px;
+  border: 1px solid var(--ui-line, #657386);
+  border-radius: 8px;
+  color: var(--ui-text, #eaf0f6);
+  background: var(--ui-panel, #192334);
+  font-size: 14px;
+  font-weight: 600;
+}
+
+button.hands-free-toggle[aria-pressed='true'],
+.opening-command-controls > button.hands-free-toggle[aria-pressed='true'] {
+  border-color: #ff9ca3;
+  color: #fff;
+  background: #8b1523;
+}
+
+button.hands-free-toggle:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+button.hands-free-toggle:focus-visible {
+  outline: 3px solid var(--ui-accent, #4ed5e7);
+  outline-offset: 3px;
+}

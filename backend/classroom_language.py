@@ -6,10 +6,21 @@ _VERBS = "show|hide|reveal|conceal|display|see|look|view|take|select|highlight|f
 _GUARDED = re.compile(r"\b(?:don't|do not|not to|never|avoid|not|cannot|can't|unless|if|what would|what might|should i|should we|would it|could it|how much|how far|is it safe|prescribe|diagnose|recommend treatment|treatment plan|my patient|biologically safe)\b")
 _GERUNDS = {"showing": "show", "hiding": "hide", "selecting": "select", "highlighting": "highlight", "moving": "move", "rotating": "rotate", "installing": "install", "putting": "put", "adding": "add", "removing": "remove", "looking": "look", "revealing": "reveal", "explaining": "explain", "comparing": "compare"}
 _ANATOMY = r"(roots?|gums|gingiva|bone|tooth numbers)"
+_FDI_DIGITS = {word: str(index + 1) for index, word in enumerate("one two three four five six seven eight".split())}
+_FDI_PAIR = r"(?:[1-4]|one|two|three|four) (?:[1-8]|one|two|three|four|five|six|seven|eight)\b"
+_FDI_TARGET = rf"(?:{_FDI_PAIR}|[1-4][1-8]\b)"
 
 
 def _layer(value: str) -> str:
     return {"root": "roots", "gingiva": "gums"}.get(value, value)
+
+
+def _spoken_fdi_targets(value: str) -> str:
+    """Merge digit pairs only in explicit tooth targets, never movement quantities."""
+    def targets(match):
+        normalized = re.sub(_FDI_PAIR, lambda pair: "".join(_FDI_DIGITS.get(part, part) for part in pair[0].split()), match[2])
+        return f"{match[1]} {normalized}"
+    return re.sub(rf"\b(tooth|teeth) ({_FDI_TARGET}(?:(?:, ?| and ){_FDI_TARGET})*)", targets, value)
 
 
 def normalize_classroom_language(text: str) -> str:
@@ -36,4 +47,4 @@ def normalize_classroom_language(text: str) -> str:
     value = re.sub(r"\b(upper|lower|maxillary|mandibular) (?:front (?:four|4)|(?:four|4) front)(?: teeth)?\b", r"\1 incisors", value)
     value = re.sub(r"\b(upper|lower) (front|back) teeth\b", lambda m: f"{m[1]} {'anterior' if m[2] == 'front' else 'posterior'} teeth", value)
     value = re.sub(r"\b(upper|lower) teeth at the (front|back)\b", lambda m: f"{m[1]} {'anterior' if m[2] == 'front' else 'posterior'} teeth", value)
-    return value
+    return _spoken_fdi_targets(value)

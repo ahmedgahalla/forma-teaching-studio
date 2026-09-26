@@ -89,7 +89,12 @@ export function DialogsInfo({ api }: { api: CaseStudioApi }) {
             translates flexible wording into the same bounded classroom, geometry and appliance
             actions. The application validates the complete request and calculates supported
             mechanics independently. Stop or Escape cancels pending work. “Undo that” restores the
-            whole request. Explanations are spoken only when you ask.
+            whole request. Enable Hands-free for this session with the microphone toggle or M, then
+            begin each instruction with “Forma”. A bare “Forma” allows a follow-up within six
+            seconds. Say “Forma, stop listening” to switch it off. Audio reaches your browser’s
+            speech service while listening; speech without a wake phrase is discarded after its
+            transient caption. Optional spoken replies are in Settings; requested explanations
+            always speak aloud.
           </p>
           <h3>Build an appliance experiment</h3>
           <p className="form-note">
@@ -177,6 +182,21 @@ export function DialogsInfo({ api }: { api: CaseStudioApi }) {
             </li>
           </ul>
           <div className="shortcut-list">
+            <span>
+              Hands-free on / off<kbd>M / B / .</kbd>
+            </span>
+            <span>
+              Next step<kbd>PageDown / →</kbd>
+            </span>
+            <span>
+              Previous step<kbd>PageUp / ←</kbd>
+            </span>
+            <span>
+              Hold to talk<kbd>Space</kbd>
+            </span>
+            <span>
+              Stop action or narration<kbd>Escape</kbd>
+            </span>
             <span>
               Focus command bar<kbd>/</kbd>
             </span>

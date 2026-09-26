@@ -7,7 +7,16 @@ import { OpeningCommandDock } from './OpeningCommandDock';
 
 type DockController = Pick<
   ReturnType<typeof useTeaching>,
-  'capture' | 'runtime' | 'analysisPending' | 'analysis' | 'analysisError' | 'cancel' | 'runControl'
+  | 'capture'
+  | 'runtime'
+  | 'analysisPending'
+  | 'analysis'
+  | 'analysisError'
+  | 'cancel'
+  | 'runControl'
+  | 'voice'
+  | 'toggleHandsFree'
+  | 'narration'
 >;
 let teaching: DockController, root: Root, container: HTMLDivElement;
 
@@ -53,6 +62,9 @@ beforeEach(async () => {
   vi.stubGlobal('IS_REACT_ACT_ENVIRONMENT', true);
   teaching = {
     capture: { supported: true, phase: 'idle', transcript: '' },
+    voice: { supported: true, phase: 'idle', transcript: '', active: false },
+    toggleHandsFree: vi.fn(),
+    narration: '',
     runtime: {
       phase: 'idle',
       message: 'Ready for your instruction.',
@@ -188,10 +200,11 @@ it('delegates undo and redo to the shared runtime while commands are closed', as
   expect(content().hidden).toBe(true);
 });
 
-it.each(['execution', 'playback'])(
+it.each(['execution', 'playback', 'spoken reply'])(
   'keeps Stop reachable during %s with commands closed',
   async mode => {
     if (mode === 'execution') teaching.runtime.phase = 'executing';
+    if (mode === 'spoken reply') teaching.narration = 'Roots shown.';
     await render(mode === 'playback');
     await click(stop()!);
     expect(teaching.cancel).toHaveBeenCalledOnce();

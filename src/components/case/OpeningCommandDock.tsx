@@ -2,6 +2,7 @@
 import { useId, type ReactNode } from 'react';
 import { MessageSquare, Redo2, Square, Undo2 } from 'lucide-react';
 import { useTeaching } from '../teaching/TeachingController';
+import { HandsFreeToggle } from '../teaching/HandsFreeToggle';
 
 export function OpeningCommandDock({
   open,
@@ -20,7 +21,11 @@ export function OpeningCommandDock({
     id = useId();
   const capturing = teaching.capture.phase !== 'idle';
   const working =
-    capturing || teaching.analysisPending || teaching.runtime.phase !== 'idle' || playing;
+    capturing ||
+    !!teaching.narration ||
+    teaching.analysisPending ||
+    teaching.runtime.phase !== 'idle' ||
+    playing;
   const feedback = capturing
     ? `${teaching.capture.phase}: ${teaching.capture.transcript || 'Release Space to run your instruction.'}`
     : teaching.analysisPending
@@ -36,6 +41,7 @@ export function OpeningCommandDock({
           <MessageSquare size={16} />
           {open ? 'Hide commands' : 'Commands'} <kbd>/</kbd>
         </button>
+        <HandsFreeToggle />
         {!open && (
           <span
             role="status"

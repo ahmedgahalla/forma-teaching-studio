@@ -4,9 +4,15 @@ from pathlib import Path
 import pytest
 
 from classroom_language import normalize_classroom_language
+from teaching_source import normalized_teaching_text
 import main
 
 FIXTURES = json.loads((Path(__file__).parents[1] / "src/lib/classroom-language.fixtures.json").read_text(encoding="utf-8"))
+
+
+def test_spoken_fdi_targets_remain_distinct_from_movement_quantities():
+    assert normalized_teaching_text("move tooth one six buccally one point five millimeters") == "move tooth 16 buccally 1.5 mm"
+    assert normalized_teaching_text("select teeth one one and two one") == "select teeth 11 and 21"
 
 
 @pytest.mark.parametrize("source,expected", FIXTURES)

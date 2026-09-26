@@ -28,6 +28,16 @@ const setup = () => {
 };
 afterEach(() => vi.useRealTimers());
 describe('push to talk', () => {
+  it('uses the configured recognition language', () => {
+    const controller = createPushToTalk(
+      Recognition,
+      { state: vi.fn(), final: vi.fn(), error: vi.fn() },
+      'en-GB',
+    );
+    controller.start();
+    expect(Recognition.last.lang).toBe('en-GB');
+    controller.dispose();
+  });
   it('does not submit a final while held; release accepts the final result at end', () => {
     const { callbacks, controller } = setup();
     controller.start();

@@ -22,6 +22,25 @@ const gerunds: Record<string, string> = {
 const anatomy = '(roots?|gums|gingiva|bone|tooth numbers)';
 const layer = (value: string) =>
   value === 'root' ? 'roots' : value === 'gingiva' ? 'gums' : value;
+const fdiDigits = Object.fromEntries(
+  'one two three four five six seven eight'.split(' ').map((word, index) => [word, index + 1]),
+);
+const fdiPair = '(?:[1-4]|one|two|three|four) (?:[1-8]|one|two|three|four|five|six|seven|eight)\\b';
+const fdiTarget = `(?:${fdiPair}|[1-4][1-8]\\b)`;
+
+/** Only merge digit pairs in an explicit tooth target, never movement quantities. */
+function spokenFdiTargets(value: string): string {
+  return value.replace(
+    new RegExp(`\\b(tooth|teeth) (${fdiTarget}(?:(?:, ?| and )${fdiTarget})*)`, 'g'),
+    (_, noun: string, targets: string) =>
+      `${noun} ${targets.replace(new RegExp(fdiPair, 'g'), pair =>
+        pair
+          .split(' ')
+          .map(part => fdiDigits[part] ?? part)
+          .join(''),
+      )}`,
+  );
+}
 
 /** Explicit wording aliases only. Unknown clauses, quantities and conditional language stay intact. */
 export function normalizeClassroomLanguage(text: string): string {
@@ -103,5 +122,5 @@ export function normalizeClassroomLanguage(text: string): string {
     (_, arch: string, group: string) =>
       `${arch} ${group === 'front' ? 'anterior' : 'posterior'} teeth`,
   );
-  return value;
+  return spokenFdiTargets(value);
 }

@@ -18,6 +18,8 @@ import {
 import { parseTryActions } from './parse-try';
 import type { TeachingContext, TeachingPlan } from './types';
 import { validateTeachingPlan } from './plan-validate';
+import { isDentalArrangementClause, parseArrangement } from './parse-arrangement';
+import { parseNavigation } from './parse-navigation';
 
 export function buildTeachingPlan(text: string, context: TeachingContext): TeachingPlan {
   if (typeof text !== 'string' || !text.trim() || text.length > 1500)
@@ -29,29 +31,8 @@ export function buildTeachingPlan(text: string, context: TeachingContext): Teach
   const next = copyContext(context),
     overrides = { arch: false, view: false, selection: false },
     actions: TeachingAction[] = [];
-  if (isDentalArrangementClause(source)) {
-    const match = source.match(
-      /^(?:load|open|show) (?:the )?(?:dental )?class (i|ii|iii|1|2|3)(?: (?:division|div) (1|2))?(?: arrangement)?$/,
-    );
-    if (!match || ((match[1] === 'ii' || match[1] === '2') && !match[2]))
-      throw new CommandValidationError(
-        'Choose dental Class I, Class II division 1, Class II division 2, or Class III as a separate request.',
-      );
-    if (match[2] && !['ii', '2'].includes(match[1]))
-      throw new CommandValidationError('Divisions 1 and 2 belong to the dental Class II examples.');
-    const id = ['i', '1'].includes(match[1])
-      ? 'dental-class-i'
-      : ['iii', '3'].includes(match[1])
-        ? 'dental-class-iii'
-        : match[2] === '1'
-          ? 'dental-class-ii-division-1'
-          : 'dental-class-ii-division-2';
-    return validateTeachingPlan(
-      { actions: [{ kind: 'dental-arrangement', id }], summary: source, clarification: null },
-      context,
-      { allowLocalActions: true },
-    );
-  }
+  const arrangement = parseArrangement(source, context);
+  if (arrangement) return arrangement;
   if (clauses(source).some(isDentalArrangementClause))
     throw new CommandValidationError(
       'Load a dental arrangement as a separate request, then give commands for its model.',
@@ -221,7 +202,9 @@ export function buildTeachingPlan(text: string, context: TeachingContext): Teach
         /* Other unsupported wording remains available to the optional interpreter. */
       }
     }
-    const action = parseTeachingCommand(clause, next.selected, next.availableIds, next.selectedIds);
+    const action =
+      parseNavigation(clause, next) ||
+      parseTeachingCommand(clause, next.selected, next.availableIds, next.selectedIds);
     append(
       action.kind === 'return-lesson' && next.mode === 'case' && next.hasWorkflowOrigin
         ? { kind: 'workspace', action: 'lesson' }
@@ -266,6 +249,7 @@ export function parseTeachingPlan(text: string, context: TeachingContext): Teach
       (typeof text === 'string' &&
         clauses(normalizeSpeechCommand(text)).some(
           clause =>
+            parseNavigation(clause, context) ||
             isDentalArrangementClause(clause) ||
             isMechanicsClause(clause) ||
             isCaseClause(clause, context) ||
@@ -286,6 +270,4 @@ export function parseTeachingPlan(text: string, context: TeachingContext): Teach
   }
 }
 
-export function isDentalArrangementClause(text: string): boolean {
-  return /^(?:load|open|show) (?:the )?(?:dental )?class\b/.test(text);
-}
+export { isDentalArrangementClause } from './parse-arrangement';
