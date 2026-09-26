@@ -77,3 +77,10 @@ Entry format: mistake (with link) · root cause · prevention · status (`noted`
 - **Root cause:** `tsc --incremental` reused a stale `tsconfig.tsbuildinfo` across large file moves and skipped re-checking affected modules.
 - **Prevention:** the `typecheck` script now runs `tsc --noEmit --incremental false`, so local runs match CI's fresh-checkout behavior.
 - **Status:** automated · **Count:** 1
+
+## 10. Concurrent PRs claim the same next phase-doc number
+
+- **Mistake:** PR #3 (`ahmed/local-project-setup`) and PR #5 (`naser/node-version-policy`) were both opened around the same time, each adding a new sub-phase doc numbered `1.5`, and each based on a main that predated the other's PR — so neither branch's diff showed the collision until an auditor session merged main into both and hit the same `docs/phases/phase-1-tooling/README.md` conflict twice (once against each other, once against a same-session doc that had already claimed `1.6`). Resolving it correctly required deciding which PR keeps `1.5` (the one merging first) and renumbering the other's file, heading, README index entry, and every cross-reference (handoff notes, etc.) on its branch before merge.
+- **Root cause:** phase/sub-phase numbers are picked by each branch independently from its own base, with no reservation mechanism; two branches open at once will pick the same next number whenever neither has seen the other's doc yet.
+- **Prevention:** no automation yet — sub-phase numbers aren't mechanically checkable across branches the way file limits or formatting are. When auditing a PR that adds a numbered phase/sub-phase doc, check `docs/phases/<phase>/README.md` on main _and_ grep open PRs' diffs for the same number before merging, not just the PR's own diff against its (possibly stale) base. Renumbering is mechanical once caught: rename the file, fix its own heading, the phase README line, and grep the repo for every reference to the old path/number.
+- **Status:** noted · **Count:** 1
