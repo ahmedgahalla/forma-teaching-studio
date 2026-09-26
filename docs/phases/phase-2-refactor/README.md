@@ -1,6 +1,6 @@
 # Phase 2 — refactor
 
-**Status:** in review · **Branch:** `naser/phase-2-refactor` (on merged Phase 1 main) · **PR:** #2 · **Owner:** auditor
+**Status:** merged as `a6dc7c9`, tagged `v0.14-phase2` · **Branch:** `naser/phase-2-refactor` (on merged Phase 1 main) · **PR:** #2 · **Owner:** auditor
 
 **Goal:** a component-based structure with no behavior change — dead code out, the monoliths split, folders by feature — in gated slices with the full verification gate after each.
 
