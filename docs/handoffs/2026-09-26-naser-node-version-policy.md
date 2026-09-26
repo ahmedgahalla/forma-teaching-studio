@@ -16,7 +16,7 @@ builder's version is unknown, and the tooling read as if only Node 22 were suppo
 - `README.md`: getting-started says Node 22 or newer (floor 22.6) + one policy line.
 - `engines` unchanged at `>=22.6` (already the correct explicit range; the
   strip-types scripts set the 22.6 floor). `.nvmrc` unchanged at 22 (nvm baseline).
-- Phase doc: `docs/phases/phase-1-tooling/1.5-node-version-policy.md` (+ indexed in
+- Phase doc: `docs/phases/phase-1-tooling/1.7-node-version-policy.md` (+ indexed in
   the phase-1 README).
 
 ## Current state
