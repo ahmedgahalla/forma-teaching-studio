@@ -1,6 +1,6 @@
 # Handoff — Phase 3.2 lecture-ready opening
 
-**Branch:** `ahmed/phase-3-lecture-opening` · **PR:** pending · **Role:** builder
+**Branch:** `ahmed/phase-3-lecture-opening` · **PR:** [#13](https://github.com/ahmedgahalla/forma-teaching-studio/pull/13) (draft; DPR 2 audit pending) · **Role:** builder
 
 ## Done
 

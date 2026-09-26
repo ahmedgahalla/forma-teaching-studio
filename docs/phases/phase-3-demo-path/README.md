@@ -1,6 +1,6 @@
 # Phase 3 — demo path
 
-**Status:** implementation started; first slice under review · **Branch:** `ahmed/phase-3-lecture-opening` · **PR:** pending
+**Status:** implementation started; first slice under review · **Branch:** `ahmed/phase-3-lecture-opening` · **PR:** [#13](https://github.com/ahmedgahalla/forma-teaching-studio/pull/13) (draft; DPR 2 audit pending)
 
 **Goal:** the app opens straight into a large full-bite view, advanced tooling moves into a drawer, and a scripted 3–4 minute walkthrough supports the lecture demo (audience: an orthodontist who lectures at universities). Builds on `docs/PRODUCT_DIRECTION.md`'s consolidation direction.
 
