@@ -1,14 +1,6 @@
 'use client';
 import type { CaseStudioApi } from './api';
-import {
-  ArrowUpRight,
-  History,
-  Move3D,
-  Redo2,
-  Ruler,
-  SlidersHorizontal,
-  Undo2,
-} from 'lucide-react';
+import { ArrowUpRight, History, Move3D, Ruler, SlidersHorizontal } from 'lucide-react';
 import { MobilePanelHeading } from './StudioExperience';
 import TryPanel from '../try/TryPanel';
 import { toothArch } from '@/lib/appliances';
@@ -22,29 +14,17 @@ export function CaseInspector({ api }: { api: CaseStudioApi }) {
   return (
     <>
       <aside className="inspector">
-        <MobilePanelHeading title="Tools" onClose={() => api.setMobilePanel('model')} />
+        <MobilePanelHeading
+          title="Tools"
+          onClose={() => {
+            api.setMobilePanel('model');
+            api.setToolsOpen(false);
+          }}
+        />
         <div className="inspector-heading">
           <span className="eyebrow">
             {api.selectedIds.length === 1 ? 'TOOTH INSPECTOR' : 'GROUP INSPECTOR'}
           </span>
-          <div className="history-buttons">
-            <button
-              className="icon-button"
-              onClick={() => void api.teaching.runControl('undo that')}
-              aria-label="Undo"
-              title="Ctrl / Cmd + Z"
-            >
-              <Undo2 size={17} />
-            </button>
-            <button
-              className="icon-button"
-              onClick={() => void api.teaching.runControl('redo')}
-              aria-label="Redo"
-              title="Ctrl / Cmd + Shift + Z"
-            >
-              <Redo2 size={17} />
-            </button>
-          </div>
         </div>
         <div className="tooth-card">
           <div className="large-number">

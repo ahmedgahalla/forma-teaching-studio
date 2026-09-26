@@ -6,6 +6,10 @@ Proposed next design pass, following the request to make Forma excellent without
 
 Implemented a bounded first step: a pinned command bar, separate camera row, contextual suggestions, less idle lecture chrome, compact phone sheets, and everyday upper/lower appliance wording. Manual previews keep Apply/Discard accessible; lesson explanations expand when requested. See [verification](VERIFICATION.md) for the measured checks. This does not complete the broader consolidation below: intent-routing across editing and Analyze, clarification memory, collision performance, and educator-reviewed demonstration quality remain separate work.
 
+## Lecture-ready opening · 26 September 2026
+
+Phase 3.2 implements the opening-screen portion of this proposal in the current code. Tools and Commands start closed; the header keeps Library, Tools, Present and More. More holds secondary workspace actions, while View groups cameras, arches, comparison and presentation controls beside a directly available Fit button. One Undo/Redo pair and compact command feedback remain below the model; `/` opens and focuses Commands, and preview decisions remain independent. This supersedes the always-visible composer and camera row from the first usability pass. The broader consolidation, complete demo scripts and proposed biology illustration are not completed by this slice.
+
 ## Product promise
 
 A professor can select a teaching setup, demonstrate a concept on a clear 3D mouth, ask students to predict a change, then reveal and compare the result without leaving the workspace.

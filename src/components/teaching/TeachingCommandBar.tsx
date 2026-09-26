@@ -10,7 +10,9 @@ export function TeachingCommandBar({
   onChange,
   inputRef,
   suggestions,
+  showUndo = true,
 }: {
+  showUndo?: boolean;
   suggestions?: string[];
   label?: string;
   placeholder?: string;
@@ -237,14 +239,16 @@ export function TeachingCommandBar({
           )}
           {teaching.runtime.message}
         </span>
-        <button
-          className="text-button"
-          onClick={() => void teaching.run('undo that')}
-          aria-label="Undo classroom request"
-        >
-          <Undo2 size={14} />
-          Undo
-        </button>
+        {showUndo && (
+          <button
+            className="text-button"
+            onClick={() => void teaching.run('undo that')}
+            aria-label="Undo classroom request"
+          >
+            <Undo2 size={14} />
+            Undo
+          </button>
+        )}
       </div>
       {(teaching.analyzeMode || teaching.analysis) && (
         <div className="teaching-analysis-hint">

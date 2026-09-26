@@ -2,9 +2,17 @@
 
 Forma supports an interactive university lecture: observe an arrangement, ask students to predict, demonstrate, pause, explain and compare. Free geometric editing, authored demonstrations and initial elastic mechanics are three distinct ways to use the same workspace. Prepared cases and workflows are optional starting points.
 
+## Start with the model
+
+The case workspace opens with **Tools** and **Commands** closed so the model has the main area. The header keeps **Library**, **Tools**, **Present** and **More** available. Use More for Open case, Save case, Settings, theme, Guide, Selection and Layers. Tools opens the editing inspector, including numeric movement controls; Selection and Layers open a separate drawer. Close them when returning attention to the model.
+
+Use **View** beside the model heading for camera presets, arch visibility, Before/After/Overlay comparison, Measure, Focus selection, Isolate selection, Lecture pointer and **Export 3D image** (PNG). **Fit model** remains available beside View without opening the menu. On phones and tablets, Model, Select, Layers and Tools also remain in the bottom dock.
+
+The row below the model keeps **Commands** and one **Undo/Redo** pair available. Open Commands to type or use Analyze, or press `/` outside an editable field to open and focus the input. **Hide commands** closes the composer while brief feedback remains visible; **Stop** appears there during speech capture, a running request or playback. Preview Apply/Discard decisions remain visible independently of both Commands and Tools.
+
 ## Build and discuss an appliance
 
-Open **Appliances** in the synthetic free workspace. For a prepared case, first choose **Explore this arrangement**. Select teeth, install brackets, choose the visible wire material/size, connect the brackets and enter a small explicit activation. **Show what happens** calculates the initial elastic response. Installing hardware alone does not calculate movement.
+Open **Tools → Appliances** in the synthetic free workspace. For a prepared case, first choose **Explore this arrangement**. Select teeth, install brackets, choose the visible wire material/size, connect the brackets and enter a small explicit activation. **Show what happens** calculates the initial elastic response. Installing hardware alone does not calculate movement.
 
 Use **Predict before reveal** to hide the calculated response until students answer. Reveal it, show roots, and compare forces/moments and displacement. **Movement display** can exaggerate the picture up to 50×; the reported numbers remain unscaled. Arrows and arcs indicate force/moment direction, without a length scale.
 
@@ -14,25 +22,25 @@ Save an **Experiment stage** to recall an appliance configuration. Every stage u
 
 ## Point and speak
 
-Hold Space outside an editable field, or hold the microphone button. Pointing to a model location can update “here” or “these teeth” without canceling capture. Release to submit once. Escape, Stop or loss of window focus discards unfinished speech; starting the microphone interrupts narration. Other manual scene edits cancel unfinished capture or stale requests.
+Hold Space outside an editable field, including when Commands is closed, or open Commands and hold the microphone button. Pointing to a model location can update “here” or “these teeth” without canceling capture. Release to submit once. Escape, Stop or loss of window focus discards unfinished speech; starting the microphone interrupts narration. Other manual scene edits cancel unfinished capture or stale requests.
 
 Clear validated voice/text geometric movements execute immediately. Prefix a request with **preview** to inspect it before Apply; manual numeric tools retain their preview decision. **Undo** restores the whole request, including its scene/appliance changes. No recognition service or AI key is required for typed built-in commands.
 
 ## A short lecture
 
-1. Open **Teaching library**, choose a prepared case and enter **Lecture mode**.
+1. Open **Library**, choose a prepared case and choose **Present** to enter Lecture mode.
 2. Keep the question visible and the answer hidden while students predict what will move.
 3. Play, pause at 50%, scrub to a chosen progress, or change presentation speed. These percentages describe the animation, not treatment time.
 4. Reveal the explanation visually. **Explain aloud** is separate and only speaks when requested.
-5. Show roots or an original overlay. Select a group and use **Focus selection** or **Isolate selection** to make a detail easier to see. **Show full arch** restores context.
-6. Use **Lecture pointer** to point on the model without orbiting or changing teeth. **Exit pointer** or Escape restores orbit interaction. The pointer is a screen graphic; it does not create a landmark or measurement.
+5. Show roots with a command or Layers; use **View → Overlay** for the original arrangement. Select a group and use **Focus selection** or **Isolate selection** in View to make a detail easier to see. **Show full arch** restores context.
+6. Use **View → Lecture pointer** to point on the model without orbiting or changing teeth. **Exit pointer** or Escape restores orbit interaction. The pointer is a screen graphic; it does not create a landmark or measurement.
 7. Choose an authored alternative to restart from that case's baseline, or **Try this arrangement** for a free geometric variation. **Return to prepared case** restores the saved stage.
 
-On wide displays the console sits beside the model; narrower displays stack it underneath. Answer text and controls may scroll. The case and command controls remain available. In appliance/anatomy workflows, use the same Lecture mode button. Restart there restores the current lesson step; Next step advances the authored sequence.
+On wide displays the console sits beside the model; narrower displays stack it underneath. Answer text and controls may scroll. The case and command controls remain available; **Exit present** leaves the case's Lecture mode. In appliance/anatomy workflows, use their Lecture mode button. Restart there restores the current lesson step; Next step advances the authored sequence.
 
 ## Useful typed commands
 
-Run lines separately, or combine supported actions with “and” or “then”.
+Open **Commands** or press `/`. Run lines separately, or combine supported actions with “and” or “then”.
 
 ```text
 show upper jaw and hide gums

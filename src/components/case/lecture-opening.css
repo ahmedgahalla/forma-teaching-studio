@@ -1,0 +1,292 @@
+.app-shell.studio-experience.teaching-studio.lecture-opening.lecture-mode
+  .workspace-scene
+  > .workspace-heading {
+  display: flex;
+}
+
+/* Phase 3.2: the model fills the opening; editing tools are explicit overlays. */
+.app-shell.studio-experience.teaching-studio.lecture-opening {
+  --composer-height: 38px;
+}
+
+.app-shell.studio-experience.teaching-studio.lecture-opening .workspace {
+  display: flex;
+  grid-template-columns: none;
+}
+
+.app-shell.studio-experience.teaching-studio.lecture-opening .main-workspace {
+  min-width: 0;
+  padding: 8px 16px;
+}
+
+.lecture-opening .opening-command-dock > [hidden] {
+  display: none;
+}
+
+.lecture-opening .opening-menu,
+.lecture-opening .opening-view-menu {
+  position: relative;
+}
+
+.lecture-opening .view-actions {
+  margin-top: 0;
+  flex-shrink: 0;
+}
+
+.lecture-opening .opening-menu > summary,
+.lecture-opening .opening-view-menu > summary {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  min-height: 40px;
+  padding: 8px 11px;
+  list-style: none;
+  cursor: pointer;
+  font-size: 13px;
+  color: var(--ui-text);
+}
+
+.lecture-opening .opening-menu > summary::-webkit-details-marker,
+.lecture-opening .opening-view-menu > summary::-webkit-details-marker {
+  display: none;
+}
+
+.lecture-opening .opening-menu[open],
+.lecture-opening .opening-view-menu[open] {
+  z-index: 80;
+}
+
+.lecture-opening .opening-menu-content,
+.lecture-opening .opening-view-content {
+  position: absolute;
+  top: calc(100% + 6px);
+  right: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: min(360px, calc(100vw - 32px));
+  max-height: min(520px, calc(100dvh - 160px));
+  overflow: auto;
+  overscroll-behavior: contain;
+  padding: 12px;
+  border: 1px solid var(--ui-line);
+  border-radius: 12px;
+  background: var(--ui-panel);
+  box-shadow: 0 14px 38px var(--ui-shadow);
+}
+
+.lecture-opening .opening-menu-content {
+  width: 220px;
+  gap: 3px;
+}
+
+.lecture-opening .opening-menu:not([open]) > .opening-menu-content,
+.lecture-opening .opening-view-menu:not([open]) > .opening-view-content {
+  display: none;
+}
+
+.studio-experience.teaching-studio.lecture-opening .opening-menu-content > button {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 10px;
+  width: 100%;
+  min-height: 42px;
+  padding: 9px 10px;
+  border-radius: 7px;
+  font-size: 13px;
+  color: var(--ui-text);
+}
+
+.lecture-opening .opening-menu-content > button:hover,
+.lecture-opening .opening-menu-content > button:focus-visible {
+  background: var(--ui-soft);
+}
+
+.lecture-opening .opening-menu-content .studio-theme-toggle > span {
+  display: inline;
+}
+
+.studio-experience.teaching-studio.lecture-opening .opening-view-content .arch-toolbar,
+.studio-experience.teaching-studio.lecture-opening .opening-view-content .workspace-cameras,
+.studio-experience.teaching-studio.lecture-opening .opening-view-content .lecture-view-tools {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin: 0;
+}
+
+.lecture-opening .opening-view-content .workspace-cameras button {
+  flex: 1;
+  min-width: 60px;
+  min-height: 40px;
+}
+
+.lecture-opening .opening-view-content > button {
+  font-size: 13px;
+}
+
+.lecture-opening .opening-view-content .segmented,
+.lecture-opening .opening-view-content .comparison-strip {
+  flex: 1 0 auto;
+}
+
+.lecture-opening .opening-command-controls {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 38px;
+}
+
+.lecture-opening .opening-command-controls > button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  gap: 7px;
+  min-width: 36px;
+  min-height: 36px;
+  padding: 6px 9px;
+  border: 1px solid var(--ui-line);
+  border-radius: 7px;
+  color: var(--ui-muted);
+  font-size: 12px;
+}
+
+.lecture-opening .opening-command-controls > button:first-child {
+  margin-right: auto;
+}
+
+.lecture-opening .opening-command-controls > button[aria-expanded='true'] {
+  background: var(--ui-soft);
+  color: var(--ui-accent);
+}
+
+.lecture-opening .opening-command-controls > [role='status'] {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: var(--ui-muted);
+  font-size: 12px;
+}
+
+.lecture-opening .opening-command-controls > .error {
+  color: var(--ui-error);
+}
+
+.studio-experience.teaching-studio.lecture-opening .preview-decision-bar {
+  left: 16px;
+  right: 16px;
+  bottom: calc(var(--workspace-bottom) + var(--composer-height) + 8px);
+}
+
+@media (width > 1050px) {
+  .studio-experience.teaching-studio.lecture-opening .inspector,
+  .studio-experience.teaching-studio.lecture-opening:not(
+      .lecture-mode
+    )[data-mobile-panel='selection']
+    .sidebar,
+  .studio-experience.teaching-studio.lecture-opening:not(.lecture-mode)[data-mobile-panel='layers']
+    .sidebar {
+    position: absolute;
+    display: flex;
+    top: 8px;
+    bottom: calc(var(--composer-height) + var(--preview-reserve) + 16px);
+    width: 320px;
+    height: auto;
+    min-height: 0;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    z-index: 50;
+    padding: 0 16px 18px;
+    border: 1px solid var(--ui-line);
+    border-radius: 12px;
+    background: var(--ui-panel);
+    box-shadow: 0 12px 32px var(--ui-shadow);
+  }
+
+  .studio-experience.teaching-studio.lecture-opening .inspector {
+    right: 16px;
+    display: none;
+  }
+
+  .studio-experience.teaching-studio.lecture-opening:not(.lecture-mode)[data-tools-open='true']
+    .inspector,
+  .studio-experience.teaching-studio.lecture-opening:not(.lecture-mode)[data-mobile-panel='tools']
+    .inspector {
+    display: flex;
+  }
+
+  .lecture-opening .model-tools {
+    left: 16px;
+    right: auto;
+  }
+
+  .studio-experience.teaching-studio.lecture-opening:not(
+      .lecture-mode
+    )[data-mobile-panel='selection']
+    .sidebar,
+  .studio-experience.teaching-studio.lecture-opening:not(.lecture-mode)[data-mobile-panel='layers']
+    .sidebar {
+    left: 16px;
+  }
+
+  .studio-experience.teaching-studio.lecture-opening .inspector > .mobile-panel-heading {
+    display: flex;
+  }
+}
+
+@media (max-width: 1050px) {
+  .app-shell.studio-experience.teaching-studio.lecture-opening .main-workspace {
+    padding: 7px 10px 5px;
+  }
+
+  .studio-experience.teaching-studio.lecture-opening .preview-decision-bar {
+    left: 10px;
+    right: 10px;
+  }
+
+  .lecture-opening .opening-command-controls,
+  .lecture-opening .opening-command-controls > button,
+  .lecture-opening .opening-menu > summary,
+  .lecture-opening .opening-view-menu > summary {
+    min-height: 44px;
+  }
+
+  .lecture-opening .opening-command-controls > button {
+    min-width: 44px;
+  }
+
+  .lecture-opening .opening-command-controls kbd {
+    display: none;
+  }
+}
+
+@media (max-width: 700px) {
+  .studio-experience.teaching-studio.lecture-opening
+    .workspace-scene
+    > .workspace-heading
+    .view-actions {
+    display: flex;
+    gap: 4px;
+  }
+
+  .lecture-opening .opening-view-content {
+    width: min(320px, calc(100vw - 32px));
+    right: -48px;
+  }
+
+  .lecture-opening .opening-menu > summary > span {
+    display: none;
+  }
+
+  .lecture-opening .opening-command-controls {
+    gap: 4px;
+  }
+
+  .lecture-opening .opening-command-controls > [role='status'] {
+    font-size: 11px;
+  }
+}

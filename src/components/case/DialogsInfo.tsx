@@ -120,6 +120,7 @@ export function DialogsInfo({ api }: { api: CaseStudioApi }) {
                 key={s}
                 onClick={() => {
                   api.setCommand(s);
+                  api.setCommandsOpen(true);
                   setModal(null);
                   setTimeout(() => api.commandInput.current?.focus(), 0);
                 }}

@@ -1,68 +1,131 @@
 'use client';
-import type { CaseStudioApi } from './api';
-import { Download, Layers3, Presentation, Settings2, Upload } from 'lucide-react';
+import {
+  CircleHelp,
+  Download,
+  Layers3,
+  MoreHorizontal,
+  MousePointer2,
+  Presentation,
+  Settings2,
+  SlidersHorizontal,
+  Upload,
+} from 'lucide-react';
 import { StudioThemeToggle } from '../shared/StudioTheme';
+import { useDisclosureMenu } from './useDisclosureMenu';
 
-export function CaseTopbar({ api }: { api: CaseStudioApi }) {
+export type CaseTopbarProps = {
+  lecture: boolean;
+  toolsOpen: boolean;
+  busy: boolean;
+  onOpenLibrary: () => void;
+  onToggleTools: () => void;
+  onToggleLecture: () => void;
+  onOpenCase: () => void;
+  onSaveCase: () => void;
+  onOpenSettings: () => void;
+  onOpenGuide: () => void;
+  onOpenSelection: () => void;
+  onOpenLayers: () => void;
+};
+
+export function CaseTopbar({
+  lecture,
+  toolsOpen,
+  busy,
+  onOpenLibrary,
+  onToggleTools,
+  onToggleLecture,
+  onOpenCase,
+  onSaveCase,
+  onOpenSettings,
+  onOpenGuide,
+  onOpenSelection,
+  onOpenLayers,
+}: CaseTopbarProps) {
+  const { menuRef, summaryRef } = useDisclosureMenu({ closeOnAction: true });
+
   return (
-    <>
-      <header className="topbar">
-        {/* eslint-disable-next-line @next/next/no-html-link-for-pages -- TODO(phase-3): intentional full reload of the static export */}
-        <a className="brand" href="/" aria-label="Forma home">
-          <span className="brand-icon">
-            <Layers3 size={22} />
-          </span>
-          forma
-          <span className="brand-divider" />
-          <span className="brand-sub">TEACHING STUDIO</span>
-        </a>
-        <div className="top-center">
-          <span className="studio-live-dot" />
-          Interactive classroom
-        </div>
-        <div className="header-actions">
-          <StudioThemeToggle />
-          <button
-            className="button light small workflows-button"
-            aria-label="Teaching library"
-            onClick={() => api.setModal('workflows')}
+    <header className="topbar">
+      <div className="brand" aria-label="Forma Teaching Studio">
+        <span className="brand-icon">
+          <Layers3 size={22} />
+        </span>
+        forma
+        <span className="brand-divider" />
+        <span className="brand-sub">TEACHING STUDIO</span>
+      </div>
+      <div className="top-center">
+        <span className="studio-live-dot" />
+        Interactive classroom
+      </div>
+      <div className="header-actions">
+        <button
+          type="button"
+          className="button light small workflows-button"
+          aria-label="Teaching library"
+          onClick={onOpenLibrary}
+        >
+          <Layers3 size={16} />
+          <span>Library</span>
+        </button>
+        <button
+          type="button"
+          className={`button light small ${toolsOpen ? 'active' : ''}`}
+          aria-label="Tools"
+          aria-pressed={toolsOpen}
+          onClick={onToggleTools}
+        >
+          <SlidersHorizontal size={16} />
+          <span>Tools</span>
+        </button>
+        <button
+          type="button"
+          className={`button small presentation-button ${lecture ? 'active' : ''}`}
+          aria-pressed={lecture}
+          aria-label={lecture ? 'Exit lecture mode' : 'Enter lecture mode'}
+          onClick={onToggleLecture}
+        >
+          <Presentation size={16} />
+          <span>{lecture ? 'Exit present' : 'Present'}</span>
+        </button>
+        <details ref={menuRef} className="opening-menu">
+          <summary
+            ref={summaryRef}
+            className="button light small"
+            aria-label="More workspace actions"
           >
-            <Layers3 size={16} />
-            <span>Teaching library</span>
-          </button>
-          <button
-            className={`button small presentation-button ${api.lecture ? 'active' : ''}`}
-            aria-pressed={api.lecture}
-            aria-label={api.lecture ? 'Exit lecture mode' : 'Enter lecture mode'}
-            onClick={() => api.setLecture(!api.lecture)}
-          >
-            <Presentation size={16} />
-            <span>{api.lecture ? 'Exit lecture' : 'Lecture mode'}</span>
-          </button>
-          <button
-            className="text-button open-case-button"
-            onClick={() => api.caseInput.current?.click()}
-            disabled={api.busy}
-          >
-            <Upload size={16} />
-            Open case
-          </button>
-          <button className="button dark small" aria-label="Save case" onClick={api.save}>
-            <Download size={15} />
-            <span>Save case</span>
-          </button>
-          <button
-            className="avatar"
-            onClick={() => {
-              api.setApiDraft(api.apiUrl || 'http://127.0.0.1:8000');
-              api.setModal('settings');
-            }}
-            aria-label="Open settings"
-          >
-            <Settings2 size={18} />
-          </button>
-        </div>
-      </header>
-    </>
+            <MoreHorizontal size={16} />
+            <span>More</span>
+          </summary>
+          <div className="opening-menu-content">
+            <button type="button" onClick={onOpenCase} disabled={busy}>
+              <Upload size={16} />
+              Open case
+            </button>
+            <button type="button" onClick={onSaveCase}>
+              <Download size={16} />
+              Save case
+            </button>
+            <button type="button" onClick={onOpenSettings}>
+              <Settings2 size={16} />
+              Settings
+            </button>
+            <StudioThemeToggle />
+            <button type="button" onClick={onOpenGuide}>
+              <CircleHelp size={16} />
+              Guide
+            </button>
+            <button type="button" onClick={onOpenSelection}>
+              <MousePointer2 size={16} />
+              Selection
+            </button>
+            <button type="button" onClick={onOpenLayers}>
+              <Layers3 size={16} />
+              Layers
+            </button>
+          </div>
+        </details>
+      </div>
+    </header>
   );
 }

@@ -11,6 +11,7 @@ import { mechanicsResponseCaption } from '@/lib/mechanics-presentation';
 
 export function CaseViewport({ api }: { api: CaseStudioApi }) {
   const { viewer, sceneInteraction } = api;
+  const editing = !api.lecture && (api.toolsOpen || api.mobilePanel === 'tools');
   return (
     <>
       <section
@@ -96,7 +97,7 @@ export function CaseViewport({ api }: { api: CaseStudioApi }) {
           bracketStyle={api.bracketStyle}
           ligatureColor={api.ligatureColor}
           opening={api.opening}
-          measureMode={api.measureMode}
+          measureMode={api.measureMode && editing}
           landmarks={api.landmarks}
           onLandmark={point => {
             api.setLandmarks(previous => (previous.length >= 2 ? [point] : [...previous, point]));
@@ -104,7 +105,7 @@ export function CaseViewport({ api }: { api: CaseStudioApi }) {
           }}
           intersections={api.highlightedContacts}
           attachments={api.attachments}
-          tool={api.tool}
+          tool={editing ? api.tool : 'orbit'}
           onPosePreview={(id, next) => {
             api.teaching.interact();
             if (!api.sandbox.lockedIds.includes(id))
@@ -136,66 +137,66 @@ export function CaseViewport({ api }: { api: CaseStudioApi }) {
             </button>
           </div>
         )}
-        <div className="viewport-top">
-          <span className="view-badge">
+        {(api.sandbox.pending || api.sandbox.unrestricted || !api.model.demo) && (
+          <div className="viewport-top">
+            <span className="view-badge">
+              <span />
+              {api.sandbox.pending
+                ? 'UNAPPLIED PREVIEW'
+                : api.sandbox.unrestricted
+                  ? 'UNRESTRICTED ILLUSTRATION'
+                  : 'IMPORTED CASE'}
+            </span>
+            <span className="unit-badge">mm · FDI numbering</span>
+          </div>
+        )}
+        {editing && (
+          <div className="model-tools" aria-label="3D tools">
+            <button
+              aria-label="Orbit tool"
+              title="Orbit"
+              className={api.tool === 'orbit' ? 'active' : ''}
+              onClick={() => api.chooseTool('orbit')}
+            >
+              <MousePointer2 size={19} />
+            </button>
+            <button
+              aria-label="Move with handles"
+              title="Move with world-axis handles"
+              className={api.tool === 'translate' ? 'active' : ''}
+              onClick={() => api.chooseTool('translate')}
+            >
+              <Move3D size={19} />
+            </button>
+            <button
+              aria-label="Rotate with handles"
+              title="Rotate with world-axis handles"
+              className={api.tool === 'rotate' ? 'active' : ''}
+              onClick={() => api.chooseTool('rotate')}
+            >
+              <Rotate3D size={19} />
+            </button>
             <span />
-            {api.sandbox.pending
-              ? 'UNAPPLIED PREVIEW'
-              : api.sandbox.unrestricted
-                ? 'UNRESTRICTED ILLUSTRATION'
-                : api.prepared
-                  ? 'AUTHORED TEACHING EXAMPLE'
-                  : api.model.demo
-                    ? 'SYNTHETIC SANDBOX'
-                    : 'IMPORTED CASE'}
-          </span>
-          <span className="unit-badge">mm · FDI numbering</span>
-        </div>
-        <div className="model-tools" aria-label="3D tools">
-          <button
-            aria-label="Orbit tool"
-            title="Orbit"
-            className={api.tool === 'orbit' ? 'active' : ''}
-            onClick={() => api.chooseTool('orbit')}
-          >
-            <MousePointer2 size={19} />
-          </button>
-          <button
-            aria-label="Move with handles"
-            title="Move with world-axis handles"
-            className={api.tool === 'translate' ? 'active' : ''}
-            onClick={() => api.chooseTool('translate')}
-          >
-            <Move3D size={19} />
-          </button>
-          <button
-            aria-label="Rotate with handles"
-            title="Rotate with world-axis handles"
-            className={api.tool === 'rotate' ? 'active' : ''}
-            onClick={() => api.chooseTool('rotate')}
-          >
-            <Rotate3D size={19} />
-          </button>
-          <span />
-          <button
-            aria-label="Focus selected teeth"
-            title="Focus selected teeth"
-            onClick={() => {
-              api.teaching.referenceInteraction();
-              viewer.current?.focus();
-            }}
-          >
-            <Focus size={19} />
-          </button>
-          <button
-            aria-label="Toggle tooth numbers"
-            title="Tooth numbers"
-            className={api.labels ? 'active' : ''}
-            onClick={() => api.setLabels(!api.labels)}
-          >
-            11
-          </button>
-        </div>
+            <button
+              aria-label="Focus selected teeth"
+              title="Focus selected teeth"
+              onClick={() => {
+                api.teaching.referenceInteraction();
+                viewer.current?.focus();
+              }}
+            >
+              <Focus size={19} />
+            </button>
+            <button
+              aria-label="Toggle tooth numbers"
+              title="Tooth numbers"
+              className={api.labels ? 'active' : ''}
+              onClick={() => api.setLabels(!api.labels)}
+            >
+              11
+            </button>
+          </div>
+        )}
         <div className="viewport-selection">
           <MousePointer2 size={14} />
           <span>
@@ -217,7 +218,7 @@ export function CaseViewport({ api }: { api: CaseStudioApi }) {
           <i />
         </div>
         <div className="viewport-hint">
-          {api.measureMode
+          {api.measureMode && editing
             ? 'Pick two crown-surface points'
             : 'Drag to orbit · Scroll to zoom · Shift-click to select'}
         </div>

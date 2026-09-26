@@ -1,87 +1,32 @@
 'use client';
 import type { CaseStudioApi } from './api';
-import type { ArchView } from '../viewer/Viewer';
-import { BookOpen, ChevronLeft, ChevronRight, Eye, Ruler, X } from 'lucide-react';
+import { BookOpen, ChevronLeft, ChevronRight, X } from 'lucide-react';
 
-export function CaseArchToolbar({ api }: { api: CaseStudioApi }) {
+export function CaseArchToolbar({
+  api,
+}: {
+  api: Pick<
+    CaseStudioApi,
+    | 'canRestoreWorkspace'
+    | 'caseDefinition'
+    | 'caseVariant'
+    | 'currentLesson'
+    | 'lecture'
+    | 'lessonStep'
+    | 'pathAudit'
+    | 'prepared'
+    | 'sandbox'
+    | 'scenario'
+    | 'setLecture'
+    | 'setLessonId'
+    | 'setLessonStep'
+    | 'setSandbox'
+    | 'teaching'
+    | 'workflowOrigin'
+  >;
+}) {
   return (
     <>
-      <div className="arch-toolbar">
-        <div className="segmented">
-          {(['both', 'upper', 'lower'] as ArchView[]).map(a => (
-            <button
-              key={a}
-              className={api.arch === a ? 'active' : ''}
-              onClick={() => {
-                api.setArch(a);
-                if (a === 'both' && api.view === 'occlusal') api.setCamera('perspective');
-              }}
-              aria-pressed={api.arch === a}
-            >
-              {a === 'both' ? (
-                <>
-                  <span className="arch-button-full">Both arches</span>
-                  <span className="arch-button-short">Both</span>
-                </>
-              ) : (
-                `${a[0].toUpperCase()}${a.slice(1)}`
-              )}
-            </button>
-          ))}
-        </div>
-        <div className="comparison-strip">
-          <button
-            className={api.stage === 0 ? 'active' : ''}
-            onClick={() =>
-              void api.teaching.execute(
-                [{ kind: 'comparison', mode: 'before' }],
-                'Show the edit start',
-              )
-            }
-          >
-            Before
-          </button>
-          <button
-            className={api.stage === api.stages && !api.ghost ? 'active' : ''}
-            onClick={() =>
-              void api.teaching.execute(
-                [{ kind: 'comparison', mode: 'after' }],
-                'Show the endpoint',
-              )
-            }
-          >
-            After
-          </button>
-          <button
-            className={api.ghost ? 'active' : ''}
-            aria-pressed={api.ghost}
-            disabled={!!api.sandbox.pending}
-            onClick={() =>
-              void api.teaching.execute(
-                [{ kind: 'comparison', mode: api.ghost ? 'off' : 'overlay' }],
-                api.ghost ? 'Hide original overlay' : 'Compare with the original',
-              )
-            }
-          >
-            <Eye size={13} />
-            Overlay
-          </button>
-        </div>
-        <button
-          className={`measure-tool ${api.measureMode ? 'active' : ''}`}
-          onClick={() => {
-            api.setMeasureMode(!api.measureMode);
-            api.setTool('orbit');
-            api.setToolsOpen(true);
-            api.setPanel('analysis');
-            api.setMobilePanel('tools');
-          }}
-          aria-pressed={api.measureMode}
-        >
-          <Ruler size={14} />
-          Measure
-        </button>
-      </div>
       {api.scenario && api.caseDefinition && api.caseVariant && (
         <div className="case-lesson-summary">
           <span>
