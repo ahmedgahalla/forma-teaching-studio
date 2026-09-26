@@ -16,6 +16,6 @@ Full command gate passed on the proposal branch: 1,575 frontend tests across 51 
 
 ## Current state and next action
 
-The proposal is documentation only and unapproved. The auditor and users should choose the case route, biology depth, reviewer, pivot treatment, presentation context and opening behaviour. Review the onboarding PR independently. No Phase 3 implementation starts until the roadmap is agreed; this task stops after opening the proposal PR.
+The proposal is open as [PR #12](https://github.com/ahmedgahalla/forma-teaching-studio/pull/12), documentation only and unapproved. The auditor and users should choose the case route, biology depth, reviewer, pivot treatment, presentation context and opening behaviour. Review the onboarding PR independently. No Phase 3 implementation starts until the roadmap is agreed; this task stops after opening the proposal PR.
 
 No builder changes to `docs/STATUS.md`. No new defect lesson was identified in this planning slice; the existing stale-doc, generated-audit, canvas-DPR and phase-numbering lessons were applied. The proportional-verification proposal in PR #10 was not assumed to be an active rule.

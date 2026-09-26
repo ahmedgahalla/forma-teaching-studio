@@ -1,6 +1,6 @@
 # Phase 3 — demo path proposal
 
-**Status:** proposed; implementation not started · **Branch:** `ahmed/phase-3-demo-proposal` · **PR:** pending · **Owner:** builder · **Date:** 2026-09-26
+**Status:** proposed; implementation not started · **Branch:** `ahmed/phase-3-demo-proposal` · **PR:** [#12](https://github.com/ahmedgahalla/forma-teaching-studio/pull/12) · **Owner:** builder · **Date:** 2026-09-26
 
 ## Decision requested
 
