@@ -11,6 +11,7 @@
 - [1.3 — test fix and docs](1.3-test-fix-and-docs.md): stale teaching-case audit regenerated (suite fully green), STATUS.md + numbered phases + ADRs 001–002, no-private-state migration
 - [1.4 — setup automation](1.4-setup-automation.md): `npm run setup`, self-enabling git hooks for dependency sync, README getting-started
 - [1.6 — PR lifecycle delegation](1.6-pr-lifecycle-delegation.md) (post-merge follow-up): Naser delegates the full PR lifecycle to Claude Code via `gh`; lesson recorded on a branch-protection required-check-name mismatch found while merging PR #5
+- [1.7 — Node version policy](1.7-node-version-policy.md) (post-merge follow-up): explicit Node ≥22.6 supported range, setup check accepts newer majors, CI matrix on Node 22 + 24, policy documented in AGENTS.md and README
 
 ## Outcome — verification gate on the final branch state (2026-09-25)
 
