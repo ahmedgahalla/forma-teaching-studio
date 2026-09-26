@@ -64,6 +64,13 @@ Entry format: mistake (with link) · root cause · prevention · status (`noted`
 - **Prevention:** when `npm ci` reports missing lock entries, regenerate wholesale (delete `package-lock.json` + `node_modules`, run `npm install`) rather than patching; CI's `npm ci` on Linux is the enforcement.
 - **Status:** automated · **Count:** 2
 
+## 9a. Required status checks named for the wrong CI shape
+
+- **Mistake:** the repo owner enabled a branch-protection ruleset on `main` (`protect-main`, applied 2026-09-26) requiring status checks literally named `frontend` and `backend`. The Node version policy PR (#5) split the frontend job into a `[22, 24]` matrix in the same PR, so the reported check-run names became `frontend (22)` and `frontend (24)` — the required `frontend` context never posts, and GitHub reports the PR as "not mergeable: the base branch policy prohibits the merge" even though every actual check is green. This blocks not just PR #5 but every future PR, since the required context can never be satisfied under the new CI shape.
+- **Root cause:** required status check names were set from the single-job CI config; nothing tied them to the workflow file, and a matrix strategy silently renames GitHub Actions check-run contexts to `<job> (<matrix-value>)`.
+- **Prevention:** whenever a CI job gains/loses a matrix dimension or is renamed, update branch-protection required status checks in the same change (or immediately after, since only repo admins can edit rulesets). Before relying on a merge, verify actual check-run names on the PR head commit (`gh api repos/<owner>/<repo>/commits/<sha>/check-runs --jq '.check_runs[].name'`) against the ruleset's `required_status_checks` (`gh api repos/<owner>/<repo>/rules/branches/main`), not just `gh pr checks`.
+- **Status:** noted · **Count:** 1
+
 ## 9. Incremental typecheck false greens
 
 - **Mistake:** during the Phase 2.4 classroom split, `npm run typecheck` reported clean while `tsc` with a fresh state found real missing-import errors; the broken state was even committed (fixed in the next commit). The full test suite caught it, but only after a misleading gate.

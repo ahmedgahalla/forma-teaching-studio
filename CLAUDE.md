@@ -25,3 +25,7 @@ Standing procedure for "audit PR #N" or "audit branch X". Everything shared — 
 8. **Fix mechanical issues** (formatting, lint, dead code, obvious duplication) on a separate `naser/audit-<branch>` branch with its own PR, so the builder's history stays clean. **Design-level issues get reported only, never silently rewritten.**
 9. **Merge decision.** Merge to main (merge commit, never squash/rebase) only when CI is green AND the audit has zero Blocking findings AND the PR updated its phase docs. Otherwise don't merge and report to Naser; Naser can override either way.
 10. **After a merge:** delete the branch, update `docs/STATUS.md`, tag main if a phase completed (e.g. `v0.13-phase1`), then run the session end protocol (phase doc, inbox items, lessons, handoff note).
+
+## PR lifecycle: standing delegation
+
+Naser has delegated the full PR lifecycle to Claude Code via `gh` (installed and authenticated as `NaserShadid`, repo write access, no admin). Handle create, update, comment, audit, and merge per the merge rules above without asking Naser to open or merge a PR manually. `gh` is at `C:\Program Files\GitHub CLI\gh.exe` (not on this session's default PATH — call it by full path, or in bash via `gh` if it resolves). Still stop and report rather than acting when genuinely blocked — e.g. a merge rejected by branch protection for reasons outside the documented merge rules (misconfigured required status checks, missing admin rights), or anything else this procedure doesn't already resolve.
