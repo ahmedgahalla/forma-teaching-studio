@@ -84,3 +84,17 @@ Entry format: mistake (with link) · root cause · prevention · status (`noted`
 - **Root cause:** phase/sub-phase numbers are picked by each branch independently from its own base, with no reservation mechanism; two branches open at once will pick the same next number whenever neither has seen the other's doc yet.
 - **Prevention:** no automation yet — sub-phase numbers aren't mechanically checkable across branches the way file limits or formatting are. When auditing a PR that adds a numbered phase/sub-phase doc, check `docs/phases/<phase>/README.md` on main _and_ grep open PRs' diffs for the same number before merging, not just the PR's own diff against its (possibly stale) base. Renumbering is mechanical once caught: rename the file, fix its own heading, the phase README line, and grep the repo for every reference to the old path/number.
 - **Status:** noted · **Count:** 1
+
+## 11. Installed runtimes differ from shell defaults
+
+- **Mistake:** the onboarding version check found `node` resolving to 24.14.0 and `python` to 3.10.10 even though Python 3.13.3 was installed; the requested environment was Node 22 / Python 3.13. See [Phase 1.9](phases/phase-1-tooling/1.9-builder-onboarding.md).
+- **Root cause:** executable lookup follows PATH order, and installing a second runtime does not guarantee that a new shell selects it. The setup script permits newer Node versions and can find Python through its launcher, so a successful setup alone does not prove the plain commands match the requested versions.
+- **Prevention:** verify both version and resolved executable in a fresh shell before setup, then run the gate with the intended runtimes. Preserve unrelated runtime installations when correcting PATH precedence.
+- **Status:** noted · **Count:** 1
+
+## 12. Generated caches retain another Windows account's permissions
+
+- **Mistake:** onboarding pytest passed with an inaccessible-cache warning, then ESLint failed while scanning the same old `backend/.pytest_cache`. See [Phase 1.9](phases/phase-1-tooling/1.9-builder-onboarding.md).
+- **Root cause:** the checkout had been created under a different Windows account, and the generated cache's ACL denied access to the current user even though tracked source was readable.
+- **Prevention:** use a fresh user-owned checkout/environment when changing execution accounts. If the active repository cannot be renamed, preserve the affected parent directory, restore its unchanged tracked files and ignored local configuration, and recreate dependencies. Re-run failed checks; do not hide a permissions failure behind a passing test count.
+- **Status:** noted · **Count:** 1
