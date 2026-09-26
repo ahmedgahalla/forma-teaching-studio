@@ -1,12 +1,20 @@
 # Phase 3 — demo path proposal
 
-**Status:** proposed; implementation not started · **Branch:** `ahmed/phase-3-demo-proposal` · **PR:** [#12](https://github.com/ahmedgahalla/forma-teaching-studio/pull/12) · **Owner:** builder · **Date:** 2026-09-26
+**Status:** revised proposal; teacher workflow awaiting review · **Branch:** `ahmed/phase-3-demo-proposal` · **PR:** [#12](https://github.com/ahmedgahalla/forma-teaching-studio/pull/12) · **Owner:** builder · **Date:** 2026-09-26
+
+## Latest direction: Explore and Lecture
+
+The owner now requests two primary experiences, **Explore** and **Lecture**, with the 3D model central and clicking, typing and voice available for supported teaching actions. The owner confirmed that lectures and notes will be **created beforehand inside Forma**. The current request is planning only.
+
+Read the [teacher workspace proposal](teacher-workspace-proposal.md) first. It specifies Prepare and Teach within Lecture, notes linked to model steps, temporary exploration with exact return, local lecture saving, input parity and PR-sized delivery. It supersedes this document's opening/navigation choices and expands the proposed scope to teacher-authored lectures. The case comparison, biology boundaries and timed demonstration below remain useful supporting material; their case/review decisions are still open.
+
+Since this original proposal was written, the owner authorized the first clutter-reduction slice: Phase 3.2 is implemented separately in [PR #13](https://github.com/ahmedgahalla/forma-teaching-studio/pull/13), with CI passing and the DPR 2 display audit still pending. It is not merged and does not include the proposed lecture builder. This PR remains documentation only. The source observations below describe the pre-3.2 baseline, not the current preview.
 
 ## Decision requested
 
 Approve a focused, model-first lecture demo lasting **3 minutes 40 seconds**, with two featured setups: **Movement types** (translation versus tipping) and **Anchorage and space use**. Make a **conceptual translation pressure–tension illustration** the central teaching moment. Keep **Midline diastema** as the visually simpler substitute for anchorage, chosen before the presentation rather than added to the timed script.
 
-This is a proposal for review, not an approved roadmap or a description of shipped features. This PR changes documentation only. The user and auditor choose the cases, biology depth and delivery order before implementation begins. The original three-case pitch remains a viable higher-cost alternative, compared below.
+This is a proposal for review, not an approved roadmap or a description of shipped features. This PR changes documentation only. The user and auditor choose the cases, biology depth and remaining delivery order before further implementation. The original three-case pitch remains a viable higher-cost alternative, compared below.
 
 The audience is an orthodontist who lectures at universities, watching in person and in a recorded video. Presentable beats feature-complete: one coherent workspace, clear questions before answers, large visible anatomy, deterministic replay and a reliable return to the professor's setup. Try Mode stays available for optional exploration; AI and voice are not dependencies of the rehearsed route.
 
@@ -145,6 +153,8 @@ The biological sources below ground terminology and constrain the planned illust
 
 ## Proposed PR sequence (priority order, subject to approval)
 
+The original 3.1–3.8 numbers remain reserved. The [revised delivery order](teacher-workspace-proposal.md#delivery-order) adds the teacher-created lecture work as proposed 3.9–3.14 slices and explains how it uses the original slices. Only 3.2 has an implementation PR; numbering does not imply approval or completion.
+
 Each row is one bounded implementation PR with its own numbered sub-phase document. Create the detailed child documents only when the roadmap is approved. The sequence delivers offline reliability and a readable stage first, then a coherent presentation and its biology explanation; it does not ship a succession of unrelated top-level modes.
 
 | Sub-phase                                      | One-PR scope / likely seams                                                                                                                                                                                                                                                                                           | Exit evidence and dependency                                                                                                                                                                                     |
@@ -185,8 +195,8 @@ Use the same 3:40 sequence live and on video, with readable captions and human n
 3. **Educator review:** who can approve the diagram, direction labels and narration, and when? May the meeting show an explicitly labelled draft for feedback if that review is not available beforehand?
 4. **Teaching pivot:** retain the existing crown-centred tip as a geometric comparison, or commission a separate root-level-pivot tipping illustration? No physiological pivot will be inferred automatically.
 5. **Presentation context:** target date, projector/resolution, room brightness, preferred Midnight/Clinical theme and narration language? Default proposal: 16:9 English, current Midnight palette, human narration, with Clinical available.
-6. **Opening behaviour:** approve a lecture-ready full bite with an optional Begin action and Tools for free exploration, rather than automatically running a lesson? The proposed default is paused and professor-controlled.
+6. **Opening behaviour:** superseded by the owner's Explore/Lecture request; see the teacher workspace proposal. Both experiences start paused and remain professor-controlled.
 
 ## Outcome of this planning PR
 
-A reviewable case comparison, timed script, UI/biology design, PR-sized sequence and decision list are supplied. The Node version policy inbox item is separately signed off in this docs-only PR. The three refactoring items are not falsely closed by a plan. No feature, application code, asset, dependency, AGENTS.md or auditor-owned `docs/STATUS.md` is changed. Implementation stops here until the proposal is reviewed.
+A reviewable teacher-workspace plan, case comparison, timed script, UI/biology design, PR-sized sequence and decision list are supplied. The Node version policy inbox item is separately signed off in this docs-only PR. The three refactoring items are not falsely closed by a plan. No application code, asset, dependency, AGENTS.md or auditor-owned `docs/STATUS.md` is changed in this PR. Further implementation waits for review of the revised direction.

@@ -19,3 +19,23 @@ Full command gate passed on the proposal branch: 1,575 frontend tests across 51 
 The proposal is open as [PR #12](https://github.com/ahmedgahalla/forma-teaching-studio/pull/12), documentation only and unapproved. The auditor and users should choose the case route, biology depth, reviewer, pivot treatment, presentation context and opening behaviour. Review the onboarding PR independently. No Phase 3 implementation starts until the roadmap is agreed; this task stops after opening the proposal PR.
 
 No builder changes to `docs/STATUS.md`. No new defect lesson was identified in this planning slice; the existing stale-doc, generated-audit, canvas-DPR and phase-numbering lessons were applied. The proportional-verification proposal in PR #10 was not assumed to be an active rule.
+
+## Follow-up: teacher-created lectures and exploration
+
+The owner subsequently authorized the first UI implementation slice, now in PR #13, then explicitly requested planning before further building. The revised brief is two experiences, Explore and Lecture, with the 3D model central and supported control through clicking, typing and voice. The owner confirmed that lecture notes will be created beforehand inside Forma. The earlier stop statement above describes the original proposal session; this follow-up records the current request.
+
+Added [teacher workspace proposal](../phases/phase-3-demo-path/teacher-workspace-proposal.md) and made it the phase README's current direction. The plan covers Prepare → Rehearse → Teach, saved notes and model setups, existing authored demonstrations, hidden answers, local lecture files, temporary exploration with exact return and input parity. It distinguishes static scene capture from motion authoring and ordinary shared-screen notes from a later private audience-window arrangement. Proposed new slices 3.9–3.14 leave the original 3.1–3.8 numbers intact.
+
+Session start pulled main (already current), read status/lessons/inbox/phase/handoffs and checked open PRs. Planning work uses an isolated worktree on the existing proposal branch so the current PR #13 app preview remains untouched. Dependencies were installed with `npm run setup` in that worktree. The application, assets, dependency declarations, AGENTS.md and STATUS are unchanged.
+
+### Current review boundary
+
+Review the teacher journey before more implementation. One functional shared-screen experience is the recommended starting point; a separate audience window and additional voice languages remain decisions. English browser speech is available in the existing code, but offline recognition is not guaranteed. The original case choice and biology review decisions remain open. PR #13 has passing CI but retains its outstanding DPR 2 display audit; this docs proposal does not resolve that device check.
+
+Existing state-preservation, stale-documentation and phase-numbering lessons informed the proposal. The Node-policy sign-off stays resolved on this branch; the props, CSS and Try Mode follow-ups remain open. The existing opening-review inbox item already covers PR #13; no duplicate opening audit request was created.
+
+### Follow-up verification
+
+Setup, 470 backend tests, nonincremental typecheck, zero-warning lint, formatting, file limits (244 source files), local documentation links, whitespace checks and the production build passed. The full frontend gate is **not green locally**: two default runs passed 1,574/1,575 tests and timed out in the unchanged real-GLB geometry oracle. A full run with `--maxWorkers=1` also exceeded its unchanged 30-second limit. No application/test code, timeout or assertion was modified. Recorded the recurring verification issue in [the auditor inbox](../reviews/from-builder/2026-09-26-geometry-oracle-timeout.md) and lesson 12; the underlying slowdown remains unproven. This does not block reading the plan, but must be represented honestly in PR verification.
+
+The planning update changes no screens, so no new browser/device acceptance is claimed. An independent read-only proposal review led to two clarifications: attaching a demonstration explicitly adopts its compatible starting model, and clickable note actions/tooth-linked annotations are later extensions rather than hidden MVP scope.
