@@ -63,7 +63,7 @@ Read [docs/architecture/overview.md](docs/architecture/overview.md) before touch
 
 ## Code standards — apply to every change you make
 
-- Component-based, single responsibility. Files around **300 lines max**, normal line lengths. CI enforces limits (`npm run check:limits`); existing oversized files are allowlisted in `scripts/check-file-limits.mjs` until Phase 2 splits them — do not add new ones.
+- Component-based, single responsibility. Files around **300 lines max**, normal line lengths. CI enforces limits (`npm run check:limits`). The remaining allowlist entries in `scripts/check-file-limits.mjs` are permanent, individually justified exceptions (see ADR 003); none may grow, and no new entry is added without an ADR.
 - No duplicated or dead code. Delete what's unused.
 - **Case and lesson content stays as data**, separate from logic (the `teaching-cases.ts` / `workflows.ts` pattern).
 - TypeScript strict; keep `npm run typecheck` clean. Python follows the existing typed-Pydantic style in `backend/`.
