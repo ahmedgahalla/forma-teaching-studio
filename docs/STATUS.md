@@ -13,7 +13,8 @@ Auditor-owned (Claude Code); updated after each merge. Builder PRs do not edit t
 
 ## In progress
 
-- Nothing on a branch. Open auditor follow-ups are filed in `docs/reviews/from-auditor/` (narrow case-view props; split try-mode.ts; CSS dedupe; PR #5's AGENTS.md sign-off — builder should mark resolved or wontfix next session).
+- **PR #10 — `naser/proportional-verification-gate`, open**, pending CI and builder sign-off (AGENTS.md change). Scales the local verification gate to docs-only / code / UI change scope, folds the post-merge STATUS.md update into the merging PR for own-work merges, caps handoff notes to a week. Doc: `docs/phases/phase-1-tooling/1.8-proportional-verification-gate.md`.
+- Open auditor follow-ups are filed in `docs/reviews/from-auditor/` (narrow case-view props; split try-mode.ts; CSS dedupe; PR #5's AGENTS.md sign-off; PR #10's AGENTS.md sign-off above — builder should mark each resolved or wontfix next session).
 
 ## Pending (external)
 

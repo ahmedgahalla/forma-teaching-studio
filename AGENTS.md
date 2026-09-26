@@ -31,7 +31,7 @@ This file is the complete shared context for every AI tool working in this repo.
 1. Update the phase or sub-phase doc for what you did.
 2. Write inbox items (`docs/reviews/`) if the other role needs to act on something.
 3. Record new lessons in `docs/lessons-learned.md` (see the learning loop below).
-4. Write a handoff note to `docs/handoffs/YYYY-MM-DD-<branch>.md`: what was done, the current state, what's next, open questions.
+4. Write a short handoff note to `docs/handoffs/YYYY-MM-DD-<branch>.md`: what was done, the current state, what's next, open questions. Keep it to a few lines per point — it's a pointer to the phase docs and PR, not a duplicate of them. If any handoff note in the folder is older than a week and not yet folded in, roll it (and any other stale ones) into a one-paragraph summary before adding your new note, so session start has less to read.
 
 ## Project purpose
 
@@ -97,7 +97,7 @@ Read [docs/architecture/overview.md](docs/architecture/overview.md) before touch
 
 If any condition fails: do not merge, report to Naser. Naser can override either way. Merge method is always **"Create a merge commit"** — never squash, never rebase (either would break `.git-blame-ignore-revs`). Phase 2 merges only after Phase 1, and only once it's been updated from main.
 
-**After every merge:** delete the branch, update `docs/STATUS.md`, and tag main when a phase completes (e.g. `v0.13-phase1`).
+**After every merge:** delete the branch, update `docs/STATUS.md`, and tag main when a phase completes (e.g. `v0.13-phase1`). When you are merging your own work (an auditor merging a `naser/...` PR), fold the `docs/STATUS.md` update into that same PR before merging, rather than opening a separate post-merge docs PR afterward. When merging someone else's PR (e.g. the auditor merging a builder's `ahmed/...` PR), the `docs/STATUS.md` update still can't be part of that PR (the other role doesn't touch it) and goes through its own follow-up PR as before.
 
 ## Documentation rules
 
@@ -106,7 +106,7 @@ If any condition fails: do not merge, report to Naser. Naser can override either
 - `docs/decisions/` — ADRs, numbered `NNN-short-title.md`, for choices that constrain future work.
 - `docs/audits/` — the auditor's PR review reports.
 - `docs/reviews/` — the cross-review inbox (see its README): `from-builder/` and `from-auditor/`, one file per finding, `YYYY-MM-DD-short-title.md`, each with a `status: open | resolved | wontfix` line.
-- `docs/handoffs/` — session handoff notes, `YYYY-MM-DD-<branch>.md`.
+- `docs/handoffs/` — short session handoff notes, `YYYY-MM-DD-<branch>.md`. Notes older than a week get rolled into `docs/handoffs/older-summary.md` (one paragraph per rolled-up note, oldest first) and their individual files are deleted; only the last week of notes plus that summary file should exist at any time.
 - `docs/lessons-learned.md` — the learning loop (below).
 - Existing guides in `docs/` keep their names and locations — don't move or rename them.
 - **Docs are updated in the same PR as the change they describe.** Stale docs are a defect (see lessons-learned). All project context lives in this repo — no tool keeps private project state outside it.
@@ -116,6 +116,12 @@ If any condition fails: do not merge, report to Naser. Naser can override either
 Both tools read `docs/lessons-learned.md` at session start. Every audit feeds it: each Blocking or Should-fix finding gets a root cause and a prevention; if it matches an existing lesson, increment that lesson's count, otherwise add a new entry. The same applies to findings in `docs/reviews/from-builder/`. Each entry records: the mistake (with a link), root cause, prevention, status (`noted` / `rule` / `automated`), and occurrence count. Promotion: on the second occurrence, promote to a rule in this file; if mechanically checkable, automate it at any count (ESLint rule, CI check, or test). Prefer automation over rules, and rules over notes.
 
 ## Verification gate — run after every slice of work and before every PR
+
+Scale the local gate to what the change actually touches — CI always runs the full gate regardless of local scope, so this only changes what you run yourself before opening the PR:
+
+- **Docs-only changes** (only `.md` files, or files under `docs/`): run step 4 (`format:check`) locally and rely on CI for the rest. Skip the local build, test suite, and browser check.
+- **Code changes with no UI impact**: run the full gate below, steps 1–7. Skip step 8 (browser check).
+- **UI or rendering changes**: run the full gate below, including step 8 at DPR 1 and DPR 2.
 
 1. `npm test` — passing (the count may drop only for deliberately removed dead code; list removals in the phase doc)
 2. `npm run typecheck` — clean
