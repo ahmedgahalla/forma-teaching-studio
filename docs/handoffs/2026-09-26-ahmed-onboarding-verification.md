@@ -7,7 +7,7 @@
 - Aligned fresh PowerShell 5.1/7 sessions to Node 22.23.3 and Python 3.13.3, preserving the older installations. Node was installed from the official Windows archive after checksum verification. Git is 2.49.0.windows.1.
 - Completed `npm run setup`; hooks and dependency sync are enabled. Existing ignored `backend/.env` was preserved without exposing its values.
 - An old sandbox-owned `backend/.pytest_cache` caused the first lint run to fail and pytest to emit a cache warning. A full-checkout rename was blocked by the active app. Preserved the entire backend under `C:\Users\ahmed\Documents\Codex\.cache\forma-onboarding\backend-before-refresh`, restored its unchanged tracked files from Git, restored its ignored `.env`, and reran setup to create a fresh virtual environment. No old files were deleted.
-- Applied and independently verified GitHub `protect-main` ruleset `24035163`: required PR, zero required approvals, required `frontend`/`backend` checks from GitHub Actions, no deletion or force pushes and no bypass actors. Merge commits only; automatic head-branch deletion enabled.
+- Applied and independently verified GitHub `protect-main` ruleset `24035163`: required PR, zero required approvals, initially required `frontend`/`backend` checks from GitHub Actions, no deletion or force pushes and no bypass actors. Merge commits only; automatic head-branch deletion enabled. The current matrix check names are recorded below.
 - Root `AGENTS.md` already provides the persistent project instruction requested by the user. It was read, not modified. Builder never pushes main or edits `docs/STATUS.md`; Claude Code audits and merges.
 
 ## Verification
@@ -26,12 +26,16 @@
 
 The browser check was a functional smoke check, not a new six-screen pixel comparison or DPR 1/2 certification. No UI source changed. No live AI, microphone or physical-device acceptance is claimed. The temporary browser tab and local smoke-test server were closed afterward.
 
+After merging `dfd377f`, all seven command checks above were rerun successfully: 1,575 frontend tests, 470 backend tests without warnings, typecheck, zero-warning lint, formatting, 244 files within limits, and the production build. The earlier browser smoke evidence is unchanged; documentation merge resolution did not change the UI.
+
 ## Next
 
-- Auditor: review this setup record and update the external-settings item in `docs/STATUS.md`; see the new builder inbox note.
-- Phase 3 remains blocked on Naser's specification, as directed by the existing status and handoff. No implementation was attempted.
+- Auditor: review the onboarding PR. PR #9 already updated the external-settings item; the builder handoff is resolved.
+- The user supplied a Phase 3 demo planning brief. Prepare a separate docs-only proposal PR after onboarding; no implementation is authorized yet.
 - Existing auditor backlog is unchanged: narrower case-view props, Try Mode package split and CSS deduplication.
-- The existing shared-workflow PR #3 is separate and remains open; this task does not merge it or depend on its unmerged documentation.
+- PR #3 and the Node/lifecycle follow-ups are now merged. This branch merged latest main (`dfd377f`); onboarding is numbered 1.9 because 1.5–1.7 are taken and open PR #10 reserves 1.8.
+- Effective branch rules were rechecked: `frontend (22)`, `frontend (24)`, and `backend` are required. No settings change was needed.
+- The next docs-only proposal will record the requested builder sign-off on the Node policy. The proportional-verification proposal in PR #10 is still open and was not treated as an active rule.
 
 ## Open questions
 

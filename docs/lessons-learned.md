@@ -64,6 +64,13 @@ Entry format: mistake (with link) · root cause · prevention · status (`noted`
 - **Prevention:** when `npm ci` reports missing lock entries, regenerate wholesale (delete `package-lock.json` + `node_modules`, run `npm install`) rather than patching; CI's `npm ci` on Linux is the enforcement.
 - **Status:** automated · **Count:** 2
 
+## 9a. Required status checks named for the wrong CI shape
+
+- **Mistake:** the repo owner enabled a branch-protection ruleset on `main` (`protect-main`, applied 2026-09-26) requiring status checks literally named `frontend` and `backend`. The Node version policy PR (#5) split the frontend job into a `[22, 24]` matrix in the same PR, so the reported check-run names became `frontend (22)` and `frontend (24)` — the required `frontend` context never posts, and GitHub reports the PR as "not mergeable: the base branch policy prohibits the merge" even though every actual check is green. This blocks not just PR #5 but every future PR, since the required context can never be satisfied under the new CI shape.
+- **Root cause:** required status check names were set from the single-job CI config; nothing tied them to the workflow file, and a matrix strategy silently renames GitHub Actions check-run contexts to `<job> (<matrix-value>)`.
+- **Prevention:** whenever a CI job gains/loses a matrix dimension or is renamed, update branch-protection required status checks in the same change (or immediately after, since only repo admins can edit rulesets). Before relying on a merge, verify actual check-run names on the PR head commit (`gh api repos/<owner>/<repo>/commits/<sha>/check-runs --jq '.check_runs[].name'`) against the ruleset's `required_status_checks` (`gh api repos/<owner>/<repo>/rules/branches/main`), not just `gh pr checks`.
+- **Status:** noted · **Count:** 1
+
 ## 9. Incremental typecheck false greens
 
 - **Mistake:** during the Phase 2.4 classroom split, `npm run typecheck` reported clean while `tsc` with a fresh state found real missing-import errors; the broken state was even committed (fixed in the next commit). The full test suite caught it, but only after a misleading gate.
@@ -71,16 +78,23 @@ Entry format: mistake (with link) · root cause · prevention · status (`noted`
 - **Prevention:** the `typecheck` script now runs `tsc --noEmit --incremental false`, so local runs match CI's fresh-checkout behavior.
 - **Status:** automated · **Count:** 1
 
-## 10. Installed runtimes differ from shell defaults
+## 10. Concurrent PRs claim the same next phase-doc number
 
-- **Mistake:** the onboarding version check found `node` resolving to 24.14.0 and `python` to 3.10.10 even though Python 3.13.3 was installed; the requested environment was Node 22 / Python 3.13. See [Phase 1.6](phases/phase-1-tooling/1.6-builder-onboarding.md).
+- **Mistake:** PR #3 (`ahmed/local-project-setup`) and PR #5 (`naser/node-version-policy`) were both opened around the same time, each adding a new sub-phase doc numbered `1.5`, and each based on a main that predated the other's PR — so neither branch's diff showed the collision until an auditor session merged main into both and hit the same `docs/phases/phase-1-tooling/README.md` conflict twice (once against each other, once against a same-session doc that had already claimed `1.6`). Resolving it correctly required deciding which PR keeps `1.5` (the one merging first) and renumbering the other's file, heading, README index entry, and every cross-reference (handoff notes, etc.) on its branch before merge.
+- **Root cause:** phase/sub-phase numbers are picked by each branch independently from its own base, with no reservation mechanism; two branches open at once will pick the same next number whenever neither has seen the other's doc yet.
+- **Prevention:** no automation yet — sub-phase numbers aren't mechanically checkable across branches the way file limits or formatting are. When auditing a PR that adds a numbered phase/sub-phase doc, check `docs/phases/<phase>/README.md` on main _and_ grep open PRs' diffs for the same number before merging, not just the PR's own diff against its (possibly stale) base. Renumbering is mechanical once caught: rename the file, fix its own heading, the phase README line, and grep the repo for every reference to the old path/number.
+- **Status:** noted · **Count:** 1
+
+## 11. Installed runtimes differ from shell defaults
+
+- **Mistake:** the onboarding version check found `node` resolving to 24.14.0 and `python` to 3.10.10 even though Python 3.13.3 was installed; the requested environment was Node 22 / Python 3.13. See [Phase 1.9](phases/phase-1-tooling/1.9-builder-onboarding.md).
 - **Root cause:** executable lookup follows PATH order, and installing a second runtime does not guarantee that a new shell selects it. The setup script permits newer Node versions and can find Python through its launcher, so a successful setup alone does not prove the plain commands match the requested versions.
 - **Prevention:** verify both version and resolved executable in a fresh shell before setup, then run the gate with the intended runtimes. Preserve unrelated runtime installations when correcting PATH precedence.
 - **Status:** noted · **Count:** 1
 
-## 11. Generated caches retain another Windows account's permissions
+## 12. Generated caches retain another Windows account's permissions
 
-- **Mistake:** onboarding pytest passed with an inaccessible-cache warning, then ESLint failed while scanning the same old `backend/.pytest_cache`. See [Phase 1.6](phases/phase-1-tooling/1.6-builder-onboarding.md).
+- **Mistake:** onboarding pytest passed with an inaccessible-cache warning, then ESLint failed while scanning the same old `backend/.pytest_cache`. See [Phase 1.9](phases/phase-1-tooling/1.9-builder-onboarding.md).
 - **Root cause:** the checkout had been created under a different Windows account, and the generated cache's ACL denied access to the current user even though tracked source was readable.
 - **Prevention:** use a fresh user-owned checkout/environment when changing execution accounts. If the active repository cannot be renamed, preserve the affected parent directory, restore its unchanged tracked files and ignored local configuration, and recreate dependencies. Re-run failed checks; do not hide a permissions failure behind a passing test count.
 - **Status:** noted · **Count:** 1

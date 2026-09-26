@@ -6,9 +6,11 @@ Start with the [combined workspace guide](docs/COMBINED_WORKSPACE.md) to move be
 
 ## Getting started (development)
 
-1. Install Git, Node 22, and Python 3.13.
+1. Install Git, Node 22 or newer (the exact floor is 22.6), and Python 3.13.
 2. Clone the repo.
 3. Run `npm run setup`.
+
+**Node version policy:** any Node from 22.6 upward is supported — `engines` and `npm run setup` both accept newer majors, and CI tests Node 22 and Node 24. `.nvmrc` pins 22 as the nvm baseline.
 
 Everything after that is automatic: setup installs frontend and backend dependencies, configures git, and enables hooks that re-sync dependencies whenever a pull changes `package-lock.json` or `backend/requirements.txt`. Developers and AI tools follow [AGENTS.md](AGENTS.md).
 
