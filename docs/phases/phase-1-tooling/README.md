@@ -13,6 +13,7 @@
 - [1.5 — shared project workflow](1.5-shared-project-workflow.md): dedicated local checkout, receiving merged changes, branch-based publishing, and dependency-sync boundaries
 - [1.6 — PR lifecycle delegation](1.6-pr-lifecycle-delegation.md) (post-merge follow-up): Naser delegates the full PR lifecycle to Claude Code via `gh`; lesson recorded on a branch-protection required-check-name mismatch found while merging PR #5
 - [1.7 — Node version policy](1.7-node-version-policy.md) (post-merge follow-up): explicit Node ≥22.6 supported range, setup check accepts newer majors, CI matrix on Node 22 + 24, policy documented in AGENTS.md and README
+- [1.8 — Proportional verification gate](1.8-proportional-verification-gate.md) (post-merge follow-up): local gate scaled to docs-only / code / UI changes, STATUS.md update folded into the merging PR when it's your own work, handoff notes capped to a week with older ones rolled into a summary
 
 ## Outcome — verification gate on the final branch state (2026-09-25)
 
