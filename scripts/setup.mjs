@@ -3,7 +3,7 @@
 // configures git. Safe to rerun any time; the git hooks in .githooks/ keep
 // dependencies in sync after pulls.
 import { execSync, spawnSync } from 'node:child_process';
-import { existsSync, readFileSync } from 'node:fs';
+import { existsSync } from 'node:fs';
 import path from 'node:path';
 import process from 'node:process';
 import { fileURLToPath } from 'node:url';
@@ -20,20 +20,17 @@ const run = (command, options = {}) => {
   if (result.status !== 0) throw new Error(`"${command}" exited with ${result.status}`);
 };
 
-// 1. Node version against .nvmrc
-const wanted = readFileSync(path.join(root, '.nvmrc'), 'utf8').trim();
+// 1. Node version. Policy (AGENTS.md § verification gate): Node 22 or newer is
+// supported — 22.6 is the exact floor because the strip-types scripts need it —
+// and CI tests Node 22 and 24. .nvmrc stays at 22 as the nvm baseline.
 const nodeVersion = process.versions.node;
 const [major, minor] = nodeVersion.split('.').map(Number);
-if (major < Number(wanted) || (major === 22 && minor < 6)) {
+if (major < 22 || (major === 22 && minor < 6)) {
   fail(
-    `Node >=${wanted} required, >=22.6 for the strip-types scripts (found ${nodeVersion}). Install it from https://nodejs.org and rerun.`,
-  );
-} else if (major > Number(wanted)) {
-  console.log(
-    `! Node ${nodeVersion} (newer than the pinned ${wanted}; CI runs ${wanted} — fine locally)`,
+    `Node 22.6 or newer required (found ${nodeVersion}). Install it from https://nodejs.org and rerun.`,
   );
 } else {
-  ok(`Node ${nodeVersion}`);
+  ok(`Node ${nodeVersion} (supported range: >=22.6; CI tests 22 and 24)`);
 }
 
 // 2. Python version (backend needs 3.13)

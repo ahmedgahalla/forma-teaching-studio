@@ -126,4 +126,6 @@ Both tools read `docs/lessons-learned.md` at session start. Every audit feeds it
 7. `backend/`: `.venv\Scripts\python.exe -m pytest -q` — passing (Python 3.13)
 8. A real browser check of the affected screens against the baseline screenshots: same visuals, same behavior. For UI changes, actually click through a prepared case, the braces workflow, and a typed command, and check canvases at DPR 1 and DPR 2.
 
-**A PR cannot merge unless CI is green** (`.github/workflows/ci.yml` runs 1–7 on Node 22 / Python 3.13, matching `.nvmrc` and `engines`). Report results honestly — a failing check is reported as failing, never skipped silently.
+**A PR cannot merge unless CI is green** (`.github/workflows/ci.yml` runs 1–7 on Node 22 **and** Node 24 plus Python 3.13). Report results honestly — a failing check is reported as failing, never skipped silently.
+
+**Node version policy:** Node 22 or newer is supported. The exact floor is **22.6** (`engines` in package.json; the `--experimental-strip-types` scripts need it) — newer majors pass, both locally (`npm run setup` accepts any Node ≥22.6) and in CI, which tests both ends of the range (22 and 24). `.nvmrc` stays at 22 as the nvm baseline; developers may run any supported version.
