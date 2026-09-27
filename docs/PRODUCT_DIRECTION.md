@@ -1,6 +1,6 @@
 # Forma product direction — one coherent lecture workspace
 
-Proposed next design pass, following the request to make Forma excellent without spreading the experience across too many places. This is a proposal, not a claim that the consolidation has shipped.
+Product direction and dated implementation notes for one coherent teacher workspace. The continuing design goals below are not a claim that every consolidation item has shipped. Each implementation note identifies its bounded scope and remaining acceptance work.
 
 ## First usability pass · 24 September 2026
 
@@ -10,19 +10,31 @@ Implemented a bounded first step: a pinned command bar, separate camera row, con
 
 Phase 3.2 implements the opening-screen portion of this proposal in the current code. Tools and Commands start closed; the header keeps Library, Tools, Present and More. More holds secondary workspace actions, while View groups cameras, arches, comparison and presentation controls beside a directly available Fit button. One Undo/Redo pair and compact command feedback remain below the model; `/` opens and focuses Commands, and preview decisions remain independent. This supersedes the always-visible composer and camera row from the first usability pass. The broader consolidation, complete demo scripts and proposed biology illustration are not completed by this slice.
 
+## Ready-made lecture and free exploration · 27 September 2026
+
+[Phase 3.9](phases/phase-3-demo-path/3.9-teacher-lectures.md) implements the Explore/Lecture journey on `ahmed/phase-3-teacher-lectures`, based on Phase 4 at `ff1b3e5` and the PR #13 opening dependency. The owner's latest direction is a finished built-in sample, with lecture creation removed. **Explore** keeps spontaneous model work and existing tools. **Lecture** opens directly in Teach: predict, demonstrate translation, demonstrate tipping, recap. Rehearse uses the same four steps with notes exposed.
+
+This is the consolidated first vertical slice of the earlier proposal. Its proposed 3.10–3.14 milestones are not a parallel unfinished roadmap: runner, return and input work are retained; authoring and persistence are deliberately removed. There is no Prepare mode, lecture library, editing, capture, import/export or lecture saving. Former browser lecture saves remain untouched because the runner does not access storage. The fixed sample is validated data with stable identifiers and canonical prepared-case scenes; opening it does not inherit an edited workspace.
+
+Next/Previous restore defined starting states; one playback strip controls the current authored demonstration. The opening and recap are static. Explore this question preserves the exact paused lecture, including answer and notes visibility, and keeps the earlier standalone Explore workspace separate. Return points last only for the session. Notes opened in Teach are visible in the projected window, not private. Experiments never rewrite the sample; its two movements reuse the existing audited translation and tipping paths, without new biology or clinical prediction.
+
+Phase 4's explicitly enabled hands-free voice, glossary, tooth study and visual improvements remain the interaction foundation. Clicking, typing and supported local voice commands share validated operations. Prepared playback and typed controls do not depend on the AI backend; browser speech recognition is not guaranteed offline.
+
+This branch is implemented but not declared released: local verification records one existing full-suite BVH timeout (passing alone), and real browser access is blocked by security policy. [PR #14](https://github.com/ahmedgahalla/forma-teaching-studio/pull/14) is stacked; the current main-targeted CI trigger does not run on it. The four-step script totals an estimated **205 seconds (3 minutes 25 seconds), not yet measured**. No browser, DPR 1/2, microphone or projector verification is claimed. Lecture authoring, PDF/PowerPoint import, a separate audience window, arbitrary animation, cloud services and new biology content remain outside this scope.
+
 ## Product promise
 
-A professor can select a teaching setup, demonstrate a concept on a clear 3D mouth, ask students to predict a change, then reveal and compare the result without leaving the workspace.
+A professor can freely explore a clear 3D mouth or open a finished lecture, ask students to predict a change, then demonstrate, reveal and compare while keeping the model central.
 
 Free experimentation and guided demonstrations use the same model workspace. A case changes the starting arrangement and available authored demonstrations; it should not feel like opening a different application.
 
 ## Screen structure
 
-- **Top:** current teaching setup, Library, Undo/Redo, Lecture view, and a compact menu for saving, importing, exporting and settings.
+- **Top:** Explore/Lecture, the current teaching setup or lecture, existing Explore Library and a compact menu. Rehearse/Teach and step navigation belong within Lecture.
 - **Centre:** the dominant 3D model with one compact camera/focus toolbar. Selection stays visible and anatomy is easy to inspect.
-- **Right:** one context panel. With a selection, show its movement controls. During a guided demonstration, show the question and explanation. During a preview, show the proposed change, conflicts, Apply and Cancel.
+- **Right:** one context panel. Lecture shows the question and optional notes/answer. Free exploration exposes relevant selection tools. Preview decisions remain directly accessible.
 - **Below the model:** one playback bar, shown when a demonstration or edit exists. Avoid duplicate playback controls inside multiple panels.
-- **Bottom:** one command bar for typed and optional hold-to-talk instructions, with a short interpreted-action caption.
+- **Bottom:** compact command access and one Undo/Redo pair, with visible interpreted-action feedback. Hold-to-talk and explicitly enabled hands-free recognition use the same supported commands.
 
 Keep the model visible when opening the library, anatomy layers, saved arrangements or history. On phones these tools become sheets; use the same names and actions.
 
@@ -48,7 +60,7 @@ Continue the restrained Midnight Lab palette: dark navy, clear anatomy, a limite
 
 1. **Consolidate the existing interface.** One workspace, consistent terminology, one playback bar, one task panel, clear routes back to the professor's baseline.
 2. **Keep interaction responsive.** Measure the actual shipped model; optimise costly geometry checks without weakening their meaning. Stop and cancel must stay understandable.
-3. **Polish three complete demonstrations.** Translation versus tipping; crowding/space use; anchorage comparison. Improve starting views, anatomy, questions, replay and explanations before expanding the catalogue.
+3. **Polish a complete ready-made lecture.** Start with the translation/tipping sample and its exploration round-trip. Use the existing crowding/space and anchorage examples when the teaching story needs them; improve questions, replay and explanations before expanding the catalogue.
 4. **Improve teaching fidelity.** Review differentiated crowns, root visibility, appliance attachment and labels with an orthodontic educator. Draft authored paths remain illustrations and require review.
 5. **Test a complete real lecture.** Watch a professor use the app with students and on the room's projector. Record where they hesitate, lose the model, misread a label or need repeated commands.
 

@@ -1,0 +1,108 @@
+.teacher-experience-switch {
+  display: flex;
+  gap: 4px;
+  padding: 4px;
+  border-radius: 12px;
+  background: var(--ui-soft);
+}
+.app-shell.studio-experience.teaching-studio[data-teacher-screen] .top-center {
+  display: block;
+}
+.teacher-experience-switch button {
+  min-height: 38px;
+  padding: 6px 20px;
+  border: 0;
+  border-radius: 8px;
+  font: inherit;
+  color: var(--ui-muted);
+  background: transparent;
+  cursor: pointer;
+}
+.teacher-experience-switch button[aria-pressed='true'] {
+  color: var(--ui-text);
+  background: var(--ui-panel);
+  box-shadow: 0 1px 4px #00000012;
+}
+.app-shell[data-teacher-screen] > .lecture-navigation {
+  margin: 8px 18px 0;
+  flex-shrink: 0;
+}
+.teacher-step-heading {
+  padding: 6px 0 12px;
+  flex-shrink: 0;
+}
+.teacher-step-heading > span {
+  color: var(--ui-muted);
+  font-size: 12px;
+}
+.teacher-step-heading h1 {
+  font-size: clamp(19px, 2vw, 28px);
+  letter-spacing: -0.035em;
+  line-height: 1.2;
+  margin: 5px 0 0;
+}
+.app-shell[data-teacher-screen='lecture'] .workspace > .lecture-panel {
+  margin: 12px 18px 12px 0;
+  max-height: calc(100% - 24px);
+  min-width: 0;
+}
+.app-shell[data-teacher-screen='lecture'][data-teacher-mode='teach'] .lecture-panel {
+  width: min(320px, 23vw);
+  flex-basis: min(320px, 23vw);
+}
+.app-shell[data-teacher-screen='lecture'][data-teacher-mode='teach'] .teacher-step-heading h1 {
+  display: none;
+}
+.teacher-error {
+  padding: 10px 20px;
+  background: var(--ui-soft);
+  color: var(--ui-error);
+}
+@media (max-width: 1050px) {
+  .app-shell.studio-experience.teaching-studio[data-teacher-screen='lecture']:has(
+      > .workspace > .lecture-panel
+    ) {
+    --workspace-bottom: 0px;
+    padding-bottom: 0;
+  }
+  .app-shell[data-teacher-screen='lecture']:has(> .workspace > .lecture-panel)
+    > .mobile-studio-dock {
+    display: none;
+  }
+  .teacher-experience-switch button {
+    padding: 6px 12px;
+  }
+  .app-shell[data-teacher-screen='lecture'] .workspace {
+    flex-wrap: wrap;
+    overflow: auto;
+  }
+  .app-shell.studio-experience.teaching-studio[data-teacher-screen='lecture'] .main-workspace {
+    min-height: 52dvh;
+  }
+  .app-shell[data-teacher-screen='lecture'] .workspace > .lecture-panel {
+    flex-basis: calc(100% - 24px);
+    width: auto;
+    margin: 0 12px 12px;
+    max-height: 42dvh;
+  }
+}
+@media (max-width: 560px) {
+  .app-shell.studio-experience.teaching-studio[data-teacher-screen] .topbar {
+    flex-wrap: wrap;
+    height: auto;
+    padding: 8px 10px;
+  }
+  .app-shell[data-teacher-screen] .top-center {
+    order: 3;
+    flex-basis: 100%;
+  }
+  .teacher-experience-switch {
+    width: 100%;
+  }
+  .teacher-experience-switch button {
+    flex: 1;
+  }
+  .app-shell[data-teacher-screen] > .lecture-navigation {
+    margin: 6px 10px 0;
+  }
+}

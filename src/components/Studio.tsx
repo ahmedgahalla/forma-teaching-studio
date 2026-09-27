@@ -10,7 +10,6 @@ import { getTeachingAssetCase } from '@/lib/anatomy-assets';
 import { casePathAudit } from '@/lib/case-path-audit';
 import { DENTAL_ARRANGEMENTS } from '@/lib/dental-arrangements';
 import { getTeachingCase, sampleCaseDemonstration } from '@/lib/teaching-cases';
-import { MobileStudioDock } from './case/StudioExperience';
 import { type ViewerCamera, type ViewerHandle, type ViewName } from './viewer/Viewer';
 import {} from '@/lib/geometry';
 import { anatomicalFrame, emptyPose, type Vec3 } from '@/lib/model';
@@ -23,7 +22,6 @@ import { TeachingProvider, useTeaching, useTeachingAdapter } from './teaching/Te
 import WorkflowStudio from './workflow/WorkflowStudio';
 import {} from '@/lib/appliance-display';
 import './shared/combined-workspace.css';
-import { PreviewDecisionBar } from './try/PreviewDecisionBar';
 import { createMechanicsExperiment } from '@/lib/mechanics';
 import { mechanicsDisplayPoses } from '@/lib/mechanics-presentation';
 import { sceneAnalysisContext } from '@/lib/scene-analysis';
@@ -49,11 +47,6 @@ import { isWorkspaceInteraction } from './case/scene-interaction';
 import { useWorkspaceKeys } from './case/useWorkspaceKeys';
 import { caseNarration } from './case/narration';
 import { createCasePreflight } from './case/preflight';
-import { CaseDialogs } from './case/CaseDialogs';
-import { CaseMain } from './case/CaseMain';
-import { CaseInspector } from './case/CaseInspector';
-import { CaseSidebar } from './case/CaseSidebar';
-import { CaseTopbar } from './case/CaseTopbar';
 import {
   useAttachmentState,
   useCalibrationInputs,
@@ -72,6 +65,9 @@ import {
   useServiceDraft,
   useStagePlayback,
 } from './case/state';
+
+import { CaseShell } from './case/CaseShell';
+import { useTeacherLectures } from './lecture-builder/useTeacherLectures';
 
 function CaseStudio({ active }: { active: boolean }) {
   const teaching = useTeaching();
@@ -750,199 +746,113 @@ function CaseStudio({ active }: { active: boolean }) {
         void teaching.execute([{ kind: 'select', teeth: group.teeth }], `Select group: ${name}`);
     },
   };
+  const teacher = useTeacherLectures(api, refs);
   const casePreflight = createCasePreflight(api, refs);
-  useTeachingAdapter('case', {
-    analysisContext: () =>
-      sceneAnalysisContext({
-        synthetic: model.demo,
-        ids,
-        transforms: actualShown,
-        selectedIds,
-        arch,
-        roots,
-        gums,
-        bone: anatomy.bone,
-        lockedIds: sandbox.lockedIds,
-        mechanics,
-        revealResult: responseRevealed,
-        lesson:
-          caseDefinition && caseVariant
-            ? {
-                title: `${caseDefinition.title}: ${caseVariant.title}`,
-                explanation: `${caseDefinition.learningGoal} ${caseVariant.description}${scenario?.answerVisible ? ` ${caseVariant.answer}` : ' The prepared student answer has not been revealed; do not reveal it.'}`,
-              }
-            : currentLesson
+  useTeachingAdapter(
+    'case',
+    teacher.decorate({
+      analysisContext: () =>
+        sceneAnalysisContext({
+          synthetic: model.demo,
+          ids,
+          transforms: actualShown,
+          selectedIds,
+          arch,
+          roots,
+          gums,
+          bone: anatomy.bone,
+          lockedIds: sandbox.lockedIds,
+          mechanics,
+          revealResult: responseRevealed,
+          lesson:
+            caseDefinition && caseVariant
               ? {
-                  title: currentLesson.title,
-                  explanation:
-                    currentLesson.steps[lessonStep]?.caption || currentLesson.description,
+                  title: `${caseDefinition.title}: ${caseVariant.title}`,
+                  explanation: `${caseDefinition.learningGoal} ${caseVariant.description}${scenario?.answerVisible ? ` ${caseVariant.answer}` : ' The prepared student answer has not been revealed; do not reveal it.'}`,
                 }
-              : null,
+              : currentLesson
+                ? {
+                    title: currentLesson.title,
+                    explanation:
+                      currentLesson.steps[lessonStep]?.caption || currentLesson.description,
+                  }
+                : null,
+        }),
+      context: () => ({
+        mode: 'case',
+        glossaryId: explanations.glossaryId,
+        toothStudy: toothStudy ? { tooth: toothStudy.tooth, view: toothStudy.view } : undefined,
+        canStepStages: !!(
+          prepared ||
+          demonstration ||
+          checkpoints.length ||
+          moved ||
+          mechanics?.result
+        ),
+        autoApply: true,
+        ...(activeExperiment
+          ? { mechanics: mechanicsCommandContext(activeExperiment, mechanicsFocus, wirePreset) }
+          : {}),
+        ...(physicalPoint ? { pointed: physicalPoint } : {}),
+        workflowId: null,
+        caseId: scenario?.caseId,
+        caseVariantId: scenario?.variantId,
+        caseExploring: scenario?.exploring,
+        canRestoreWorkspace: !!returnWorkspace.current,
+        hasWorkflowOrigin: !!workflowOrigin,
+        tryMode: tryActive,
+        lockedIds: sandbox.lockedIds,
+        tryPreview: !!sandbox.pending,
+        tryLastMovement: !!(sandbox.pending || sandbox.lastEdit),
+        tryLastIds: (sandbox.pending || sandbox.lastEdit)?.affectedIds,
+        savedArrangementNames: sandbox.snapshots.map(item => item.name),
+        tryArchTargets: sandbox.archTargets,
+        stepIndex: lessonStep,
+        selected,
+        selectedIds,
+        availableIds: ids,
+        synthetic: model.demo,
+        view,
+        arch,
+        speed: playbackSpeed,
+        stage,
+        stages,
+        playing,
+        lessonActive: !!scenario || !!currentLesson || !!workflowOrigin,
+        canReturnToLesson: !!scenario?.exploring || !!currentLesson || !!workflowOrigin,
+        layers: {
+          roots,
+          gums,
+          labels,
+          braces,
+          attachments,
+          grid,
+          bone: anatomy.bone,
+          cutaway: anatomy.cutaway,
+          ligament: anatomy.ligament,
+        },
+        boneOpacity: anatomy.opacity,
       }),
-    context: () => ({
-      mode: 'case',
-      glossaryId: explanations.glossaryId,
-      toothStudy: toothStudy ? { tooth: toothStudy.tooth, view: toothStudy.view } : undefined,
-      canStepStages: !!(
-        prepared ||
-        demonstration ||
-        checkpoints.length ||
-        moved ||
-        mechanics?.result
-      ),
-      autoApply: true,
-      ...(activeExperiment
-        ? { mechanics: mechanicsCommandContext(activeExperiment, mechanicsFocus, wirePreset) }
-        : {}),
-      ...(physicalPoint ? { pointed: physicalPoint } : {}),
-      workflowId: null,
-      caseId: scenario?.caseId,
-      caseVariantId: scenario?.variantId,
-      caseExploring: scenario?.exploring,
-      canRestoreWorkspace: !!returnWorkspace.current,
-      hasWorkflowOrigin: !!workflowOrigin,
-      tryMode: tryActive,
-      lockedIds: sandbox.lockedIds,
-      tryPreview: !!sandbox.pending,
-      tryLastMovement: !!(sandbox.pending || sandbox.lastEdit),
-      tryLastIds: (sandbox.pending || sandbox.lastEdit)?.affectedIds,
-      savedArrangementNames: sandbox.snapshots.map(item => item.name),
-      tryArchTargets: sandbox.archTargets,
-      stepIndex: lessonStep,
-      selected,
-      selectedIds,
-      availableIds: ids,
-      synthetic: model.demo,
-      view,
-      arch,
-      speed: playbackSpeed,
-      stage,
-      stages,
-      playing,
-      lessonActive: !!scenario || !!currentLesson || !!workflowOrigin,
-      canReturnToLesson: !!scenario?.exploring || !!currentLesson || !!workflowOrigin,
-      layers: {
-        roots,
-        gums,
-        labels,
-        braces,
-        attachments,
-        grid,
-        bone: anatomy.bone,
-        cutaway: anatomy.cutaway,
-        ligament: anatomy.ligament,
+      capture: api.captureClassroom,
+      restore: value => api.restoreClassroom(value as ClassroomSnapshot),
+      importSetup: api.importWorkflowSetup,
+      sourceLesson: from =>
+        from ? (from as ClassroomSnapshot).workflowOrigin?.snapshot : workflowOrigin?.snapshot,
+      settle: signal => viewer.current?.whenRendered(signal) ?? Promise.resolve(),
+      apply: (action, signal) =>
+        action.kind === 'mechanics'
+          ? api.applyMechanics(action.action, signal)
+          : api.applyTeaching(action),
+      preflight: casePreflight,
+      pause: () => {
+        setPlaying(false);
+        importAbort.current?.abort();
       },
-      boneOpacity: anatomy.opacity,
+      narration: target => caseNarration(api, target),
     }),
-    capture: api.captureClassroom,
-    restore: value => api.restoreClassroom(value as ClassroomSnapshot),
-    importSetup: api.importWorkflowSetup,
-    sourceLesson: from =>
-      from ? (from as ClassroomSnapshot).workflowOrigin?.snapshot : workflowOrigin?.snapshot,
-    settle: signal => viewer.current?.whenRendered(signal) ?? Promise.resolve(),
-    apply: (action, signal) =>
-      action.kind === 'mechanics'
-        ? api.applyMechanics(action.action, signal)
-        : api.applyTeaching(action),
-    preflight: casePreflight,
-    pause: () => {
-      setPlaying(false);
-      importAbort.current?.abort();
-    },
-    narration: target => caseNarration(api, target),
-  });
-
-  return (
-    <div
-      className={`app-shell braces-studio teaching-studio try-studio studio-experience lecture-opening ${lecture ? 'lecture-mode' : ''}`}
-      data-mobile-panel={mobilePanel}
-      data-tools-open={toolsOpen}
-      data-preview={!!sandbox.pending}
-      style={active ? undefined : { display: 'none' }}
-      onPointerDownCapture={sceneInteraction}
-      onClickCapture={sceneInteraction}
-      onChangeCapture={sceneInteraction}
-    >
-      <CaseTopbar
-        lecture={lecture}
-        toolsOpen={!lecture && (toolsOpen || mobilePanel === 'tools')}
-        busy={busy}
-        onOpenLibrary={() => setModal('workflows')}
-        onToggleTools={() => {
-          const open = lecture || !(toolsOpen || mobilePanel === 'tools');
-          setLecture(false);
-          setToolsOpen(open);
-          setMobilePanel(open ? 'tools' : 'model');
-        }}
-        onToggleLecture={() => {
-          setLecture(!lecture);
-          setMobilePanel('model');
-        }}
-        onOpenCase={() => caseInput.current?.click()}
-        onSaveCase={api.save}
-        onOpenSettings={() => {
-          setApiDraft(apiUrl || 'http://127.0.0.1:8000');
-          setModal('settings');
-        }}
-        onOpenGuide={() => setModal('guide')}
-        onOpenSelection={() => {
-          setLecture(false);
-          setToolsOpen(false);
-          setMobilePanel('selection');
-        }}
-        onOpenLayers={() => {
-          setLecture(false);
-          setToolsOpen(false);
-          setMobilePanel('layers');
-        }}
-      />
-      {tryActive && (
-        <PreviewDecisionBar
-          pending={api.tryPanelProps.pending || null}
-          affectedCount={sandbox.pending?.affectedIds.length}
-          busy={api.tryPanelProps.busy}
-          unrestricted={sandbox.unrestricted}
-          onApply={api.tryPanelProps.onApply}
-          onDiscard={api.tryPanelProps.onDiscard}
-          onModify={() => {
-            setLecture(false);
-            setToolsOpen(true);
-            setPanel('move');
-            setMobilePanel('tools');
-          }}
-        />
-      )}
-      <input
-        ref={caseInput}
-        type="file"
-        accept=".json"
-        hidden
-        onChange={e => api.importCase(e.target.files?.[0])}
-      />
-      <div className="workspace">
-        <CaseSidebar api={api} />
-
-        <CaseMain api={api} />
-
-        <CaseInspector api={api} />
-      </div>
-      <MobileStudioDock
-        activePanel={mobilePanel}
-        onChange={next => {
-          if (next !== 'model') setLecture(false);
-          setMobilePanel(next);
-          setToolsOpen(next === 'tools');
-        }}
-        onStop={teaching.cancel}
-      />
-      <footer className="statusbar">
-        <span>Synthetic teaching model · illustrative movement · not for clinical use</span>
-        <span>{aiEnabled ? 'AI interpretation available' : 'Built-in commands'}</span>
-      </footer>
-
-      <CaseDialogs api={api} />
-    </div>
   );
+
+  return <CaseShell api={api} teacher={teacher} />;
 }
 
 function TeachingScenes() {

@@ -6,6 +6,7 @@ import {
   planMechanicsClause,
 } from '../mechanics-commands';
 import { parseLessonPlan } from './lesson-plan';
+import { parsePresentationPlan } from './presentation';
 import { isGlossaryClose, parseGlossaryPlan } from '../glossary/parser';
 import { advance } from './advance';
 import { copyContext } from './types';
@@ -33,6 +34,8 @@ export function buildTeachingPlan(text: string, context: TeachingContext): Teach
   if (typeof text !== 'string' || !text.trim() || text.length > 1500)
     throw new Error('Give a classroom request of at most 1500 characters.');
   const normalized = normalizeSpeechCommand(preserveToothStudyTop(text, context));
+  const presentation = parsePresentationPlan(normalized, context);
+  if (presentation) return presentation;
   if (isGlossaryClose(normalized, context)) return parseGlossaryPlan(normalized, context)!;
   const lesson = parseLessonPlan(normalized, context);
   if (lesson) return lesson;
@@ -268,7 +271,7 @@ export function parseTeachingPlan(text: string, context: TeachingContext): Teach
     }
     // New mechanics stay deterministic and local, including useful validation errors.
     if (
-      (context.tryMode && error instanceof CommandValidationError) ||
+      ((context.tryMode || context.presentation) && error instanceof CommandValidationError) ||
       (typeof text === 'string' &&
         clauses(normalizeSpeechCommand(text)).some(
           clause =>
@@ -293,5 +296,4 @@ export function parseTeachingPlan(text: string, context: TeachingContext): Teach
     throw error;
   }
 }
-
 export { isDentalArrangementClause } from './parse-arrangement';

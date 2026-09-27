@@ -147,3 +147,35 @@ Entry format: mistake (with link) · root cause · prevention · status (`noted`
 - **Status:** automated · **Count:** 1
 
 Numbers 17–19 were checked against the current lessons and the parallel Phase 3 proposal's reserved lesson 12 before being assigned.
+
+## 20. A saved pose needs its original model reference
+
+- **Mistake caught during implementation:** [Phase 3.9 integration review](reviews/from-builder/2026-09-27-teacher-lecture-workflow.md) found static prepared-case captures losing source identity after playback was detached, and mechanics captures changing transforms without rebuilding their reference teeth.
+- **Root cause:** visible transforms were treated as self-contained despite depending on registered model origins, tooth presence and reference frames. Rendered mechanics can also be magnified relative to their numerical result.
+- **Prevention:** persist a bounded source descriptor alongside the visible pose; retain it through restore/recapture; reconstruct mechanics reference metadata together and save calculated views as explicit static poses. Bridge regressions cover omitted teeth, source origins, magnified shown poses, repeated restoration and mechanics revalidation. Runtime tests cover the independent paused lecture and original Explore return points, including answer/notes visibility.
+- **Status:** automated · **Count:** 1
+
+**Sample-only scope update (27 September 2026):** user-requested removal of authoring also removes capture/recapture and its tests. The source-descriptor lesson remains relevant to fixed sample restoration; current coverage verifies absolute poses, source validation and return snapshots. No current capture feature is claimed.
+
+## 21. A clickable shortcut must use the same contextual planner
+
+- **Mistake:** the same [integration review](reviews/from-builder/2026-09-27-teacher-lecture-workflow.md) reproduced a related glossary click switching tooth 46 to tooth 16, while typing the same request retained tooth 46.
+- **Root cause:** the button called a context-free authored-action helper rather than the current-study planner already used by text and voice.
+- **Prevention:** route shortcuts through the context-aware helper and compare actual clicked actions with the parsed request in a component regression. The new lecture navigation likewise has click, text and local-speech runtime parity tests.
+- **Status:** automated · **Count:** 2
+
+- **Sample-lecture recurrence:** the visible “Explore this question” button text was absent from local command aliases. Test exact labels through the parser as well as their button actions; the retired preparation phrase is rejected locally. This is automated rather than an unapproved AGENTS amendment.
+
+## 22. Replay preflight uses the saved request start
+
+- **Mistake:** [Phase 3.9 review](reviews/from-builder/2026-09-27-teacher-lecture-workflow.md) found repeating Next on the last lecture step rejected as out of bounds, even though replay restores the previous request's starting state.
+- **Root cause:** the lecture adapter discarded the runtime's `from` snapshot and checked current navigation state.
+- **Prevention:** derive lecture/session/return context from the supplied snapshot during replay preflight. Regression tests repeat final-step navigation and a question detour, then verify the restored frame.
+- **Status:** automated · **Count:** 1
+
+## 23. Read-only lecture guards include model metadata edits
+
+- **Mistake:** the same [review](reviews/from-builder/2026-09-27-teacher-lecture-workflow.md) found attachment commands editing a lecture model without entering the question exploration.
+- **Root cause:** the guard covered tooth movement and scenario changes but omitted the separate attachment action kind.
+- **Prevention:** guard attachment edits through the same runtime boundary as movements; regression tests prove rejection during teaching and allowance after explicit exploration.
+- **Status:** automated · **Count:** 1

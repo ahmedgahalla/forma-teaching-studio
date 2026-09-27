@@ -4,8 +4,10 @@ import { WORKFLOWS } from '../workflows';
 import type { MechanicsCommandContext, PointedReference } from '../mechanics-commands';
 import { TOOTH_STUDY_VIEWS, type ToothStudyContext } from '../tooth-study/types';
 import { hasToothAnatomy } from '../tooth-anatomy';
+import type { PresentationContext } from './presentation';
 
 export type TeachingContext = {
+  presentation?: PresentationContext;
   mode: 'case' | 'workflow';
   workflowId: string | null;
   stepIndex: number;
@@ -84,6 +86,7 @@ export const LOCAL_ONLY_KINDS: readonly TeachingAction['kind'][] = [
   'tooth-study',
   'glossary',
   'lesson',
+  'presentation',
 ];
 
 export function record(value: unknown): Record<string, unknown> {

@@ -5,8 +5,10 @@ import type { MechanicsAction } from '../mechanics/types';
 import type { DentalArrangementId } from '../dental-arrangements';
 import type { LessonAction } from './lesson-controls';
 import type { ToothStudyAction } from '../tooth-study/types';
+import type { PresentationAction } from './presentation';
 
 export type TeachingAction =
+  | PresentationAction
   | ToothStudyAction
   | LessonAction
   | { kind: 'glossary'; id: string | null }
