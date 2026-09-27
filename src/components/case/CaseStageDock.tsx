@@ -3,7 +3,13 @@ import type { CaseStudioApi } from './api';
 import StageBar from '../shared/StageBar';
 import { hasMechanicsMovement } from '@/lib/mechanics-presentation';
 
-export function CaseStageDock({ api }: { api: CaseStudioApi }) {
+export function CaseStageDock({
+  api,
+  hideExplore = false,
+}: {
+  api: CaseStudioApi;
+  hideExplore?: boolean;
+}) {
   return (
     <>
       {(api.prepared ||
@@ -70,7 +76,7 @@ export function CaseStageDock({ api }: { api: CaseStudioApi }) {
             );
           }}
           onExplore={
-            api.prepared
+            api.prepared && !hideExplore
               ? () =>
                   void api.teaching.execute(
                     [{ kind: 'case', action: 'explore' }],

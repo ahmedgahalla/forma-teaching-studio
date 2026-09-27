@@ -147,3 +147,17 @@ Entry format: mistake (with link) · root cause · prevention · status (`noted`
 - **Status:** automated · **Count:** 1
 
 Numbers 17–19 were checked against the current lessons and the parallel Phase 3 proposal's reserved lesson 12 before being assigned.
+
+## 20. A saved pose needs its original model reference
+
+- **Mistake caught during implementation:** [Phase 3.9 integration review](reviews/from-builder/2026-09-27-teacher-lecture-workflow.md) found static prepared-case captures losing source identity after playback was detached, and mechanics captures changing transforms without rebuilding their reference teeth.
+- **Root cause:** visible transforms were treated as self-contained despite depending on registered model origins, tooth presence and reference frames. Rendered mechanics can also be magnified relative to their numerical result.
+- **Prevention:** persist a bounded source descriptor alongside the visible pose; retain it through restore/recapture; reconstruct mechanics reference metadata together and save calculated views as explicit static poses. Bridge regressions cover omitted teeth, source origins, magnified shown poses, repeated restoration and mechanics revalidation. Runtime tests cover the independent paused lecture and original Explore return points, including answer/notes visibility.
+- **Status:** automated · **Count:** 1
+
+## 21. A clickable shortcut must use the same contextual planner
+
+- **Mistake:** the same [integration review](reviews/from-builder/2026-09-27-teacher-lecture-workflow.md) reproduced a related glossary click switching tooth 46 to tooth 16, while typing the same request retained tooth 46.
+- **Root cause:** the button called a context-free authored-action helper rather than the current-study planner already used by text and voice.
+- **Prevention:** route shortcuts through the context-aware helper and compare actual clicked actions with the parsed request in a component regression. The new lecture navigation likewise has click, text and local-speech runtime parity tests.
+- **Status:** automated · **Count:** 1

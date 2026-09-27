@@ -8,6 +8,7 @@ export function teachingActionMode(
 ): TeachingContext['mode'] {
   if (
     action.kind === 'case' ||
+    action.kind === 'presentation' ||
     action.kind === 'dental-arrangement' ||
     action.kind === 'tooth-study' ||
     (action.kind === 'glossary' && action.id !== null) ||
@@ -39,6 +40,7 @@ export function interpreterTeachingContext(context: TeachingContext): TeachingCo
     'toothStudy',
     'glossaryId',
     'canStepStages',
+    'presentation',
   ] as const)
     delete wire[field];
   if (wire.lastActions?.some(action => LOCAL_ONLY_KINDS.includes(action.kind)))

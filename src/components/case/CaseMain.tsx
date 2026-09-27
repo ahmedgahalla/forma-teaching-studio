@@ -8,21 +8,32 @@ import { CaseArchToolbar } from './CaseArchToolbar';
 import { CaseViewport } from './CaseViewport';
 import { CaseLectureOverlay } from './CaseLectureOverlay';
 import { CaseStageDock } from './CaseStageDock';
+import type { TeacherLectures } from '../lecture-builder/useTeacherLectures';
 
-export function CaseMain({ api }: { api: CaseStudioApi }) {
+export function CaseMain({ api, teacher }: { api: CaseStudioApi; teacher?: TeacherLectures }) {
+  const customStep = teacher?.document && !teacher.session.exploring;
   return (
     <>
       <main className="main-workspace">
         <div className="workspace-scene">
-          <CaseWorkspaceHeading api={api} />
-          <CaseArchToolbar api={api} />
+          {customStep ? (
+            <div className="teacher-step-heading">
+              <span>{teacher.document!.title}</span>
+              <h1>{teacher.document!.steps[teacher.session.index].title}</h1>
+            </div>
+          ) : (
+            <CaseWorkspaceHeading api={api} />
+          )}
+          {(!customStep || teacher.session.mode === 'prepare') && <CaseArchToolbar api={api} />}
           <div
             className={`lecture-stage${api.toothStudy ? ' tooth-study-workspace' : ''}${api.glossaryId ? ' definition-workspace' : ''}`}
           >
             <CaseViewport api={api} />
-            <CaseLectureOverlay api={api} />
+            {!customStep && <CaseLectureOverlay api={api} />}
           </div>
-          <CaseStageDock api={api} />
+          {(!customStep || api.prepared || api.demonstration || api.sandbox.pending) && (
+            <CaseStageDock api={api} hideExplore={!!customStep} />
+          )}
         </div>
         <OpeningCommandDock
           open={api.commandsOpen}
@@ -56,37 +67,39 @@ export function CaseMain({ api }: { api: CaseStudioApi }) {
           <TeachingCommandBar
             showUndo={false}
             suggestions={
-              api.sandbox.pending
-                ? ['apply preview', 'discard preview']
-                : api.prepared
-                  ? [
-                      'play demonstration',
-                      'show roots',
-                      'reveal answer',
-                      'explore this arrangement',
-                    ]
-                  : api.mechanics?.result
+              customStep
+                ? ['next step', 'show roots', 'reveal answer', 'show notes']
+                : api.sandbox.pending
+                  ? ['apply preview', 'discard preview']
+                  : api.prepared
                     ? [
-                        'repeat that more slowly',
+                        'play demonstration',
                         'show roots',
-                        'show displacement traces',
-                        'compare with original',
+                        'reveal answer',
+                        'explore this arrangement',
                       ]
-                    : api.mechanics?.config.wires.length
+                    : api.mechanics?.result
                       ? [
-                          'activate that wire by 0.5 mm',
-                          'show what happens',
+                          'repeat that more slowly',
                           'show roots',
-                          'undo that',
+                          'show displacement traces',
+                          'compare with original',
                         ]
-                      : api.mechanics && Object.keys(api.mechanics.config.brackets).length
-                        ? ['put a wire through these brackets', 'show roots', 'undo that']
-                        : [
-                            'select upper teeth',
-                            'put brackets in top',
+                      : api.mechanics?.config.wires.length
+                        ? [
+                            'activate that wire by 0.5 mm',
+                            'show what happens',
                             'show roots',
-                            'compare with original',
+                            'undo that',
                           ]
+                        : api.mechanics && Object.keys(api.mechanics.config.brackets).length
+                          ? ['put a wire through these brackets', 'show roots', 'undo that']
+                          : [
+                              'select upper teeth',
+                              'put brackets in top',
+                              'show roots',
+                              'compare with original',
+                            ]
             }
             placeholder={
               api.prepared

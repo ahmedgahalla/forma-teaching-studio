@@ -1,20 +1,20 @@
 # Phase 3 — demo path
 
-**Status:** implementation started; first slice under review · **Branch:** `ahmed/phase-3-lecture-opening` · **PR:** [#13](https://github.com/ahmedgahalla/forma-teaching-studio/pull/13) (draft; DPR 2 audit pending)
+**Status:** teacher-created lecture slice implemented; automated results recorded; browser acceptance blocked · **Current branch:** `ahmed/phase-3-teacher-lectures` · **Current PR:** pending
 
-**Goal:** the app opens straight into a large full-bite view, advanced tooling moves into a drawer, and a scripted 3–4 minute walkthrough supports the lecture demo (audience: an orthodontist who lectures at universities). Builds on `docs/PRODUCT_DIRECTION.md`'s consolidation direction.
+**Goal:** a professor can explore the central model freely or prepare a lecture inside Forma, teach alongside saved notes and model steps, and return from a spontaneous experiment without losing the lecture. A rehearsed 3–4 minute walkthrough should demonstrate the complete journey to an orthodontist who lectures at universities. Builds on [product direction](../../PRODUCT_DIRECTION.md).
 
-Scope sketch (to be planned after Phase 2):
+## Current implementation
 
-- Model-first opening layout: camera fit on load, side panels collapsed by default
-- Advanced tooling (Try Mode numerics, mechanics detail, import/calibration, measurement) in a drawer
-- A scripted walkthrough as an ordered sequence of existing validated `TeachingAction`s (case load → question → play → reveal roots → compare) with next/back — data-driven, reusing the runtime
-- Verified with the full gate plus an actually timed run-through
+- [3.9 — Teacher-created lectures](3.9-teacher-lectures.md): Explore/Lecture entry points; Prepare/Rehearse/Teach; saved notes and explicit model capture; prepared-case demonstrations; deterministic navigation; local saving and JSON backups; temporary exploration with a paused return.
+- [3.2 — Lecture-ready opening](3.2-lecture-ready-opening.md): collapsed editing and commands, grouped controls, full-width model and preserved preview decisions. Dependency: [PR #13](https://github.com/ahmedgahalla/forma-teaching-studio/pull/13).
 
-## Implementation
+The current branch starts from [Phase 4](../phase-4-voice-lecture-assistant/README.md) at `ff1b3e5` and retains its voice, glossary, tooth-study and presentation work. Phase 4 alone did not provide teacher-authored lecture documents; 3.9 adds that workflow.
 
-On 26 September 2026, the owner authorized building Phase 3 and prioritized reducing clutter. The detailed roadmap proposal remains in [PR #12](https://github.com/ahmedgahalla/forma-teaching-studio/pull/12). This first implementation starts with its **3.2 lecture-ready opening**, ahead of the proposed 3.1 offline-assets pass, to address that request directly.
+## Relationship to the proposal
 
-- [3.2 — Lecture-ready opening](3.2-lecture-ready-opening.md): collapsed editing and commands, grouped controls, full-width model and preserved preview decisions.
+The owner first authorized Phase 3 clutter reduction on 26 September 2026, producing 3.2 ahead of offline assets. The later approved bounded teacher-workspace implementation follows the Explore/Lecture proposal in [PR #12](https://github.com/ahmedgahalla/forma-teaching-studio/pull/12).
 
-Camera framing, offline fonts/favicon, the complete presenter pass, scripted walkthrough, biology visuals and rehearsal remain separate slices. This change does not mark the whole roadmap complete.
+**3.9 is the consolidated first vertical slice:** the proposal's navigation plus proposed 3.10–3.14 document, editor, runner, return and input deliverables are recorded together in its implementation document. Do not treat those proposed numbers as duplicate outstanding features. Some proposed capabilities remain explicitly excluded: PDF/PowerPoint import, dual-screen presentation, arbitrary animation, cloud services and new biology content.
+
+Phase 4 has already advanced camera framing and visual clarity. Wider playback/presenter consolidation, offline fonts/favicon, educator-reviewed biology and real-device rehearsal remain separate work. The sample's proposed 3–4 minute script is **untimed**. Local automated results are recorded, including the full-suite timing failure and passing isolated oracle; browser access is blocked by security policy, so this slice does not claim browser, DPR 1/2, microphone or projector acceptance. See the [3.9 verification record](3.9-teacher-lectures.md#acceptance-and-verification) for the scoped evidence and remaining checks.

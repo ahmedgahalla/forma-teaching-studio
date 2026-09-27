@@ -1,9 +1,11 @@
 import { getGlossaryEntry, GLOSSARY_DISCLAIMER } from '@/lib/glossary';
-import { glossaryActions } from '@/lib/glossary/plan';
+import { glossaryActionsForStudy } from '@/lib/glossary/plan';
+import type { ToothStudyContext } from '@/lib/tooth-study/types';
 import type { CaseStudioApi } from './api';
 import './GlossaryCard.css';
 
 type GlossaryCardApi = Pick<CaseStudioApi, 'glossaryId'> & {
+  toothStudy: Pick<ToothStudyContext, 'tooth' | 'view'> | null;
   teaching: Pick<CaseStudioApi['teaching'], 'execute'>;
 };
 
@@ -34,7 +36,10 @@ export function GlossaryCard({ api }: { api: GlossaryCardApi }) {
                 key={id}
                 type="button"
                 onClick={() =>
-                  void api.teaching.execute(glossaryActions(id), `Explain ${related.term}`)
+                  void api.teaching.execute(
+                    glossaryActionsForStudy(id, api.toothStudy ?? undefined),
+                    `Explain ${related.term}`,
+                  )
                 }
               >
                 {related.term}
