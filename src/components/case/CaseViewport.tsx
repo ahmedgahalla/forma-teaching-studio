@@ -8,7 +8,7 @@ import { LecturePointer } from '../lecture/LectureViewTools';
 import { toothMatrix } from '@/lib/analysis';
 import { applianceView } from '@/lib/appliance-display';
 import { mechanicsResponseCaption } from '@/lib/mechanics-presentation';
-import { VoiceHud } from '../teaching/VoiceHud';
+import { VoiceHud, VOICE_VIEWPORT_PROPS } from '../teaching/VoiceHud';
 import { ToothStudyCard } from './ToothStudyCard';
 import { TOOTH_STUDY_DISPLAY } from '../viewer/tooth-study-display';
 
@@ -18,7 +18,7 @@ export function CaseViewport({ api }: { api: CaseStudioApi }) {
   return (
     <>
       <section
-        className="viewport"
+        {...VOICE_VIEWPORT_PROPS.case}
         onPointerDownCapture={sceneInteraction}
         aria-label="3D workspace"
       >

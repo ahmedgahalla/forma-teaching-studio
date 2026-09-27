@@ -57,6 +57,58 @@ export function displayedToothBounds(
   return bounds;
 }
 
+/** Evaluated only for camera requests; consume each reused point before advancing. */
+export function* displayedToothPoints(
+  model: DentalCase,
+  transforms: Transforms,
+  ids: string[],
+  roots: boolean,
+  opening: number,
+) {
+  const selected = new Set(ids),
+    point = new Vector3();
+  for (const tooth of model.teeth) {
+    if (!selected.has(tooth.id)) continue;
+    const matrix = toothMatrix(tooth, transforms);
+    if (toothArch(tooth.id) === 'lower') matrix.elements[13] -= opening;
+    for (const geometry of [
+      tooth.geometry,
+      ...(roots && tooth.rootGeometry ? [tooth.rootGeometry] : []),
+    ]) {
+      const positions = geometry.getAttribute('position');
+      for (let i = 0; i < positions.count; i++)
+        yield point.fromBufferAttribute(positions, i).applyMatrix4(matrix);
+    }
+  }
+}
+
+/** Include visible gingiva so tighter crown framing cannot crop it or place it behind captions. */
+export function* displayedFitPoints(
+  model: DentalCase,
+  transforms: Transforms,
+  ids: string[],
+  roots: boolean,
+  opening: number,
+  includeGums: boolean,
+) {
+  yield* displayedToothPoints(model, transforms, ids, roots, opening);
+  if (!includeGums) return;
+  const arches = new Set(ids.map(toothArch)),
+    point = new Vector3();
+  for (const gum of model.gums) {
+    if (gum.arch && !arches.has(gum.arch)) continue;
+    const positions = gum.geometry.getAttribute('position');
+    const y = gum.position[1] - (gum.arch === 'lower' ? opening : 0);
+    for (let i = 0; i < positions.count; i++) {
+      point.fromBufferAttribute(positions, i);
+      point.x += gum.position[0];
+      point.y += y;
+      point.z += gum.position[2];
+      yield point;
+    }
+  }
+}
+
 /** A selected-only back-face silhouette; no duplicate geometry or full-screen pass. */
 export function selectionContourMaterial(color: ColorRepresentation) {
   return new ShaderMaterial({

@@ -13,6 +13,10 @@ Forma opens in **Midnight Lab**, with dark graphite panels and a mint action col
 - **Measure versus Analyze:** the inspector's **Measure** tab contains geometric measurements and surface checks; it was previously labelled Analyze. **Analyze** in the command bar asks the AI about the current scene without editing it.
 - **Workflow classroom:** the same appearance preference applies to the model, anatomy controls, explanations and library.
 
+Voice captions overlay the bottom 20% of the full model canvas, above playback. Narration uses the largest text and at most two visible lines; brief confirmations appear with smaller Heard text. “Listening · paused while Forma speaks” means recognition resumes after Forma finishes or you interrupt it. Fit keeps the displayed anatomy above the caption safe area, with a small top margin for the gingiva. The canvas continues behind the HUD and fills the viewport while idle; caption changes do not reframe it. Manual orbit or zoom can move anatomy under a transient caption.
+
+Opening and Fit frame the visible teeth and gingiva centrally above captions, including roots when shown. Presets, Fit, Focus and tooth-study sides ease into place over about half a second; dragging interrupts the move, and reduced-motion settings make it instant. Tooth study keeps its explanation beside the canvas, or below it on narrow screens. Clinical Studio uses a cool light canvas and ivory shading to separate the tooth surfaces. Display sharpness updates when the window moves between monitors, with render resolution capped at DPR 2. These 4.3 changes still require new browser/projector baseline screenshots.
+
 ## Try the preview controls
 
 1. Open **Commands** or press `/`, then type `select upper front six`.

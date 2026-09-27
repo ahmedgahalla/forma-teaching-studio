@@ -1,10 +1,12 @@
 import { Box3, Euler, MathUtils, Vector3 } from 'three';
-import { perspectiveFitDistance } from '../camera-fit';
+import { perspectiveFitFrame } from '../camera-fit';
+import { VOICE_HUD_SAFE_AREA } from '../lecture-layout';
 import { anatomicalFrame, type Pose, type Tooth, type Vec3 } from '../model';
 import type { ToothStudyView } from './types';
 
 export type ToothFrame = ReturnType<typeof anatomicalFrame>;
 export type ToothStudyCamera = { position: Vec3; target: Vec3; up: Vec3 };
+export const TOOTH_STUDY_CAMERA_MARGIN = { horizontal: 1 / 0.7, vertical: 1 / 0.76 };
 
 /** Same XYZ degree rotation as the tooth mesh, evaluated only when framing changes. */
 export function transformedToothFrame(tooth: Tooth, pose?: Pose): ToothFrame {
@@ -50,9 +52,8 @@ export function toothStudyCamera(
 }
 
 /**
- * Frame transformed world bounds, including roots. A 62% height target leaves
- * space for direction labels; narrow viewports additionally constrain width.
- * Bounds are supplied by the viewer after applying tooth and arch transforms.
+ * Frame crown and roots above the overlaid HUD, leaving space for direction labels.
+ * The explanation card occupies a separate layout region beside/below the canvas.
  */
 export function getToothStudyCamera(
   tooth: Tooth,
@@ -61,17 +62,19 @@ export function getToothStudyCamera(
   view: ToothStudyView,
   verticalFov: number,
   aspect: number,
+  bottomSafeArea = VOICE_HUD_SAFE_AREA,
 ): ToothStudyCamera {
   const { direction, up } = toothStudyCamera(transformedToothFrame(tooth, pose), view);
   const ray = new Vector3(...direction);
-  const target = bounds.getCenter(new Vector3());
-  const distance = perspectiveFitDistance(
+  const { target, distance } = perspectiveFitFrame(
     bounds,
     ray,
     new Vector3(...up),
     verticalFov,
     aspect,
-    1 / 0.62,
+    TOOTH_STUDY_CAMERA_MARGIN,
+    undefined,
+    bottomSafeArea,
   );
   return {
     position: ray.multiplyScalar(distance).add(target).toArray(),

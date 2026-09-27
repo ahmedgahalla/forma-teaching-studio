@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react';
 import type { RuntimeState } from '@/lib/teaching-runtime';
 import { useTeaching } from './TeachingController';
 import './VoiceHud.css';
+export { VOICE_VIEWPORT_PROPS } from '@/lib/lecture-layout';
 
 type VoiceHudState = {
   active: boolean;
@@ -22,12 +23,12 @@ function RequestCaption({ runtime, suppressed }: { runtime: RuntimeState; suppre
   }, [complete]);
   if (!visible || suppressed) return null;
   return (
-    <div className={`voice-hud-caption${complete ? ' voice-hud-result' : ''}`}>
-      {runtime.transcript && <p className="voice-hud-heard">Heard: {runtime.transcript}</p>}
-      <p className={runtime.error ? 'voice-hud-error' : ''}>
+    <div className={`voice-hud-caption voice-hud-request${complete ? ' voice-hud-result' : ''}`}>
+      <p className={`voice-hud-summary${runtime.error ? ' voice-hud-error' : ''}`}>
         <span aria-hidden="true">{runtime.error ? '! ' : complete ? '✓ ' : ''}</span>
         {runtime.message}
       </p>
+      {runtime.transcript && <p className="voice-hud-heard">Heard: {runtime.transcript}</p>}
     </div>
   );
 }
@@ -37,7 +38,7 @@ export function VoiceHudView({ active, paused, interim, narration, runtime }: Vo
     <div className="voice-hud" role="status" aria-live="polite" aria-atomic="true">
       {active && (
         <span className="voice-hud-listening">
-          <i aria-hidden="true" /> Listening{paused ? ' · paused for reply' : ''}
+          <i aria-hidden="true" /> Listening{paused ? ' · paused while Forma speaks' : ''}
         </span>
       )}
       {narration ? (
@@ -45,7 +46,7 @@ export function VoiceHudView({ active, paused, interim, narration, runtime }: Vo
           <p>{narration}</p>
         </div>
       ) : interim ? (
-        <div className="voice-hud-caption">
+        <div className="voice-hud-caption voice-hud-interim">
           <p>{interim}</p>
         </div>
       ) : null}

@@ -1,5 +1,5 @@
 // @vitest-environment jsdom
-import { expect, it } from 'vitest';
+import { expect, it, vi } from 'vitest';
 import { PerspectiveCamera } from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import { createOrthodonticDemo } from '@/lib/demo';
@@ -28,7 +28,12 @@ it('projects reusable surface labels, hides the camera-facing surface and dispos
   const camera = new PerspectiveCamera(34, 1.4, 0.1, 10000);
   const host = document.createElement('div');
   const controls = new OrbitControls(camera, host);
-  const presentation = createToothStudyPresentation(model, host, camera, controls);
+  const presentation = createToothStudyPresentation(model, host, camera, next => {
+    camera.position.fromArray(next.position);
+    camera.up.fromArray(next.up);
+    controls.target.fromArray(next.target);
+    controls.update();
+  });
   const transforms = {};
   presentation.prepare(study, transforms, 0, false);
   camera.updateMatrixWorld();
@@ -81,4 +86,26 @@ it('temporarily removes overlays and editing handles from individual tooth prese
     tool: 'orbit',
     measureMode: false,
   });
+});
+
+it('keeps the saved study orbit when an unchanged geometry rebuild creates a fresh overlay', () => {
+  const model = createOrthodonticDemo(),
+    camera = new PerspectiveCamera();
+  const host = document.createElement('div'),
+    move = vi.fn();
+  const presentation = createToothStudyPresentation(model, host, camera, move);
+  camera.position.set(12, 37, 54);
+  const transforms = {};
+  presentation.prepare(study, transforms, 0, true);
+  presentation.prepare(study, transforms, 0, false);
+  expect(move).not.toHaveBeenCalled();
+  expect(camera.position.toArray()).toEqual([12, 37, 54]);
+  presentation.prepare({ ...study, view: 'mesial' }, transforms, 0, false);
+  expect(move).toHaveBeenCalledOnce();
+  presentation.dispose();
+  model.teeth.forEach(tooth => {
+    tooth.geometry.dispose();
+    tooth.rootGeometry?.dispose();
+  });
+  model.gums.forEach(gum => gum.geometry.dispose());
 });

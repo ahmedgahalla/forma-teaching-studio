@@ -46,7 +46,7 @@ it('keeps its listening indicator while active and marks pauses for narration', 
   await advance(20000);
   expect(container.textContent).toBe(' Listening');
   await render({ paused: true, narration: 'Observe the root movement.' });
-  expect(container.textContent).toContain('Listening · paused for reply');
+  expect(container.textContent).toContain('Listening · paused while Forma speaks');
   expect(caption()?.textContent).toBe('Observe the root movement.');
 });
 
@@ -64,7 +64,7 @@ it('shows successful heard text and summary for four seconds, retaining the list
     active: true,
     runtime: { ...idle, transcript: 'show roots', message: 'Roots shown.' },
   });
-  expect(caption()?.textContent).toBe('Heard: show roots✓ Roots shown.');
+  expect(caption()?.textContent).toBe('✓ Roots shown.Heard: show roots');
   await advance(3999);
   expect(caption()).not.toBeNull();
   await advance(1);
@@ -76,7 +76,7 @@ it('shows clarification and microphone errors with an exclamation', async () => 
   await render({
     runtime: { ...idle, error: true, transcript: 'move', message: 'Choose a tooth.' },
   });
-  expect(caption()?.textContent).toBe('Heard: move! Choose a tooth.');
+  expect(caption()?.textContent).toBe('! Choose a tooth.Heard: move');
   await render({
     runtime: { ...idle, error: true, message: 'Hands-free stopped: microphone permission denied.' },
   });
@@ -112,7 +112,7 @@ it('shows a fresh result after the previous result has faded', async () => {
   await render({ runtime: { ...idle, transcript: 'show roots', message: 'Roots shown.' } });
   await advance(4000);
   await render({ runtime: { ...idle, transcript: 'hide roots', message: 'Roots hidden.' } });
-  expect(caption()?.textContent).toBe('Heard: hide roots✓ Roots hidden.');
+  expect(caption()?.textContent).toBe('✓ Roots hidden.Heard: hide roots');
 });
 
 it('does not revive a faded request when non-wake interim speech clears', async () => {
@@ -132,4 +132,40 @@ it('continues expiring a result while a higher-priority narration caption is dis
   await advance(4000);
   await render({ narration: '' });
   expect(caption()).toBeNull();
+});
+
+it('separates a compact primary confirmation from the secondary heard text', async () => {
+  await render({ runtime: { ...idle, transcript: 'next step', message: 'next step' } });
+  expect(caption()?.classList.contains('voice-hud-request')).toBe(true);
+  expect(caption()?.firstElementChild?.className).toBe('voice-hud-summary');
+  expect(caption()?.firstElementChild?.textContent).toBe('✓ next step');
+  expect(caption()?.lastElementChild?.className).toBe('voice-hud-heard');
+  expect(caption()?.lastElementChild?.textContent).toBe('Heard: next step');
+});
+
+it('uses the narration presentation alone while keeping full text accessible', async () => {
+  const narration = 'Observe the crown and root. '.repeat(8);
+  await render({
+    active: true,
+    paused: true,
+    narration,
+    interim: 'next step',
+    runtime: { ...idle, transcript: 'next step', message: 'next step' },
+  });
+  expect(container.querySelectorAll('.voice-hud-caption')).toHaveLength(1);
+  expect(caption()?.classList.contains('voice-hud-narration')).toBe(true);
+  expect(caption()?.textContent).toBe(narration);
+  expect(container.querySelector('.voice-hud-request, .voice-hud-interim')).toBeNull();
+  expect(container.querySelector('[role="status"]')?.getAttribute('aria-atomic')).toBe('true');
+});
+
+it('marks interim and error feedback separately from narration', async () => {
+  await render({ interim: 'Forma show roots' });
+  expect(caption()?.classList.contains('voice-hud-interim')).toBe(true);
+  await render({
+    interim: '',
+    runtime: { ...idle, error: true, message: 'Choose a tooth.' },
+  });
+  expect(container.querySelector('.voice-hud-error')?.textContent).toBe('! Choose a tooth.');
+  expect(container.querySelector('.voice-hud-narration, .voice-hud-interim')).toBeNull();
 });

@@ -28,8 +28,8 @@ export function createRenderBarrier() {
         signal.addEventListener('abort', finish, { once: true });
       });
     },
-    rendered() {
-      if (!failure && !closed) [...pending].forEach(waiter => waiter.finish());
+    rendered(settled = true) {
+      if (settled && !failure && !closed) pending.forEach(waiter => waiter.finish());
     },
     fail(error: Error) {
       failure = error;

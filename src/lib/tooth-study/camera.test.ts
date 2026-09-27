@@ -4,6 +4,7 @@ import { describe, expect, it } from 'vitest';
 import { anatomicalFrame, type Tooth } from '../model';
 import { getToothStudyCamera, toothStudyCamera, transformedToothFrame } from './camera';
 import { TOOTH_STUDY_VIEWS } from './types';
+import { VOICE_HUD_SAFE_AREA } from '../lecture-layout';
 
 const metadata: { teeth: Tooth[] } = JSON.parse(
   readFileSync('public/models/forma-teaching-v1.json', 'utf8'),
@@ -54,7 +55,7 @@ describe('tooth-relative camera', () => {
     expect(anatomicalFrame(source)).toEqual(frame);
   });
 
-  it.each(TOOTH_STUDY_VIEWS)('fills 55–70%% of viewport height for %s', view => {
+  it.each(TOOTH_STUDY_VIEWS)('fills 70–76%% of available model height for %s', view => {
     const bounds = new Box3(new Vector3(-5, -13, -5), new Vector3(5, 13, 5));
     // Axis-aligned frame makes the dimensions intentionally independent of the real arch location.
     const source: Tooth = { ...tooth('16'), buccal: [0, 0, 1], mesial: [1, 0, 0] };
@@ -72,16 +73,20 @@ describe('tooth-relative camera', () => {
     const fraction =
       (Math.max(...projected.map(point => point.y)) -
         Math.min(...projected.map(point => point.y))) /
-      2;
-    expect(fraction).toBeGreaterThanOrEqual(0.55);
-    expect(fraction).toBeLessThanOrEqual(0.7);
+      (2 * (1 - VOICE_HUD_SAFE_AREA));
+    expect(fraction).toBeGreaterThanOrEqual(0.7);
+    expect(fraction).toBeLessThanOrEqual(0.76 + 1e-10);
     expect(projected.every(point => Math.abs(point.x) <= 1)).toBe(true);
+    expect(Math.min(...projected.map(point => point.y))).toBeGreaterThan(
+      2 * VOICE_HUD_SAFE_AREA - 1,
+    );
+    expect(Math.max(...projected.map(point => point.y))).toBeLessThan(1);
   });
 
   it('targets the transformed bounds once and keeps a narrow viewport within its width', () => {
     const bounds = new Box3(new Vector3(100, 200, 300), new Vector3(108, 226, 308));
     const state = getToothStudyCamera(tooth('46'), undefined, bounds, 'buccal', 45, 0.3);
-    expect(state.target).toEqual([104, 213, 304]);
+    expect(state.target[1]).toBeLessThan(213);
     const camera = new PerspectiveCamera(45, 0.3, 0.1, 1000);
     camera.position.fromArray(state.position);
     camera.up.fromArray(state.up);

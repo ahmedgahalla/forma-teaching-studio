@@ -45,6 +45,7 @@ import { createClassroomActions } from './case/actions-classroom';
 import { createMechanicsActions } from './case/actions-mechanics';
 import { createExportActions } from './case/actions-export';
 import { useToothStudyState } from './case/tooth-study';
+import { useWorkspaceKeys } from './case/useWorkspaceKeys';
 import { caseNarration } from './case/narration';
 import { createCasePreflight } from './case/preflight';
 import { CaseDialogs } from './case/CaseDialogs';
@@ -393,31 +394,14 @@ function CaseStudio({ active }: { active: boolean }) {
       if (contactTimer.current) clearTimeout(contactTimer.current);
     };
   }, [model, current, setChecking, setContacts]);
-  useEffect(() => {
-    if (!active) return;
-    const fn = (e: KeyboardEvent) => {
-      if (
-        e.isComposing ||
-        (e.target as HTMLElement).closest('input, textarea, select, dialog, [contenteditable]')
-      )
-        return;
-      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'z') {
-        e.preventDefault();
-        void teaching.runControl(e.shiftKey ? 'redo' : 'undo that');
-      }
-      if (e.key === 'Escape') {
-        setMobilePanel('model');
-        setToolsOpen(false);
-      }
-      if (e.key === '/' && !e.ctrlKey && !e.metaKey && !e.altKey) {
-        e.preventDefault();
-        setCommandsOpen(true);
-        requestAnimationFrame(() => commandInput.current?.focus());
-      }
-    };
-    window.addEventListener('keydown', fn);
-    return () => window.removeEventListener('keydown', fn);
-  }, [active, teaching, setMobilePanel, setToolsOpen, setCommandsOpen]);
+  useWorkspaceKeys({
+    active,
+    runControl: teaching.runControl,
+    setMobilePanel,
+    setToolsOpen,
+    setCommandsOpen,
+    commandInput,
+  });
 
   useEffect(() => {
     if (!active) {

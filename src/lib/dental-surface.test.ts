@@ -70,6 +70,30 @@ describe('display-only dental surfaces', () => {
     lower.dispose();
     source.dispose();
   });
+  it('keeps enamel ivory with darker roots and preserves visible concavity shading', () => {
+    const bowl = new THREE.PlaneGeometry(6, 6, 12, 12),
+      positions = bowl.getAttribute('position');
+    for (let i = 0; i < positions.count; i++)
+      positions.setZ(i, 0.22 * (positions.getX(i) ** 2 + positions.getY(i) ** 2));
+    bowl.computeVertexNormals();
+    const smooth = bowl.clone().setIndex(null);
+    const crown = dentalSurface(bowl, [0, 1, 0], 'enamel'),
+      plain = dentalSurface(smooth, [0, 1, 0], 'enamel'),
+      root = dentalSurface(bowl, [0, 1, 0], 'root');
+    const crownColors = crown.getAttribute('color'),
+      plainColors = plain.getAttribute('color'),
+      rootColors = root.getAttribute('color'),
+      center = 6 * 13 + 6;
+    expect(crownColors.getX(center) / plainColors.getX(center)).toBeLessThan(0.975);
+    for (let i = 0; i < positions.count; i++) {
+      expect(plainColors.getX(i)).toBeLessThan(0.85);
+      expect(plainColors.getX(i)).toBeGreaterThan(plainColors.getY(i));
+      expect(plainColors.getY(i)).toBeGreaterThan(plainColors.getZ(i));
+      expect(rootColors.getX(i)).toBeLessThan(plainColors.getX(i));
+      expect(rootColors.getZ(i)).toBeLessThan(plainColors.getZ(i));
+    }
+    [bowl, smooth, crown, plain, root].forEach(geometry => geometry.dispose());
+  });
   it.each(['midnight', 'clinical'] as const)(
     'creates an opaque %s backdrop with a brighter centre and no external asset',
     theme => {

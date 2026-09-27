@@ -4,7 +4,9 @@ import type { DentalCase } from './geometry';
 import { toothMatrix } from './analysis';
 import {
   cameraViewDirection,
+  displayedFitPoints,
   displayedToothBounds,
+  displayedToothPoints,
   isToothVisible,
   layoutToothLabels,
   selectionContourMaterial,
@@ -114,6 +116,32 @@ describe('lecture viewer presentation', () => {
     ).toEqual(['31']);
   });
 
+  it('streams transformed crown/root vertices for exact fitting without mutating buffers', () => {
+    const transforms = {
+      '11': {
+        translation: [3, 2, 1] as [number, number, number],
+        rotation: [20, 30, -12] as [number, number, number],
+      },
+    };
+    const original = Array.from(crown.getAttribute('position').array);
+    const points = Array.from(displayedToothPoints(model, transforms, ['11', '31'], true, 8), p =>
+      p.clone(),
+    );
+    expect(points).toHaveLength(
+      crown.getAttribute('position').count * 2 + root.getAttribute('position').count,
+    );
+    expect(points[0]).toEqual(
+      new THREE.Vector3()
+        .fromBufferAttribute(crown.getAttribute('position'), 0)
+        .applyMatrix4(toothMatrix(model.teeth[0], transforms)),
+    );
+    expect(points.at(-1)!.y).toBeLessThan(0);
+    const bounds = displayedToothBounds(model, transforms, ['11', '31'], true, 8);
+    expect(points.every(point => bounds.containsPoint(point))).toBe(true);
+    expect(Array.from(crown.getAttribute('position').array)).toEqual(original);
+    expect([...displayedToothPoints(model, transforms, [], true, 0)]).toEqual([]);
+  });
+
   it('uses matching left/right lateral views with stable superior orientation', () => {
     const left = cameraViewDirection('left', 'both'),
       right = cameraViewDirection('right', 'both');
@@ -123,6 +151,34 @@ describe('lecture viewer presentation', () => {
     expect(left.z).toBe(0);
     expect(cameraViewDirection('occlusal', 'upper').y).toBeLessThan(-0.99);
     expect(cameraViewDirection('occlusal', 'lower').y).toBeGreaterThan(0.99);
+  });
+
+  it.each(['11', '31'])('includes only shown gingiva and arch-independent gums for %s', id => {
+    const withGums: DentalCase = {
+      ...model,
+      gums: [
+        { id: 'upper', arch: 'upper', geometry: crown, position: [2, 20, 3] },
+        { id: 'lower', arch: 'lower', geometry: crown, position: [4, -20, 5] },
+        { id: 'unassigned', geometry: crown, position: [6, 7, 8] },
+      ],
+    };
+    const before = Array.from(crown.getAttribute('position').array);
+    const teeth = Array.from(displayedToothPoints(withGums, {}, [id], true, 8), p => p.clone());
+    const points = Array.from(displayedFitPoints(withGums, {}, [id], true, 8, true), p =>
+      p.clone(),
+    );
+    const count = crown.getAttribute('position').count;
+    expect(points).toHaveLength(teeth.length + count * 2);
+    expect(points.slice(0, teeth.length)).toEqual(teeth);
+    const first = new THREE.Vector3().fromBufferAttribute(crown.getAttribute('position'), 0);
+    expect(points[teeth.length]).toEqual(
+      first.clone().add(id === '11' ? new THREE.Vector3(2, 20, 3) : new THREE.Vector3(4, -28, 5)),
+    );
+    expect(points[teeth.length + count]).toEqual(first.clone().add(new THREE.Vector3(6, 7, 8)));
+    expect(
+      Array.from(displayedFitPoints(withGums, {}, [id], true, 8, false), p => p.clone()),
+    ).toEqual(teeth);
+    expect(Array.from(crown.getAttribute('position').array)).toEqual(before);
   });
 
   it('keeps selected labels and omits overlapping, clipped and offscreen labels deterministically', () => {

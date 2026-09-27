@@ -22,9 +22,9 @@ export const dentalStagePalette = {
     curve: '#68d0cc',
   },
   clinical: {
-    edge: '#d5e0e9',
-    center: '#edf3f7',
-    clear: '#e4ecf2',
+    edge: '#adbfce',
+    center: '#cbd9e3',
+    clear: '#bacdda',
     gridMajor: '#98acbc',
     gridMinor: '#bfced9',
     selected: '#0c7084',
@@ -113,13 +113,13 @@ export function dentalSurface(
     high = Math.max(high, height);
   }
   const cervical = new THREE.Color(
-    tissue === 'enamel' ? '#ded0b7' : tissue === 'root' ? '#c5a982' : '#a65260',
+    tissue === 'enamel' ? '#cbbb9b' : tissue === 'root' ? '#b29975' : '#a65260',
   );
   const body = new THREE.Color(
-    tissue === 'enamel' ? '#f0eadb' : tissue === 'root' ? '#e3cdae' : '#c77985',
+    tissue === 'enamel' ? '#e1d6ba' : tissue === 'root' ? '#cfb48e' : '#c77985',
   );
   const edge = new THREE.Color(
-    tissue === 'enamel' ? '#f4f3ed' : tissue === 'root' ? '#e8d6b8' : '#d99099',
+    tissue === 'enamel' ? '#ebe4d2' : tissue === 'root' ? '#d7c19d' : '#d99099',
   );
   const colors = new Float32Array(positions.count * 3),
     color = new THREE.Color();
@@ -132,7 +132,7 @@ export function dentalSurface(
       .copy(cervical)
       .lerp(body, bodyMix)
       .lerp(edge, THREE.MathUtils.smoothstep(t, 0.7, 1) * 0.68);
-    if (cavity) color.multiplyScalar(1 - 0.16 * cavity[i]);
+    if (cavity) color.multiplyScalar(1 - 0.34 * cavity[i]);
     color.toArray(colors, i * 3);
   }
   geometry.setAttribute('color', new THREE.BufferAttribute(colors, 3));

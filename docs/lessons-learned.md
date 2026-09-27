@@ -34,7 +34,9 @@ Entry format: mistake (with link) · root cause · prevention · status (`noted`
 - **Mistake class:** canvases sized only by their device-pixel buffer render wrong (blurry or clipped) at non-1 devicePixelRatio; a projector or a scaled laptop display is exactly the demo environment.
 - **Root cause:** the CSS size and the drawing-buffer size are separate; testing only at DPR 1 hides the mismatch.
 - **Prevention:** canvases get an explicit CSS size (AGENTS.md code standards), and browser checks run at both DPR 1 and DPR 2 (verification gate step 8; auditor procedure).
-- **Status:** rule · **Count:** 1
+- **Status:** rule · **Count:** 2 (initial canvas sizing; [Phase 4.3](phases/phase-4-voice-lecture-assistant/4.3-visual-clarity.md) found a ratio set only at renderer creation)
+
+- **4.3 prevention:** observe the raw display resolution, re-arm after every change and update both renderer/composer ratios with teardown cleanup. Listener tests automate the lifecycle; real DPR 1/2 and monitor-move checks remain required.
 
 ## 5. Stale docs
 
@@ -99,3 +101,17 @@ Entry format: mistake (with link) · root cause · prevention · status (`noted`
 - **Prevention:** create parallel worktrees outside the project directory. The orchestrator removed the nested worktree and reverted the temporary tool-config exclusions the builder had added, so root tooling configuration is unchanged. Before running recursive tools, check `git worktree list` for worktrees under the project root.
 - **Status:** noted · **Count:** 1
 - **Numbering:** 13 was chosen after checking the local open-PR worktrees: Phase 3.2 reserves 11 and the Phase 3 proposal reserves 12. Preserve those entries when merging; recheck later concurrent reservations per lesson 10.
+
+## 14. Camera framing and completion need image-space evidence
+
+- **Mistake:** [Phase 4.3 review](reviews/from-builder/2026-09-27-phase-4-3-visual-review.md) found that fitting empty corners of a world bounding box left actual crowns small and low. Integration review also caught exact restored pole cameras drifting under later OrbitControls updates and a fresh study gate overriding a same-geometry saved orbit.
+- **Root cause:** bounds containment was treated as sufficient visual framing; assigning a camera was treated as completion without accounting for downstream control updates and fresh presentation state. The review revision also found that avoiding HUD overlap by shrinking the canvas permanently removed 22% of its usable area.
+- **Prevention:** project actual shipped-model vertices to test occupancy, centering and roots/gingiva visibility. Keep the full canvas and share an overlay safe-area value between CSS and asymmetric camera framing. Hold exact programmatic poses until user interaction, defer settlement until the final transition frame, and record restored study state before automatic framing. Pure/DOM regressions cover these paths; projector baseline acceptance remains separate. AGENTS promotion is deferred under this revision's explicit no-AGENTS-edit instruction.
+- **Status:** automated · **Count:** 2
+
+## 15. Global keyboard targets are not always Elements
+
+- **Mistake:** the [4.3 review revision](phases/phase-4-voice-lecture-assistant/4.3-visual-clarity.md) reproduced a `closest is not a function` exception in Studio when a keyboard event targeted Window/Document. Hold-to-talk and presenter handling already guarded their targets.
+- **Root cause:** a TypeScript HTMLElement cast was treated as a runtime guarantee for a global event target.
+- **Prevention:** check `event.target instanceof Element` before DOM traversal. The extracted workspace hook and hold-to-talk tests dispatch real Window/Document events and retain editable-field, composition, active-state and cleanup checks.
+- **Status:** automated · **Count:** 1

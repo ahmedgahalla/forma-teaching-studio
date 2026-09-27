@@ -21,7 +21,7 @@ import type { MechanicsExperiment } from '@/lib/mechanics/types';
 import { createAttachmentGeometry } from '@/lib/attachments';
 import { createApplianceKit, orderedArchIds, toothArch } from '@/lib/appliances';
 import { toothMatrix } from '@/lib/analysis';
-import { perspectiveFitDistance } from '@/lib/camera-fit';
+import { LECTURE_CAMERA_MARGIN, perspectiveFitFrame } from '@/lib/camera-fit';
 import { sameViewerGeometry } from '@/lib/viewer-model';
 import { createWorkflowAppliances, workflowFixedVisibility } from '@/lib/workflow-appliances';
 import {
@@ -30,19 +30,24 @@ import {
   layoutAnatomyLabels,
 } from '@/lib/teaching-anatomy';
 import { createRenderBarrier } from '@/lib/render-barrier';
+import { createDentalMaterials } from '@/lib/viewer-materials';
+import { observePixelRatio } from '@/lib/pixel-ratio';
 import { createRemovableRetainer } from '@/lib/removable-retainer';
 import { useStudioTheme } from '../shared/StudioTheme';
 import {
   cameraViewDirection,
   displayedToothBounds,
+  displayedFitPoints,
   isToothVisible,
   layoutToothLabels,
-  selectionContourMaterial,
   type ToothLabelAnchor,
 } from '@/lib/viewer-presentation';
 import './teaching-anatomy.css';
 import './tooth-study-labels.css';
 import { createToothStudyPresentation } from './tooth-study-presentation';
+import { createCameraMotion, readViewerCamera } from './camera-motion';
+import { createViewerResize } from './viewer-resize';
+import { TOOTH_STUDY_CAMERA_MARGIN } from '@/lib/tooth-study/camera';
 
 export type { ViewName, ArchView, ViewerCamera, ViewerHandle } from './viewer-types';
 import type { ViewName, ViewerCamera, ViewerHandle, ViewerProps as Props } from './viewer-types';
@@ -106,13 +111,12 @@ const Viewer = forwardRef<ViewerHandle, Props>(function Viewer(props, ref) {
       return;
     }
     setError('');
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
     renderer.localClippingEnabled = true;
     renderer.shadowMap.enabled = true;
     renderer.shadowMap.type = THREE.PCFShadowMap;
     renderer.outputColorSpace = THREE.SRGBColorSpace;
     renderer.toneMapping = THREE.ACESFilmicToneMapping;
-    renderer.toneMappingExposure = 0.95;
+    renderer.toneMappingExposure = 0.88;
     let renderedTheme = liveTheme.current;
     const palette = dentalStagePalette[renderedTheme];
     renderer.setClearColor(palette.clear, 1);
@@ -121,7 +125,7 @@ const Viewer = forwardRef<ViewerHandle, Props>(function Viewer(props, ref) {
       camera = new THREE.PerspectiveCamera(34, 1, 0.1, 10000);
     const backdrop = dentalBackdrop(renderedTheme);
     scene.background = backdrop;
-    scene.environmentIntensity = 0.65;
+    scene.environmentIntensity = 0.55;
     const target = new THREE.WebGLRenderTarget(1, 1, { type: THREE.HalfFloatType, samples: 4 });
     const composer = new EffectComposer(renderer, target),
       scenePass = new RenderPass(scene, camera),
@@ -140,6 +144,10 @@ const Viewer = forwardRef<ViewerHandle, Props>(function Viewer(props, ref) {
     composer.addPass(scenePass);
     composer.addPass(ao);
     composer.addPass(outputPass);
+    const stopPixelRatio = observePixelRatio(window, ratio => {
+      renderer.setPixelRatio(ratio);
+      composer.setPixelRatio(ratio);
+    });
     const pmrem = new THREE.PMREMGenerator(renderer),
       room = new RoomEnvironment();
     const environment = pmrem.fromScene(room, 0.04);
@@ -147,7 +155,14 @@ const Viewer = forwardRef<ViewerHandle, Props>(function Viewer(props, ref) {
     room.dispose();
     pmrem.dispose();
     const controls = new OrbitControls(camera, renderer.domElement);
-    const toothStudy = createToothStudyPresentation(props.model, labelContainer, camera, controls);
+    const motionPreference = window.matchMedia('(prefers-reduced-motion: reduce)');
+    const cameraMotion = createCameraMotion(camera, controls, () => motionPreference.matches);
+    const toothStudy = createToothStudyPresentation(
+      props.model,
+      labelContainer,
+      camera,
+      cameraMotion.move,
+    );
     controls.enableDamping = true;
     controls.dampingFactor = 0.11;
     controls.minDistance = 10;
@@ -171,41 +186,16 @@ const Viewer = forwardRef<ViewerHandle, Props>(function Viewer(props, ref) {
     const rim = new THREE.DirectionalLight(0xd7eaff, 1.1);
     rim.position.set(25, 45, -65);
     scene.add(rim);
-    const enamel = new THREE.MeshPhysicalMaterial({
-      color: props.model.demo ? 0xffffff : 0xf0ebdf,
-      vertexColors: props.model.demo,
-      roughness: 0.38,
-      metalness: 0,
-      ior: 1.5,
-      clearcoat: 0.12,
-      clearcoatRoughness: 0.38,
-    });
-    const contourMaterial = selectionContourMaterial(palette.selected);
-    const lockedMaterial = enamel.clone();
-    lockedMaterial.color.set(palette.locked);
-    const contactMaterial = enamel.clone();
-    contactMaterial.color.set(palette.contact);
-    const rootMaterial = new THREE.MeshStandardMaterial({
-      color: props.model.demo ? 0xffffff : 0xe2cba7,
-      vertexColors: props.model.demo,
-      roughness: 0.52,
-    });
-    const ghostMaterial = new THREE.MeshBasicMaterial({
-      color: palette.ghost,
-      opacity: palette.ghostOpacity,
-      transparent: true,
-      depthWrite: false,
-    });
-    const gumMaterial = new THREE.MeshPhysicalMaterial({
-      color: props.model.demo ? 0xffffff : 0xb8757b,
-      vertexColors: props.model.demo,
-      roughness: 0.6,
-      clearcoat: 0.12,
-      clearcoatRoughness: 0.4,
-      transparent: true,
-      side: THREE.DoubleSide,
-    });
-    const attachmentMaterial = new THREE.MeshStandardMaterial({ color: 0xf1b762, roughness: 0.4 });
+    const {
+      enamel,
+      contourMaterial,
+      lockedMaterial,
+      contactMaterial,
+      rootMaterial,
+      ghostMaterial,
+      gumMaterial,
+      attachmentMaterial,
+    } = createDentalMaterials(!!props.model.demo, renderedTheme);
     const kit = createApplianceKit();
     const workflowKit = createWorkflowAppliances(props.model);
     scene.add(workflowKit.group);
@@ -428,24 +418,30 @@ const Viewer = forwardRef<ViewerHandle, Props>(function Viewer(props, ref) {
     let currentView: ViewName = restoreCamera ? previousCamera.view : 'perspective',
       snapshotRequested = false,
       disposed = false,
+      restoringSavedStudy = !!restoreCamera,
       pendingCamera: ViewerCamera | null = null;
     const cancelCameraRestore = () => {
       pendingCamera = null;
     };
     const onCameraInteraction = () => {
       cancelCameraRestore();
+      cameraMotion.cancel();
       live.current.onReferenceInteraction?.();
     };
     controls.addEventListener('start', onCameraInteraction);
     if (restoreCamera) {
-      camera.position.copy(previousCamera.position);
-      camera.up.copy(previousCamera.up);
+      cameraMotion.move(
+        {
+          position: previousCamera.position.toArray(),
+          target: previousCamera.target.toArray(),
+          up: previousCamera.up.toArray(),
+        },
+        true,
+      );
       camera.aspect = previousCamera.aspect;
       camera.far = previousCamera.far;
-      controls.target.copy(previousCamera.target);
       controls.maxDistance = previousCamera.maxDistance;
       camera.updateProjectionMatrix();
-      controls.update();
     }
     const cutawayTooth = () =>
       anatomyCutawayTooth(props.model, live.current.anatomy, live.current.selected);
@@ -475,51 +471,67 @@ const Viewer = forwardRef<ViewerHandle, Props>(function Viewer(props, ref) {
         error instanceof Error ? error.message : 'The teaching anatomy could not be displayed.',
       );
     }
-    const visibleBounds = (selectedOnly = false) => {
-      const ids = props.model.teeth
+    const visibleIds = (selectedOnly = false) =>
+      props.model.teeth
         .filter(tooth => visible(tooth.id) && (!selectedOnly || selection().includes(tooth.id)))
         .map(tooth => tooth.id);
+    const visiblePoints = (selectedOnly = false) =>
+      cutawayTooth()
+        ? undefined
+        : displayedFitPoints(
+            props.model,
+            live.current.transforms,
+            visibleIds(selectedOnly),
+            live.current.roots,
+            live.current.opening,
+            !selectedOnly && live.current.gums && !live.current.isolateSelection,
+          );
+    const visibleBounds = (selectedOnly = false) => {
       const bounds = displayedToothBounds(
         props.model,
         live.current.transforms,
-        ids,
+        visibleIds(selectedOnly),
         live.current.roots,
         live.current.opening,
       );
-      if (!selectedOnly && live.current.gums && !cutawayTooth() && !live.current.isolateSelection)
-        for (const gum of props.model.gums) {
-          if (gum.arch && live.current.arch !== 'both' && gum.arch !== live.current.arch) continue;
-          gum.geometry.computeBoundingBox();
-          const box = gum.geometry
-            .boundingBox!.clone()
-            .translate(new THREE.Vector3(...gum.position));
-          if (gum.arch === 'lower') box.translate(new THREE.Vector3(0, -live.current.opening, 0));
-          bounds.union(box);
-        }
-      if ((!selectedOnly || cutawayTooth()) && (!live.current.isolateSelection || cutawayTooth()))
-        bounds.union(anatomyKit.bounds);
+      // Exact visible tooth/gum points drive ordinary framing; cutaway uses support bounds.
+      if (cutawayTooth()) bounds.union(anatomyKit.bounds);
       return bounds;
     };
-    const positionCamera = (bounds: THREE.Box3, direction: THREE.Vector3, margin: number) => {
+    const positionCamera = (
+      bounds: THREE.Box3,
+      direction: THREE.Vector3,
+      margin: Parameters<typeof perspectiveFitFrame>[5],
+      up = camera.up,
+      instant = false,
+      selectedOnly = false,
+    ) => {
       if (bounds.isEmpty()) return;
       direction.normalize();
-      const center = bounds.getCenter(new THREE.Vector3());
-      const distance = Math.max(
-        controls.minDistance,
-        perspectiveFitDistance(bounds, direction, camera.up, camera.fov, camera.aspect, margin),
+      const framing = perspectiveFitFrame(
+        bounds,
+        direction,
+        up,
+        camera.fov,
+        camera.aspect,
+        margin,
+        visiblePoints(selectedOnly),
       );
-      const damping = controls.enableDamping;
-      controls.enableDamping = false;
-      controls.update();
+      const center = framing.target,
+        distance = Math.max(controls.minDistance, framing.distance);
       controls.maxDistance = Math.max(3000, distance * 2);
       camera.far = Math.max(10000, distance * 4);
       camera.updateProjectionMatrix();
-      camera.position.copy(center).addScaledVector(direction, distance);
-      controls.target.copy(center);
-      controls.update();
-      controls.enableDamping = damping;
+      cameraMotion.move(
+        {
+          position: center.clone().addScaledVector(direction, distance).toArray(),
+          target: center.toArray(),
+          up: up.toArray(),
+        },
+        instant,
+      );
     };
-    const fit = (view: ViewName, section = false) => {
+    const fit = (view: ViewName, section = false, instant = false) => {
       currentView = view;
       const bounds = visibleBounds();
       if (bounds.isEmpty()) return;
@@ -528,8 +540,13 @@ const Viewer = forwardRef<ViewerHandle, Props>(function Viewer(props, ref) {
         section && tooth
           ? new THREE.Vector3(...tooth.buccal).add(new THREE.Vector3(0.04, 0.06, 0))
           : cameraViewDirection(view, live.current.arch);
-      camera.up.set(0, 1, 0);
-      positionCamera(bounds, direction, tooth ? 1.48 : 1.18);
+      positionCamera(
+        bounds,
+        direction,
+        tooth ? 1.48 : LECTURE_CAMERA_MARGIN,
+        new THREE.Vector3(0, 1, 0),
+        instant,
+      );
     };
     commands.current = {
       setView: view => {
@@ -543,67 +560,43 @@ const Viewer = forwardRef<ViewerHandle, Props>(function Viewer(props, ref) {
       focus: () => {
         cancelCameraRestore();
         const direction = camera.position.clone().sub(controls.target).normalize();
-        positionCamera(visibleBounds(true), direction, 1.25);
+        positionCamera(visibleBounds(true), direction, 1.25, camera.up, false, true);
       },
       snapshot: () => {
         snapshotRequested = true;
       },
-      getCamera: () =>
-        pendingCamera
-          ? {
-              ...pendingCamera,
-              position: [...pendingCamera.position],
-              target: [...pendingCamera.target],
-              up: [...pendingCamera.up],
-            }
-          : {
-              position: camera.position.toArray(),
-              target: controls.target.toArray(),
-              up: camera.up.toArray(),
-              view: currentView,
-              far: camera.far,
-              maxDistance: controls.maxDistance,
-            },
+      getCamera: () => readViewerCamera(camera, controls, currentView, pendingCamera),
       restoreCamera: value => {
-        pendingCamera = {
-          ...value,
-          position: [...value.position],
-          target: [...value.target],
-          up: [...value.up],
-        };
+        cameraMotion.cancel();
+        pendingCamera = readViewerCamera(camera, controls, currentView, value);
       },
     };
-    let renderWidth = 0,
-      renderHeight = 0;
-    const resize = () => {
-      const { width, height } = container.getBoundingClientRect();
-      if (!width || !height) return;
-      if (width === renderWidth && height === renderHeight) return;
-      const before = camera.aspect,
-        next = width / height,
-        direction = camera.position.clone().sub(controls.target),
-        bounds = visibleBounds();
-      // Preserve orbit and relative zoom while matching the changed horizontal FOV.
-      if (direction.lengthSq() && !bounds.isEmpty()) {
-        const oldFit = perspectiveFitDistance(bounds, direction, camera.up, camera.fov, before);
-        const newFit = perspectiveFitDistance(bounds, direction, camera.up, camera.fov, next);
-        camera.position.copy(controls.target).addScaledVector(direction, newFit / oldFit);
-        controls.maxDistance = Math.max(3000, newFit * 2);
-        camera.far = Math.max(10000, newFit * 4);
-      }
-      camera.aspect = next;
-      camera.updateProjectionMatrix();
-      renderer.setSize(width, height);
-      composer.setSize(width, height);
-      contourMaterial.uniforms.viewport.value.set(width, height);
-      controls.update();
-      renderWidth = width;
-      renderHeight = height;
-    };
-    const observer = new ResizeObserver(resize);
-    observer.observe(container);
-    resize();
-    if (!restoreCamera) fit('perspective', !!cutawayTooth());
+    const sizing = createViewerResize(
+      container,
+      camera,
+      controls,
+      renderer,
+      composer,
+      contourMaterial.uniforms.viewport.value,
+      cameraMotion.finish,
+      (direction, aspect) => {
+        const bounds = visibleBounds(),
+          study = live.current.toothStudy;
+        return bounds.isEmpty()
+          ? null
+          : perspectiveFitFrame(
+              bounds,
+              direction,
+              camera.up,
+              camera.fov,
+              aspect,
+              study ? TOOTH_STUDY_CAMERA_MARGIN : LECTURE_CAMERA_MARGIN,
+              study ? undefined : visiblePoints(),
+            );
+      },
+    );
+    sizing.resize();
+    if (!restoreCamera) fit('perspective', !!cutawayTooth(), true);
     const gizmo = new TransformControls(camera, renderer.domElement),
       pivot = new THREE.Object3D();
     scene.add(pivot);
@@ -748,7 +741,7 @@ const Viewer = forwardRef<ViewerHandle, Props>(function Viewer(props, ref) {
       updateStageTheme();
       // Resize before drawing, rather than letting a later ResizeObserver callback
       // change the camera after history has captured this frame.
-      resize();
+      sizing.resize();
       const p = live.current;
       const {
         transforms,
@@ -1051,27 +1044,20 @@ const Viewer = forwardRef<ViewerHandle, Props>(function Viewer(props, ref) {
         lastAnatomyFit = anatomyFit;
         lastIsolation = isolated;
       }
-      toothStudy.prepare(p.toothStudy, transforms, opening, !!pendingCamera);
+      toothStudy.prepare(p.toothStudy, transforms, opening, !!pendingCamera || restoringSavedStudy);
+      restoringSavedStudy = false;
       if (pendingCamera) {
-        // Drain residual orbit damping before assigning an exact undo snapshot.
-        const damping = controls.enableDamping;
-        controls.enableDamping = false;
-        controls.update();
-        camera.position.fromArray(pendingCamera.position);
-        camera.up.fromArray(pendingCamera.up);
+        cameraMotion.move(pendingCamera, true);
         camera.far = pendingCamera.far;
-        controls.target.fromArray(pendingCamera.target);
         controls.maxDistance = pendingCamera.maxDistance;
         currentView = pendingCamera.view;
         camera.updateProjectionMatrix();
-        controls.update();
-        controls.enableDamping = damping;
         pendingCamera = null;
       }
-      controls.update();
+      cameraMotion.update();
       inverseCamera.copy(camera.quaternion).invert();
       camera.updateMatrixWorld();
-      toothStudy.render(renderWidth, renderHeight);
+      toothStudy.render(sizing.width, sizing.height);
       anatomyOverlay.hidden = !cutaway;
       if (showLabels && !cutaway) {
         const anchors: ToothLabelAnchor[] = [];
@@ -1083,14 +1069,14 @@ const Viewer = forwardRef<ViewerHandle, Props>(function Viewer(props, ref) {
               .project(camera);
             anchors.push({
               id,
-              x: ((projected.x + 1) * renderWidth) / 2,
-              y: ((1 - projected.y) * renderHeight) / 2,
+              x: ((projected.x + 1) * sizing.width) / 2,
+              y: ((1 - projected.y) * sizing.height) / 2,
               depth: projected.z,
               selected: selectedIds.includes(id),
               locked: !!p.lockedIds?.includes(id),
             });
           }
-        for (const label of layoutToothLabels(anchors, renderWidth, renderHeight)) {
+        for (const label of layoutToothLabels(anchors, sizing.width, sizing.height)) {
           const element = labels.get(label.id)!;
           element.style.display = 'block';
           element.style.transform = `translate(-50%, -50%) translate(${label.x}px,${label.y}px)`;
@@ -1171,8 +1157,8 @@ const Viewer = forwardRef<ViewerHandle, Props>(function Viewer(props, ref) {
         setError(failure.message);
         return;
       }
-      renderBarrier.rendered();
-      if (snapshotRequested) {
+      renderBarrier.rendered(!cameraMotion.active);
+      if (snapshotRequested && !cameraMotion.active) {
         snapshotRequested = false;
         renderer.domElement.toBlob(blob => {
           if (blob) download('forma-teaching-view.png', blob, 'image/png');
@@ -1184,6 +1170,7 @@ const Viewer = forwardRef<ViewerHandle, Props>(function Viewer(props, ref) {
     }
     render();
     return () => {
+      cameraMotion.finish();
       savedCamera.current = {
         model: props.model,
         position: camera.position.clone(),
@@ -1196,7 +1183,8 @@ const Viewer = forwardRef<ViewerHandle, Props>(function Viewer(props, ref) {
       };
       disposed = true;
       cancelAnimationFrame(frame);
-      observer.disconnect();
+      sizing.dispose();
+      stopPixelRatio();
       controls.removeEventListener('start', onCameraInteraction);
       controls.dispose();
       renderer.domElement.removeEventListener('pointerdown', onDown);

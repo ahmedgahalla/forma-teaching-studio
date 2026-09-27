@@ -1,10 +1,13 @@
 import { Vector3, type PerspectiveCamera } from 'three';
-import type { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import type { DentalCase } from '@/lib/geometry';
 import type { Transforms } from '@/lib/model';
 import { displayedToothBounds } from '@/lib/viewer-presentation';
 import { getToothAnatomy, TOOTH_ANATOMY_DISCLAIMER } from '@/lib/tooth-anatomy';
-import { getToothStudyCamera, transformedToothFrame } from '@/lib/tooth-study/camera';
+import {
+  getToothStudyCamera,
+  transformedToothFrame,
+  type ToothStudyCamera,
+} from '@/lib/tooth-study/camera';
 import {
   createSurfaceLabels,
   placeSurfaceLabel,
@@ -30,7 +33,7 @@ export function createToothStudyPresentation(
   model: DentalCase,
   host: HTMLElement,
   camera: PerspectiveCamera,
-  controls: OrbitControls,
+  moveCamera: (next: ToothStudyCamera) => void,
 ) {
   const overlay = document.createElement('div');
   overlay.className = 'tooth-study-labels';
@@ -111,14 +114,7 @@ export function createToothStudyPresentation(
           camera.fov,
           camera.aspect,
         );
-        const damping = controls.enableDamping;
-        controls.enableDamping = false;
-        controls.update();
-        camera.position.fromArray(next.position);
-        camera.up.fromArray(next.up);
-        controls.target.fromArray(next.target);
-        controls.update();
-        controls.enableDamping = damping;
+        moveCamera(next);
       }
       lastTooth = study.tooth;
       lastTransforms = transforms;

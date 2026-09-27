@@ -9,8 +9,8 @@ const start = vi.fn(),
   finish = vi.fn(),
   cancel = vi.fn(),
   cancelCapture = vi.fn();
-function Harness() {
-  useHoldToTalkKeys({ enabled: true, held: () => false, start, finish, cancel, cancelCapture });
+function Harness({ held = false }: { held?: boolean }) {
+  useHoldToTalkKeys({ enabled: true, held: () => held, start, finish, cancel, cancelCapture });
   return null;
 }
 function press(target: EventTarget = document.body, key = ' ', code = 'Space') {
@@ -58,6 +58,25 @@ it.each(['button', 'input', 'summary'])('leaves Space on %s unchanged', tag => {
   expect(press(target).defaultPrevented).toBe(false);
   expect(start).not.toHaveBeenCalled();
 });
+it.each(['window', 'document'] as const)(
+  'starts and releases hold capture when keyboard events target %s',
+  name => {
+    const target = name === 'window' ? window : document;
+    expect(press(target).defaultPrevented).toBe(true);
+    expect(start).toHaveBeenCalledOnce();
+    act(() => root.render(<Harness held />));
+    const release = new KeyboardEvent('keyup', {
+      key: ' ',
+      code: 'Space',
+      bubbles: true,
+      cancelable: true,
+    });
+    target.dispatchEvent(release);
+    expect(release.defaultPrevented).toBe(true);
+    expect(finish).toHaveBeenCalledOnce();
+    expect(cancel).not.toHaveBeenCalled();
+  },
+);
 it('retains Escape cancellation while a dialog is open', () => {
   container.insertAdjacentHTML('beforeend', '<dialog open></dialog>');
   press(document.body, 'Escape', 'Escape');

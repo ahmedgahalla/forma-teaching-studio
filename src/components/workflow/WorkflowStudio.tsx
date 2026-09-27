@@ -39,7 +39,7 @@ import {
 } from '../teaching/TeachingController';
 import { captureWorkflowArrangement } from '@/lib/workflow-transfer';
 import { sceneAnalysisContext } from '@/lib/scene-analysis';
-import { VoiceHud } from '../teaching/VoiceHud';
+import { VoiceHud, VOICE_VIEWPORT_PROPS } from '../teaching/VoiceHud';
 import { HandsFreeToggle } from '../teaching/HandsFreeToggle';
 
 export function WorkflowLibrary({ onChoose }: { onChoose: (id: string) => void }) {
@@ -416,7 +416,7 @@ export default function WorkflowStudio({ active }: { active: boolean }) {
           />
           <div className="lecture-stage">
             <section
-              className="viewport workflow-viewport"
+              {...VOICE_VIEWPORT_PROPS.workflow}
               aria-label="Workflow 3D model"
               onPointerDownCapture={viewportInteraction}
             >
