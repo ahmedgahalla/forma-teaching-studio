@@ -27,4 +27,6 @@ Notes autosave; model edits require explicit Capture. Static captures preserve d
 
 ## Review and preview
 
+CI has not run for this stacked draft: the existing workflow triggers only for PRs targeting main. After the Phase 4 dependency is audited and merged, retarget #14 to main and require green Node 22/24 frontend and Python backend checks. CI policy is unchanged.
+
 Draft PR #14 targets the unchanged Phase 4 branch so its diff isolates this feature. The dependency ref was published at `ff1b3e5`; it was not edited or merged. Latest main was merged before opening the PR (already current). The original checkout and preview on port 3011 remain unchanged. The new static build is served from this worktree on `http://127.0.0.1:3012`, bound to loopback; process session 52502. The server startup was confirmed from its console, without a browser or HTTP inspection. Start with Lecture, choose the sample lecture, then Rehearse or Teach.
