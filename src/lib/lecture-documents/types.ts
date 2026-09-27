@@ -41,5 +41,3 @@ export type LectureDocument = {
   updatedAt: string;
   steps: LectureStep[];
 };
-
-export type LectureStorage = Pick<Storage, 'getItem' | 'setItem'>;

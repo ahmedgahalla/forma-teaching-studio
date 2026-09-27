@@ -1,32 +1,31 @@
-# Teacher lecture workflow handoff — 27 September 2026
+# Ready-made lecture handoff — 27 September 2026
 
-**Branch:** `ahmed/phase-3-teacher-lectures` · **Base:** Claude's Phase 4 at `ff1b3e5` · **PR:** [#14](https://github.com/ahmedgahalla/forma-teaching-studio/pull/14) (draft; stacked on Phase 4).
+**Branch:** `ahmed/phase-3-teacher-lectures` · **Base:** Claude's unchanged Phase 4 at `ff1b3e5` · **PR:** [#14](https://github.com/ahmedgahalla/forma-teaching-studio/pull/14) (draft; stacked on Phase 4).
 
 ## Done
 
-Implemented the approved Explore/Lecture workflow in an isolated managed worktree. Lecture includes local preparation, saved notes/questions/answers, explicit visible-model capture, existing prepared demonstrations, reorder/duplicate/confirmed deletion, JSON backup/import copies, and a three-step sample. Rehearse/Teach use one model and playback bar; step navigation restores absolute setups with hidden answers. A question detour restores the paused scene and answer/notes visibility, while preserving the independent earlier Explore workspace. Click/type/local-voice navigation shares validated runtime actions. Glossary related-term clicks now retain the studied tooth.
+The owner's latest request supersedes custom lecture authoring. Lecture now directly opens a complete sample, **Translation vs tipping: follow the crown and root**, in Teach. Four steps cover prediction, translation, tipping and recap; all have authored notes/questions/answers, and the two demonstrations reuse existing case trajectories. The suggested 205-second walkthrough has not been timed.
 
-The shell was extracted to keep the existing Studio allowlist from growing. No packages, solver, assets, backend endpoints, AGENTS or auditor-owned STATUS were changed. Phase 3.9 consolidates the approved bounded document/editor/runner/return/input work; the phase doc and product direction explain that scope decision.
+Removed the create/library/editor/import/export/save journey and its newly orphaned persistence/capture code. Existing browser saves are untouched: the sample does not read or write lecture storage. Rehearse exposes notes; Teach collapses them; answers are hidden on each newly loaded step. Notes displayed in this single window are public. Repeated Lecture clicks preserve the current step. Opening afresh starts the canonical sample regardless of the preceding Explore model.
+
+One model and one current-demonstration playback strip remain. Explore this question and Return to lecture restore the paused model, camera, layers, frame and answer/notes visibility; leaving Lecture restores the separate earlier Explore workspace. Clicks, typing and recognized local speech share runtime actions. Exact visible labels and explicit exit phrases resolve locally. Removed preparation commands cannot resurrect an editor. Attachment edits require exploration, and replay preflight correctly uses its saved starting session.
+
+The earlier glossary correction remains: related-term clicks retain the studied tooth. No solver, packages, assets, backend endpoints, AGENTS or auditor-owned STATUS were changed.
 
 ## Verification
 
-- Final focused regressions: 132 passing across 10 files.
-- Default frontend: 2,341 pass, existing BVH oracle timeout plus five worker startup timeouts.
-- Two-worker full frontend: 2,382 pass, same existing BVH timeout; no worker errors.
-- Isolated unchanged BVH oracle: 3/3 pass in 24.25 s. Timeout/assertions unchanged.
-- Fresh typecheck, lint, formatting, file limits and production static build pass. Python backend: 482 pass.
-- Real browser access was rejected by this session's security policy, including a prohibition on alternate browser workarounds. Browser/DPR/screenshots, real speech recognition and projector checks are not verified. The demo script is an untimed rehearsal proposal.
+Final results are recorded in the [Phase 3.9 verification record](../phases/phase-3-demo-path/3.9-teacher-lectures.md#acceptance-and-verification). The full frontend run passed 2,383 tests with one unchanged BVH oracle timeout across 99 files in 101.47 seconds. The unchanged oracle then passed alone, 3/3 in 21.63 seconds. Fresh typecheck, zero-warning lint, file limits (380 files), production static build and 482 backend tests passed. Final formatting check passed. Do not call the complete gate green while that run or browser acceptance is failing/unverified.
 
-The full frontend invocation is not green. Review the [phase verification](../phases/phase-3-demo-path/3.9-teacher-lectures.md#acceptance-and-verification) and [auditor inbox item](../reviews/from-builder/2026-09-27-teacher-lecture-workflow.md), then run the repository gate on the audit host. No merge is performed by the builder.
+The browser security policy rejected preview access and prohibited alternate-browser workarounds. Source, DOM and runtime tests do not establish browser/DPR, actual speech recognition or projector readability. These checks remain with the auditor.
 
-## Next and limits
+## Next and review dependency
 
-Audit the unchanged Phase 4 dependency after PR #13, then this feature. Check the real layout at DPR 1 and 2, full prepared-case/braces/typed-command paths, and create → reopen → teach → pause → explore → return → backup/import. Confirm projector readability and microphone behavior on the actual device before presenting.
+Audit PR #13 and Phase 4 first, then this feature. PR #14 targets Phase 4 to isolate the feature diff; CI only triggers for PRs targeting main, so this stacked draft has no CI run. After dependency integration, retarget to main and require green Node 22/24 frontend and Python backend checks. The builder has not merged anything.
 
-Notes autosave; model edits require explicit Capture. Static captures preserve displayed poses and validated appliance inputs, not computed responses or inferred animations. Imported models/workflow transfers, PDF/PPT import, private notes/audience window, cloud sync and new biology content remain excluded. Return points are in-session, and deletion recovery uses exported backups. Existing unrelated auditor follow-ups remain open; this work does not merge the proposal/onboarding PRs or amend the shared rulebook.
+Run the four-step sample on actual screens at DPR 1 and 2, then prepared-case, braces-workflow and typed-command regressions in Explore. Check notes, hidden answers, one playback bar, repeated navigation, question detour and exact return. See the [open auditor item](../reviews/from-builder/2026-09-27-teacher-lecture-workflow.md).
 
-## Review and preview
+The worktree production preview remains on `http://127.0.0.1:3012`, served from `out/` on loopback (process session 52502). Rebuilding updates its files. Server startup was confirmed previously; no browser or HTTP inspection is claimed. The original checkout and port 3011 remain untouched.
 
-CI has not run for this stacked draft: the existing workflow triggers only for PRs targeting main. After the Phase 4 dependency is audited and merged, retarget #14 to main and require green Node 22/24 frontend and Python backend checks. CI policy is unchanged.
+## Suggested next product work
 
-Draft PR #14 targets the unchanged Phase 4 branch so its diff isolates this feature. The dependency ref was published at `ff1b3e5`; it was not edited or merged. Latest main was merged before opening the PR (already current). The original checkout and preview on port 3011 remain unchanged. The new static build is served from this worktree on `http://127.0.0.1:3012`, bound to loopback; process session 52502. The server startup was confirmed from its console, without a browser or HTTP inspection. Start with Lecture, choose the sample lecture, then Rehearse or Teach.
+Prioritize clearer model focus and fewer repeated headings/counters, then an authored same-camera translation/tipping comparison. A separate audience window could make notes private if the teacher presents on a second screen. Biology visuals require a distinct educator-reviewed scope; offline fonts/favicon and an actual device rehearsal remain separate known improvements. No additional feature was built merely because it is suggested here.

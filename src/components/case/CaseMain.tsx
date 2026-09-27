@@ -24,7 +24,7 @@ export function CaseMain({ api, teacher }: { api: CaseStudioApi; teacher?: Teach
           ) : (
             <CaseWorkspaceHeading api={api} />
           )}
-          {(!customStep || teacher.session.mode === 'prepare') && <CaseArchToolbar api={api} />}
+          {!customStep && <CaseArchToolbar api={api} />}
           <div
             className={`lecture-stage${api.toothStudy ? ' tooth-study-workspace' : ''}${api.glossaryId ? ' definition-workspace' : ''}`}
           >
@@ -102,9 +102,11 @@ export function CaseMain({ api, teacher }: { api: CaseStudioApi; teacher?: Teach
                             ]
             }
             placeholder={
-              api.prepared
-                ? 'Try “show roots, then reveal answer”'
-                : 'Try “select upper front six, then move them buccally 1 mm”'
+              customStep
+                ? 'Try “next step”, “show notes” or “reveal answer”'
+                : api.prepared
+                  ? 'Try “show roots, then reveal answer”'
+                  : 'Try “select upper front six, then move them buccally 1 mm”'
             }
             value={api.command}
             onChange={api.setCommand}

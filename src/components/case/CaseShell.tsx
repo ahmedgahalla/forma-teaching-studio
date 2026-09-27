@@ -34,11 +34,7 @@ export function CaseShell({ api, teacher }: { api: CaseStudioApi; teacher: Teach
     aiEnabled,
     sceneInteraction,
   } = api;
-  const teacherError =
-    teacher.error ||
-    (teacher.session.screen === 'library' && teaching.runtime.error
-      ? teaching.runtime.message
-      : '');
+  const teacherError = teaching.runtime.error ? teaching.runtime.message : '';
   return (
     <div
       className={`app-shell braces-studio teaching-studio try-studio studio-experience lecture-opening ${lecture ? 'lecture-mode' : ''}`}
@@ -54,12 +50,8 @@ export function CaseShell({ api, teacher }: { api: CaseStudioApi; teacher: Teach
     >
       <CaseTopbar
         experience={teacher.active ? 'lecture' : 'explore'}
-        onExperienceChange={next => (next === 'lecture' ? teacher.showLibrary() : teacher.exit())}
-        toolsAvailable={
-          !teacher.active ||
-          teacher.session.exploring ||
-          (teacher.session.screen === 'lecture' && teacher.session.mode === 'prepare')
-        }
+        onExperienceChange={next => (next === 'lecture' ? teacher.openSample() : teacher.exit())}
+        toolsAvailable={!teacher.active || teacher.session.exploring}
         caseActionsAvailable={!teacher.active}
         lecture={lecture}
         toolsOpen={!lecture && (toolsOpen || mobilePanel === 'tools')}
@@ -135,7 +127,6 @@ export function CaseShell({ api, teacher }: { api: CaseStudioApi; teacher: Teach
         ) : (
           <CaseInspector api={api} />
         )}
-        {teacher.session.screen === 'library' && <TeacherWorkspace teacher={teacher} />}
       </div>
       <MobileStudioDock
         activePanel={mobilePanel}

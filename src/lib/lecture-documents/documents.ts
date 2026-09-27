@@ -1,7 +1,7 @@
 import { getTeachingCase } from '../teaching-cases';
 import { fields, identifier, object, text } from './fields';
 import { validateLectureScene } from './scene';
-import type { LectureDocument, LectureScene, LectureStep } from './types';
+import type { LectureDocument, LectureStep } from './types';
 
 export const MAX_LECTURE_STEPS = 100;
 
@@ -51,32 +51,4 @@ export function validateLectureDocument(raw: unknown): LectureDocument {
     updatedAt,
     steps,
   };
-}
-
-export function createLectureStep(scene: LectureScene, title = 'New step'): LectureStep {
-  return validateStep({
-    id: crypto.randomUUID(),
-    title,
-    notes: '',
-    question: '',
-    answer: '',
-    scene,
-  });
-}
-
-export function createLectureDocument(
-  scene: LectureScene,
-  title = 'Untitled lecture',
-): LectureDocument {
-  return validateLectureDocument({
-    version: 1,
-    id: crypto.randomUUID(),
-    title,
-    updatedAt: new Date().toISOString(),
-    steps: [createLectureStep(scene)],
-  });
-}
-
-export function duplicateLectureStep(step: LectureStep): LectureStep {
-  return validateStep({ ...step, id: crypto.randomUUID() });
 }

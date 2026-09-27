@@ -9,7 +9,7 @@ import { CaseShell } from './CaseShell';
 const calls = vi.hoisted(() => ({
   mount: vi.fn(),
   unmount: vi.fn(),
-  library: vi.fn(),
+  openSample: vi.fn(),
   exit: vi.fn(),
   save: vi.fn(),
   importCase: vi.fn(),
@@ -35,26 +35,25 @@ vi.mock('./CaseDialogs', () => ({ CaseDialogs: () => null }));
 vi.mock('./StudioExperience', () => ({ MobileStudioDock: () => null }));
 vi.mock('../try/PreviewDecisionBar', () => ({ PreviewDecisionBar: () => null }));
 vi.mock('../lecture-builder/LecturePanel', () => ({
-  LecturePanel: () => <aside data-testid="lecture-panel">Lecture preparation</aside>,
-}));
-vi.mock('../lecture-builder/LectureLibrary', () => ({
-  LectureLibrary: () => <section data-testid="lecture-library">Saved lectures</section>,
+  LecturePanel: () => <aside data-testid="lecture-panel">Sample lecture</aside>,
 }));
 vi.mock('../lecture-builder/LectureNavigation', () => ({
   LectureNavigation: () => <nav aria-label="Lecture controls" />,
 }));
 
-type Screen = 'explore' | 'library' | 'lecture';
+type Screen = 'explore' | 'lecture';
 function Harness({
   initialScreen = 'lecture',
-  mode = 'prepare',
+  mode = 'teach',
   busy = false,
   error = '',
+  exploring = false,
 }: {
   initialScreen?: Screen;
-  mode?: 'prepare' | 'teach';
+  mode?: 'rehearse' | 'teach';
   busy?: boolean;
   error?: string;
+  exploring?: boolean;
 }) {
   const [screen, setScreen] = useState<Screen>(initialScreen);
   const [lecture, setLecture] = useState(mode === 'teach');
@@ -84,16 +83,15 @@ function Harness({
     importCase: calls.importCase,
   } as unknown as CaseStudioApi;
   const teacher = {
-    session: { screen, mode, exploring: false },
+    session: { screen, mode, exploring },
     active: screen !== 'explore',
     error: '',
     document: screen === 'lecture' ? { title: 'Lecture', steps: [{}] } : undefined,
     panelProps: screen === 'lecture' ? {} : null,
-    libraryProps: {},
     navigationProps: {},
-    showLibrary: () => {
-      calls.library();
-      setScreen('library');
+    openSample: () => {
+      calls.openSample();
+      setScreen('lecture');
     },
     exit: () => {
       calls.exit();
@@ -131,46 +129,41 @@ afterEach(async () => {
   vi.unstubAllGlobals();
 });
 
-it('switches the single lecture context panel to editing tools and back in Prepare', async () => {
-  await render();
+it('shows editing tools only during an explicit question exploration', async () => {
+  await render({ exploring: true });
   const model = byTestId('model-workspace');
-  expect(container.querySelectorAll('[data-testid="lecture-panel"]')).toHaveLength(1);
-  expect(byTestId('tools')).toBeNull();
+  expect(byTestId('lecture-panel')).toBeNull();
   await click('Tools');
   expect(findButton('Tools')?.getAttribute('aria-pressed')).toBe('true');
-  expect(byTestId('lecture-panel')).toBeNull();
   expect(byTestId('tools')).not.toBeNull();
   await click('Tools');
   expect(findButton('Tools')?.getAttribute('aria-pressed')).toBe('false');
-  expect(container.querySelectorAll('[data-testid="lecture-panel"]')).toHaveLength(1);
-  expect(byTestId('tools')).toBeNull();
   expect(byTestId('model-workspace')).toBe(model);
   expect(calls.mount).toHaveBeenCalledOnce();
   expect(calls.unmount).not.toHaveBeenCalled();
 });
 
-it('opens one library overlay without remounting the shared model workspace', async () => {
-  await render();
+it('opens the ready lecture directly without remounting the shared model', async () => {
+  await render({ initialScreen: 'explore' });
   const model = byTestId('model-workspace');
   await click('Lecture');
-  expect(calls.library).toHaveBeenCalledOnce();
-  expect(container.querySelectorAll('.teacher-library-screen')).toHaveLength(1);
-  expect(container.querySelectorAll('[data-testid="lecture-library"]')).toHaveLength(1);
-  expect(byTestId('lecture-panel')).toBeNull();
+  expect(calls.openSample).toHaveBeenCalledOnce();
+  expect(container.querySelectorAll('[data-testid="lecture-panel"]')).toHaveLength(1);
   expect(findButton('Tools')).toBeUndefined();
+  expect(findButton('Create lecture')).toBeUndefined();
   expect(byTestId('model-workspace')).toBe(model);
   await click('Explore');
   expect(calls.exit).toHaveBeenCalledOnce();
-  expect(byTestId('lecture-library')).toBeNull();
+  expect(byTestId('lecture-panel')).toBeNull();
   expect(byTestId('model-workspace')).toBe(model);
   expect(calls.mount).toHaveBeenCalledOnce();
   expect(calls.unmount).not.toHaveBeenCalled();
 });
 
-it('shows a rejected lecture opening above the library overlay', async () => {
-  await render({ initialScreen: 'library', error: 'Choose a saved lecture.' });
+it('keeps a rejected lecture opening visible from Explore', async () => {
+  await render({ initialScreen: 'explore', error: 'Apply or discard the preview first.' });
   expect(container.querySelector('[role="alert"]')?.textContent).toContain(
-    'Choose a saved lecture.',
+    'Apply or discard the preview first.',
   );
 });
 

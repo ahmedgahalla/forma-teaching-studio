@@ -1,4 +1,3 @@
-.lecture-library,
 .lecture-panel,
 .lecture-navigation {
   color: var(--ui-text);
@@ -6,34 +5,10 @@
   border: 1px solid var(--ui-line);
   border-radius: 14px;
 }
-.lecture-library {
-  width: min(100%, 1040px);
-  margin: 24px auto;
-  padding: clamp(20px, 3vw, 40px);
-  overflow: auto;
-}
-.lecture-library-heading,
-.lecture-panel-heading,
-.lecture-document-list > li {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 16px;
-}
-.lecture-library h1 {
-  margin: 8px 0;
-  font-size: clamp(24px, 2.5vw, 34px);
-  line-height: 1.2;
-  letter-spacing: -0.04em;
-}
-.lecture-library h2,
 .lecture-panel h2 {
   margin: 0;
   font-size: 20px;
   line-height: 1.35;
-}
-.lecture-library p {
-  margin: 8px 0;
 }
 .lecture-eyebrow {
   color: var(--ui-muted);
@@ -41,14 +16,12 @@
   font-weight: 700;
   letter-spacing: 0.1em;
 }
-.lecture-library button,
 .lecture-panel button,
-.lecture-navigation button,
-.lecture-import {
+.lecture-navigation button {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  min-height: 42px;
+  min-height: 44px;
   padding: 8px 12px;
   border: 1px solid var(--ui-line);
   border-radius: 8px;
@@ -58,14 +31,10 @@
   text-align: center;
   cursor: pointer;
 }
-.lecture-library button:hover:not(:disabled),
 .lecture-panel button:hover:not(:disabled),
-.lecture-navigation button:hover:not(:disabled),
-.lecture-import:hover {
+.lecture-navigation button:hover:not(:disabled) {
   background: var(--ui-soft);
 }
-.lecture-library .lecture-primary,
-.lecture-panel .lecture-primary,
 .lecture-navigation .lecture-primary,
 .lecture-navigation button[aria-pressed='true'] {
   border-color: var(--ui-accent);
@@ -73,10 +42,6 @@
   color: var(--ui-accent);
   font-weight: 700;
 }
-.lecture-library-actions,
-.lecture-document-actions,
-.lecture-edit-actions,
-.lecture-delete-confirm,
 .lecture-mode-switch,
 .lecture-step-navigation {
   display: flex;
@@ -84,60 +49,9 @@
   align-items: center;
   gap: 8px;
 }
-.lecture-library-actions {
-  margin: 24px 0 12px;
-}
-.lecture-import {
-  position: relative;
-  overflow: hidden;
-}
-.lecture-import input {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  opacity: 0;
-  cursor: pointer;
-}
-.lecture-import:focus-within {
-  outline: 3px solid var(--ui-accent);
-  outline-offset: 3px;
-}
-.lecture-muted,
-.lecture-save-status,
-.lecture-document-summary p {
+.lecture-muted {
   color: var(--ui-muted);
   font-size: 12px;
-}
-.lecture-error {
-  color: var(--ui-error);
-}
-.lecture-empty {
-  padding: 48px 24px;
-  margin-top: 24px;
-  border: 1px dashed var(--ui-line);
-  border-radius: 12px;
-  text-align: center;
-  background: var(--ui-raised);
-}
-.lecture-document-list,
-.lecture-step-list {
-  margin: 20px 0 0;
-  padding: 0;
-  list-style: none;
-}
-.lecture-document-list > li {
-  padding: 20px 0;
-  border-top: 1px solid var(--ui-line);
-}
-.lecture-document-summary {
-  min-width: 0;
-  overflow-wrap: anywhere;
-}
-.lecture-delete-confirm {
-  max-width: 420px;
-}
-.lecture-delete-confirm p {
-  flex-basis: 100%;
 }
 .lecture-panel {
   display: flex;
@@ -150,91 +64,11 @@
   overflow: auto;
   overscroll-behavior: contain;
 }
-.lecture-panel > label,
-.lecture-demo-picker > label {
-  margin-top: 4px;
-  font-size: 12px;
-  font-weight: 700;
-}
-.lecture-panel input,
-.lecture-panel textarea,
-.lecture-panel select {
-  width: 100%;
-  min-height: 40px;
-  padding: 9px 10px;
-  border: 1px solid var(--ui-line);
-  border-radius: 7px;
-  color: var(--ui-text);
-  background: var(--ui-bg);
-  font: inherit;
-}
-.lecture-panel textarea {
-  resize: vertical;
-}
-.lecture-panel textarea:focus-visible,
-.lecture-demo-picker > summary:focus-visible {
-  outline: 3px solid var(--ui-accent);
-  outline-offset: 3px;
-}
 .lecture-panel p {
   margin: 0;
 }
-.lecture-step-list {
-  display: grid;
-  gap: 5px;
-  max-height: 180px;
-  margin: 0;
-  overflow: auto;
-}
-.lecture-step-list button {
-  justify-content: flex-start;
-  gap: 10px;
-  width: 100%;
-  text-align: left;
-  overflow-wrap: anywhere;
-}
-.lecture-step-list button[aria-current='step'] {
-  border-color: var(--ui-accent);
-  background: var(--ui-soft);
-}
-.lecture-step-list button > span {
-  color: var(--ui-muted);
-  font-variant-numeric: tabular-nums;
-}
-.lecture-edit-actions button,
-.lecture-panel-heading button {
-  min-height: 36px;
-  padding: 7px 9px;
-  font-size: 12px;
-}
-.lecture-capture,
-.lecture-demo-picker {
-  margin-top: 8px;
-  padding-top: 14px;
-  border-top: 1px solid var(--ui-line);
-}
-.lecture-capture button {
-  width: 100%;
-}
-.lecture-capture p,
-.lecture-demo-picker p {
-  margin: 8px 0;
-  color: var(--ui-muted);
-  font-size: 12px;
-}
-.lecture-demo-picker > summary {
-  padding: 4px 0;
-  font-weight: 600;
-  cursor: pointer;
-}
-.lecture-demo-picker > label,
-.lecture-demo-picker > button {
-  display: block;
-  margin: 8px 0;
-}
 .lecture-panel[data-mode='teach'] {
   align-self: flex-start;
-  background: var(--ui-panel);
 }
 .lecture-panel[data-mode='teach'] h2,
 .lecture-question {
@@ -266,11 +100,6 @@
     flex-basis: auto;
     width: 100%;
     max-height: 45dvh;
-  }
-  .lecture-library-heading,
-  .lecture-document-list > li {
-    align-items: flex-start;
-    flex-direction: column;
   }
   .lecture-navigation {
     gap: 8px;

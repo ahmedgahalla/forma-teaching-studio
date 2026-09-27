@@ -3,22 +3,22 @@ import { act, type ReactNode } from 'react';
 import { createRoot, type Root } from 'react-dom/client';
 import { afterEach, beforeEach, expect, it, vi } from 'vitest';
 import type { LectureDocument } from '@/lib/lecture-documents';
-import { TEACHING_CASES } from '@/lib/teaching-cases';
-import { LectureLibrary } from './LectureLibrary';
+import type { TeacherLectures } from './useTeacherLectures';
 import { LectureNavigation, type LectureNavigationProps } from './LectureNavigation';
 import { LecturePanel, type LecturePanelProps } from './LecturePanel';
+import { TeacherWorkspace } from './TeacherWorkspace';
 
 let root: Root, container: HTMLDivElement;
 const lecture = {
   version: 1,
-  id: 'test-lecture',
+  id: 'sample-lecture',
   title: 'Movement lesson',
   updatedAt: '2026-09-27T10:00:00.000Z',
   steps: ['Observe', 'Predict', 'Compare'].map((title, index) => ({
     id: `step-${index}`,
     title,
     notes: `Notes for ${title}`,
-    question: 'What changes?',
+    question: `Question for ${title}`,
     answer: 'The model illustrates movement.',
     scene: {},
   })),
@@ -41,23 +41,11 @@ function panelProps(patch: Partial<LecturePanelProps> = {}): LecturePanelProps {
   return {
     document: lecture,
     index: 0,
-    mode: 'prepare',
+    mode: 'teach',
     answerVisible: false,
     notesVisible: false,
-    saveStatus: 'Saved in this browser',
-    onTitle: vi.fn(),
-    onPatchStep: vi.fn(),
-    onCapture: vi.fn(),
-    onAdd: vi.fn(),
-    onDuplicate: vi.fn(),
-    onDelete: vi.fn(),
-    onMove: vi.fn(),
-    onAttachDemo: vi.fn(),
-    onDetachDemo: vi.fn(),
-    onGo: vi.fn(),
     onReveal: vi.fn(),
     onNotes: vi.fn(),
-    onExport: vi.fn(),
     ...patch,
   };
 }
@@ -72,7 +60,6 @@ function navigationProps(patch: Partial<LectureNavigationProps> = {}): LectureNa
     onNext: vi.fn(),
     onExplore: vi.fn(),
     onReturn: vi.fn(),
-    onLibrary: vi.fn(),
     ...patch,
   };
 }
@@ -89,78 +76,28 @@ afterEach(async () => {
   vi.unstubAllGlobals();
 });
 
-it('offers a clear start and sample in an empty library', async () => {
-  const onCreate = vi.fn(),
-    onSample = vi.fn();
-  await render(
-    <LectureLibrary
-      documents={[]}
-      error=""
-      onCreate={onCreate}
-      onSample={onSample}
-      onOpen={vi.fn()}
-      onImport={vi.fn()}
-      onDelete={vi.fn()}
-    />,
-  );
-  await click('Create lecture');
-  await click('Open a three-step sample');
-  expect(onCreate).toHaveBeenCalledOnce();
-  expect(onSample).toHaveBeenCalledOnce();
-  expect(container.textContent).toContain('Lectures save in this browser');
+it('shows the ready-made lecture without creation or editing controls in either view', async () => {
+  for (const mode of ['rehearse', 'teach'] as const) {
+    await render(<LecturePanel {...panelProps({ mode })} />);
+    expect(container.textContent).toContain('READY TO TEACH');
+    expect(container.querySelector('h2')?.textContent).toBe('Observe');
+    expect(container.querySelector('input, textarea, select, [contenteditable]')).toBeNull();
+    expect([...container.querySelectorAll('button')].map(item => item.textContent)).toEqual([
+      'Reveal answer',
+      'Show notes',
+    ]);
+    expect(container.textContent).not.toMatch(
+      /Create lecture|Add step|Capture|Export|Import|Delete/,
+    );
+  }
 });
 
-it('requires explicit inline confirmation before deleting a saved lecture', async () => {
-  const onDelete = vi.fn();
-  await render(
-    <LectureLibrary
-      documents={[lecture]}
-      error=""
-      onCreate={vi.fn()}
-      onSample={vi.fn()}
-      onOpen={vi.fn()}
-      onImport={vi.fn()}
-      onDelete={onDelete}
-    />,
-  );
-  await click('Delete Movement lesson');
-  expect(onDelete).not.toHaveBeenCalled();
-  await click('Keep lecture');
-  expect(onDelete).not.toHaveBeenCalled();
-  await click('Delete Movement lesson');
-  await click('Delete lecture');
-  expect(onDelete).toHaveBeenCalledExactlyOnceWith(lecture.id);
-});
-
-it('passes an imported backup to the owner and keeps import available', async () => {
-  const onImport = vi.fn(),
-    file = new File(['{}'], 'lecture.json', { type: 'application/json' });
-  await render(
-    <LectureLibrary
-      documents={[]}
-      error="Invalid backup"
-      onCreate={vi.fn()}
-      onSample={vi.fn()}
-      onOpen={vi.fn()}
-      onImport={onImport}
-      onDelete={vi.fn()}
-    />,
-  );
-  const input = container.querySelector<HTMLInputElement>('input[type="file"]')!;
-  Object.defineProperty(input, 'files', { value: [file] });
-  await act(async () => input.dispatchEvent(new Event('change', { bubbles: true })));
-  expect(onImport).toHaveBeenCalledExactlyOnceWith(file);
-  expect(input.value).toBe('');
-  expect(container.querySelector('[role="alert"]')?.textContent).toBe('Invalid backup');
-});
-
-it('keeps answers and notes hidden in teaching until the presenter requests them', async () => {
-  const props = panelProps({ mode: 'teach' });
+it('keeps answers and notes hidden until the presenter requests them', async () => {
+  const props = panelProps();
   await render(<LecturePanel {...props} />);
-  expect(container.textContent).toContain('What changes?');
+  expect(container.textContent).toContain('Question for Observe');
   expect(container.textContent).not.toContain(lecture.steps[0].answer);
   expect(container.textContent).not.toContain(lecture.steps[0].notes);
-  expect(container.querySelector('input, textarea')).toBeNull();
   await click('Reveal answer');
   await click('Show notes');
   expect(props.onReveal).toHaveBeenCalledOnce();
@@ -170,97 +107,71 @@ it('keeps answers and notes hidden in teaching until the presenter requests them
   expect(container.querySelector('.lecture-notes')?.textContent).toContain(
     'VISIBLE ON THIS SCREEN',
   );
+  expect(button('Hide answer').getAttribute('aria-expanded')).toBe('true');
+  expect(button('Hide notes').getAttribute('aria-expanded')).toBe('true');
+  await click('Hide answer');
+  await click('Hide notes');
+  expect(props.onReveal).toHaveBeenCalledTimes(2);
+  expect(props.onNotes).toHaveBeenCalledTimes(2);
 });
 
-it('captures the shown setup explicitly and identifies the current ordered step', async () => {
-  const props = panelProps();
-  await render(<LecturePanel {...props} />);
-  expect(container.querySelector('[aria-current="step"]')?.textContent).toBe('1Observe');
-  await click('Capture shown model setup');
-  await click('Move step later');
-  await click('2Predict');
-  expect(props.onCapture).toHaveBeenCalledOnce();
-  expect(props.onMove).toHaveBeenCalledExactlyOnceWith(1);
-  expect(props.onGo).toHaveBeenCalledExactlyOnceWith(1);
-  expect(button('Move step earlier').disabled).toBe(true);
-  await render(<LecturePanel {...props} document={{ ...lecture, steps: [lecture.steps[0]] }} />);
-  expect(button('Delete step').disabled).toBe(true);
-});
-
-it('selects compatible authored variants and does not attach one until requested', async () => {
-  const props = panelProps(),
-    example = TEACHING_CASES.find(item => item.id === 'movement-types')!;
-  await render(<LecturePanel {...props} />);
-  const selects = container.querySelectorAll('select');
-  await act(async () => {
-    selects[0].value = example.id;
-    selects[0].dispatchEvent(new Event('change', { bubbles: true }));
-  });
-  expect(selects[1].value).toBe(example.variants[0].id);
-  expect(props.onAttachDemo).not.toHaveBeenCalled();
-  await act(async () => {
-    selects[1].value = example.variants[1].id;
-    selects[1].dispatchEvent(new Event('change', { bubbles: true }));
-  });
-  await click('Attach demonstration');
-  expect(props.onAttachDemo).toHaveBeenCalledExactlyOnceWith(example.id, example.variants[1].id);
-  expect(container.textContent).toContain('Uses this example’s starting model');
-});
-
-it('confirms step deletion and keeps authoring fields within saved document limits', async () => {
-  const props = panelProps();
-  await render(<LecturePanel {...props} />);
-  await click('Delete step');
-  expect(props.onDelete).not.toHaveBeenCalled();
-  expect(container.querySelector('[aria-label="Delete step confirmation"]')?.textContent).toContain(
-    'Observe',
+it('renders the current rehearsal notes read-only and hides absent optional content', async () => {
+  await render(
+    <LecturePanel {...panelProps({ mode: 'rehearse', index: 1, notesVisible: true })} />,
   );
-  await click('Keep step');
-  expect(props.onDelete).not.toHaveBeenCalled();
-  await click('Delete step');
-  await click('Confirm delete');
-  expect(props.onDelete).toHaveBeenCalledOnce();
-  expect([...container.querySelectorAll('input')].map(input => input.maxLength)).toEqual([
-    160, 160,
-  ]);
-  expect([...container.querySelectorAll('textarea')].map(input => input.maxLength)).toEqual([
-    20000, 2000, 10000,
-  ]);
-  const full = {
+  expect(container.querySelector('h2')?.textContent).toBe('Predict');
+  expect(container.textContent).toContain('Notes for Predict');
+  expect(container.textContent).not.toContain('Notes for Observe');
+  expect(container.querySelector('textarea')).toBeNull();
+  const empty = {
     ...lecture,
-    steps: Array.from({ length: 100 }, (_, index) => ({
-      ...lecture.steps[0],
-      id: `full-${index}`,
-    })),
+    steps: [{ ...lecture.steps[0], question: '', answer: '', notes: '' }],
   };
-  await render(<LecturePanel {...props} document={full} />);
-  expect(button('Add step').disabled).toBe(true);
-  expect(button('Duplicate').disabled).toBe(true);
-  await click('Add step');
-  await click('Duplicate');
-  expect(props.onAdd).not.toHaveBeenCalled();
-  expect(props.onDuplicate).not.toHaveBeenCalled();
+  await render(<LecturePanel {...panelProps({ document: empty })} />);
+  expect(container.querySelectorAll('button')).toHaveLength(0);
 });
 
-it('keeps a clear return path while exploring and prevents navigation to another step', async () => {
+it('provides only Rehearse and Teach with bounded step navigation and separate playback', async () => {
+  const props = navigationProps();
+  await render(<LectureNavigation {...props} />);
+  const modes = container.querySelector('[aria-label="Lecture view"]');
+  expect(modes?.textContent).toBe('RehearseTeach');
+  expect(container.textContent).not.toMatch(/Prepare|My lectures|Create|Play|Pause|Replay/);
+  expect(button('Previous lecture step').disabled).toBe(true);
+  await click('Previous lecture step');
+  expect(props.onPrevious).not.toHaveBeenCalled();
+  await click('Rehearse');
+  await click('Next lecture step');
+  await click('Explore this question');
+  expect(props.onMode).toHaveBeenCalledExactlyOnceWith('rehearse');
+  expect(props.onNext).toHaveBeenCalledOnce();
+  expect(props.onExplore).toHaveBeenCalledOnce();
+  await render(<LectureNavigation {...props} index={2} />);
+  expect(button('Next lecture step').disabled).toBe(true);
+  await click('Previous lecture step');
+  expect(props.onPrevious).toHaveBeenCalledOnce();
+});
+
+it('keeps a clear return path during exploration and prevents accidental lecture navigation', async () => {
   const props = navigationProps({ index: 1, exploring: true });
   await render(<LectureNavigation {...props} />);
   expect(button('Previous lecture step').disabled).toBe(true);
   expect(button('Next lecture step').disabled).toBe(true);
-  expect(button('Prepare').disabled).toBe(true);
+  expect(button('Rehearse').disabled).toBe(true);
+  expect(button('Teach').disabled).toBe(true);
   await click('Next lecture step');
+  await click('Rehearse');
   expect(props.onNext).not.toHaveBeenCalled();
+  expect(props.onMode).not.toHaveBeenCalled();
   await click('Return to lecture');
   expect(props.onReturn).toHaveBeenCalledOnce();
 });
 
-it('separates lecture step navigation from the shared model playback', async () => {
-  const props = navigationProps();
-  await render(<LectureNavigation {...props} />);
-  expect(button('Previous lecture step').disabled).toBe(true);
-  await click('Next lecture step');
-  expect(props.onNext).toHaveBeenCalledOnce();
-  expect(container.textContent).not.toMatch(/Play|Pause|Replay/);
-  await render(<LectureNavigation {...props} index={2} />);
-  expect(button('Next lecture step').disabled).toBe(true);
+it('renders one context panel when a lecture is active and no library overlay', async () => {
+  const teacher = { panelProps: panelProps() } as unknown as TeacherLectures;
+  await render(<TeacherWorkspace teacher={teacher} />);
+  expect(container.querySelectorAll('[aria-label="Lecture step"]')).toHaveLength(1);
+  expect(container.querySelector('.teacher-library-screen')).toBeNull();
+  await render(<TeacherWorkspace teacher={{ ...teacher, panelProps: null }} />);
+  expect(container.innerHTML).toBe('');
 });

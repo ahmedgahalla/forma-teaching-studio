@@ -17,8 +17,9 @@ describe('teacher lecture journey through the shared runtime', () => {
   it('opens, teaches, navigates and replays absolute steps with hidden answers', async () => {
     const h = setup();
     await h.open();
-    await h.runtime.submit('teach lecture');
     expect(h.session.mode).toBe('teach');
+    expect(h.session.notesVisible).toBe(false);
+    expect(h.session.answerVisible).toBe(false);
     await h.runtime.submit('next step');
     const first = h.snapshot.history.current;
     expect(h.snapshot.lesson.stage).toBe(0);
@@ -40,8 +41,12 @@ describe('teacher lecture journey through the shared runtime', () => {
     const mid = {
       ...h.snapshot,
       camera: {
-        ...h.document.steps[0].scene.setup.camera!,
         position: [11, 22, 83] as [number, number, number],
+        target: [0, 0, 0] as [number, number, number],
+        up: [0, 1, 0] as [number, number, number],
+        view: 'perspective' as const,
+        far: 10000,
+        maxDistance: 3000,
       },
       lesson: { ...h.snapshot.lesson, stage: 4.3, roots: true, labels: true },
     };
@@ -96,6 +101,37 @@ describe('teacher lecture journey through the shared runtime', () => {
     expect(h.snapshot.sandbox.pending).toBe(pending);
   });
 
+  it('refuses opening over a preview and leaves the original workspace intact', async () => {
+    const h = setup();
+    const pending = { label: 'Unapplied' } as NonNullable<typeof h.snapshot.sandbox.pending>;
+    const before = { ...h.snapshot, sandbox: { ...h.snapshot.sandbox, pending } };
+    h.changeScene(before);
+    await h.open();
+    expect(h.session.screen).toBe('explore');
+    expect(h.snapshot).toBe(before);
+    expect(h.original.current).toBeNull();
+    expect(h.runtime.getState().message).toMatch(/Apply or discard/i);
+  });
+
+  it('shows complete rehearsal notes, holds the final recap, and protects step boundaries', async () => {
+    const h = setup();
+    await h.open();
+    await h.runtime.submit('rehearse lecture');
+    expect(h.session.notesVisible).toBe(true);
+    expect(h.adapter().narration('step')).toBe(h.document.steps[0].notes);
+    await h.runtime.submit('go to step 4');
+    expect(h.session.index).toBe(3);
+    expect(h.session.answerVisible).toBe(false);
+    expect(h.snapshot.scenario).toBeNull();
+    expect(h.snapshot.history.current).toEqual(h.document.steps[3].scene.transforms);
+    await h.runtime.submit('next step');
+    expect(h.session.index).toBe(3);
+    expect(h.runtime.getState().error).toBe(true);
+    await h.runtime.submit('restart lecture');
+    expect(h.session.index).toBe(0);
+    expect(h.session.mode).toBe('rehearse');
+  });
+
   it('keeps clicks, typed requests and local speech controls on the same action', async () => {
     for (const input of ['click', 'typed', 'voice'] as const) {
       const h = setup();
@@ -113,9 +149,39 @@ describe('teacher lecture journey through the shared runtime', () => {
     await h.open();
     await h.runtime.submit('teach lecture');
     const study = [{ kind: 'tooth-study', action: 'open', tooth: '46' }] as const;
-    expect(() => h.adapter().preflight([...study])).toThrow(/Explore a question/);
+    expect(() => h.adapter().preflight([...study])).toThrow(/Explore this question/);
     await h.runtime.submit('explore a question');
     expect(() => h.adapter().preflight([...study])).not.toThrow();
+  });
+
+  it('requires an explicit question exploration before editing attachments', async () => {
+    const h = setup();
+    await h.open();
+    const attachments = [{ kind: 'attachment' as const, action: 'add' as const, teeth: ['11'] }];
+    expect(() => h.adapter().preflight([...attachments])).toThrow(/Explore this question/);
+    expect(() => h.adapter().preflight([{ kind: 'lecture', enabled: false }])).toThrow(
+      /Explore this question/,
+    );
+    await h.runtime.submit('explore a question');
+    expect(() => h.adapter().preflight([...attachments])).not.toThrow();
+  });
+
+  it('repeats navigation from its saved starting step instead of advancing beyond the end', async () => {
+    const h = setup();
+    await h.open();
+    await h.runtime.submit('go to step 3');
+    await h.runtime.submit('next step');
+    const endpoint = h.snapshot.history.current;
+    await h.runtime.submit('repeat that');
+    expect(h.runtime.getState().error).toBe(false);
+    expect(h.session.index).toBe(3);
+    expect(h.snapshot.history.current).toEqual(endpoint);
+    await h.runtime.submit('explore a question');
+    await h.runtime.submit('repeat that');
+    expect(h.runtime.getState().error).toBe(false);
+    expect(h.session.exploring).toBe(true);
+    await h.runtime.submit('return to lecture');
+    expect(h.snapshot.history.current).toEqual(endpoint);
   });
 
   it('ignores a late interpretation after advancing the lecture', async () => {

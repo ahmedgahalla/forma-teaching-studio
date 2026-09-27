@@ -1,16 +1,15 @@
 'use client';
 
 export type LectureNavigationProps = {
-  mode: 'prepare' | 'rehearse' | 'teach';
+  mode: 'rehearse' | 'teach';
   index: number;
   count: number;
   exploring: boolean;
-  onMode: (mode: 'prepare' | 'rehearse' | 'teach') => void;
+  onMode: (mode: 'rehearse' | 'teach') => void;
   onPrevious: () => void;
   onNext: () => void;
   onExplore: () => void;
   onReturn: () => void;
-  onLibrary: () => void;
 };
 
 export function LectureNavigation({
@@ -23,15 +22,11 @@ export function LectureNavigation({
   onNext,
   onExplore,
   onReturn,
-  onLibrary,
 }: LectureNavigationProps) {
   return (
     <nav className="lecture-navigation" aria-label="Lecture controls">
-      <button type="button" onClick={onLibrary}>
-        My lectures
-      </button>
       <div className="lecture-mode-switch" aria-label="Lecture view" role="group">
-        {(['prepare', 'rehearse', 'teach'] as const).map(value => (
+        {(['rehearse', 'teach'] as const).map(value => (
           <button
             key={value}
             type="button"
@@ -39,7 +34,7 @@ export function LectureNavigation({
             disabled={exploring}
             onClick={() => onMode(value)}
           >
-            {value === 'prepare' ? 'Prepare' : value === 'rehearse' ? 'Rehearse' : 'Teach'}
+            {value === 'rehearse' ? 'Rehearse' : 'Teach'}
           </button>
         ))}
       </div>

@@ -3,24 +3,18 @@ import type { CaseStudioApi, CaseRefs } from '../case/api';
 import type { ClassroomSnapshot } from '../case/types';
 import type { TeachingAdapter } from '../teaching/TeachingController';
 import { createLectureSample } from '@/lib/lecture-documents';
-import { fixtureScene } from '@/lib/lecture-documents/documents.fixtures';
 import { createTeachingRuntime } from '@/lib/teaching-runtime';
-import {
-  createLectureSessionActions,
-  EMPTY_LECTURE_SESSION,
-  type LectureSourceRef,
-} from './session';
+import { createLectureSessionActions, EMPTY_LECTURE_SESSION } from './session';
 import { lectureStepSnapshot } from './scene-bridge';
 
 export function lectureHarness() {
-  const document = createLectureSample(fixtureScene());
+  const document = createLectureSample();
   let snapshot = lectureStepSnapshot(document.steps[0], {} as ClassroomSnapshot);
   let session = { ...EMPTY_LECTURE_SESSION };
   let playing = false,
     shown = snapshot.lesson.transforms;
   const original = { current: null as ClassroomSnapshot | null };
   const paused = { current: null as ClassroomSnapshot | null };
-  const source: LectureSourceRef = { current: null };
   const refs = { pendingView: { current: null } } as unknown as CaseRefs;
   const set = (key: keyof ClassroomSnapshot, value: unknown) => {
     snapshot = { ...snapshot, [key]: value };
@@ -75,7 +69,6 @@ export function lectureHarness() {
       session.documentId ? document : undefined,
       original,
       paused,
-      source,
     ).decorate({
       context: () => ({
         mode: 'case',
@@ -131,7 +124,6 @@ export function lectureHarness() {
     interpret,
     original,
     paused,
-    source,
     get session() {
       return session;
     },

@@ -27,24 +27,6 @@
   margin: 8px 18px 0;
   flex-shrink: 0;
 }
-.app-shell[data-teacher-screen='lecture'] .workspace,
-.app-shell[data-teacher-screen='library'] .workspace {
-  position: relative;
-}
-.teacher-library-screen {
-  position: absolute;
-  z-index: 80;
-  inset: 0;
-  padding: 12px 20px;
-  overflow: auto;
-  background: var(--ui-bg);
-}
-.app-shell[data-teacher-screen='library'] .workspace > :not(.teacher-library-screen) {
-  visibility: hidden;
-}
-.app-shell[data-teacher-screen='library'] > .mobile-studio-dock {
-  display: none;
-}
 .teacher-step-heading {
   padding: 6px 0 12px;
   flex-shrink: 0;
@@ -77,16 +59,13 @@
   color: var(--ui-error);
 }
 @media (max-width: 1050px) {
-  .app-shell.studio-experience.teaching-studio[data-teacher-screen='library'],
-  .app-shell.studio-experience.teaching-studio[data-teacher-screen='lecture']:not(
-      [data-teacher-mode='prepare']
-    ):has(> .workspace > .lecture-panel) {
+  .app-shell.studio-experience.teaching-studio[data-teacher-screen='lecture']:has(
+      > .workspace > .lecture-panel
+    ) {
     --workspace-bottom: 0px;
     padding-bottom: 0;
   }
-  .app-shell[data-teacher-screen='lecture']:not([data-teacher-mode='prepare']):has(
-      > .workspace > .lecture-panel
-    )
+  .app-shell[data-teacher-screen='lecture']:has(> .workspace > .lecture-panel)
     > .mobile-studio-dock {
     display: none;
   }

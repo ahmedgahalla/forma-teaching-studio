@@ -1,27 +1,30 @@
 status: open
 
-# Teacher lecture workflow — integration review and remaining acceptance
+# Ready-made lecture — integration review and remaining acceptance
 
-**Branch:** `ahmed/phase-3-teacher-lectures`.
+**Branch:** `ahmed/phase-3-teacher-lectures` · **PR:** [#14](https://github.com/ahmedgahalla/forma-teaching-studio/pull/14).
 
-**Analysis scope:** the existing Phase 4 command/runtime, case capture/restore, geometry references, prepared demonstrations, storage and layout seams before and during Phase 3.9 integration. Claude's Phase 4 work at `ff1b3e5` is the base; it is not newly authored work in this feature diff.
+**Scope:** Phase 3.9 on Claude's unchanged Phase 4 base at `ff1b3e5`. The owner now requests a finished sample and no lecture creation option. The final feature opens a deterministic four-step translation/tipping lecture directly in Teach. Authoring, the saved-library UI and its storage code are removed; existing browser saves are not read, modified or deleted. See the [implementation and verification record](../../phases/phase-3-demo-path/3.9-teacher-lectures.md).
 
 ## Corrected during implementation
 
-- Related glossary clicks used a context-free action plan, changing a studied tooth to the authored default while equivalent typed commands retained the current tooth. The button now uses the same context-aware planner; a regression compares the actual click with the parsed request.
-- Durable lecture snapshots need both visible transforms and the source model identity. Reopening a static prepared-case scene must preserve registered origins and omitted teeth. The session retains source identity independently of active playback; bridge tests verify the source override.
-- A calculated scene cannot be rebased by replacing only mechanics reference transforms. Capture now reconstructs reference teeth and axes from the visible pose, retains appliance inputs, and discards calculated results. The saved step is a static illustration.
-- Lecture return must preserve presentation state as well as the model. The paused return includes answer and notes visibility; tests alter these during exploration before returning.
-- Structural lecture edits clear obsolete runtime history so Undo cannot reference a deleted step. Document deletion requires confirmation; backups provide recovery, and imported backups create independent copies.
+- Related glossary clicks retain the studied tooth, matching the context-aware typed request.
+- Paused lecture restoration retains the model, camera, layers, frame and answer/notes visibility, independently of the original Explore workspace.
+- Repeated Lecture clicks leave the current step alone. Reopening starts the fixed sample, independent of any prior model setup or unavailable browser storage.
+- Read-only lecture protection covers attachment edits as well as tooth motion and scenario changes. Changes require Explore this question.
+- Replay preflight uses the saved request-start session rather than the current final-step index. Tests cover repeated Next at the last step and repeated exploration with exact return.
+- Command examples and exact visible navigation labels match supported local grammar. Retired preparation requests are rejected locally, including compound requests; the editor cannot be reopened by speech or typing.
+
+Earlier capture/persistence findings informed the first implementation but those authoring features and their dedicated tests are now deliberately removed. Their model-reference lessons remain recorded without claiming a current capture or backup feature.
 
 ## Auditor acceptance still required
 
-**Blocking for merge:** a real browser walkthrough and screenshots at 1600×900 with DPR 1 and 2. This session's browser security policy rejected access to the running preview and explicitly prohibited alternate-surface workarounds. No browser, projector, real microphone or timed-demo pass is claimed. Source/DOM/runtime tests do not replace that gate.
+**Blocking for merge:** a real browser walkthrough with DPR 1 and 2. This session's browser security policy rejected preview access and prohibited alternate-surface workarounds. No browser, microphone, projector or timed-demo pass is claimed.
 
-Verify a prepared demonstration, braces workflow in Explore, a typed command, and the complete custom-lecture journey: create/reorder three steps, capture, save/reopen, teach, pause halfway, explore a question, return, export/import. Check actual tooth occupancy, notes/readability, focus, panel scrolling, small-screen controls, and that exactly one playback bar is active. Verify the prepared model identity survives detach/capture/reopen. Notes shown on the single window are visible to the audience.
+Verify Lecture directly opens the four-step sample with hidden answers and collapsed notes; play translation/tipping, navigate both directions, rehearse, explore a question and return to its paused moment, then exit to the original Explore workspace. Verify one playback bar, model occupancy, keyboard focus, scrolling, small-screen controls and readable projected text. Notes opened in this single window are visible to the audience. Also check a prepared case, the braces workflow and typed commands in Explore.
 
-The default local frontend gate encountered the existing real-GLB oracle timeout and worker startup timeouts. Root records final controlled-run results in the phase doc. Do not weaken the oracle or label an incomplete gate green. CI and all repository merge conditions remain required.
+Full local gate results belong in the phase doc. Earlier full frontend runs encountered the unchanged BVH oracle timeout and worker startup timeouts; retain the assertions and original timeouts. No incomplete gate should be labelled green.
 
-**Dependency:** Phase 4's unchanged base and PR #13 must be audited and integrated in order. This feature must not silently replace Claude's branch or bypass the auditor-owned STATUS/merge workflow. Existing broad CSS, Try Mode split and case-prop cleanup remain separate, except for the shell extraction necessary for this integration.
+**Dependency and CI:** audit and integrate PR #13 and Phase 4 before this feature. PR #14 is stacked; the current CI workflow only triggers on PRs targeting main. After dependency integration, retarget this PR to main and require green Node 22/24 frontend and Python backend CI. The builder does not merge or edit auditor-owned STATUS. Unrelated CSS, Try Mode splitting and broad case-prop follow-ups remain separate.
 
-**Suggested resolution:** record the actual browser evidence, dependency disposition and CI results in the audit; resolve this item only when the requested acceptance has been performed or explicitly dispositioned by the owner.
+**Suggested resolution:** record browser evidence, dependency disposition and CI results in the audit. Resolve only after acceptance has been performed or explicitly dispositioned by the owner.

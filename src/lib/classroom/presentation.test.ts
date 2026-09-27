@@ -38,6 +38,7 @@ describe('presentation command parity and precedence', () => {
     ['explore this step', 'explore'],
     ['explore this arrangement', 'explore'],
     ['explore a question', 'explore'],
+    ['Explore this question', 'explore'],
     ['reveal answer', 'reveal'],
     ['show the answer', 'reveal'],
     ['hide answer', 'hide-answer'],
@@ -46,8 +47,11 @@ describe('presentation command parity and precedence', () => {
     ['restart lecture', 'restart'],
     ['teach lecture', 'teach'],
     ['rehearse lecture', 'rehearse'],
-    ['prepare lecture', 'prepare'],
+    ['Rehearse', 'rehearse'],
+    ['Teach', 'teach'],
     ['exit lecture', 'exit'],
+    ['end lecture', 'exit'],
+    ['exit lecture mode', 'exit'],
   ] as const)('shares click, typed and recognized voice actions: %s', (text, action) => {
     const actions = [control(action)];
     const typed = parseTeachingPlan(text, context);
@@ -56,6 +60,39 @@ describe('presentation command parity and precedence', () => {
     expect(parseLocalVoicePlan(text, context, preflight)?.actions).toEqual(actions);
     expect(preflight).toHaveBeenCalledWith(actions);
     expect(preserveLocalPlan(typed)).toBe(true);
+  });
+
+  it.each(['Explore this question', 'Rehearse', 'Teach'])(
+    'does not activate a presentation from the standalone command without a lecture: %s',
+    text => {
+      const original = structuredClone(withoutLecture),
+        preflight = vi.fn();
+      expect(() => parseTeachingPlan(text, withoutLecture)).toThrow();
+      expect(parseLocalVoicePlan(text, withoutLecture, preflight)).toBeUndefined();
+      expect(preflight).not.toHaveBeenCalled();
+      expect(withoutLecture).toEqual(original);
+    },
+  );
+
+  it.each([
+    'prepare lecture',
+    'Prepare the lecture.',
+    'prepare lecture then front view',
+    'front view and prepare lecture',
+  ])('rejects retired editing commands locally without changing the scene: %s', text => {
+    for (const state of [context, withoutLecture]) {
+      const original = structuredClone(state),
+        preflight = vi.fn();
+      const parsed = parseTeachingPlan(text, state);
+      expect(parsed).toMatchObject({
+        actions: [],
+        clarification: expect.stringMatching(/Rehearse or Teach/),
+      });
+      expect(preserveLocalPlan(parsed)).toBe(true);
+      expect(parseLocalVoicePlan(text, state, preflight)).toBeUndefined();
+      expect(preflight).not.toHaveBeenCalled();
+      expect(state).toEqual(original);
+    }
   });
 
   it('uses one-based step numbers and wins over legacy lesson navigation', () => {
@@ -91,6 +128,15 @@ describe('presentation command parity and precedence', () => {
     ]);
   });
 
+  it.each(['end lecture', 'exit lecture mode'])(
+    'preserves the independent presentation layout control outside a lecture: %s',
+    text => {
+      expect(parseTeachingPlan(text, withoutLecture).actions).toEqual([
+        { kind: 'lecture', enabled: false },
+      ]);
+    },
+  );
+
   it.each(['next step and front view', 'front view then next step', 'show notes; hide answer'])(
     'keeps mixed requests as local clarification: %s',
     text => {
@@ -119,6 +165,16 @@ describe('presentation command parity and precedence', () => {
 });
 
 describe('presentation action validation and preflight', () => {
+  it.each(['prepare', 'library'])(
+    'rejects retired %s actions from controls and AI plans',
+    action => {
+      const retired = { kind: 'presentation', action };
+      expect(() => validateAction(retired, context)).toThrow(/Unsupported/);
+      expect(() => local([retired])).toThrow(/Unsupported/);
+      expect(() => validateTeachingPlan(plan([retired]), context)).toThrow(/Unsupported/);
+    },
+  );
+
   it.each([-1, 100, 1.5, NaN, Infinity, '1'])('rejects invalid step index %s', index => {
     expect(() => validateAction({ ...control('go'), index }, context)).toThrow(
       /step from 1 to 100/,
@@ -158,14 +214,10 @@ describe('presentation action validation and preflight', () => {
     expect(() => local([control('previous')], first)).toThrow(/step from 1 to 3/);
   });
 
-  it('requires an active lecture except for opening a document, library or Explore', () => {
-    for (const action of ['next', 'return', 'notes'] as const)
+  it('requires an active lecture except for opening a document or returning to Explore', () => {
+    for (const action of ['next', 'return', 'notes', 'rehearse', 'teach'] as const)
       expect(() => local([control(action)], withoutLecture)).toThrow(/Open a lecture/);
-    for (const action of [
-      control('library'),
-      control('exit'),
-      { ...control('open'), id: 'lecture-1' },
-    ]) {
+    for (const action of [control('exit'), { ...control('open'), id: 'lecture-1' }]) {
       expect(local([action], withoutLecture).actions).toEqual([action]);
       expect(teachingActionMode(action as PresentationAction, 'workflow')).toBe('case');
     }
@@ -173,7 +225,7 @@ describe('presentation action validation and preflight', () => {
 
   it('requires preview decisions before transitions but allows answer and note display', () => {
     const preview = { ...context, tryPreview: true };
-    for (const action of ['next', 'library', 'exit', 'teach', 'explore'] as const)
+    for (const action of ['next', 'exit', 'rehearse', 'teach', 'explore'] as const)
       expect(() => local([control(action)], preview)).toThrow(/Apply or discard/);
     expect(() => local([{ ...control('open'), id: 'another' }], preview)).toThrow(
       /Apply or discard/,
@@ -184,9 +236,9 @@ describe('presentation action validation and preflight', () => {
 
   it('preserves the return path while exploring and advances metadata only', () => {
     const exploring = { ...context, presentation: { ...context.presentation!, exploring: true } };
-    for (const action of ['next', 'previous', 'restart', 'prepare'] as const)
+    for (const action of ['next', 'previous', 'restart', 'rehearse', 'teach'] as const)
       expect(() => local([control(action)], exploring)).toThrow(/Return to the lecture/);
-    for (const action of ['return', 'exit', 'library'] as const)
+    for (const action of ['return', 'exit'] as const)
       expect(local([control(action)], exploring).actions).toEqual([control(action)]);
     const state = structuredClone(exploring);
     const overrides = { arch: false, view: false, selection: false };
@@ -194,9 +246,9 @@ describe('presentation action validation and preflight', () => {
     expect(state.presentation?.exploring).toBe(false);
     advance(state, { kind: 'presentation', action: 'next' }, overrides);
     expect(state.presentation?.index).toBe(2);
-    advance(state, { kind: 'presentation', action: 'prepare' }, overrides);
-    expect(state.presentation?.mode).toBe('prepare');
-    advance(state, { kind: 'presentation', action: 'library' }, overrides);
+    advance(state, { kind: 'presentation', action: 'rehearse' }, overrides);
+    expect(state.presentation?.mode).toBe('rehearse');
+    advance(state, { kind: 'presentation', action: 'exit' }, overrides);
     expect(state.presentation).toBeUndefined();
     expect(state.mode).toBe('case');
     expect(exploring.presentation.exploring).toBe(true);
@@ -214,7 +266,7 @@ describe('presentation action validation and preflight', () => {
   });
 
   it('does not send local lecture context or actions to the AI interpreter', () => {
-    for (const action of [control('next'), control('library'), { ...control('open'), id: 'x' }])
+    for (const action of [control('next'), control('exit'), { ...control('open'), id: 'x' }])
       expect(() => validateTeachingPlan(plan([action]), context)).toThrow(/local commands only/);
     const wire = interpreterTeachingContext({
       ...context,

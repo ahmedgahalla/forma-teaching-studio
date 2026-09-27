@@ -1,17 +1,16 @@
 import type { ClassroomSnapshot } from '../case/types';
 import type { CaseRefs, CaseStudioApi } from '../case/api';
 import type { TeachingAdapter } from '../teaching/TeachingController';
-import type { LectureDocument, LectureSource } from '@/lib/lecture-documents';
-import type { DentalCase } from '@/lib/geometry';
+import type { LectureDocument } from '@/lib/lecture-documents';
 import type { PresentationAction } from '@/lib/classroom/presentation';
 import { createTryState } from '@/lib/try-mode';
 import { lectureStepSnapshot } from './scene-bridge';
 
 export type LectureSession = {
-  screen: 'explore' | 'library' | 'lecture';
+  screen: 'explore' | 'lecture';
   documentId: string | null;
   index: number;
-  mode: 'prepare' | 'rehearse' | 'teach';
+  mode: 'rehearse' | 'teach';
   exploring: boolean;
   answerVisible: boolean;
   notesVisible: boolean;
@@ -20,7 +19,7 @@ export const EMPTY_LECTURE_SESSION: LectureSession = {
   screen: 'explore',
   documentId: null,
   index: 0,
-  mode: 'prepare',
+  mode: 'teach',
   exploring: false,
   answerVisible: false,
   notesVisible: false,
@@ -29,13 +28,11 @@ export type LectureReturn = { current: ClassroomSnapshot | null };
 type PausedLecture = ClassroomSnapshot & {
   lectureDisplay: Pick<LectureSession, 'answerVisible' | 'notesVisible'>;
 };
-export type LectureSourceRef = { current: { model: DentalCase; source: LectureSource } | null };
 type TeacherSnapshot = ClassroomSnapshot & {
   teacher?: {
     session: LectureSession;
     original: ClassroomSnapshot | null;
     paused: ClassroomSnapshot | null;
-    source: LectureSourceRef['current'];
   };
 };
 
@@ -48,7 +45,6 @@ export function createLectureSessionActions(
   document: LectureDocument | undefined,
   original: LectureReturn,
   paused: LectureReturn,
-  source: LectureSourceRef,
 ) {
   const restore = (saved: ClassroomSnapshot) => {
     api.restoreClassroom(saved);
@@ -60,11 +56,10 @@ export function createLectureSessionActions(
   const loadStep = (next: LectureSession) => {
     const doc = next.documentId ? getDocument(next.documentId) : undefined;
     const step = doc?.steps[next.index];
-    if (!step) throw new Error('Choose a saved lecture step.');
+    if (!step) throw new Error('Choose an available lecture step.');
     const snapshot = lectureStepSnapshot(step, api.captureClassroom());
-    source.current = { model: snapshot.lesson.model, source: step.scene.source };
     restore(snapshot);
-    api.setLecture(next.mode !== 'prepare');
+    api.setLecture(true);
     setSession({
       ...next,
       screen: 'lecture',
@@ -73,39 +68,40 @@ export function createLectureSessionActions(
       notesVisible: next.mode === 'rehearse',
     });
   };
-  const preflight = (action: PresentationAction) => {
+  const preflight = (
+    action: PresentationAction,
+    state = session,
+    doc = document,
+    returnPoint = paused.current,
+  ) => {
     const display = ['reveal', 'hide-answer', 'notes', 'hide-notes'].includes(action.action);
     if (!display && (api.sandbox.pending || api.dragPreview || api.busy))
       throw new Error(
         'Apply or discard the preview and finish loading before changing lecture steps.',
       );
     if (action.action === 'open') {
-      if (!getDocument(action.id)?.steps.length) throw new Error('Choose a saved lecture.');
+      if (!getDocument(action.id)?.steps.length) throw new Error('Choose an available lecture.');
       return;
     }
-    if (action.action === 'library' || action.action === 'exit') return;
-    if (!document) throw new Error('Open a lecture first.');
-    if (session.exploring && !display && !['return', 'exit', 'library'].includes(action.action))
+    if (action.action === 'exit') return;
+    if (!doc) throw new Error('Open a lecture first.');
+    if (state.exploring && !display && !['return', 'exit'].includes(action.action))
       throw new Error('Return to the lecture before changing steps.');
-    if (action.action === 'return' && !paused.current)
+    if (action.action === 'return' && !returnPoint)
       throw new Error('There is no paused lecture to return to.');
     const index =
       action.action === 'go'
         ? action.index
-        : session.index + (action.action === 'next' ? 1 : action.action === 'previous' ? -1 : 0);
-    if (index < 0 || index >= document.steps.length)
+        : state.index + (action.action === 'next' ? 1 : action.action === 'previous' ? -1 : 0);
+    if (index < 0 || index >= doc.steps.length)
       throw new Error('That step is outside this lecture.');
   };
   const apply = (action: PresentationAction) => {
     preflight(action);
-    if (action.action === 'library' || action.action === 'exit') {
+    if (action.action === 'exit') {
       if (original.current) restore(original.current);
       original.current = paused.current = null;
-      source.current = null;
-      setSession({
-        ...EMPTY_LECTURE_SESSION,
-        screen: action.action === 'library' ? 'library' : 'explore',
-      });
+      setSession({ ...EMPTY_LECTURE_SESSION });
     } else if (action.action === 'open') {
       original.current ||= api.captureClassroom();
       paused.current = null;
@@ -136,7 +132,7 @@ export function createLectureSessionActions(
     } else if (action.action === 'return') {
       const saved = paused.current as PausedLecture;
       restore(saved);
-      api.setLecture(session.mode !== 'prepare');
+      api.setLecture(true);
       paused.current = null;
       setSession({ ...session, ...saved.lectureDisplay, exploring: false });
     } else if (['reveal', 'hide-answer', 'notes', 'hide-notes'].includes(action.action)) {
@@ -147,7 +143,7 @@ export function createLectureSessionActions(
           : { notesVisible: action.action === 'notes' }),
       });
     } else {
-      const mode = ['prepare', 'rehearse', 'teach'].includes(action.action)
+      const mode = ['rehearse', 'teach'].includes(action.action)
         ? (action.action as LectureSession['mode'])
         : session.mode;
       const index =
@@ -184,7 +180,6 @@ export function createLectureSessionActions(
         session,
         original: original.current,
         paused: paused.current,
-        source: source.current,
       },
     }),
     restore: value => {
@@ -194,19 +189,20 @@ export function createLectureSessionActions(
         setSession(saved.teacher.session);
         original.current = saved.teacher.original;
         paused.current = saved.teacher.paused;
-        source.current = saved.teacher.source;
       }
     },
     preflight: (actions, from) => {
+      const saved = (from as TeacherSnapshot | undefined)?.teacher;
+      const state = saved?.session ?? session;
+      const doc = saved ? getDocument(saved.session.documentId ?? '') : document;
       const presentation = actions.find(a => a.kind === 'presentation');
       if (presentation?.kind === 'presentation') {
-        preflight(presentation);
+        preflight(presentation, state, doc, saved ? saved.paused : paused.current);
         return;
       }
       if (
-        document &&
-        !session.exploring &&
-        session.mode !== 'prepare' &&
+        doc &&
+        !state.exploring &&
         actions.some(
           a =>
             [
@@ -218,12 +214,14 @@ export function createLectureSessionActions(
               'workflow',
               'anatomy-lesson',
               'tooth-study',
+              'attachment',
+              'lecture',
             ].includes(a.kind) ||
             (a.kind === 'case' && !['play', 'pause', 'progress', 'reset'].includes(a.action)) ||
             (a.kind === 'dental' && !['play', 'pause', 'undo', 'redo'].includes(a.command.type)),
         )
       )
-        throw new Error('Choose Explore a question before changing this lecture model.');
+        throw new Error('Choose Explore this question before changing this lecture model.');
       adapter.preflight(actions, from);
     },
     apply: (action, signal) =>

@@ -3,7 +3,6 @@ import { fields, oneOf, type TeachingContext, type TeachingPlan } from './types'
 import { validateTeachingPlan } from './plan-validate';
 
 const controls = [
-  'prepare',
   'rehearse',
   'teach',
   'next',
@@ -12,7 +11,6 @@ const controls = [
   'explore',
   'return',
   'exit',
-  'library',
   'reveal',
   'hide-answer',
   'notes',
@@ -26,7 +24,7 @@ export type PresentationContext = {
   documentId: string;
   index: number;
   count: number;
-  mode: 'prepare' | 'rehearse' | 'teach';
+  mode: 'rehearse' | 'teach';
   exploring: boolean;
 };
 
@@ -68,9 +66,9 @@ export function advancePresentation(context: TeachingContext, action: TeachingAc
   const display = ['reveal', 'hide-answer', 'notes', 'hide-notes'].includes(action.action);
   if (context.tryPreview && !display)
     throw new Error('Apply or discard the preview before changing lecture steps or experiences.');
-  if (current?.exploring && !display && !['return', 'exit', 'library'].includes(action.action))
+  if (current?.exploring && !display && !['return', 'exit'].includes(action.action))
     throw new Error('Return to the lecture before changing its steps or presentation mode.');
-  if (action.action === 'open' || action.action === 'library' || action.action === 'exit') {
+  if (action.action === 'open' || action.action === 'exit') {
     context.mode = 'case';
     context.playing = false;
     delete context.presentation;
@@ -84,8 +82,7 @@ export function advancePresentation(context: TeachingContext, action: TeachingAc
     if (!current.exploring) throw new Error('You are already in the lecture.');
     next.exploring = false;
   } else if (action.action === 'explore') next.exploring = true;
-  else if (action.action === 'prepare' || action.action === 'rehearse' || action.action === 'teach')
-    next.mode = action.action;
+  else if (action.action === 'rehearse' || action.action === 'teach') next.mode = action.action;
   else if (action.action === 'restart') next.index = 0;
   else if (action.action === 'go') next.index = action.index;
   else if (action.action === 'next') next.index++;
@@ -108,6 +105,7 @@ function command(source: string): PresentationAction | undefined {
     'explore this step': 'explore',
     'explore this arrangement': 'explore',
     'explore a question': 'explore',
+    'explore this question': 'explore',
     'reveal answer': 'reveal',
     'show answer': 'reveal',
     'hide answer': 'hide-answer',
@@ -116,23 +114,29 @@ function command(source: string): PresentationAction | undefined {
     'restart lecture': 'restart',
     'teach lecture': 'teach',
     'rehearse lecture': 'rehearse',
-    'prepare lecture': 'prepare',
+    teach: 'teach',
+    rehearse: 'rehearse',
     'exit lecture': 'exit',
+    'end lecture': 'exit',
+    'exit lecture mode': 'exit',
   };
   const action = aliases[source.replace(/\bthe (?=lecture|lesson|answer|notes)\b/g, '')];
   return action ? validatePresentationAction({ kind: 'presentation', action }) : undefined;
 }
 
-/** Complete local requests take precedence over legacy lessons only while a lecture is active. */
+/** Active lecture controls and retired editing requests stay local. */
 export function parsePresentationPlan(
   source: string,
   context: TeachingContext,
 ): TeachingPlan | undefined {
-  if (!context.presentation) return;
   try {
+    const parts = source.split(/\s+(?:and then|and|then)\s+|[;,]\s*|\.\s+/);
+    if (parts.some(part => /^prepare (?:the )?lecture$/.test(part)))
+      throw new Error('Lecture editing is unavailable. Use Rehearse or Teach.');
+    if (!context.presentation) return;
     const action = command(source);
     if (!action) {
-      if (source.split(/\s+(?:and then|and|then)\s+|[;,]\s*|\.\s+/).some(part => command(part)))
+      if (parts.some(part => command(part)))
         throw new Error('Use one lecture control as a separate request, then change the scene.');
       return;
     }

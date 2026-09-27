@@ -1,4 +1,29 @@
-import type { LectureScene } from './types';
+import { validateLectureScene } from './scene';
+import type { LectureDocument, LectureScene, LectureStep } from './types';
+
+export function createLectureStep(scene: LectureScene, title = 'Test step'): LectureStep {
+  return {
+    id: crypto.randomUUID(),
+    title,
+    notes: '',
+    question: '',
+    answer: '',
+    scene: validateLectureScene(scene),
+  };
+}
+
+export function createLectureDocument(
+  scene: LectureScene,
+  title = 'Test lecture',
+): LectureDocument {
+  return {
+    version: 1,
+    id: crypto.randomUUID(),
+    title,
+    updatedAt: '2026-09-27T00:00:00.000Z',
+    steps: [createLectureStep(scene)],
+  };
+}
 
 export function fixtureScene(): LectureScene {
   return {
