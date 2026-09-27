@@ -86,7 +86,23 @@ describe('authored teaching glossary', () => {
       };
       const plan = parseTeachingPlan(`what is ${entry.term}`, studying);
       expect(plan.clarification).toBeNull();
-      expect(plan.actions).toEqual([...entry.show!, { kind: 'glossary', id: entry.id }]);
+      const genericSurface = [
+        'mesial',
+        'distal',
+        'buccal',
+        'labial',
+        'lingual',
+        'palatal',
+        'occlusal',
+        'incisal',
+        'apex',
+      ].includes(entry.id);
+      const visual = entry.show!.map(action =>
+        genericSurface && action.kind === 'tooth-study' && action.action === 'open'
+          ? { kind: 'tooth-study', action: 'view', view: action.view }
+          : action,
+      );
+      expect(plan.actions).toEqual([...visual, { kind: 'glossary', id: entry.id }]);
       expect(validateTeachingPlan(plan, studying, { allowLocalActions: true }).actions).toEqual(
         plan.actions,
       );

@@ -11,6 +11,7 @@ export function readViewerCamera(
   controls: OrbitControls,
   view: ViewName,
   pending: ViewerCamera | null,
+  destination?: CameraPose,
 ): ViewerCamera {
   return pending
     ? {
@@ -20,9 +21,9 @@ export function readViewerCamera(
         up: [...pending.up],
       }
     : {
-        position: camera.position.toArray(),
-        target: controls.target.toArray(),
-        up: camera.up.toArray(),
+        position: (destination?.position ?? camera.position).toArray(),
+        target: (destination?.target ?? controls.target).toArray(),
+        up: (destination?.up ?? camera.up).toArray(),
         view,
         far: camera.far,
         maxDistance: controls.maxDistance,
@@ -57,6 +58,13 @@ export function createCameraMotion(
     get active() {
       return transition.active;
     },
+    /** Requested pose during a transition; the displayed pose after it settles or is cancelled. */
+    get pose(): CameraPose {
+      return transition.active ? destination : pose;
+    },
+    read(view: ViewName, pending: ViewerCamera | null) {
+      return readViewerCamera(camera, controls, view, pending, this.pose);
+    },
     move(next: Destination, instant = false) {
       drainDamping();
       held = true;
@@ -80,6 +88,8 @@ export function createCameraMotion(
     cancel() {
       transition.cancel();
       drainDamping();
+      camera.up.set(0, 1, 0);
+      camera.lookAt(controls.target);
       held = false;
     },
     finish() {

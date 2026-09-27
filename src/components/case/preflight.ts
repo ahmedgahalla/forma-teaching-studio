@@ -23,6 +23,8 @@ export function createCasePreflight(api: CaseStudioApi, refs: CaseRefs) {
         index = saved?.lessonStep ?? api.lessonStep;
       const source = saved?.lesson.model || api.model,
         teeth = source.teeth;
+      let synthetic = source.demo,
+        hasRoots = teeth.some(tooth => tooth.rootGeometry);
       let lesson = LESSONS.find(item => item.id === (saved?.lessonId ?? api.lessonId));
       let candidate = { ...(saved?.sandbox || api.sandbox), current: transforms };
       const requireEndpoint = () => {
@@ -108,6 +110,7 @@ export function createCasePreflight(api: CaseStudioApi, refs: CaseRefs) {
             );
           if (action.action === 'load') {
             const definition = getTeachingCase(action.id);
+            synthetic = hasRoots = true;
             sourceScenario = {
               caseId: definition.id,
               variantId: definition.variants[0].id,
@@ -137,7 +140,7 @@ export function createCasePreflight(api: CaseStudioApi, refs: CaseRefs) {
             throw new Error('There is no source lesson to return to.');
         }
         if (action.kind === 'appliance-display') {
-          if (!source.demo && !['none', 'braces'].includes(action.preset))
+          if (!synthetic && !['none', 'braces'].includes(action.preset))
             throw new Error('Use the synthetic model for these teaching appliances.');
           if (action.preset === 'braces' && teeth.some(tooth => !tooth.calibrated))
             throw new Error('Calibrate the imported tooth directions before placing braces.');
@@ -222,14 +225,9 @@ export function createCasePreflight(api: CaseStudioApi, refs: CaseRefs) {
         )
           previewStage =
             action.kind === 'try-playback' && action.direction === 'reverse' ? 0 : count;
-        if (
-          action.kind === 'toggle' &&
-          action.target === 'roots' &&
-          action.visible &&
-          !teeth.some(tooth => tooth.rootGeometry)
-        )
+        if (action.kind === 'toggle' && action.target === 'roots' && action.visible && !hasRoots)
           throw new Error('This case has no root geometry.');
-        if (action.kind === 'anatomy' && !source.demo)
+        if (action.kind === 'anatomy' && !synthetic)
           throw new Error(
             'Generated supporting anatomy is available only in the synthetic classroom.',
           );

@@ -2,6 +2,8 @@ status: open
 
 # Phase 4.3 — Visual clarity acceptance
 
+**4.5 audit disposition:** addressed in [4.5](../../phases/phase-4-voice-lecture-assistant/4.5-audit-fixes.md): camera consumers use the tween destination, cancellation restores world-up/lookAt, and study labels reserve the review-caption band. Regressions cover math, transition reads and resize measurement. This item remains **open** for host gates, new screenshot baselines and DPR/projector acceptance.
+
 Implementation and gate evidence: [4.3 phase doc](../../phases/phase-4-voice-lecture-assistant/4.3-visual-clarity.md). The orchestrator reviews and commits; no git mutations were authorized in this session.
 
 Please rerun the exact root format, lint, format-check and full build on the host. Sandbox root scanning cannot access the pytest cache; worker prebuild cannot read an ancestor directory. Accessible-source alternatives are supplementary.

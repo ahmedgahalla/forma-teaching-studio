@@ -2,6 +2,8 @@ status: open
 
 # Audit Phase 4.1 hands-free lecture control
 
+**4.5 audit disposition:** addressed in [4.5](../../phases/phase-4-voice-lecture-assistant/4.5-audit-fixes.md): silence/aborted backoff, local-only mishearing aliases, and hidden-tab microphone pause/resume, with regression tests. This item remains **open** for real microphone, browser/projector and DPR acceptance; the builder environment exposes no browser.
+
 Builder branch `ahmed/phase-4-voice-lecture-assistant` depends on draft PR #13 (`ed2164e`). The orchestrator prohibited git state changes; all changes remain uncommitted for review. Scope and evidence: [4.1](../../phases/phase-4-voice-lecture-assistant/4.1-hands-free-voice.md).
 
 Please audit the wake gate, browser microphone lifecycle and shared runtime integration. No new TeachingActions were added. Coordinate the parallel 4.2 merge; it owns tooth-study action/schema/viewer changes.

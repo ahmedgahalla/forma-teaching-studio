@@ -48,7 +48,12 @@ export function VoiceHudView({
         <div className="voice-hud-indicators">
           {active && (
             <span className="voice-hud-listening">
-              <i aria-hidden="true" /> Listening{paused ? ' · paused while Forma speaks' : ''}
+              <i aria-hidden="true" />
+              {paused
+                ? narration && !narrationFallback
+                  ? ' Listening · paused while Forma speaks'
+                  : 'Hands-free paused'
+                : ' Listening'}
             </span>
           )}
           {narration && narrationFallback && (

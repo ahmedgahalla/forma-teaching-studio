@@ -1,10 +1,10 @@
 // @vitest-environment jsdom
 import { afterEach, expect, it, vi } from 'vitest';
-import { PerspectiveCamera } from 'three';
+import { PerspectiveCamera, Vector3 } from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import { createRenderBarrier } from '@/lib/render-barrier';
 import { CAMERA_TRANSITION_MS } from '@/lib/camera-transition';
-import { createCameraMotion } from './camera-motion';
+import { createCameraMotion, readViewerCamera } from './camera-motion';
 
 const cleanup: (() => void)[] = [];
 afterEach(() => cleanup.splice(0).forEach(dispose => dispose()));
@@ -127,4 +127,62 @@ it('keeps the exact completed pole view on later frames and finishes before a re
   motion.finish();
   expect(motion.active).toBe(false);
   expect(camera.position.toArray()).toEqual(destination.position);
+});
+
+it.each([false, true])(
+  'restores world-up and lookAt when orbit cancels a rolled pose (instant=%s)',
+  instant => {
+    const { camera, controls, motion, destination, time } = setup();
+    motion.move({ ...destination, position: [0, 100, 1], up: [0, 0, -1] }, instant);
+    if (!instant) {
+      time(260);
+      motion.update();
+    }
+    const displayed = camera.position.clone();
+    motion.cancel();
+    expect(camera.up.toArray()).toEqual([0, 1, 0]);
+    expect(camera.position.equals(displayed)).toBe(true);
+    const expected = camera.clone();
+    expected.up.set(0, 1, 0);
+    expected.lookAt(controls.target);
+    expect(camera.quaternion.angleTo(expected.quaternion)).toBeLessThan(1e-7);
+    motion.update();
+    expect(camera.up.toArray()).toEqual([0, 1, 0]);
+  },
+);
+
+it('reads the destination during a tween so undo never saves an interpolated camera', () => {
+  const { camera, controls, motion, destination, time } = setup();
+  motion.move(destination);
+  time(260);
+  motion.update();
+  const snapshot = readViewerCamera(camera, controls, 'front', null, motion.pose);
+  expect(snapshot).toMatchObject(destination);
+  expect(motion.read('front', null)).toEqual(snapshot);
+  snapshot.position[0] = 1000;
+  expect(motion.pose.position.toArray()).toEqual(destination.position);
+  motion.cancel();
+  expect(readViewerCamera(camera, controls, 'front', null, motion.pose).position).toEqual(
+    camera.position.toArray(),
+  );
+});
+
+it('focuses along the requested front view while its transition is still running', () => {
+  const { camera, controls, motion, time } = setup();
+  motion.move({ position: [-100, 0, 0], target: [0, 0, 0], up: [0, 1, 0] }, true);
+  motion.move({ position: [0, 0, 100], target: [0, 0, 0], up: [0, 1, 0] });
+  time(100);
+  motion.update();
+  const { position, target, up } = motion.pose;
+  const direction = position.clone().sub(target).normalize();
+  expect(direction.toArray()).toEqual([0, 0, 1]);
+  expect(up.toArray()).toEqual([0, 1, 0]);
+  const toothCenter = new Vector3(10, 20, 30);
+  motion.move({
+    position: toothCenter.clone().addScaledVector(direction, 25).toArray(),
+    target: toothCenter.toArray(),
+    up: up.toArray(),
+  });
+  motion.finish();
+  expect(camera.position.clone().sub(controls.target).normalize().toArray()).toEqual([0, 0, 1]);
 });

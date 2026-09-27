@@ -40,15 +40,15 @@ export function toothSurfaceDirection(frame: ToothFrame, view: ToothStudyView): 
   return [(axis[0] * sign) / length, (axis[1] * sign) / length, (axis[2] * sign) / length];
 }
 
-/** Side views preserve world superior; biting/root-tip views put the buccal side at screen top. */
+/** World-up matches OrbitControls; a tiny pole tilt projects superior toward buccal. */
 export function toothStudyCamera(
   frame: ToothFrame,
   view: ToothStudyView,
 ): { direction: Vec3; up: Vec3 } {
-  return {
-    direction: toothSurfaceDirection(frame, view),
-    up: view === 'occlusal' || view === 'apical' ? [...frame.buccal] : [0, 1, 0],
-  };
+  const direction = new Vector3(...toothSurfaceDirection(frame, view));
+  if (view === 'occlusal' || view === 'apical')
+    direction.addScaledVector(new Vector3(...frame.buccal), -Math.sign(direction.y) * 0.001);
+  return { direction: direction.normalize().toArray(), up: [0, 1, 0] };
 }
 
 /**

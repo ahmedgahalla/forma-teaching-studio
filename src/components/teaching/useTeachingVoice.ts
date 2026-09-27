@@ -12,9 +12,10 @@ import {
 import { createSpeaker } from '@/lib/voice/speaker';
 import type { RuntimeState } from '@/lib/teaching-runtime';
 import { useHoldToTalkKeys } from './useHoldToTalkKeys';
+export { submitLocalVoice } from '@/lib/voice/local-submit';
 
 type Options = {
-  submit: (text: string) => Promise<RuntimeState | undefined>;
+  submit: (text: string, localOnly?: boolean) => Promise<RuntimeState | undefined>;
   interrupt: () => void;
   cancel: () => void;
   canStop: () => boolean;
@@ -50,7 +51,10 @@ export function useTeachingVoice(options: Options) {
     alive = useRef(false),
     request = useRef(0);
   const narrated = useRef(0);
-  const syncPause = () => handsFree.current?.setPaused(speaking.current || held.current);
+  const syncPause = () =>
+    handsFree.current?.setPaused(
+      document.visibilityState === 'hidden' || speaking.current || held.current,
+    );
   const stopSpeaking = () => speaker.current?.cancel();
   const invalidate = () => {
     request.current++;
@@ -66,14 +70,14 @@ export function useTeachingVoice(options: Options) {
     invalidate();
     latest.current.message('Hands-free is off.', false, 'stop listening');
   };
-  const submitVoice = async (text: string) => {
+  const submitVoice = async (text: string, localOnly = false) => {
     held.current = false;
     syncPause();
-    invalidate();
+    if (!localOnly) invalidate();
     const own = request.current,
       beforeNarration = narrated.current;
     try {
-      const result = await latest.current.submit(text);
+      const result = await latest.current.submit(text, localOnly);
       if (
         !alive.current ||
         own !== request.current ||
@@ -88,7 +92,7 @@ export function useTeachingVoice(options: Options) {
         : result.message.split(/\s+/).slice(0, 12).join(' ');
       await speaker.current?.speak(reply);
     } catch (error) {
-      if (alive.current && own === request.current)
+      if (!localOnly && alive.current && own === request.current)
         latest.current.message(
           error instanceof Error ? error.message : 'Speech output unavailable.',
           true,
@@ -127,8 +131,8 @@ export function useTeachingVoice(options: Options) {
         state: state => {
           if (alive.current) setVoice(state);
         },
-        final: text => {
-          void submitVoice(text);
+        final: (text, alias) => {
+          void submitVoice(text, alias);
         },
         error: message => latest.current.message(message, true),
         canStop: () => speaking.current || latest.current.canStop(),
@@ -166,12 +170,14 @@ export function useTeachingVoice(options: Options) {
       latest.current.cancel();
     };
     window.addEventListener('pagehide', pagehide);
+    document.addEventListener('visibilitychange', syncPause);
     return () => {
       alive.current = false;
       handsFree.current?.dispose();
       mic.current?.dispose();
       speaker.current?.cancel();
       window.removeEventListener('pagehide', pagehide);
+      document.removeEventListener('visibilitychange', syncPause);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps -- mount-owned browser services read current callbacks/settings through refs
   }, []);

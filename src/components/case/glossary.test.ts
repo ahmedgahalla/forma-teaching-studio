@@ -4,6 +4,23 @@ import { getGlossaryEntry } from '@/lib/glossary';
 import { setupToothStudy } from './tooth-study.fixtures';
 import { caseNarration } from './narration';
 import { getTeachingCase } from '@/lib/teaching-cases';
+import { glossaryActions } from '@/lib/glossary/plan';
+
+it.each(['periodontal-ligament', 'alveolar-bone'])(
+  'preflights the loaded synthetic model for %s after an imported case',
+  id => {
+    const { api, preflight } = setupToothStudy();
+    api.setModel({ ...api.model, demo: false, teeth: [] });
+    const before = api.captureClassroom();
+    const actions = glossaryActions(id);
+    expect(() => preflight(actions)).not.toThrow();
+    expect(api.captureClassroom()).toEqual(before);
+    expect(() => preflight(actions.slice(1))).toThrow(/root geometry|synthetic classroom/);
+    expect(() =>
+      preflight([{ kind: 'anatomy', action: 'bone', visible: true }, ...actions]),
+    ).toThrow(/synthetic classroom/);
+  },
+);
 
 it('shows the model before narration and undoes/redoes the whole glossary request', async () => {
   const { api, host, settle } = setupToothStudy();

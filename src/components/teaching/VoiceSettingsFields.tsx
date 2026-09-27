@@ -51,9 +51,12 @@ export function VoiceSettingsFields() {
       </label>
       <p className="form-note" id={`${id}-privacy`}>
         Enable Hands-free explicitly each session using its microphone toggle or M. Your browser’s
-        speech service receives audio while listening. Begin with “Forma”; other speech is discarded
-        after the transient caption and never submitted, logged or sent to AI. Recognition pauses
-        while Forma speaks. Say “Forma, stop listening” to switch it off.
+        speech service receives audio while listening. Begin with “Forma” or “for ma”, optionally
+        after “hey”, “ok” or “okay”. Mishearings “former”, “forma’s” and “fauna” only run recognized
+        local commands; they never reach AI or Analyze, show interim captions, or arm a follow-up.
+        Other speech is discarded without captions or submission. Recognition pauses while Forma
+        speaks or the tab is hidden, then resumes when visible and ready. Say “Forma, stop
+        listening” to switch it off.
       </p>
       <p className="form-note">
         Preferences are saved on this browser. Listening never starts on page load.

@@ -36,13 +36,26 @@ it('projects reusable surface labels, hides the camera-facing surface and dispos
   });
   const transforms = {};
   presentation.prepare(study, transforms, 0, false);
+  const caption = host.querySelector<HTMLElement>('.tooth-study-model-caption')!;
+  const captionHeight = vi.fn(() => 42);
+  Object.defineProperties(caption, {
+    offsetTop: { get: () => 12 },
+    offsetHeight: { get: captionHeight },
+  });
   camera.updateMatrixWorld();
   presentation.render(1000, 700);
+  presentation.render(1000, 700);
+  expect(captionHeight).toHaveBeenCalledTimes(1);
+  presentation.render(600, 290);
+  expect(captionHeight).toHaveBeenCalledTimes(2);
   const labels = [...host.querySelectorAll<HTMLSpanElement>('.tooth-study-surface-label')];
   expect(labels).toHaveLength(6);
   expect(labels.find(label => label.textContent === 'Buccal')?.hidden).toBe(true);
   expect(labels.find(label => label.textContent === 'Mesial')?.hidden).toBe(false);
   expect(labels.find(label => label.textContent === 'Apex')?.hidden).toBe(false);
+  expect(
+    parseFloat(labels.find(label => label.textContent === 'Apex')!.style.top) - 24,
+  ).toBeGreaterThanOrEqual(12 + 42 + 8);
   expect(host.textContent).toContain(TOOTH_ANATOMY_DISCLAIMER);
   const saved = camera.position.clone();
   saved.x += 4;

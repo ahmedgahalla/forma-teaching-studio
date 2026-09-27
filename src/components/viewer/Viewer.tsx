@@ -45,7 +45,7 @@ import {
 import './teaching-anatomy.css';
 import './tooth-study-labels.css';
 import { createToothStudyPresentation } from './tooth-study-presentation';
-import { createCameraMotion, readViewerCamera } from './camera-motion';
+import { createCameraMotion } from './camera-motion';
 import { createViewerResize } from './viewer-resize';
 import { TOOTH_STUDY_CAMERA_MARGIN } from '@/lib/tooth-study/camera';
 
@@ -559,16 +559,16 @@ const Viewer = forwardRef<ViewerHandle, Props>(function Viewer(props, ref) {
       },
       focus: () => {
         cancelCameraRestore();
-        const direction = camera.position.clone().sub(controls.target).normalize();
-        positionCamera(visibleBounds(true), direction, 1.25, camera.up, false, true);
+        const { position, target, up } = cameraMotion.pose;
+        positionCamera(visibleBounds(true), position.clone().sub(target), 1.25, up, false, true);
       },
       snapshot: () => {
         snapshotRequested = true;
       },
-      getCamera: () => readViewerCamera(camera, controls, currentView, pendingCamera),
+      getCamera: () => cameraMotion.read(currentView, pendingCamera),
       restoreCamera: value => {
         cameraMotion.cancel();
-        pendingCamera = readViewerCamera(camera, controls, currentView, value);
+        pendingCamera = cameraMotion.read(currentView, value);
       },
     };
     const sizing = createViewerResize(

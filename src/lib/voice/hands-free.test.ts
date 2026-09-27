@@ -37,6 +37,46 @@ beforeEach(() => {
 afterEach(() => vi.useRealTimers());
 
 describe('hands-free recognition', () => {
+  it.each(['no-speech', 'aborted'])('restarts repeated %s sessions after only 250 ms', error => {
+    const { callbacks, controller } = setup();
+    controller.start();
+    for (let count = 1; count <= 6; count++) {
+      last().onerror?.({ error });
+      vi.advanceTimersByTime(249);
+      expect(Recognition.sessions).toHaveLength(count);
+      vi.advanceTimersByTime(1);
+      expect(Recognition.sessions).toHaveLength(count + 1);
+    }
+    expect(callbacks.error).not.toHaveBeenCalled();
+    controller.dispose();
+  });
+  it.each(['end', 'error'])('resets immediate-failure backoff after a healthy %s session', path => {
+    const { controller } = setup();
+    controller.start();
+    last().onend?.();
+    vi.advanceTimersByTime(250);
+    last().onend?.();
+    vi.advanceTimersByTime(500);
+    vi.advanceTimersByTime(3000);
+    if (path === 'end') last().onend?.();
+    else last().onerror?.({ error: 'network' });
+    vi.advanceTimersByTime(250);
+    expect(Recognition.sessions).toHaveLength(4);
+    controller.dispose();
+  });
+  it.each(['Former', 'Fauna', "Forma's"])(
+    'never captions %s alias speech or arms follow-up from the bare alias',
+    alias => {
+      const { controller, callbacks } = setup();
+      controller.start();
+      last().onresult?.(event(`${alias} guidelines treated this differently`, false));
+      expect(controller.getState().transcript).toBe('');
+      last().onresult?.(event(`${alias}.`));
+      last().onresult?.(event('show the roots', true, 1));
+      expect(callbacks.final).not.toHaveBeenCalled();
+      controller.dispose();
+    },
+  );
   it('requires explicit start and configures continuous recognition', () => {
     const { controller } = setup();
     expect(controller.getState()).toEqual({

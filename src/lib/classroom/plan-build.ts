@@ -6,7 +6,7 @@ import {
   planMechanicsClause,
 } from '../mechanics-commands';
 import { parseLessonPlan } from './lesson-plan';
-import { parseGlossaryPlan } from '../glossary/parser';
+import { isGlossaryClose, parseGlossaryPlan } from '../glossary/parser';
 import { advance } from './advance';
 import { copyContext } from './types';
 import {
@@ -33,8 +33,7 @@ export function buildTeachingPlan(text: string, context: TeachingContext): Teach
   if (typeof text !== 'string' || !text.trim() || text.length > 1500)
     throw new Error('Give a classroom request of at most 1500 characters.');
   const normalized = normalizeSpeechCommand(preserveToothStudyTop(text, context));
-  const glossary = parseGlossaryPlan(normalized, context);
-  if (glossary) return glossary;
+  if (isGlossaryClose(normalized, context)) return parseGlossaryPlan(normalized, context)!;
   const lesson = parseLessonPlan(normalized, context);
   if (lesson) return lesson;
   const source = /^(?:stop|pause)(?:[.;,]| and| then)\s*(?:undo|redo)(?: that)?$/.test(normalized)
@@ -262,7 +261,11 @@ export function parseTeachingPlan(text: string, context: TeachingContext): Teach
   try {
     return buildTeachingPlan(text, context);
   } catch (error) {
-    if (error instanceof UnrecognizedCommandError) throw error;
+    if (error instanceof UnrecognizedCommandError) {
+      const glossary = parseGlossaryPlan(text, context);
+      if (glossary) return glossary;
+      throw error;
+    }
     // New mechanics stay deterministic and local, including useful validation errors.
     if (
       (context.tryMode && error instanceof CommandValidationError) ||

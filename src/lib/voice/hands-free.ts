@@ -1,5 +1,5 @@
 import type { SpeechRecognitionConstructor, SpeechRecognitionLike } from '../speech';
-import { createWakePhraseGate, stripWakePhrase } from './wake-phrase';
+import { createWakePhraseGate, matchWakePhrase } from './wake-phrase';
 
 export type HandsFreeState = {
   supported: boolean;
@@ -17,7 +17,7 @@ export function createHandsFree(
   Recognition: SpeechRecognitionConstructor | undefined,
   callbacks: {
     state: (state: HandsFreeState) => void;
-    final: (text: string) => void;
+    final: (text: string, alias?: boolean) => void;
     error: (message: string) => void;
     canStop: () => boolean;
   },
@@ -65,7 +65,8 @@ export function createHandsFree(
     stop();
     if (!disposed) callbacks.error(message);
   };
-  const restart = () => {
+  const restart = (startedAt: number, normal = false) => {
+    if (normal || Date.now() - startedAt >= 2500) attempts = 0;
     release();
     if (!state.active || paused || disposed) return;
     publish({ phase: 'restarting', transcript: '' });
@@ -105,7 +106,8 @@ export function createHandsFree(
         .map(result => result[0]?.transcript || '')
         .join(' ')
         .trim();
-      const addressed = gate.armed() || stripWakePhrase(interim) !== null;
+      const wake = matchWakePhrase(interim);
+      const addressed = wake ? !wake.alias : gate.armed();
       publish({ transcript: addressed ? interim : '' });
       for (let index = event.resultIndex; index < event.results.length; index++) {
         if (!current()) return;
@@ -114,7 +116,10 @@ export function createHandsFree(
         finalized.add(index);
         attempts = networkFailures = 0;
         const accepted = gate.accept(result[0]?.transcript || '', callbacks.canStop());
-        if (accepted) callbacks.final(accepted);
+        if (accepted) {
+          if (accepted.alias) callbacks.final(accepted.text, true);
+          else callbacks.final(accepted.text);
+        }
       }
     };
     session.onerror = event => {
@@ -124,12 +129,11 @@ export function createHandsFree(
         return fail(
           'Hands-free is off after repeated network failures. Typed commands still work.',
         );
-      restart();
+      restart(startedAt, event.error === 'no-speech' || event.error === 'aborted');
     };
     session.onend = () => {
       if (!current()) return;
-      if (Date.now() - startedAt >= 10000) attempts = 0;
-      restart();
+      restart(startedAt);
     };
     try {
       session.start();

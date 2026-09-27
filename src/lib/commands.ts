@@ -279,7 +279,7 @@ export function parseCommand(
     }
     throw new Error('Use “rotate 11 5 degrees around y” or “rotate upper incisors 5 degrees”.');
   }
-  throw new Error(
+  throw new UnrecognizedCommandError(
     'Use an explicit tooth movement with mm or degrees, such as “intrude upper incisors 0.5 mm” or “torque selected teeth -3 degrees”. Automatic treatment planning is not supported.',
   );
 }

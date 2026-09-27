@@ -59,6 +59,9 @@ export function createToothStudyPresentation(
     lastTransforms: Transforms | undefined,
     lastOpening = NaN;
   let active = false;
+  let labelWidth = 0,
+    labelHeight = 0,
+    captionBottom = 0;
   return {
     prepare(
       study: ViewerToothStudy | null | undefined,
@@ -71,6 +74,7 @@ export function createToothStudyPresentation(
       const reframe = shouldFrame(study, restoring);
       if (!study) {
         lastTooth = undefined;
+        labelWidth = 0;
         return;
       }
       if (
@@ -122,6 +126,11 @@ export function createToothStudyPresentation(
     },
     render(width: number, height: number) {
       if (!active) return;
+      if (width !== labelWidth || height !== labelHeight) {
+        captionBottom = caption.offsetTop + caption.offsetHeight + 8;
+        labelWidth = width;
+        labelHeight = height;
+      }
       projectedCenter.copy(center).project(camera);
       const cx = ((projectedCenter.x + 1) * width) / 2;
       const cy = ((1 - projectedCenter.y) * height) / 2;
@@ -140,6 +149,8 @@ export function createToothStudyPresentation(
             width,
             height,
             label.screen,
+            72,
+            captionBottom,
           );
         label.element.hidden = !placed;
         if (!placed) continue;

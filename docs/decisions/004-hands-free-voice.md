@@ -14,11 +14,12 @@ While hands-free recognition is running, the browser vendor's speech service rec
 
 - Require explicit opt-in each page session. Disclose audio processing on the toggle and in Settings and the professor guide.
 - Keep a red Listening indicator visible while enabled, including a paused label during narration. The toggle uses `aria-pressed`.
-- Execute final utterances only after a leading Forma wake phrase, accepted recognizer aliases, or a six-second follow-up window armed by a bare wake phrase. Interim text is a transient student caption.
+- Full wake phrases are **Forma** and **for ma**, optionally prefixed by **hey**, **ok** or **okay**. A bare full wake phrase arms one six-second follow-up. Only full wake phrases and their armed follow-ups can show interim captions or use optional AI/Analyze.
+- Mishearings **former**, **forma's** and **fauna** are local-only aliases. A final alias command must be accepted by the local parser before submission; rejected aliases produce no caption, HUD error, AI/Analyze request or history. A bare alias never arms the follow-up window, and alias interim text is never displayed.
 - Discard non-wake final speech without submitting it, storing it, logging it or sending it to AI. The recognition service itself has already received the audio. Only accepted requests enter existing command processing and request history.
-- Pause recognition while Forma speaks and during hold-to-talk capture. Clear the armed follow-up on pause/stop. Resume after speech ends or is interrupted.
+- Pause recognition while Forma speaks, during hold-to-talk capture, and whenever the tab becomes hidden. Abort the current microphone session and clear the armed follow-up on pause/stop. Resume an already enabled session only when the tab is visible and other pause reasons have ended. The HUD shows **Hands-free paused** for general pauses and **Listening · paused while Forma speaks** during narration, including on return if another pause reason remains.
 - Turn off on explicit toggle/“Forma, stop listening”, pagehide/navigation/unmount, a voice mode/language change, permission/service denial, unavailable microphone, initialization/start failure, or three network failures without a successful final result. Never restart a deliberately stopped session. Window blur alone keeps hands-free active and discards only unfinished hold-to-talk capture.
-- Restart ordinary ended sessions with bounded 250 ms–4 s backoff. Permission and microphone failures require a new explicit activation after correction.
+- Restart normal silence/aborted sessions at 250 ms. Sessions lasting at least 2.5 seconds reset restart attempts on both error and end paths; only immediate failures accumulate the bounded 250 ms–4 s backoff. Permission and microphone failures require a new explicit activation after correction.
 
 ## Navigation and execution
 
@@ -26,7 +27,7 @@ Presenter next/previous keys submit the same local grammar as speech: workflow m
 
 ## Consequences and limits
 
-Wake aliases intentionally trade some recognition tolerance for a small false-activation risk; they are a tested data list. Spoken confirmations are optional and off by default. Confirmation summaries are limited to twelve words; clarification text is retained in full.
+Wake aliases retain recognition tolerance only for locally understood commands. Ordinary speech such as “Former guidelines treated this differently” is silently ignored; “former, show the roots” can execute locally. Full Forma/for ma requests retain optional AI/Analyze behavior. Spoken confirmations are optional and off by default. Confirmation summaries are limited to twelve words; clarification text is retained in full.
 
 There is an unavoidable conflict between pausing recognition during speech output and detecting a new spoken Stop during that pause. This implementation prioritizes the requested feedback prevention. Bare Stop/Cancel is accepted without a wake phrase during playback when recognition is running; during narration use Stop, Escape, or the hold-to-talk button (which interrupts narration before capture). The paused indicator makes this state visible. Always hearing Stop during narration would require a separate audio/echo-cancellation design, outside this browser-recognition slice.
 

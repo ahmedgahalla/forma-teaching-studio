@@ -17,7 +17,7 @@ import {
   type Snapshot,
   type TeachingAdapter,
 } from './teaching-context';
-import { useTeachingVoice } from './useTeachingVoice';
+import { useTeachingVoice, submitLocalVoice } from './useTeachingVoice';
 import { usePresenterKeys } from './usePresenterKeys';
 export { useTeaching, useTeachingAdapter, type TeachingAdapter } from './teaching-context';
 
@@ -95,7 +95,7 @@ export function TeachingProvider({ children }: { children: ReactNode }) {
     revision = useRef(0);
   const engine = useRef<ReturnType<typeof createTeachingRuntime<Snapshot>> | null>(null);
   const voiceControl = useTeachingVoice({
-    submit: text => submitText(text),
+    submit: (text, localOnly) => submitText(text, localOnly),
     interrupt: () => {
       cancelAnalysis();
       engine.current?.cancel('Listening for your instruction…');
@@ -125,10 +125,8 @@ export function TeachingProvider({ children }: { children: ReactNode }) {
     setAnalysisPending(false);
   };
   const runAnalysis = async (question: string) => {
-    cancelAnalysis();
+    clearAnalysis();
     engine.current?.cancel('Explaining the current model.');
-    setAnalysis(null);
-    setAnalysisError('');
     setAnalysisQuestion(question);
     const controller = new AbortController(),
       requestedRevision = revision.current,
@@ -192,7 +190,13 @@ export function TeachingProvider({ children }: { children: ReactNode }) {
       }
     }
   };
-  const submitText = async (text: string) => {
+  const clearAnalysis = () => {
+    cancelAnalysis();
+    setAnalysis(null);
+    setAnalysisError('');
+  };
+  const submitText = async (text: string, localOnly = false) => {
+    if (localOnly) return submitLocalVoice(engine.current, text, clearAnalysis);
     if (/^stop listening[.!?]?$/i.test(text.trim())) {
       voiceControl.stopListening();
       return;
@@ -203,9 +207,7 @@ export function TeachingProvider({ children }: { children: ReactNode }) {
     ) {
       return runAnalysis(text);
     }
-    cancelAnalysis();
-    setAnalysis(null);
-    setAnalysisError('');
+    clearAnalysis();
     await engine.current?.submit(text, {
       interpreter: preferAIRef.current && configRef.current.enabled ? 'ai' : 'auto',
     });
@@ -347,9 +349,7 @@ export function TeachingProvider({ children }: { children: ReactNode }) {
       engine.current?.cancel('The target changed. Give the next instruction when ready.');
   };
   const runControl = async (text: string) => {
-    cancelAnalysis();
-    setAnalysis(null);
-    setAnalysisError('');
+    clearAnalysis();
     voiceControl.cancelCapture();
     voiceControl.invalidate();
     await engine.current?.submit(text);
@@ -433,5 +433,4 @@ export function TeachingProvider({ children }: { children: ReactNode }) {
     </Context.Provider>
   );
 }
-
 export { TeachingCommandBar } from './TeachingCommandBar';

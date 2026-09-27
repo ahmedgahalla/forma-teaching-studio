@@ -5,6 +5,7 @@ import { createDentalArrangement } from '@/lib/dental-arrangements';
 import { createTeachingCase, sampleCaseDemonstration } from '@/lib/teaching-cases';
 import { createTryState } from '@/lib/try-mode';
 import { DEFAULT_ANATOMY } from '@/lib/teaching-anatomy';
+import { applyToothStudy } from './tooth-study';
 
 /**
  * The teaching-action kinds that load or steer a prepared arrangement
@@ -130,6 +131,8 @@ export function applyCaseLoadKinds(
       if (!api.scenario || !api.caseDefinition || !api.caseVariant)
         throw new Error('Choose a prepared case first.');
       if (action.action === 'explore') {
+        const prior = api.toothStudy?.prior;
+        if (prior) applyToothStudy(api, refs, { kind: 'tooth-study', action: 'close' });
         const current = sampleCaseDemonstration(
           api.scenario.caseId,
           api.scenario.variantId,
@@ -140,12 +143,13 @@ export function applyCaseLoadKinds(
           exploring: true,
           returnProgress: api.stage / api.stages,
           returnDisplay: {
-            lesson: { ...api.snapshot(), transforms: current },
-            anatomy: api.anatomy,
+            // State setters are batched: capture the stored mouth, not this render's study.
+            lesson: { ...api.snapshot(), ...prior, toothStudy: null, transforms: current },
+            anatomy: prior?.anatomy ?? api.anatomy,
             appliance: api.applianceDisplay,
             bracketStyle: api.bracketStyle,
             ligatureColor: api.ligatureColor,
-            camera: refs.viewer.current?.getCamera() || null,
+            camera: prior ? prior.camera : (refs.viewer.current?.getCamera() ?? null),
           },
         });
         api.dispatch({ type: 'load', value: current });

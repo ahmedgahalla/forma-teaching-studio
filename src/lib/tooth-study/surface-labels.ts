@@ -46,6 +46,7 @@ export function placeSurfaceLabel(
   height: number,
   out: LabelPoint,
   radius = 72,
+  topInset = 0,
 ): boolean {
   const dx = px - cx,
     dy = py - cy,
@@ -57,16 +58,19 @@ export function placeSurfaceLabel(
     !Number.isFinite(width) ||
     !Number.isFinite(height) ||
     !Number.isFinite(radius) ||
+    !Number.isFinite(topInset) ||
     length < 1e-6 ||
     width <= 0 ||
     height <= 0 ||
-    radius < 0
+    radius < 0 ||
+    topInset < 0
   )
     return false;
   const distance = Math.max(length, radius);
   const marginX = Math.min(64, width / 2),
     marginY = Math.min(24, height / 2);
+  if (topInset + marginY * 2 > height) return false;
   out.x = Math.min(width - marginX, Math.max(marginX, cx + (dx / length) * distance));
-  out.y = Math.min(height - marginY, Math.max(marginY, cy + (dy / length) * distance));
+  out.y = Math.min(height - marginY, Math.max(topInset + marginY, cy + (dy / length) * distance));
   return true;
 }

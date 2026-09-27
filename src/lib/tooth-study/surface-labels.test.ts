@@ -66,4 +66,15 @@ describe('surface direction labels', () => {
     expect(placeSurfaceLabel(20, 20, 30, 20, Infinity, 400, out)).toBe(false);
     expect(out).toEqual({ x: 1, y: 2 });
   });
+
+  it.each([33, 54, 75])('reserves a %s px caption band above top-clamped labels', captionBottom => {
+    const out = { x: 0, y: 0 };
+    expect(placeSurfaceLabel(300, 90, 300, -100, 600, 290, out, 72, captionBottom + 8)).toBe(true);
+    expect(out.y - 24).toBeGreaterThanOrEqual(captionBottom + 8);
+    expect(out.y).toBeLessThanOrEqual(290 - 24);
+  });
+
+  it('hides a label if the caption leaves no safe vertical space', () => {
+    expect(placeSurfaceLabel(30, 20, 30, -10, 60, 40, { x: 0, y: 0 }, 72, 54)).toBe(false);
+  });
 });

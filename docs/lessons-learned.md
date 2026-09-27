@@ -107,7 +107,8 @@ Entry format: mistake (with link) · root cause · prevention · status (`noted`
 - **Mistake:** [Phase 4.3 review](reviews/from-builder/2026-09-27-phase-4-3-visual-review.md) found that fitting empty corners of a world bounding box left actual crowns small and low. Integration review also caught exact restored pole cameras drifting under later OrbitControls updates and a fresh study gate overriding a same-geometry saved orbit.
 - **Root cause:** bounds containment was treated as sufficient visual framing; assigning a camera was treated as completion without accounting for downstream control updates and fresh presentation state. The review revision also found that avoiding HUD overlap by shrinking the canvas permanently removed 22% of its usable area.
 - **Prevention:** project actual shipped-model vertices to test occupancy, centering and roots/gingiva visibility. Keep the full canvas and share an overlay safe-area value between CSS and asymmetric camera framing. Hold exact programmatic poses until user interaction, defer settlement until the final transition frame, and record restored study state before automatic framing. Pure/DOM regressions cover these paths; projector baseline acceptance remains separate. AGENTS promotion is deferred under this revision's explicit no-AGENTS-edit instruction.
-- **Status:** automated · **Count:** 2
+- **Status:** automated · **Count:** 4 (two earlier framing/restoration findings; Phase 4.5 findings 4 and 5)
+- **4.5 root causes and prevention:** [Audit fixes](phases/phase-4-voice-lecture-assistant/4.5-audit-fixes.md) found tooth-study pole views changing camera up after OrbitControls had fixed its orbit frame, and focus/snapshot code reading an interpolated pose as intended state. Keep world +Y up, tilt pole directions, restore up and lookAt on cancellation, and read the active tween destination for chained commands and snapshots. Direction/projection, cancellation and destination regressions automate both protections. AGENTS promotion remains deferred under the explicit no-edit constraint.
 
 ## 15. Global keyboard targets are not always Elements
 
@@ -121,4 +122,28 @@ Entry format: mistake (with link) · root cause · prevention · status (`noted`
 - **Mistake caught during implementation:** the initial [4.4](phases/phase-4-voice-lecture-assistant/4.4-explain-by-voice.md) glossary integration attempted to load a prepared case and choose a variant in one request, while the existing case preflight kept validating against the original case. Final review also caught a definition restore binding to the outgoing model rather than the snapshot's model.
 - **Root cause:** the prior single-case-command rule made an immutable source scenario sufficient. Adding an authored exception changed that assumption; state-setter fixtures also did not emulate React's batched model identity changes.
 - **Prevention:** permit only exact authored visual sequences across that boundary, advance the private preflight scenario after load, and restore model-bound presentation using the snapshot's model. Integrity tests validate every visual, an actual dispatch/runtime regression covers the paused torque request and Undo/Redo, and a React hook regression covers definitions across batched model restoration.
+- **Status:** automated · **Count:** 2
+- **4.5 recurrence:** loading an authored synthetic case advanced its scenario but retained the imported source model's capability flags/IDs, rejecting later PDL/bone actions. Advance model identity, synthetic capability and available IDs together; imported-case plan/preflight regressions now verify the full sequence. AGENTS promotion is deferred by the explicit no-edit constraint.
+
+## 17. Fallback grammar must preserve existing grammar ownership
+
+- **Mistake:** [Phase 4.5 finding 1](phases/phase-4-voice-lecture-assistant/4.5-audit-fixes.md) found the glossary swallowing mechanics explanations, including the Inspector's own command.
+- **Root cause:** a broad question parser ran first and guarded only one of several existing grammars.
+- **Prevention:** invoke glossary fallback only after the normal planner reports an unrecognized command. Preserve recognized grammar clarifications and test precedence across mechanics, case, arrangement, workspace, Try Mode, lesson/workflow narration and tooth study, with and without required context.
 - **Status:** automated · **Count:** 1
+
+## 18. Recognition silence is not an immediate service failure
+
+- **Mistake:** [Phase 4.5 finding 2](phases/phase-4-voice-lecture-assistant/4.5-audit-fixes.md) found quiet classrooms accumulating four-second microphone restart gaps.
+- **Root cause:** no-speech restarted through the error path, which detached the end callback that alone reset attempts after a long session.
+- **Prevention:** reset attempts for normal no-speech/aborted ends and evaluate session duration in the shared restart path. Fake-clock regressions distinguish ordinary silence, long sessions and immediate repeated failures.
+- **Status:** automated · **Count:** 1
+
+## 19. Dismissal actions must preserve the active workspace
+
+- **Mistake:** [Phase 4.5 finding 3](phases/phase-4-voice-lecture-assistant/4.5-audit-fixes.md) found “hide that” and “close the definition” switching a workflow to the case workspace.
+- **Root cause:** the glossary claimed dismissal without an open definition, and all glossary actions were routed as case-opening actions.
+- **Prevention:** require open glossary context to parse its close phrases, and preserve current mode for `id: null`. Workflow-mode regression tests cover both grammar ownership and action routing.
+- **Status:** automated · **Count:** 1
+
+Numbers 17–19 were checked against the current lessons and the parallel Phase 3 proposal's reserved lesson 12 before being assigned.

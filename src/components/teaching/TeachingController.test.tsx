@@ -335,6 +335,8 @@ describe('hosted command service discovery', () => {
   });
 });
 afterEach(async () => {
+  vi.restoreAllMocks();
+  vi.useRealTimers();
   await act(async () => {
     root.unmount();
   });
@@ -532,6 +534,145 @@ describe('persistent teaching speech controller integration', () => {
 });
 
 describe('hands-free teaching integration', () => {
+  it.each(['ai', 'analyze'])('keeps mishearing aliases local-only in %s mode', async mode => {
+    await act(async () => {
+      teaching.setConfig({ enabled: true, url: 'http://localhost:8000' });
+      if (mode === 'ai') teaching.setPreferAI(true);
+      else teaching.setAnalyzeMode(true);
+      teaching.toggleHandsFree();
+    });
+    const initial = teaching.runtime,
+      recognition = FakeRecognition.instances.at(-1)!;
+    const fetcher = vi.fn();
+    vi.stubGlobal('fetch', fetcher);
+    for (const [index, text] of [
+      'Former guidelines treated this differently',
+      "Forma's definition needs revising",
+      'fauna needs protection',
+      'former, what is an unknown term',
+    ].entries()) {
+      await act(async () => recognition.result(text, false, index));
+      expect(teaching.voice.transcript).toBe('');
+      await act(async () => recognition.result(text, true, index));
+      expect(teaching.runtime).toEqual(initial);
+    }
+    expect(fetcher).not.toHaveBeenCalled();
+    expect(applied).not.toHaveBeenCalled();
+    await act(async () => recognition.result('former, show the roots', true, 4));
+    expect(scene().roots).toBe(true);
+    expect(teaching.runtime.interpreter).toBe('local');
+    expect(fetcher).not.toHaveBeenCalled();
+  });
+  it('silently rejects alias commands that fail local preflight', async () => {
+    await act(async () => teaching.toggleHandsFree());
+    const initial = teaching.runtime;
+    preflight.mockImplementationOnce(() => {
+      throw new Error('Unavailable here');
+    });
+    await act(async () => FakeRecognition.instances.at(-1)!.result('former, show roots'));
+    expect(teaching.runtime).toEqual(initial);
+    expect(applied).not.toHaveBeenCalled();
+  });
+  it('cancels stale Analyze work only after a local alias is accepted', async () => {
+    await act(async () => {
+      teaching.setConfig({ enabled: true, url: 'https://forma.example' });
+      teaching.setAnalyzeMode(true);
+      teaching.toggleHandsFree();
+    });
+    let resolve!: (value: unknown) => void;
+    const fetcher = vi.fn(
+      () =>
+        new Promise(done => {
+          resolve = done;
+        }),
+    );
+    vi.stubGlobal('fetch', fetcher);
+    const recognition = FakeRecognition.instances.at(-1)!;
+    await act(async () => recognition.result('Forma explain the model'));
+    const signal = (fetcher.mock.calls[0] as unknown as [string, RequestInit])[1].signal!;
+    const pending = teaching.runtime;
+    await act(async () =>
+      recognition.result('Former guidelines treated this differently', true, 1),
+    );
+    expect(teaching.runtime).toEqual(pending);
+    expect(signal.aborted).toBe(false);
+    await act(async () => recognition.result('former, show roots', true, 2));
+    expect(scene().roots).toBe(true);
+    expect(signal.aborted).toBe(true);
+    expect(teaching.analysisPending).toBe(false);
+    const accepted = teaching.runtime;
+    await act(async () => resolve({ ok: true, json: async () => ({}) }));
+    expect(teaching.runtime).toEqual(accepted);
+    expect(teaching.analysis).toBeNull();
+    expect(fetcher).toHaveBeenCalledOnce();
+  });
+  it('rolls back alias execution failures without showing or speaking an error', async () => {
+    await act(async () => {
+      teaching.setVoiceSettings({ mode: 'hands-free', language: 'en-US', spokenReplies: true });
+      teaching.toggleHandsFree();
+    });
+    const initial = teaching.runtime;
+    applied.mockImplementationOnce(() => {
+      throw new Error('Renderer unavailable');
+    });
+    await act(async () => FakeRecognition.instances.at(-1)!.result('former, show roots'));
+    expect(teaching.runtime).toEqual({ ...initial, interpreter: undefined });
+    expect(scene().roots).toBe(false);
+    expect(spoken).toHaveLength(0);
+  });
+  it('pauses on a hidden tab, ignores stale speech, and resumes only after visibility returns', async () => {
+    vi.useFakeTimers();
+    await act(async () => teaching.toggleHandsFree());
+    const recognition = FakeRecognition.instances.at(-1)!;
+    const stale = recognition.onresult;
+    vi.spyOn(document, 'visibilityState', 'get').mockReturnValue('hidden');
+    await act(async () => document.dispatchEvent(new Event('visibilitychange')));
+    expect(teaching.voice).toMatchObject({ active: true, phase: 'paused', transcript: '' });
+    expect(recognition.abort).toHaveBeenCalledOnce();
+    await act(async () => {
+      stale?.({
+        resultIndex: 0,
+        results: [{ isFinal: true, 0: { transcript: 'Forma show roots' } }],
+      });
+      vi.advanceTimersByTime(10000);
+    });
+    expect(scene().roots).toBe(false);
+    expect(FakeRecognition.instances).toHaveLength(1);
+    vi.spyOn(document, 'visibilityState', 'get').mockReturnValue('visible');
+    await act(async () => document.dispatchEvent(new Event('visibilitychange')));
+    expect(teaching.voice.phase).toBe('listening');
+    expect(FakeRecognition.instances).toHaveLength(2);
+    vi.restoreAllMocks();
+  });
+  it('keeps a returning tab paused while narration is still speaking', async () => {
+    await act(async () => teaching.toggleHandsFree());
+    await act(async () => FakeRecognition.instances.at(-1)!.result('Forma explain this step'));
+    vi.spyOn(document, 'visibilityState', 'get').mockReturnValue('hidden');
+    await act(async () => document.dispatchEvent(new Event('visibilitychange')));
+    vi.spyOn(document, 'visibilityState', 'get').mockReturnValue('visible');
+    await act(async () => document.dispatchEvent(new Event('visibilitychange')));
+    expect(teaching.voice.phase).toBe('paused');
+    expect(FakeRecognition.instances).toHaveLength(1);
+    await act(async () => spoken[0].onend?.());
+    expect(teaching.voice.phase).toBe('listening');
+    vi.restoreAllMocks();
+  });
+  it('does not resume recognition when narration ends in a hidden tab', async () => {
+    await act(async () => teaching.toggleHandsFree());
+    await act(async () => FakeRecognition.instances.at(-1)!.result('Forma explain this step'));
+    vi.spyOn(document, 'visibilityState', 'get').mockReturnValue('hidden');
+    await act(async () => {
+      document.dispatchEvent(new Event('visibilitychange'));
+      spoken[0].onend?.();
+    });
+    expect(teaching.voice.phase).toBe('paused');
+    expect(FakeRecognition.instances).toHaveLength(1);
+    await act(async () => teaching.toggleHandsFree());
+    vi.spyOn(document, 'visibilityState', 'get').mockReturnValue('visible');
+    await act(async () => document.dispatchEvent(new Event('visibilitychange')));
+    expect(teaching.voice.active).toBe(false);
+    expect(FakeRecognition.instances).toHaveLength(1);
+  });
   async function listen() {
     await act(async () => {
       teaching.toggleHandsFree();

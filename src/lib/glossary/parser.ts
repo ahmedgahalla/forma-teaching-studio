@@ -1,17 +1,15 @@
-import { normalizeSpeechCommand, parseTeachingCommand } from '../lecture';
+import { normalizeSpeechCommand } from '../lecture';
 import { findGlossaryEntry } from './index';
-import { glossaryActions } from './plan';
+import { glossaryActionsForStudy } from './plan';
 import type { TeachingContext, TeachingPlan } from '../classroom/types';
 import { validateTeachingPlan } from '../classroom/plan-validate';
-import { isToothStudyClause } from '../classroom/parse-tooth-study';
-import { clauses } from '../classroom/parse-clauses';
 
 export function parseGlossaryPlan(
   text: string,
   context: TeachingContext,
 ): TeachingPlan | undefined {
   const source = normalizeSpeechCommand(text);
-  if (/^(?:close (?:the )?definition|hide that)$/.test(source))
+  if (isGlossaryClose(source, context))
     return {
       actions: [{ kind: 'glossary', id: null }],
       summary: 'Definition closed.',
@@ -20,19 +18,7 @@ export function parseGlossaryPlan(
   const request = source.match(
     /^(?:what is|what's|what are|define|explain|tell me about|show me) (?:the |a |an )?(.+)$/,
   );
-  if (!request || isToothStudyClause(source, context)) return undefined;
-  // Preserve every existing single-action command, including narration and display controls.
-  try {
-    parseTeachingCommand(
-      clauses(source)[0],
-      context.selected,
-      context.availableIds,
-      context.selectedIds,
-    );
-    return undefined;
-  } catch {
-    /* Only authored glossary terms are resolved below. */
-  }
+  if (!request) return undefined;
   const entry = findGlossaryEntry(request[1]);
   if (!entry && source.startsWith('show me ')) return undefined;
   if (!entry)
@@ -45,7 +31,7 @@ export function parseGlossaryPlan(
   try {
     return validateTeachingPlan(
       {
-        actions: glossaryActions(entry.id),
+        actions: glossaryActionsForStudy(entry.id, context.toothStudy),
         summary: `Explain ${entry.term}.`,
         clarification: null,
       },
@@ -62,4 +48,8 @@ export function parseGlossaryPlan(
           : 'This explanation is unavailable in the current model.',
     };
   }
+}
+
+export function isGlossaryClose(source: string, context: TeachingContext): boolean {
+  return !!context.glossaryId && /^(?:close (?:the )?definition|hide that)$/.test(source);
 }

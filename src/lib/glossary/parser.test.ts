@@ -74,7 +74,9 @@ describe('local authored glossary grammar', () => {
     },
   );
   it.each(['close the definition', 'hide that'])('closes by %s', text =>
-    expect(parseTeachingPlan(text, context).actions).toEqual([{ kind: 'glossary', id: null }]),
+    expect(parseTeachingPlan(text, { ...context, glossaryId: 'torque' }).actions).toEqual([
+      { kind: 'glossary', id: null },
+    ]),
   );
 });
 

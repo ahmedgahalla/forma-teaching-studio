@@ -10,7 +10,7 @@ export function teachingActionMode(
     action.kind === 'case' ||
     action.kind === 'dental-arrangement' ||
     action.kind === 'tooth-study' ||
-    action.kind === 'glossary' ||
+    (action.kind === 'glossary' && action.id !== null) ||
     action.kind === 'lesson' ||
     (action.kind === 'workflow' && action.action === 'exit')
   )

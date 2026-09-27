@@ -148,6 +148,7 @@ export function setupToothStudy() {
     workflowId: null,
     stepIndex: 0,
     synthetic: api.model.demo,
+    glossaryId: api.glossaryId,
     selected: api.selected,
     selectedIds: api.selectedIds,
     availableIds: model.teeth.map(tooth => tooth.id),

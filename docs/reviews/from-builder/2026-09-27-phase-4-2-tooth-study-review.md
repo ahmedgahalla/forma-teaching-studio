@@ -2,6 +2,8 @@ status: open
 
 # Phase 4.2 educator and visual acceptance
 
+**4.5 audit disposition:** addressed in [4.5](../../phases/phase-4-voice-lecture-assistant/4.5-audit-fixes.md): world-up study cameras/manual orbit, generic glossary views preserving the studied tooth, exploration/return preserving the pre-study mouth, and disclaimer label clearance. Automated regressions pass; this item remains **open** for educator and browser/device acceptance.
+
 **Location:** [4.2 implementation and gate record](../../phases/phase-4-voice-lecture-assistant/4.2-tooth-study.md), `src/lib/tooth-anatomy/`, `src/components/case/ToothStudyCard.*`, `src/components/viewer/tooth-study-*`.
 
 **Analysis:** The feature uses existing validated request execution, with strict local-only actions and stripped AI context. Data is separate from camera, labels and runtime state. Every changed allowlisted file shrank. Review caught and fixed close-then-explain selection ambiguity and stale study state during same-model case reset/variant/return; regression tests cover both. No unresolved code finding was identified in this scoped review.

@@ -25,6 +25,8 @@ The selected tooth is isolated, its roots shown, and gingiva and supporting anat
 
 Closing must be the final action in a combined request. Give subsequent commands separately so they resolve against the restored selection and display.
 
+**Explore this arrangement** from a prepared case closes tooth study first and explores the full mouth at the shown stage. **Return to prepared case** restores the camera, selection and display from before tooth study, preserving that stage. It never applies the tooth's close-up camera to the whole mouth.
+
 ## Names and directions
 
 Names use the **patient's** right and left. If a side is omitted, it defaults to the patient's right: **upper first molar → 16**, **lower canine → 43**. Say upper/maxillary or lower/mandibular; when an arch is already selected it can supply an omitted arch. Otherwise Forma asks for the arch. Canine/cuspid/eye tooth, premolar/bicuspid and first molar/six-year molar are aliases. First and second positions remain distinct.
@@ -37,7 +39,9 @@ Names use the **patient's** right and left. If a side is omitted, it defaults to
 | `view from the occlusal`, `biting surface`, `incisal`, `top` | Biting surface                        |
 | `view from the apical`, `root tip`                           | Root tips                             |
 
-Use the complete `view from the …` phrase for each alias. Side views keep world superior (+Y) upright. Occlusal and apical views put the buccal side at the top. Projected labels use **Labial** for incisors/canines, **Palatal** for upper teeth, **Incisal** for incisors/canines, and **Apex** for the rootward direction. Labels pointing toward or directly away from the camera are hidden to avoid covering the tooth.
+Use the complete `view from the …` phrase for each alias. Every view keeps world superior (+Y) as camera up. Occlusal and apical views use a small off-pole direction adjustment to put the buccal side at the top while preserving manual orbit. Projected labels use **Labial** for incisors/canines, **Palatal** for upper teeth, **Incisal** for incisors/canines, and **Apex** for the rootward direction. Labels pointing toward or directly away from the camera are hidden to avoid covering the tooth. The top label clamp reserves the teaching-draft caption's measured band, including on short canvases.
+
+Generic glossary requests such as **show me the mesial surface** or **show me the apex** keep the current studied tooth, turn to that view, and add the definition. Specific named features retain their authored representative visual.
 
 **Turn it**, **next side**, **next/back**, and the presenter keys cycle **buccal → mesial → lingual → distal → occlusal → apical** (Back reverses). Outside study, navigation continues to follow the current workflow, lesson or demonstration. An empty free workspace explains that there is nothing to step through.
 

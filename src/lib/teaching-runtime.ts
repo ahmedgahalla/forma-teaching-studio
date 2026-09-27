@@ -7,6 +7,8 @@ import {
   type TeachingPlan,
 } from './classroom';
 import type { TeachingAction } from './lecture';
+import { preserveLocalPlan, parseLocalVoicePlan } from './teaching-runtime-local';
+import type { TeachingSubmitOptions } from './teaching-runtime-local';
 export type RuntimeState = {
   phase: 'idle' | 'interpreting' | 'executing' | 'speaking';
   message: string;
@@ -258,8 +260,15 @@ export function createTeachingRuntime<S>(host: TeachingHost<S>) {
       throw error;
     }
   };
-  const submit = async (text: string, options: { interpreter?: 'auto' | 'ai' } = {}) => {
+  const submit = async (text: string, options: TeachingSubmitOptions = {}) => {
     if (disposed || !text.trim()) return;
+    const previous = { ...state, interpreter: state.interpreter },
+      localOnly = options.interpreter === 'local';
+    const local = localOnly
+      ? parseLocalVoicePlan(text, { ...host.context(), lastActions: last?.actions }, host.preflight)
+      : undefined;
+    if (localOnly && !local) return false;
+    if (localOnly) options.onLocalAccept?.();
     if (/^(stop|cancel|pause everything)$/i.test(text.trim())) {
       cancel();
       publish({ transcript: text });
@@ -282,26 +291,13 @@ export function createTeachingRuntime<S>(host: TeachingHost<S>) {
       interpreter: undefined,
     });
     try {
-      let plan: TeachingPlan | undefined;
+      let plan: TeachingPlan | undefined = local;
       try {
-        plan = parseTeachingPlan(text, context);
+        plan ??= parseTeachingPlan(text, context);
       } catch {
         /* Unfamiliar wording uses the configured interpreter. */
       }
-      // Stop/history/replay remain immediate and independent of network availability.
-      const localControl =
-        plan &&
-        !plan.clarification &&
-        plan.actions.length > 0 &&
-        (plan.actions.some(action => ['tooth-study', 'glossary', 'lesson'].includes(action.kind)) ||
-          plan.actions.every(
-            action =>
-              ['stop', 'history', 'replay'].includes(action.kind) ||
-              (action.kind === 'dental' && ['undo', 'redo', 'pause'].includes(action.command.type)),
-          ));
-      // An explicit ambiguity or failed constraint is not an invitation to invent
-      // a replacement, even when the professor has requested AI interpretation.
-      if (!plan || (options.interpreter === 'ai' && !localControl && !plan.clarification)) {
+      if (!plan || (options.interpreter === 'ai' && !preserveLocalPlan(plan))) {
         const response = await abortable(host.interpret(text, context, signal), signal);
         if (signal.aborted || own !== token) return;
         plan = validateTeachingPlan(
@@ -314,6 +310,10 @@ export function createTeachingRuntime<S>(host: TeachingHost<S>) {
       if (signal.aborted || own !== token || host.context().revision !== revision) return;
       await run(plan, own, signal, undefined, false, undefined, undefined, revision);
     } catch (error) {
+      if (localOnly) {
+        if (own === token && !signal.aborted) publish({ ...previous, phase: 'idle', error: false });
+        return false;
+      }
       if (own === token && !signal.aborted)
         publish({
           phase: 'idle',

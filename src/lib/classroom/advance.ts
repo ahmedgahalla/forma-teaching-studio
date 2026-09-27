@@ -59,8 +59,8 @@ export function advance(context: TeachingContext, action: TeachingAction, overri
   } else if (action.kind === 'lesson') {
     advanceLessonControl(context, action);
   } else if (action.kind === 'glossary') {
-    context.mode = 'case';
-    context.workflowId = null;
+    context.mode = action.id === null ? context.mode : 'case';
+    context.workflowId = action.id === null ? context.workflowId : null;
     context.glossaryId = action.id;
   } else if (action.kind === 'mechanics') {
     advanceMechanicsContext(context, action.action);

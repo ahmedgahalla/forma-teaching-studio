@@ -1,6 +1,6 @@
 import type { TeachingAction } from '../lecture';
 import { TEACHING_CASES } from '../teaching-cases';
-import type { TeachingContext } from './types';
+import { DEMO_IDS, type TeachingContext } from './types';
 
 /** Prepared-case branch of the private preflight simulation. */
 export function advanceCase(
@@ -13,6 +13,8 @@ export function advanceCase(
     const definition = TEACHING_CASES.find(item => item.id === action.id);
     if (!definition) throw new Error('Choose a supported prepared teaching case.');
     context.mode = 'case';
+    context.synthetic = true;
+    context.availableIds = [...DEMO_IDS];
     delete context.toothStudy;
     context.workflowId = null;
     context.caseId = definition.id;

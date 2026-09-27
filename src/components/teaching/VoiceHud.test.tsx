@@ -41,6 +41,11 @@ it('stays empty before a request and exposes a polite non-focusable status regio
   expect(container.querySelector('button, input, [tabindex]')).toBeNull();
 });
 
+it('labels a visibility pause without claiming Forma is speaking', async () => {
+  await render({ active: true, paused: true });
+  expect(container.querySelector('.voice-hud-listening')?.textContent).toBe('Hands-free paused');
+});
+
 it('keeps its listening indicator while active and marks pauses for narration', async () => {
   await render({ active: true });
   await advance(20000);

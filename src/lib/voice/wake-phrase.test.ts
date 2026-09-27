@@ -34,7 +34,7 @@ describe('wake phrases', () => {
     const gate = createWakePhraseGate(() => now);
     expect(gate.accept('Forma')).toBeNull();
     now += FOLLOW_UP_MS - 1;
-    expect(gate.accept('show roots')).toBe('show roots');
+    expect(gate.accept('show roots')).toEqual({ text: 'show roots', alias: false });
     expect(gate.accept('hide gums')).toBeNull();
   });
   it('expires the follow-up exactly at six seconds', () => {
@@ -50,17 +50,25 @@ describe('wake phrases', () => {
     gate.reset();
     expect(gate.accept('show roots')).toBeNull();
     gate.accept('Forma');
-    expect(gate.accept('Forma, play')).toBe('play');
+    expect(gate.accept('Forma, play')).toEqual({ text: 'play', alias: false });
     expect(gate.accept('show roots')).toBeNull();
   });
   it('only accepts bare stop/cancel without a wake phrase when stoppable', () => {
     const gate = createWakePhraseGate();
     expect(gate.accept('stop')).toBeNull();
     expect(gate.accept('cancel')).toBeNull();
-    expect(gate.accept('Stop!', true)).toBe('stop');
-    expect(gate.accept('cancel.', true)).toBe('cancel');
+    expect(gate.accept('Stop!', true)).toEqual({ text: 'stop', alias: false });
+    expect(gate.accept('cancel.', true)).toEqual({ text: 'cancel', alias: false });
     expect(gate.accept('we can stop here', true)).toBeNull();
     expect(gate.accept('stop listening', true)).toBeNull();
-    expect(gate.accept('Forma, stop listening')).toBe('stop listening');
+    expect(gate.accept('Forma, stop listening')).toEqual({ text: 'stop listening', alias: false });
+  });
+  it.each(['former', 'forma’s', 'fauna'])('marks %s as local-only and never arms it', alias => {
+    const gate = createWakePhraseGate();
+    expect(gate.accept(`${alias}, show roots`)).toEqual({ text: 'show roots', alias: true });
+    gate.accept('Forma');
+    expect(gate.accept(`${alias}.`)).toBeNull();
+    expect(gate.armed()).toBe(false);
+    expect(gate.accept('show roots')).toBeNull();
   });
 });

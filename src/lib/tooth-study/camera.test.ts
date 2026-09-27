@@ -16,6 +16,7 @@ describe('tooth-relative camera', () => {
     it.each(TOOTH_STUDY_VIEWS)('frames ' + id + ' from %s with anatomical screen-up', view => {
       const frame = anatomicalFrame(tooth(id));
       const { direction, up } = toothStudyCamera(frame, view);
+      expect(up).toEqual([0, 1, 0]);
       const expected =
         view === 'buccal' || view === 'lingual'
           ? frame.buccal
@@ -25,6 +26,10 @@ describe('tooth-relative camera', () => {
       const sign = ['lingual', 'distal', 'apical'].includes(view) ? -1 : 1;
       direction.forEach((value, axis) => expect(value).toBeCloseTo(expected[axis] * sign));
       expect(new Vector3(...direction).length()).toBeCloseTo(1);
+      if (view === 'occlusal' || view === 'apical') {
+        expect(Math.hypot(direction[0], direction[2])).toBeGreaterThan(0.0005);
+        expect(Math.abs(direction[1])).toBeGreaterThan(0.999);
+      }
       const camera = new PerspectiveCamera(45, 16 / 9, 0.1, 1000);
       camera.position.fromArray(direction).multiplyScalar(50);
       camera.up.fromArray(up);

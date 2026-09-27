@@ -35,7 +35,7 @@ Hold-to-talk remains the default. If microphone recognition is unavailable or pe
 
 ## Hands-free lecture listening
 
-Choose **Hands-free** beside the command dock, or press **M**, **B** or **.** outside editable fields, dialogs and menus. A red **Listening** pill remains on the model while enabled. Activation is explicit every page session; saving a hands-free preference in Settings never starts the microphone automatically. Blur keeps this mode running; it still discards unfinished hold-to-talk capture.
+Choose **Hands-free** beside the command dock, or press **M**, **B** or **.** outside editable fields, dialogs and menus. A red **Listening** pill remains on the model while enabled. Activation is explicit every page session; saving a hands-free preference in Settings never starts the microphone automatically. Window blur keeps this mode running while the tab remains visible; it discards unfinished hold-to-talk capture. Hiding the tab pauses recognition and releases its microphone session. An enabled session resumes when the tab is visible again and narration/hold capture no longer needs it paused; the pill shows a paused state while another pause reason remains.
 
 ```text
 Forma, show the upper arch
@@ -46,13 +46,15 @@ Forma, explain this step
 Forma, stop listening
 ```
 
-Begin a final utterance with **Forma**, **hey Forma**, **okay Forma** or **ok Forma**. Common recognizer outputs **former**, **for ma**, **forma's** and **fauna** are accepted too. Saying only the wake phrase arms one follow-up utterance for six seconds. Interim captions do not execute anything. Speech without the wake phrase is silently discarded after its transient interim caption; it is never submitted, stored, logged or sent to AI. The student HUD shows the accepted request and its result or clarification, then fades the completed feedback after about four seconds.
+Begin a final utterance with **Forma** or **for ma**, optionally preceded by **hey**, **okay** or **ok**. Saying only one of these full wake phrases arms one follow-up utterance for six seconds. Interim captions appear only for full wake phrases and their armed follow-ups; they do not execute anything. Ordinary classroom speech is silently discarded without captions, submission, storage, logging or AI requests. The student HUD shows an accepted request and its result or clarification, then fades completed feedback after about four seconds.
+
+Recognizer mishearings **former**, **forma's** and **fauna** work only for locally understood final commands: **“former, show the roots”** works locally. They never invoke the AI interpreter or Analyze, and their interim text is never captioned. Unrecognized alias speech, such as **“Former guidelines treated this differently”**, is silently ignored without a HUD error. A bare alias such as **“Former.”** never arms a follow-up.
 
 **Privacy:** while recognition is running, the browser vendor's speech service receives audio, including ordinary lecture speech. The wake gate filters recognized text locally; it cannot prevent that audio transmission. This is not offline recognition or an OpenAI audio connection. Turn hands-free off before private discussion. See [ADR 004](decisions/004-hands-free-voice.md).
 
 Bare **stop** or **cancel** works without Forma during a playing demonstration when recognition is running. Recognition pauses while Forma speaks so it cannot hear itself; the HUD displays the narration and a paused indicator. During that pause a spoken Stop cannot be heard: use **Stop**, **Escape** or the **Hold to talk** button to interrupt, then give the next instruction. Hold Space also interrupts in the default hold mode. Pausing clears any armed follow-up.
 
-Ordinary browser recognition endings restart automatically with bounded backoff. Permission denial, speech-service denial, an unavailable microphone, initialization/start failure or three network errors turn hands-free off with a message. Page navigation/pagehide, closing the workspace, and changing voice mode or language also turn it off. Correct the problem and explicitly enable it again; window focus never enables it.
+Ordinary silence and aborted sessions restart after 250 ms. Sessions lasting at least 2.5 seconds reset restart attempts; only immediate failures accumulate bounded backoff up to four seconds. Permission denial, speech-service denial, an unavailable microphone, initialization/start failure or three network errors turn hands-free off with a message. Page navigation/pagehide, closing the workspace, and changing voice mode or language also turn it off. Correct the problem and explicitly enable it again; returning to a visible tab resumes only a session that was already enabled.
 
 In **Settings → Lecture voice**, choose the voice mode preference, **en-US** (default) or **en-GB**, and optional **Spoken replies** (off by default). Preferences are saved in this browser. Spoken replies give a short confirmation or clarification only after voice requests; explicit “explain” narration remains available regardless of that setting.
 
@@ -143,7 +145,9 @@ Forma, hide that
 
 Run each explanation as a separate request. The glossary speaks and captions an authored definition and shows a large definition card beside the model. Related-term buttons request another definition. Where a visual is authored, it appears first: Carabelli opens tooth 16 from the palatal side; torque and tipping select the matching prepared movement variant, paused at the start. The complete visual-plus-definition request undoes together. Closing the card leaves the displayed model available.
 
-Existing commands retain precedence: **show roots**, arch commands, **explain this tooth** and **explain this step** continue to perform their original actions. Unknown glossary questions return a local clarification with example terms. Glossary actions and context are excluded from optional AI interpretation; Analyze remains a separate optional feature.
+Existing local grammars and their clarifications retain precedence, including **explain that movement**, **explain the result**, **explain this tooth**, **explain this step** and **explain the answer**. Unknown glossary questions return a local clarification with example terms only after those grammars decline the request. **Hide that** and **close the definition** close a currently open definition and otherwise retain existing handling; closing never changes workspaces. Glossary actions and context are excluded from optional AI interpretation; Analyze remains a separate optional feature.
+
+During tooth study, **show me the distal surface**, **show me the occlusal surface** and **show me the apex** turn the tooth already being studied and add its generic definition. Outside study, glossary visuals use their authored representative tooth. PDL and alveolar-bone explanations can load their synthetic prepared case from an imported case before showing the supporting anatomy.
 
 The authored lookup and model instructions work offline without the AI service. Typed commands need no wake phrase, microphone or speech-recognition service. Browser recognition remains subject to its service and connection requirements; it is not an offline wake-word system. Speech-output failure uses the caption fallback described above. Every entry is **Teaching draft — pending educator review**, with no clinical advice or treatment recommendations. See [Teaching glossary](GLOSSARY.md).
 
