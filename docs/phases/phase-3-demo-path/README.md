@@ -1,6 +1,6 @@
 # Phase 3 — demo path
 
-**Status:** teacher-created lecture slice implemented; automated results recorded; browser acceptance blocked · **Current branch:** `ahmed/phase-3-teacher-lectures` · **Current PR:** pending
+**Status:** teacher-created lecture slice implemented; automated results recorded; browser acceptance blocked · **Current branch:** `ahmed/phase-3-teacher-lectures` · **Current PR:** [#14](https://github.com/ahmedgahalla/forma-teaching-studio/pull/14) (draft; stacked on Phase 4)
 
 **Goal:** a professor can explore the central model freely or prepare a lecture inside Forma, teach alongside saved notes and model steps, and return from a spontaneous experiment without losing the lecture. A rehearsed 3–4 minute walkthrough should demonstrate the complete journey to an orthodontist who lectures at universities. Builds on [product direction](../../PRODUCT_DIRECTION.md).
 
