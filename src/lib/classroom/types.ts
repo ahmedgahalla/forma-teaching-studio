@@ -21,6 +21,7 @@ export type TeachingContext = {
   stages?: number;
   canStepStages?: boolean;
   toothStudy?: Pick<ToothStudyContext, 'tooth' | 'view'>;
+  glossaryId?: string | null;
   playing?: boolean;
   lessonActive?: boolean;
   canReturnToLesson?: boolean;
@@ -81,6 +82,8 @@ export const LOCAL_ONLY_KINDS: readonly TeachingAction['kind'][] = [
   'workspace',
   'appliance-display',
   'tooth-study',
+  'glossary',
+  'lesson',
 ];
 
 export function record(value: unknown): Record<string, unknown> {

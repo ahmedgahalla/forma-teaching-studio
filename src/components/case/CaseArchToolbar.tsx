@@ -18,9 +18,6 @@ export function CaseArchToolbar({
     | 'sandbox'
     | 'scenario'
     | 'setLecture'
-    | 'setLessonId'
-    | 'setLessonStep'
-    | 'setSandbox'
     | 'teaching'
     | 'workflowOrigin'
   >;
@@ -165,11 +162,9 @@ export function CaseArchToolbar({
           <button
             className="icon-button"
             aria-label="Close lesson"
-            onClick={() => {
-              api.setLessonId('');
-              api.setLessonStep(-1);
-              api.setSandbox({ ...api.sandbox, active: true, pending: null, lastEdit: null });
-            }}
+            onClick={() =>
+              void api.teaching.execute([{ kind: 'lesson', action: 'close' }], 'Close lesson')
+            }
           >
             <X size={16} />
           </button>

@@ -1,6 +1,8 @@
 import type { CaseRefs, CaseStudioApi } from './api';
 import type { LessonSnapshot } from './types';
 import { assertTryRestoreUnlocked } from '@/lib/try-mode';
+import { parseLessonCommand } from '@/lib/classroom/lesson-controls';
+import { returnTourToMouth } from './lesson-controls';
 
 export function createLessonActions(api: CaseStudioApi, refs: CaseRefs) {
   const snapshot = (): LessonSnapshot => ({
@@ -20,6 +22,10 @@ export function createLessonActions(api: CaseStudioApi, refs: CaseRefs) {
     stage: api.stage,
     stages: api.stages,
     opening: api.opening,
+    toothStudy: api.toothStudy,
+    isolated: api.isolated,
+    anatomy: { ...api.anatomy },
+    camera: refs.viewer.current?.getCamera() ?? null,
   });
   const restoreSnapshot = (s: LessonSnapshot) => {
     assertTryRestoreUnlocked(api.tryState, s.transforms);
@@ -40,10 +46,14 @@ export function createLessonActions(api: CaseStudioApi, refs: CaseRefs) {
     api.setStage(s.stage);
     api.setStages(s.stages);
     api.setOpening(s.opening);
+    api.setToothStudy(s.toothStudy ?? null);
+    api.setIsolated(s.isolated ?? false);
+    if (s.anatomy) api.setAnatomy(s.anatomy);
     api.setPlaying(false);
     api.setDragPreview(null);
     api.setTool('orbit');
-    setTimeout(() => refs.viewer.current?.setView(s.view), 0);
+    refs.pendingCamera.current = s.camera ?? null;
+    refs.pendingView.current = s.camera ? null : s.view;
   };
   const advanceLesson = (action: 'next' | 'previous' | 'restart'): boolean => {
     if (!api.currentLesson) {
@@ -70,7 +80,20 @@ export function createLessonActions(api: CaseStudioApi, refs: CaseRefs) {
       return false;
     }
     const before = snapshot();
-    if (!api.runTeaching(next.command)) return false;
+    const parsed = parseLessonCommand(
+      next.command,
+      api.selected,
+      api.ids,
+      api.selectedIds,
+      api.toothStudy ?? undefined,
+    );
+    if (
+      api.currentLesson.id === 'tooth-anatomy-tour' &&
+      parsed.kind === 'tooth-study' &&
+      parsed.action === 'close'
+    )
+      returnTourToMouth(api, refs);
+    else if (!api.applyTeaching(parsed)) return false;
     refs.lessonSnapshots.current[index] = before;
     api.setLessonStep(index);
     return true;

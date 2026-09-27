@@ -10,7 +10,6 @@ import {
   type CommandServiceConfig as Config,
 } from '@/lib/command-service';
 import { validateSceneAnalysis, type SceneAnalysis } from '@/lib/scene-analysis';
-
 import {
   Context,
   initialRuntime,
@@ -367,6 +366,7 @@ export function TeachingProvider({ children }: { children: ReactNode }) {
         setVoiceSettings: voiceControl.setVoiceSettings,
         toggleHandsFree: voiceControl.toggleHandsFree,
         narration: voiceControl.narration,
+        narrationFallback: voiceControl.narrationFallback,
         config,
         preferAI: preferAI && config.enabled,
         setPreferAI: enabled => {

@@ -17,7 +17,8 @@ export function parseNavigation(
   const next = /^(?:next(?: step)?|go on|continue|go to the next step)$/.test(text);
   const previous = /^(?:back|previous(?: step)?|go back)$/.test(text);
   if (!next && !previous) return undefined;
-  if (context.mode === 'case' && context.toothStudy)
+  const shortLesson = context.lessonActive && !context.caseId && !context.hasWorkflowOrigin;
+  if (context.mode === 'case' && context.toothStudy && !shortLesson)
     return {
       kind: 'tooth-study',
       action: 'view',
@@ -25,7 +26,6 @@ export function parseNavigation(
     };
   const action = next ? 'next' : 'previous';
   if (context.mode === 'workflow') return { kind: 'workflow', action };
-  const shortLesson = context.lessonActive && !context.caseId && !context.hasWorkflowOrigin;
   const preparedCase = context.caseId && !context.caseExploring;
   if (!shortLesson && !preparedCase && context.canStepStages === false)
     throw new CommandValidationError(

@@ -12,6 +12,7 @@ import { validateAction } from './validate-action';
 import type { TeachingContext, TeachingPlan } from './types';
 import { clauses } from './parse-clauses';
 import { fields, record, type PlanValidationOptions } from './types';
+import { isGlossaryVisualPlan } from '../glossary/plan';
 import { CLOSE_TOOTH_STUDY_LAST } from './parse-tooth-study';
 
 export function auditNumbers(text: string, actions: TeachingAction[]) {
@@ -185,7 +186,7 @@ export function validateTeachingPlan(
       throw new Error(
         'Load a dental arrangement as a separate request, then give commands for its model.',
       );
-    if (action.kind === 'case' && plan.actions.length !== 1)
+    if (action.kind === 'case' && plan.actions.length !== 1 && !isGlossaryVisualPlan(plan.actions))
       throw new Error(
         'Use a prepared case command as a separate request, then give commands for its arrangement.',
       );

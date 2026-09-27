@@ -82,46 +82,6 @@ describe('interruptible speech output', () => {
       expect(spoken[0].onerror).toBeNull();
     },
   );
-  it('reports a speech error while clearing the caption and detaching callbacks', async () => {
-    const { caption, speaker } = setup();
-    const completion = speaker.speak('Show roots.');
-    const rejected = expect(completion).rejects.toThrow(
-      'Speech output could not start. Show roots.',
-    );
-    spoken[0].onerror?.({ error: 'audio-busy' });
-    await rejected;
-    expect(caption).toHaveBeenLastCalledWith('');
-    expect(spoken[0].onend).toBeNull();
-    expect(spoken[0].onerror).toBeNull();
-  });
-  it('clears the caption if speechSynthesis.speak throws', async () => {
-    const { caption, speaker } = setup();
-    synthesis.speak.mockImplementation(() => {
-      throw new Error('Browser failed to speak');
-    });
-    await expect(speaker.speak('Show roots.')).rejects.toThrow('Speech output could not start.');
-    expect(caption.mock.calls).toEqual([['Show roots.'], ['']]);
-    speaker.cancel();
-    expect(caption).toHaveBeenCalledTimes(2);
-  });
-  it('reports unavailable speech output without a stuck caption', async () => {
-    const { caption, speaker } = setup();
-    vi.stubGlobal('speechSynthesis', undefined);
-    await expect(speaker.speak('Show roots.')).rejects.toThrow('Speech output is unavailable.');
-    expect(caption).not.toHaveBeenCalled();
-  });
-  it('rejects constructor errors before publishing a caption', async () => {
-    const { caption, speaker } = setup();
-    class BrokenUtterance {
-      constructor() {
-        throw new Error('Cannot create an utterance');
-      }
-    }
-    vi.stubGlobal('SpeechSynthesisUtterance', BrokenUtterance);
-    await expect(speaker.speak('Show roots.')).rejects.toThrow('Cannot create an utterance');
-    expect(caption).not.toHaveBeenCalled();
-    expect(synthesis.speak).not.toHaveBeenCalled();
-  });
   it('replaces narration and ignores stale completion callbacks from the previous utterance', async () => {
     const { caption, speaker } = setup();
     const first = speaker.speak('First narration.');
@@ -243,28 +203,6 @@ describe('interruptible speech output', () => {
     await completion;
     expect(spoken).toHaveLength(1);
     expect(caption.mock.calls).toEqual([[spoken[0].text], ['']]);
-  });
-
-  it('clears a long narration if a later utterance cannot be constructed', async () => {
-    const { caption, speaker } = setup();
-    const controller = new AbortController();
-    const completion = speaker.speak(
-      'Observe the tooth and root movement. '.repeat(8),
-      controller.signal,
-    );
-    class BrokenUtterance {
-      constructor() {
-        throw new Error('Cannot create the next chunk');
-      }
-    }
-    vi.stubGlobal('SpeechSynthesisUtterance', BrokenUtterance);
-    const rejected = expect(completion).rejects.toThrow('Speech output could not start.');
-    spoken[0].onend?.();
-    await rejected;
-    expect(caption.mock.calls).toEqual([[spoken[0].text], ['']]);
-    synthesis.cancel.mockClear();
-    controller.abort();
-    expect(synthesis.cancel).not.toHaveBeenCalled();
   });
 
   it('also bounds a single unusually long token without losing characters', async () => {

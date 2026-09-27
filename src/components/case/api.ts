@@ -6,7 +6,7 @@
  * follow-up once the split has settled.
  */
 import type { RefObject } from 'react';
-import type { useToothStudyState } from './tooth-study';
+import type { useExplanationState } from './explanation-state';
 import type {
   useAttachmentState,
   useCalibrationInputs,
@@ -44,7 +44,7 @@ import type { PointedReference } from '@/lib/mechanics-commands';
 import type { WorkflowTransfer } from '@/lib/workflow-transfer';
 import type { ClassroomSnapshot, LessonSnapshot } from './types';
 
-type StateBundle = ReturnType<typeof useToothStudyState> &
+type StateBundle = ReturnType<typeof useExplanationState> &
   ReturnType<typeof useMechanicsState> &
   ReturnType<typeof useCaseScenario> &
   ReturnType<typeof useLayoutState> &

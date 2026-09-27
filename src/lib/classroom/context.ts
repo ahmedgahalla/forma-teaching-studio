@@ -10,6 +10,8 @@ export function teachingActionMode(
     action.kind === 'case' ||
     action.kind === 'dental-arrangement' ||
     action.kind === 'tooth-study' ||
+    action.kind === 'glossary' ||
+    action.kind === 'lesson' ||
     (action.kind === 'workflow' && action.action === 'exit')
   )
     return 'case';
@@ -35,6 +37,7 @@ export function interpreterTeachingContext(context: TeachingContext): TeachingCo
     'hasWorkflowOrigin',
     'autoApply',
     'toothStudy',
+    'glossaryId',
     'canStepStages',
   ] as const)
     delete wire[field];

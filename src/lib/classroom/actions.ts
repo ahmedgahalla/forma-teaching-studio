@@ -3,10 +3,13 @@ import type { WorkflowId, WorkflowPhase } from '../workflows';
 import type { TryAction } from '../try-mode';
 import type { MechanicsAction } from '../mechanics/types';
 import type { DentalArrangementId } from '../dental-arrangements';
+import type { LessonAction } from './lesson-controls';
 import type { ToothStudyAction } from '../tooth-study/types';
 
 export type TeachingAction =
   | ToothStudyAction
+  | LessonAction
+  | { kind: 'glossary'; id: string | null }
   | { kind: 'mechanics'; action: MechanicsAction }
   | { kind: 'dental-arrangement'; id: DentalArrangementId }
   | { kind: 'case'; action: 'load' | 'variant'; id: string }

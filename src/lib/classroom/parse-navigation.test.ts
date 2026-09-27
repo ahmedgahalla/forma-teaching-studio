@@ -25,6 +25,11 @@ const contexts = [
   },
   { label: 'short lesson', state: { ...context, lessonActive: true }, kind: 'lesson-step' },
   {
+    label: 'short lesson with an isolated tooth',
+    state: { ...context, lessonActive: true, toothStudy: { tooth: '11', view: 'buccal' as const } },
+    kind: 'lesson-step',
+  },
+  {
     label: 'workflow with lesson flag',
     state: {
       ...context,

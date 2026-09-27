@@ -39,6 +39,8 @@ export function useTeachingVoice(options: Options) {
   });
   const [voiceSettings, updateSettings] = useState<VoiceSettings>(DEFAULT_VOICE_SETTINGS);
   const [narration, setNarration] = useState('');
+  const [narrationFallback, setNarrationFallback] = useState(false);
+  const captionOnly = useRef(false);
   const settings = useRef(DEFAULT_VOICE_SETTINGS),
     held = useRef(false);
   const mic = useRef<ReturnType<typeof createPushToTalk> | null>(null);
@@ -142,10 +144,18 @@ export function useTeachingVoice(options: Options) {
     speaker.current = createSpeaker(
       () => settings.current.language,
       text => {
-        speaking.current = !!text;
+        speaking.current = !!text && !captionOnly.current;
         if (text) narrated.current++;
         syncPause();
         if (alive.current) setNarration(text);
+      },
+      active => {
+        captionOnly.current = active;
+        if (active) {
+          speaking.current = false;
+          syncPause();
+        }
+        if (alive.current) setNarrationFallback(active);
       },
     );
     initializeRecognition();
@@ -211,6 +221,7 @@ export function useTeachingVoice(options: Options) {
     setVoiceSettings,
     toggleHandsFree,
     narration,
+    narrationFallback,
     start,
     finish,
     cancelCapture,

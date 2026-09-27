@@ -5,7 +5,7 @@ import { LectureConsole } from '../lecture/LectureConsole';
 export function CaseLectureOverlay({ api }: { api: CaseStudioApi }) {
   return (
     <>
-      {api.lecture && !api.toothStudy && (
+      {api.lecture && !api.toothStudy && !api.glossaryId && (
         <LectureConsole
           compact={!api.caseVariant}
           collapsible={!!api.caseVariant}

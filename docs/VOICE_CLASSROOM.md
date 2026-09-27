@@ -56,6 +56,8 @@ Ordinary browser recognition endings restart automatically with bounded backoff.
 
 In **Settings → Lecture voice**, choose the voice mode preference, **en-US** (default) or **en-GB**, and optional **Spoken replies** (off by default). Preferences are saved in this browser. Spoken replies give a short confirmation or clarification only after voice requests; explicit “explain” narration remains available regardless of that setting.
 
+If speech synthesis is unavailable or fails, requested narration continues in the normal large caption area, advancing through readable chunks with **“Speech unavailable — showing text”** as a secondary note. It does not replace the explanation with a truncated red error. Stop, Escape and hold-to-talk interruption still cancel the narration sequence.
+
 ## Presenter clicker and navigation
 
 **PageDown / Right** advances; **PageUp / Left** goes back. In a workflow classroom this changes the authored workflow step. In the case workspace an active short lesson takes priority; otherwise it changes the prepared-case/demonstration stage. Keys continue working after clicking a plain button such as Next step. Editable fields, visible dialogs and open menus retain their own keys. **M / B / .** toggles hands-free; **Space** retains hold-to-talk in hold mode.
@@ -121,9 +123,48 @@ show all teeth
 
 Upper/maxillary and lower/mandibular are interchangeable, as are canine/cuspid/eye tooth, premolar/bicuspid, and first molar/six-year molar. Names use the patient's side; an omitted side defaults to right (upper 1x, lower 4x). An omitted arch uses the selected arch or asks for clarification. “Upper first molar” therefore opens 16.
 
-While study is open, **next/back** and presenter keys cycle tooth sides, and explanation requests use that tooth. Otherwise a single selected tooth is opened and explained; an ambiguous selection asks for clarification. “Show all teeth” closes an active study and retains its ordinary full-arch meaning outside one. **Focus**, **select**, **zoom to** and **show roots** retain their previous meanings. An empty free workspace now clarifies that there is nothing to step through, without calling AI.
+While study is open without a short lesson, **next/back** and presenter keys cycle tooth sides, and tooth-explanation requests use that tooth. An active lesson takes priority for Next/Back; **next side** still turns the tooth. Otherwise a single selected tooth is opened and explained; an ambiguous selection asks for clarification. “Show all teeth” closes an active study and retains its ordinary full-arch meaning outside one. **Focus**, **select**, **zoom to** and **show roots** retain their previous meanings. An empty free workspace now clarifies that there is nothing to step through, without calling AI.
 
 The six buttons and Explain aloud use the same validated, undoable local actions as speech. Tooth-study context/actions never enter the AI interpreter schema. The card and labels are authored teaching drafts; explanations use browser narration with HUD captions and Stop/Escape interruption. Full instructions and limitations: [Tooth study](TOOTH_STUDY.md).
+
+## Ask Forma: teaching glossary
+
+```text
+Forma, what is the cusp of Carabelli?
+Forma, what's torque?
+Forma, what are mamelons?
+Forma, define overjet
+Forma, explain tipping
+Forma, tell me about the cingulum
+Forma, show me the oblique ridge
+Forma, close the definition
+Forma, hide that
+```
+
+Run each explanation as a separate request. The glossary speaks and captions an authored definition and shows a large definition card beside the model. Related-term buttons request another definition. Where a visual is authored, it appears first: Carabelli opens tooth 16 from the palatal side; torque and tipping select the matching prepared movement variant, paused at the start. The complete visual-plus-definition request undoes together. Closing the card leaves the displayed model available.
+
+Existing commands retain precedence: **show roots**, arch commands, **explain this tooth** and **explain this step** continue to perform their original actions. Unknown glossary questions return a local clarification with example terms. Glossary actions and context are excluded from optional AI interpretation; Analyze remains a separate optional feature.
+
+The authored lookup and model instructions work offline without the AI service. Typed commands need no wake phrase, microphone or speech-recognition service. Browser recognition remains subject to its service and connection requirements; it is not an offline wake-word system. Speech-output failure uses the caption fallback described above. Every entry is **Teaching draft — pending educator review**, with no clinical advice or treatment recommendations. See [Teaching glossary](GLOSSARY.md).
+
+## Tooth anatomy tour
+
+```text
+Forma, start the tooth anatomy tour
+Forma, start the tooth tour
+Forma, next
+Forma, previous
+Forma, explain this step
+Forma, next side
+Forma, restart lesson
+Forma, end the tooth tour
+```
+
+Either start phrase begins the same ten-step tour from the free workspace, immediately showing tooth 11 labially. It visits incisors, a canine, a premolar and upper/lower first molars through tooth-study views, then returns to the full mouth. Existing tooth movements are preserved. The Library's short guided lessons list provides the same entry point; the Guide and Library also list Ask Forma phrases.
+
+The lesson ribbon shows the current caption. **Next/previous** and presenter PageDown/Right or PageUp/Left follow lesson steps, taking priority over ordinary tooth-side cycling. Use **next side** to turn the tooth without advancing the lesson, and **explain this step** to narrate its authored caption. Previous and Restart restore the saved setup, including the tooth-study view.
+
+The final step shows the full mouth and leaves its ribbon caption available for narration. **End the tooth tour** or the ribbon's close button ends the lesson; **back to the full mouth** while a tour tooth is open also ends it. Closing returns to the full mouth and remains undoable as one request. Tour captions are **Teaching draft — pending educator review** and describe synthetic anatomy; browser, projector and educator acceptance remain outstanding.
 
 ## Look inside a tooth
 

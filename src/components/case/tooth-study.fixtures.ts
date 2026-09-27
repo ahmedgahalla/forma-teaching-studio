@@ -53,6 +53,7 @@ export function setupToothStudy() {
     view: 'left',
     anatomy: { bone: true, ligament: true, cutaway: true, opacity: 0.37 },
     toothStudy: null,
+    glossaryId: null,
     playing: false,
     plan: { current: {}, past: [], future: [] },
     sandbox: createTryState(),

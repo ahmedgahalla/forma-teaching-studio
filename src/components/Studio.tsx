@@ -44,7 +44,8 @@ import { createTeachingDispatch } from './case/teaching-dispatch';
 import { createClassroomActions } from './case/actions-classroom';
 import { createMechanicsActions } from './case/actions-mechanics';
 import { createExportActions } from './case/actions-export';
-import { useToothStudyState } from './case/tooth-study';
+import { useExplanationState } from './case/explanation-state';
+import { isWorkspaceInteraction } from './case/scene-interaction';
 import { useWorkspaceKeys } from './case/useWorkspaceKeys';
 import { caseNarration } from './case/narration';
 import { createCasePreflight } from './case/preflight';
@@ -127,7 +128,8 @@ function CaseStudio({ active }: { active: boolean }) {
     workflowOrigin,
     setWorkflowOrigin,
   } = useModelState();
-  const { toothStudy, setToothStudy } = useToothStudyState(model);
+  const explanations = useExplanationState(model);
+  const { toothStudy } = explanations;
   const returnWorkspace = useRef<ClassroomSnapshot | null>(null);
   const {
     comparisonName,
@@ -448,17 +450,11 @@ function CaseStudio({ active }: { active: boolean }) {
   const collision = sandbox.pending?.collision;
 
   const sceneInteraction = (event: { target: EventTarget }) => {
-    if (
-      !(event.target as HTMLElement).closest(
-        '.tooth-study-card, .teaching-command-bar, .case-scenario-panel, .case-stage-toolbar, .mobile-studio-dock, .mobile-panel-heading, .opening-command-controls, .opening-view-menu, .opening-menu, .studio-theme-toggle, .preview-decision-bar, .lecture-console, .lecture-view-tools, .lecture-pointer, .viewport, .tooth-chart, .selection-groups, .mechanics-panel',
-      )
-    )
-      teaching.interact();
+    if (isWorkspaceInteraction(event.target)) teaching.interact();
   };
   const canRestoreWorkspace = !!returnWorkspace.current;
   const api = {
-    toothStudy,
-    setToothStudy,
+    ...explanations,
     pointed,
     setPointed,
     mechanics,
@@ -785,6 +781,7 @@ function CaseStudio({ active }: { active: boolean }) {
       }),
     context: () => ({
       mode: 'case',
+      glossaryId: explanations.glossaryId,
       toothStudy: toothStudy ? { tooth: toothStudy.tooth, view: toothStudy.view } : undefined,
       canStepStages: !!(
         prepared ||

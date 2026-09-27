@@ -250,10 +250,12 @@ describe('deterministic teaching scene commands', () => {
 });
 
 describe('built-in teaching sequences', () => {
-  it('supplies four short geometric lessons with an explicit reset and supported steps', () => {
-    expect(LESSONS).toHaveLength(4);
+  it('supplies four geometric lessons with explicit resets plus the tooth anatomy tour', () => {
+    expect(LESSONS).toHaveLength(5);
     expect(new Set(LESSONS.map(lesson => lesson.id)).size).toBe(LESSONS.length);
-    for (const lesson of LESSONS) {
+    expect(LESSONS[0].id).toBe('tooth-anatomy-tour');
+    expect(LESSONS[0].steps[0].command).toBe('show tooth 11 from the labial');
+    for (const lesson of LESSONS.filter(item => item.id !== 'tooth-anatomy-tour')) {
       expect(lesson.steps.length).toBeGreaterThanOrEqual(4);
       expect(lesson.steps.length).toBeLessThanOrEqual(6);
       expect(lesson.steps[0].command).toBe('reset all teeth');

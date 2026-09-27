@@ -1,9 +1,15 @@
+import { getGlossaryEntry } from '@/lib/glossary';
 import { explainMechanics } from '@/lib/mechanics-presentation';
 import { spokenToothExplanation } from '@/lib/tooth-anatomy';
 import type { TeachingNarrationTarget } from '@/lib/teaching-narration';
 import type { CaseStudioApi } from './api';
 
 export function caseNarration(api: CaseStudioApi, target: TeachingNarrationTarget): string {
+  if (target === 'glossary') {
+    const entry = api.glossaryId ? getGlossaryEntry(api.glossaryId) : undefined;
+    if (!entry) throw new Error('Choose an authored glossary term first.');
+    return `${entry.term}. ${entry.definition}`;
+  }
   if (target === 'tooth') {
     const id = api.toothStudy?.tooth;
     if (!id) throw new Error('Open a tooth before asking for its explanation.');

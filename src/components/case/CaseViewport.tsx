@@ -10,6 +10,7 @@ import { applianceView } from '@/lib/appliance-display';
 import { mechanicsResponseCaption } from '@/lib/mechanics-presentation';
 import { VoiceHud, VOICE_VIEWPORT_PROPS } from '../teaching/VoiceHud';
 import { ToothStudyCard } from './ToothStudyCard';
+import { GlossaryCard } from './GlossaryCard';
 import { TOOTH_STUDY_DISPLAY } from '../viewer/tooth-study-display';
 
 export function CaseViewport({ api }: { api: CaseStudioApi }) {
@@ -261,7 +262,7 @@ export function CaseViewport({ api }: { api: CaseStudioApi }) {
         )}
         {api.roots && <div className="roots-badge">Schematic roots · not reconstructed</div>}
       </section>
-      <ToothStudyCard api={api} />
+      {api.glossaryId ? <GlossaryCard api={api} /> : <ToothStudyCard api={api} />}
     </>
   );
 }

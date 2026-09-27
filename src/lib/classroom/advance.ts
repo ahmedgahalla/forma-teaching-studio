@@ -1,6 +1,8 @@
 import type { TeachingAction } from '../lecture';
 import { advanceMechanicsContext } from '../mechanics-commands';
 import { WORKFLOWS } from '../workflows';
+import { advanceLessonControl } from './lesson-controls';
+import { advanceWorkspace } from './advance-workspace';
 import { advanceCase } from './advance-case';
 import { advanceToothStudy } from './advance-tooth-study';
 import { DEMO_IDS, type TeachingContext } from './types';
@@ -54,6 +56,12 @@ export function advance(context: TeachingContext, action: TeachingAction, overri
     context.availableIds = [...DEMO_IDS];
     context.workflowId = null;
     context.playing = false;
+  } else if (action.kind === 'lesson') {
+    advanceLessonControl(context, action);
+  } else if (action.kind === 'glossary') {
+    context.mode = 'case';
+    context.workflowId = null;
+    context.glossaryId = action.id;
   } else if (action.kind === 'mechanics') {
     advanceMechanicsContext(context, action.action);
   } else if (action.kind === 'tooth-study') {
@@ -62,15 +70,7 @@ export function advance(context: TeachingContext, action: TeachingAction, overri
   } else if (action.kind === 'case') {
     advanceCase(context, action);
   } else if (action.kind === 'workspace') {
-    if (context.mode === 'case' && context.tryPreview)
-      throw new Error('Apply or discard the preview before changing workspaces.');
-    if (action.action === 'explore' && context.mode !== 'workflow')
-      throw new Error('Open a teaching workflow before exploring its setup.');
-    if (action.action === 'restore' && !context.canRestoreWorkspace)
-      throw new Error('There is no saved workspace to restore.');
-    if (action.action === 'lesson' && (context.mode !== 'case' || !context.hasWorkflowOrigin))
-      throw new Error('This workspace has no source lesson to return to.');
-    // Transfers are standalone: the host restores the destination model and its context.
+    advanceWorkspace(context, action);
   } else if (action.kind === 'appliance-display') {
     if (context.mode !== 'case')
       throw new Error('Explore this setup in your workspace before placing a teaching appliance.');

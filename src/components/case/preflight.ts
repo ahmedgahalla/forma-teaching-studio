@@ -3,7 +3,10 @@ import type { TeachingAction } from '@/lib/lecture';
 import { assertTryRestoreUnlocked, assertTryUnlocked, transitionTryMode } from '@/lib/try-mode';
 import { createMechanicsExperiment, transitionMechanics } from '@/lib/mechanics';
 import { applyDentalCommand } from '@/lib/model';
-import { LESSONS, parseTeachingCommand } from '@/lib/lecture';
+import { LESSONS } from '@/lib/lecture';
+import { parseLessonCommand } from '@/lib/classroom/lesson-controls';
+import { preflightLessonControl } from './lesson-controls';
+import { getGlossaryEntry } from '@/lib/glossary';
 import { getTeachingCase, sampleCaseDemonstration } from '@/lib/teaching-cases';
 import { validateApplianceDisplay } from '@/lib/appliance-display';
 import type { CaseRefs, CaseStudioApi } from './api';
@@ -37,7 +40,7 @@ export function createCasePreflight(api: CaseStudioApi, refs: CaseRefs) {
       let mechanicsCandidate = saved ? saved.mechanics : api.mechanics;
       let mechanicsHasResult = !!mechanicsCandidate?.result,
         plannedSolve = false;
-      const sourceScenario = saved ? saved.scenario : api.scenario;
+      let sourceScenario = saved ? saved.scenario : api.scenario;
       const sourcePrepared = sourceScenario && !sourceScenario.exploring;
       preflightToothStudy(
         actions,
@@ -46,6 +49,9 @@ export function createCasePreflight(api: CaseStudioApi, refs: CaseRefs) {
         (saved ? saved.toothStudy : api.toothStudy)?.tooth,
       );
       for (const action of actions) {
+        if (action.kind === 'lesson') preflightLessonControl(api, action, saved);
+        if (action.kind === 'glossary' && action.id !== null && !getGlossaryEntry(action.id))
+          throw new Error('Choose an authored glossary term.');
         if (action.kind === 'dental-arrangement') {
           if (candidate.pending || api.busy)
             throw new Error(
@@ -100,8 +106,17 @@ export function createCasePreflight(api: CaseStudioApi, refs: CaseRefs) {
             throw new Error(
               'Finish any import and Apply or Discard the preview before changing the case.',
             );
-          if (action.action === 'load') getTeachingCase(action.id);
-          else if (!sourceScenario) throw new Error('Choose a prepared case first.');
+          if (action.action === 'load') {
+            const definition = getTeachingCase(action.id);
+            sourceScenario = {
+              caseId: definition.id,
+              variantId: definition.variants[0].id,
+              model: source,
+              returnProgress: 0,
+              exploring: false,
+              answerVisible: false,
+            };
+          } else if (!sourceScenario) throw new Error('Choose a prepared case first.');
           else if (action.action === 'variant')
             sampleCaseDemonstration(sourceScenario.caseId, action.id, 0);
         }
@@ -230,11 +245,18 @@ export function createCasePreflight(api: CaseStudioApi, refs: CaseRefs) {
             index++;
             const next = lesson.steps[index];
             if (!next) throw new Error('This lesson is complete.');
-            const parsed = parseTeachingCommand(
+            const parsed = parseLessonCommand(
               next.command,
               saved?.lesson.selected || api.selected,
               teeth.map(tooth => tooth.id),
               saved?.lesson.selectedIds || api.selectedIds,
+              (saved ? saved.toothStudy : api.toothStudy) ?? undefined,
+            );
+            preflightToothStudy(
+              [parsed],
+              source,
+              saved?.lesson.selectedIds || api.selectedIds,
+              (saved ? saved.toothStudy : api.toothStudy)?.tooth,
             );
             if (parsed.kind === 'dental') {
               const target = applyDentalCommand(transforms, teeth, parsed.command);

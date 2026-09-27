@@ -1,5 +1,7 @@
 import type { CaseRefs, CaseStudioApi } from './api';
+import { applyLessonControl } from './lesson-controls';
 import { applyToothStudy } from './tooth-study';
+import { getGlossaryEntry } from '@/lib/glossary';
 import { applyCaseLoadKinds } from './teaching-load-kinds';
 import type { TeachingAction } from '@/lib/lecture';
 import { DEFAULT_ATTACHMENT, errorText } from './constants';
@@ -10,7 +12,18 @@ import { parseTeachingCommand } from '@/lib/lecture';
 export function createTeachingDispatch(api: CaseStudioApi, refs: CaseRefs) {
   const applyTeaching = (action: TeachingAction): boolean => {
     try {
-      if (action.kind === 'tooth-study') return applyToothStudy(api, refs, action);
+      if (action.kind === 'glossary') {
+        if (action.id !== null && !getGlossaryEntry(action.id))
+          throw new Error('Choose an authored glossary term.');
+        api.setGlossaryId(action.id);
+        return true;
+      }
+      if (action.kind === 'lesson') return applyLessonControl(api, refs, action);
+      if (action.kind === 'tooth-study') {
+        if (action.action === 'close' && api.lessonId === 'tooth-anatomy-tour')
+          return applyLessonControl(api, refs, { kind: 'lesson', action: 'close' });
+        return applyToothStudy(api, refs, action);
+      }
       if (
         api.toothStudy &&
         action.kind === 'case' &&

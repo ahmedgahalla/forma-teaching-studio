@@ -4,6 +4,7 @@ import { ArrowUpRight } from 'lucide-react';
 import { Dialog } from './ui';
 import { EXAMPLES } from './constants';
 import { createDemo } from '@/lib/geometry';
+import { AskFormaExamples } from './AskFormaExamples';
 
 export function DialogsInfo({ api }: { api: CaseStudioApi }) {
   const { modal, setModal } = api;
@@ -104,6 +105,7 @@ export function DialogsInfo({ api }: { api: CaseStudioApi }) {
             side means right. Closing restores the prior view; Undo restores the whole request.
             Teaching draft — pending educator review · synthetic model.
           </p>
+          <AskFormaExamples />
           <h3>Build an appliance experiment</h3>
           <p className="form-note">
             Point to a crown, root or gingiva while speaking. “Install brackets here” targets the

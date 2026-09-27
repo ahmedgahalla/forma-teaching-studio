@@ -1,3 +1,5 @@
+import { validateLessonAction } from './lesson-controls';
+import { getGlossaryEntry } from '../glossary';
 import { validateCaseAction } from './validate-case';
 import { validateToothStudyAction } from './validate-tooth-study';
 import { validateCommand } from '../commands';
@@ -20,6 +22,13 @@ export function validateAction(value: unknown, context: TeachingContext): Teachi
   const action = record(value),
     only = (...names: string[]) => fields(action, ['kind', ...names]);
   switch (action.kind) {
+    case 'lesson':
+      return validateLessonAction(action);
+    case 'glossary':
+      only('id');
+      if (action.id !== null && (typeof action.id !== 'string' || !getGlossaryEntry(action.id)))
+        throw new Error('Choose an authored glossary term.');
+      return { kind: 'glossary', id: action.id as string | null };
     case 'mechanics':
       only('action');
       return { kind: 'mechanics', action: validateMechanicsAction(action.action) };

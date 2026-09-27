@@ -10,6 +10,7 @@ type VoiceHudState = {
   paused?: boolean;
   interim: string;
   narration: string;
+  narrationFallback?: boolean;
   runtime: RuntimeState;
 };
 
@@ -33,13 +34,27 @@ function RequestCaption({ runtime, suppressed }: { runtime: RuntimeState; suppre
   );
 }
 
-export function VoiceHudView({ active, paused, interim, narration, runtime }: VoiceHudState) {
+export function VoiceHudView({
+  active,
+  paused,
+  interim,
+  narration,
+  narrationFallback,
+  runtime,
+}: VoiceHudState) {
   return (
     <div className="voice-hud" role="status" aria-live="polite" aria-atomic="true">
-      {active && (
-        <span className="voice-hud-listening">
-          <i aria-hidden="true" /> Listening{paused ? ' · paused while Forma speaks' : ''}
-        </span>
+      {(active || (narration && narrationFallback)) && (
+        <div className="voice-hud-indicators">
+          {active && (
+            <span className="voice-hud-listening">
+              <i aria-hidden="true" /> Listening{paused ? ' · paused while Forma speaks' : ''}
+            </span>
+          )}
+          {narration && narrationFallback && (
+            <small className="voice-hud-speech-note">Speech unavailable — showing text</small>
+          )}
+        </div>
       )}
       {narration ? (
         <div className="voice-hud-caption voice-hud-narration">
@@ -62,13 +77,14 @@ export function VoiceHudView({ active, paused, interim, narration, runtime }: Vo
 }
 
 export function VoiceHud() {
-  const { voice, capture, narration, runtime } = useTeaching();
+  const { voice, capture, narration, narrationFallback, runtime } = useTeaching();
   return (
     <VoiceHudView
       active={voice.active}
       paused={voice.phase === 'paused'}
       interim={capture.phase === 'idle' ? voice.transcript : capture.transcript}
       narration={narration}
+      narrationFallback={narrationFallback}
       runtime={runtime}
     />
   );

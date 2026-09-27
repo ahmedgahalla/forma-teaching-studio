@@ -7,6 +7,7 @@ import { WorkflowLibrary } from '../workflow/WorkflowStudio';
 import { CASE_CARDS } from './constants';
 import { DENTAL_ARRANGEMENTS } from '@/lib/dental-arrangements';
 import { LESSONS } from '@/lib/lecture';
+import { AskFormaExamples } from './AskFormaExamples';
 
 export function DialogsLibrary({ api }: { api: CaseStudioApi }) {
   const { modal, setModal } = api;
@@ -14,6 +15,7 @@ export function DialogsLibrary({ api }: { api: CaseStudioApi }) {
     <>
       {modal === 'workflows' && (
         <Dialog title="Teaching library" onClose={() => setModal(null)}>
+          <AskFormaExamples />
           <section className="dental-arrangement-library">
             <span className="eyebrow">START A FREE EXPERIMENT</span>
             <h3>Dental relationships</h3>
@@ -81,26 +83,13 @@ export function DialogsLibrary({ api }: { api: CaseStudioApi }) {
             {LESSONS.map((lesson, i) => (
               <button
                 key={lesson.id}
-                onClick={() => {
-                  if (api.workflowOrigin || api.scenario) {
-                    api.note('Restore your workspace before starting another short lesson.', true);
-                    setModal(null);
-                    return;
-                  }
-                  if (api.sandbox.pending) {
-                    api.note('Apply or discard the preview before opening a lesson.', true);
-                    setModal(null);
-                    return;
-                  }
-                  api.setSandbox({ ...api.sandbox, pending: null, lastEdit: null });
-                  api.setLessonId(lesson.id);
-                  api.setLessonStep(-1);
-                  api.lessonSnapshots.current = [];
-                  api.setLecture(true);
-                  setModal(null);
-                  api.setPlaying(false);
-                  api.note('Lesson ready. Say “next step” or press Next step to begin.');
-                }}
+                disabled={!!api.sandbox.pending || api.busy}
+                onClick={() =>
+                  void api.teaching.execute(
+                    [{ kind: 'lesson', action: 'start', id: lesson.id }],
+                    `Start ${lesson.title}`,
+                  )
+                }
               >
                 <span className="lesson-number">0{i + 1}</span>
                 <div>
@@ -113,8 +102,9 @@ export function DialogsLibrary({ api }: { api: CaseStudioApi }) {
             ))}
           </div>
           <p className="form-note">
-            The first step resets tooth movements. Save your case first if needed. Previous step
-            restores the setup before that step. Demonstrations use illustrative geometry.
+            The anatomy tour preserves tooth movements; the geometric lessons start by resetting
+            them. Save your case first if needed. Previous step restores the setup before that step.
+            Demonstrations use illustrative geometry.
           </p>
         </Dialog>
       )}

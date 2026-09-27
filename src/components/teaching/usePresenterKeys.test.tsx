@@ -51,6 +51,15 @@ describe.each([
   { label: 'case', state: context, kind: 'stage' },
   { label: 'lesson', state: { ...context, lessonActive: true }, kind: 'lesson-step' },
   {
+    label: 'tooth tour',
+    state: {
+      ...context,
+      lessonActive: true,
+      toothStudy: { tooth: '11', view: 'lingual' as const },
+    },
+    kind: 'lesson-step',
+  },
+  {
     label: 'workflow',
     state: {
       ...context,

@@ -5,6 +5,8 @@ import {
   isMechanicsSolveClause,
   planMechanicsClause,
 } from '../mechanics-commands';
+import { parseLessonPlan } from './lesson-plan';
+import { parseGlossaryPlan } from '../glossary/parser';
 import { advance } from './advance';
 import { copyContext } from './types';
 import {
@@ -31,6 +33,10 @@ export function buildTeachingPlan(text: string, context: TeachingContext): Teach
   if (typeof text !== 'string' || !text.trim() || text.length > 1500)
     throw new Error('Give a classroom request of at most 1500 characters.');
   const normalized = normalizeSpeechCommand(preserveToothStudyTop(text, context));
+  const glossary = parseGlossaryPlan(normalized, context);
+  if (glossary) return glossary;
+  const lesson = parseLessonPlan(normalized, context);
+  if (lesson) return lesson;
   const source = /^(?:stop|pause)(?:[.;,]| and| then)\s*(?:undo|redo)(?: that)?$/.test(normalized)
     ? normalized.match(/(?:undo|redo)(?: that)?$/)![0]
     : normalized;

@@ -115,3 +115,10 @@ Entry format: mistake (with link) · root cause · prevention · status (`noted`
 - **Root cause:** a TypeScript HTMLElement cast was treated as a runtime guarantee for a global event target.
 - **Prevention:** check `event.target instanceof Element` before DOM traversal. The extracted workspace hook and hold-to-talk tests dispatch real Window/Document events and retain editable-field, composition, active-state and cleanup checks.
 - **Status:** automated · **Count:** 1
+
+## 16. Authored compound requests need sequential preflight
+
+- **Mistake caught during implementation:** the initial [4.4](phases/phase-4-voice-lecture-assistant/4.4-explain-by-voice.md) glossary integration attempted to load a prepared case and choose a variant in one request, while the existing case preflight kept validating against the original case. Final review also caught a definition restore binding to the outgoing model rather than the snapshot's model.
+- **Root cause:** the prior single-case-command rule made an immutable source scenario sufficient. Adding an authored exception changed that assumption; state-setter fixtures also did not emulate React's batched model identity changes.
+- **Prevention:** permit only exact authored visual sequences across that boundary, advance the private preflight scenario after load, and restore model-bound presentation using the snapshot's model. Integrity tests validate every visual, an actual dispatch/runtime regression covers the paused torque request and Undo/Redo, and a React hook regression covers definitions across batched model restoration.
+- **Status:** automated · **Count:** 1

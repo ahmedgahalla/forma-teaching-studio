@@ -41,9 +41,27 @@ Settings offers a voice mode preference and English **en-US/en-GB** recognition.
 
 Teaching draft — pending educator review · synthetic model
 
-Select one tooth and choose **View → Study this tooth**, or say **“Forma, show the upper right first molar.”** The tooth opens with its roots, direction labels and an explanation card beside the model. Say **“view it from the mesial”**, **“explain this tooth”**, then **“back to the full mouth”**. Next/Back and presenter keys cycle its six sides while study is open. Closing restores the exact prior view and selection; Undo/Redo restores the whole request.
+Select one tooth and choose **View → Study this tooth**, or say **“Forma, show the upper right first molar.”** The tooth opens with its roots, direction labels and an explanation card beside the model. Say **“view it from the mesial”**, **“explain this tooth”**, then **“back to the full mouth”**. Next/Back and presenter keys cycle its six sides while study is open, unless a short lesson is active. Closing an ordinary tooth study restores the exact prior view and selection; Undo/Redo restores the whole request.
 
 Names use the patient's side. An omitted side means **right**: “upper first molar” opens **16**. “How many roots does it have” reads the authored explanation; root counts describe Forma's synthetic model, not every real tooth. Explanations use the existing voice captions and Stop/Escape interruption. See [Tooth study](TOOTH_STUDY.md) for names, aliases, camera orientation and review limits.
+
+## Ask Forma to explain
+
+Say **“Forma, what is the cusp of Carabelli?”** to open tooth 16 from its palatal side and hear the authored definition. **“Forma, what is torque?”** and **“Forma, explain tipping”** open the matching prepared movement example, paused at the start. The definition card sits beside the model, with related terms as buttons and the review status. The same narration appears in the large student captions. Choosing a related term requests its definition and any authored view.
+
+Use **“what is…”**, **“what's…”**, **“what are…”**, **“define…”**, **“explain…”**, **“tell me about…”**, or **“show me…”** with a glossary term. Existing commands such as **“show roots”** keep their normal meaning. Unknown glossary questions offer example terms locally. Say **“Forma, close the definition”** or **“Forma, hide that”**, or use the card's close button. Closing the definition leaves its model view available; **Undo** restores the complete explanation request, including its visual changes.
+
+Definitions and their model instructions are authored data and work offline without the AI service. Type these requests in Commands without a wake phrase when speech recognition is unavailable; browser recognition may require a connection and sends audio to the browser vendor while listening. If speech output cannot start or fails, the narration continues as readable caption chunks with the secondary note **“Speech unavailable — showing text”**. Stop, Escape or starting hold-to-talk interrupts the caption sequence as well as speech.
+
+All glossary entries are **Teaching draft — pending educator review**. They explain terminology and synthetic illustrations, without clinical advice, force prescriptions or treatment recommendations. The in-app **Guide** and **Library** list Ask Forma examples. See [Teaching glossary](GLOSSARY.md) for content and review limits.
+
+## Lead a tooth anatomy tour
+
+From the free workspace, say **“Forma, start the tooth anatomy tour”** or **“Forma, start the tooth tour”**, or select it under **Library → Short guided lessons**. It starts immediately at tooth 11's labial surface and preserves your tooth movements. If a prepared case or workflow is active, return to the free workspace first.
+
+The ten steps visit 11 labial and palatal, 13 labial, 14 mesial, 16 occlusal, palatal and buccal, 46 occlusal and buccal, then the full mouth. Say **“Forma, next”** or use PageDown/Right on the clicker to advance. **“Forma, previous”** or PageUp/Left restores the preceding setup; **“Forma, explain this step”** narrates the caption shown in the lesson ribbon. During a lesson, Next/Back follows its steps; **“next side”** still turns the isolated tooth.
+
+The last step returns to the full mouth and keeps the final ribbon caption available for **“explain this step”**. Say **“Forma, end the tooth tour”**, close the lesson ribbon, or use **“back to the full mouth”** while studying a tooth to end the tour. These exits show the full mouth, and Undo can restore the tour. The tour is a **Teaching draft — pending educator review**; root counts and displayed morphology describe this synthetic model.
 
 ## A short lecture
 

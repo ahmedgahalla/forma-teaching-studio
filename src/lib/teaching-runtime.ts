@@ -216,7 +216,7 @@ export function createTeachingRuntime<S>(host: TeachingHost<S>) {
         if (signal.aborted || own !== token) return;
         const narrationTarget = teachingNarrationTarget(action);
         if (narrationTarget) {
-          if (action.kind === 'tooth-study') {
+          if (action.kind === 'tooth-study' || action.kind === 'glossary') {
             await abortable(Promise.resolve(host.apply(action, signal)), signal);
             if (signal.aborted || own !== token) return;
           }
@@ -293,7 +293,7 @@ export function createTeachingRuntime<S>(host: TeachingHost<S>) {
         plan &&
         !plan.clarification &&
         plan.actions.length > 0 &&
-        (plan.actions.some(action => action.kind === 'tooth-study') ||
+        (plan.actions.some(action => ['tooth-study', 'glossary', 'lesson'].includes(action.kind)) ||
           plan.actions.every(
             action =>
               ['stop', 'history', 'replay'].includes(action.kind) ||

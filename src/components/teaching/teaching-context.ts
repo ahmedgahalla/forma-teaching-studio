@@ -41,6 +41,7 @@ type Controller = {
   setVoiceSettings: (settings: VoiceSettings) => void;
   toggleHandsFree: () => void;
   narration: string;
+  narrationFallback: boolean;
   config: Config;
   preferAI: boolean;
   setPreferAI: (enabled: boolean) => void;

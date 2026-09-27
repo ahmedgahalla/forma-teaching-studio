@@ -16,7 +16,9 @@ export function CaseMain({ api }: { api: CaseStudioApi }) {
         <div className="workspace-scene">
           <CaseWorkspaceHeading api={api} />
           <CaseArchToolbar api={api} />
-          <div className={`lecture-stage${api.toothStudy ? ' tooth-study-workspace' : ''}`}>
+          <div
+            className={`lecture-stage${api.toothStudy ? ' tooth-study-workspace' : ''}${api.glossaryId ? ' definition-workspace' : ''}`}
+          >
             <CaseViewport api={api} />
             <CaseLectureOverlay api={api} />
           </div>

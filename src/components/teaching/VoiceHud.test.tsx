@@ -169,3 +169,22 @@ it('marks interim and error feedback separately from narration', async () => {
   expect(container.querySelector('.voice-hud-error')?.textContent).toBe('! Choose a tooth.');
   expect(container.querySelector('.voice-hud-narration, .voice-hud-interim')).toBeNull();
 });
+
+it('keeps speech-unavailable text in the normal narration card with a secondary note', async () => {
+  await render({
+    active: true,
+    narration: 'The root apex is the tip of the root.',
+    narrationFallback: true,
+  });
+  expect(caption()?.classList.contains('voice-hud-narration')).toBe(true);
+  expect(caption()?.textContent).toBe('The root apex is the tip of the root.');
+  expect(container.querySelector('.voice-hud-speech-note')?.textContent).toBe(
+    'Speech unavailable — showing text',
+  );
+  expect(container.querySelector('.voice-hud-error')).toBeNull();
+  expect(container.textContent).not.toContain('paused while Forma speaks');
+  await render({ narration: '', narrationFallback: false });
+  expect(caption()).toBeNull();
+  expect(container.querySelector('.voice-hud-speech-note')).toBeNull();
+  expect(container.textContent).toBe(' Listening');
+});

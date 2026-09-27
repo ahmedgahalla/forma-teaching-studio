@@ -18,6 +18,10 @@ export type WorkflowOriginState = { setup: WorkflowTransfer; snapshot: unknown }
 
 /** Display state captured before a lesson step so the step can be rewound. */
 export type LessonSnapshot = {
+  toothStudy?: ToothStudyState | null;
+  isolated?: boolean;
+  anatomy?: AnatomyViewState;
+  camera?: ViewerCamera | null;
   transforms: Transforms;
   model: DentalCase;
   selected: string;
@@ -60,6 +64,7 @@ export type PreparedScenario = {
  */
 export type ClassroomSnapshot = {
   toothStudy: ToothStudyState | null;
+  glossaryId: string | null;
   mechanics: MechanicsExperiment | null;
   wirePreset: WirePreset;
   magnification: number;
