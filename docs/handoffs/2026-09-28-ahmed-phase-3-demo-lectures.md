@@ -2,6 +2,8 @@
 
 **Branch:** `ahmed/phase-3-demo-lectures` · **Base:** PR #20 at `915de39` · **Phase:** [3.21](../phases/phase-3-demo-path/3.21-atlas-demo-integration.md)
 
+**Review:** [PR #21 (draft)](https://github.com/ahmedgahalla/forma-teaching-studio/pull/21). Implementation commit: `d1db095`.
+
 The owner requested adoption of Claude's local model/UI and proper demo lectures. The source was found under Claude's `scratch-2026-09-26-716563`; the producer workspace was not edited. The coherent published GLB/metadata snapshot is now the default asset. Its complete 32-tooth export is preserved, with the existing 28 IDs adapted for teaching. Materials retain baked detail, smooth normals and saved-case attributes. Fitted atlas occlusion bypasses the older arch correction; the generated reference audit finds no crown/root intersections and records authored-path crossings honestly.
 
 The main interface adopts the source warm palette, local fonts, camera rail, display controls, odontogram and tooth inspector. The lecture picker contains the unchanged four-step movement sample plus six-step anchorage and biology lectures with notes, questions, answer reveals and primary sources. No lecture creator. Professor-specific courses still await supplied lectures/cases.

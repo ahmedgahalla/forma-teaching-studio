@@ -1,6 +1,6 @@
 # Phase 3 — demo path
 
-**Status:** Claude atlas and demo lecture integration implemented; automated checks pass; visual acceptance pending · **Current branch:** `ahmed/phase-3-demo-lectures` · **Base:** [#20 (draft)](https://github.com/ahmedgahalla/forma-teaching-studio/pull/20)
+**Status:** Claude atlas and demo lecture integration implemented; automated checks pass; visual acceptance pending · **Current branch:** `ahmed/phase-3-demo-lectures` · **PR:** [#21 (draft)](https://github.com/ahmedgahalla/forma-teaching-studio/pull/21) · **Base:** [#20 (draft)](https://github.com/ahmedgahalla/forma-teaching-studio/pull/20)
 
 **Goal:** a professor can explore the central model freely or open a finished lecture with notes, questions and model demonstrations, then return from a spontaneous experiment without losing the lecture. Builds on [product direction](../../PRODUCT_DIRECTION.md).
 
