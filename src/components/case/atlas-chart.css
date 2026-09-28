@@ -1,65 +1,147 @@
+/* Claude's two-row crown/root diagram, adapted to Forma's theme and selection. */
 .atlas-odontogram {
   align-self: center;
   flex-shrink: 0;
-  max-width: 100%;
-  overflow-x: auto;
+  box-sizing: border-box;
+  width: min(600px, 100%);
   margin-top: 9px;
-  padding: 5px 12px;
+  padding: 8px 12px 6px;
   border: 1px solid var(--ui-line);
   border-radius: 6px;
   background: var(--atlas-surface);
 }
-.atlas-chart-row {
-  display: flex;
+.atlas-chart-grid {
+  display: grid;
+  grid-template-columns: 14px minmax(0, 1fr) 14px;
   align-items: center;
-  gap: 3px;
+  column-gap: 6px;
 }
-.atlas-chart-row > span {
-  color: var(--ui-muted);
+.atlas-chart-side {
   font:
-    11px 'IBM Plex Mono',
+    500 10px 'IBM Plex Mono',
     monospace;
-  width: 16px;
+  color: var(--ui-muted);
+  text-align: center;
 }
-.atlas-chart-row button {
+.atlas-chart-row,
+.atlas-chart-half {
   display: flex;
-  align-items: center;
-  flex-direction: column;
-  width: 29px;
-  flex: 0 0 29px;
-  border: 0;
-  border-radius: 4px;
-  padding: 2px 3px;
-  background: transparent;
-  color: var(--ui-muted);
-  font:
-    10px 'IBM Plex Mono',
-    monospace;
-}
-.atlas-chart-row svg {
-  width: 15px;
-  height: 22px;
-  fill: none;
-  stroke: currentColor;
-  stroke-width: 1.2;
+  align-items: stretch;
 }
 .atlas-chart-row.lower {
-  border-top: 1px solid #c07d7f55;
+  border-top: 1px solid var(--ui-line);
 }
-.atlas-chart-row.lower button {
+.atlas-chart-half {
+  flex: 1 1 0;
+  min-width: 0;
+  gap: 1px;
+}
+.atlas-chart-half:first-child {
+  border-right: 1px solid var(--ui-line);
+  padding-right: 2px;
+}
+.atlas-chart-half:last-child {
+  padding-left: 2px;
+}
+.atlas-chart-tooth {
+  flex: var(--tooth-width) 1 0;
+  min-width: 0;
+  border: 0;
+  background: transparent;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  color: var(--ui-muted);
+  border-radius: 3px;
+}
+.atlas-chart-row.lower .atlas-chart-tooth {
   flex-direction: column-reverse;
 }
-.atlas-chart-row.lower svg {
-  transform: rotate(180deg);
+.atlas-chart-tooth svg {
+  width: 100%;
+  height: 34px;
+  display: block;
+  overflow: visible;
 }
-.atlas-chart-row button[aria-pressed='true'] {
+.atlas-chart-crown,
+.atlas-chart-root {
+  stroke-width: 1;
+  vector-effect: non-scaling-stroke;
+  stroke-linejoin: round;
+}
+.atlas-chart-crown {
+  fill: color-mix(in srgb, var(--ui-text) 10%, transparent);
+  stroke: var(--ui-muted);
+}
+.atlas-chart-root {
+  fill: none;
+  stroke: color-mix(in srgb, var(--ui-muted) 65%, var(--ui-panel));
+}
+.atlas-chart-number {
+  text-align: center;
+  font:
+    500 10.5px/1 'IBM Plex Mono',
+    monospace;
+  padding: 4px 0 3px;
+  letter-spacing: -0.02em;
+  white-space: nowrap;
+}
+.atlas-chart-tooth:hover .atlas-chart-crown,
+.atlas-chart-tooth:focus-visible .atlas-chart-crown {
+  fill: color-mix(in srgb, var(--ui-text) 28%, transparent);
+  stroke: var(--ui-text);
+}
+.atlas-chart-tooth[aria-pressed='true'] {
   color: var(--ui-accent);
-  background: var(--ui-soft);
 }
-.atlas-chart-row button[data-moved] {
+.atlas-chart-tooth[aria-pressed='true'] .atlas-chart-crown {
+  fill: var(--ui-accent);
+  stroke: var(--ui-accent);
+}
+.atlas-chart-tooth[aria-pressed='true'] .atlas-chart-root {
+  stroke: var(--ui-accent);
+}
+.atlas-chart-tooth[data-off] {
+  opacity: 0.4;
+}
+.atlas-chart-tooth[data-moved] .atlas-chart-number {
   text-decoration: underline;
   text-underline-offset: 2px;
 }
-.atlas-chart-row button:nth-child(8) {
-  margin-right: 7px;
+.atlas-chart-tooth:focus-visible {
+  outline: 2px solid var(--ui-accent);
+  outline-offset: 0;
+}
+.atlas-chart-foot {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  margin-top: 3px;
+  font-size: 11px;
+  color: var(--ui-muted);
+}
+.atlas-chart-foot > :last-child {
+  color: var(--ui-text);
+  font-family: 'IBM Plex Mono', monospace;
+}
+@media (max-width: 640px) {
+  .atlas-odontogram {
+    padding: 6px 8px 4px;
+  }
+  .atlas-chart-grid {
+    grid-template-columns: 10px minmax(0, 1fr) 10px;
+    column-gap: 3px;
+  }
+  .atlas-chart-tooth svg {
+    height: 24px;
+  }
+  .atlas-chart-number {
+    font-size: 9px;
+    padding: 3px 0 2px;
+    letter-spacing: -0.05em;
+  }
+  .atlas-chart-foot {
+    font-size: 10.5px;
+  }
 }

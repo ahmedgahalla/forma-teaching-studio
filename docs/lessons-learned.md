@@ -307,3 +307,10 @@ Numbers 17–19 were checked against the current lessons and the parallel Phase 
 - **Root cause:** copying a working script on a recent Node 22 release does not establish compatibility with the minimum supported minor release; the CI matrix selects current major releases.
 - **Prevention:** check API introduction versions for new maintenance scripts and verify the exact declared floor when changing runtime-dependent tooling. The existing generator has a separate auditor follow-up.
 - **Status:** noted · **Count:** 1
+
+## 42. Component replacements must account for later responsive overrides
+
+- **Mistake caught during review:** [3.23 source review](reviews/from-builder/2026-09-28-atlas-tooth-diagram.md) found the old workspace stylesheet's narrow-screen chart padding overrode the new component's mobile spacing.
+- **Root cause:** the parent stylesheet imports the component stylesheet first, then adds responsive rules targeting the same component.
+- **Prevention:** search all selectors for a replaced component and check their import/source order at each affected breakpoint. Keep the chart's spacing in its own stylesheet and remove its obsolete parent override. Browser acceptance remains necessary for final appearance.
+- **Status:** noted · **Count:** 1

@@ -112,3 +112,23 @@ Font files and their SIL licenses are recorded in `public/fonts/README.md`.
 The material port targets the installed Three r186 shader chunks. Seeded microtextures use deterministic
 texel sampling rather than Canvas antialiasing, and Forma retains its translucent gum controls.
 Source-level compatibility tests do not establish pixel equivalence or GPU/browser acceptance.
+
+## Tooth diagram
+
+Phase 3.23 ports the producer's `web/src/app/ui.js` crown/root SVG formulas (`glyphPaths` and
+`glyphSVG`), chart order and proportional two-row treatment from `web/src/styles.css`. Producer
+workspace: `scratch-2026-09-26-716563`, read only on 2026-09-28. The full source UI file SHA256 is
+`50765adb9e664d62329b125166785043ab28e77c8e2b3c9650596b21da66ca74`; the original glyph-function
+substring SHA256 is `ef008631846d837772032965df6cfaf7b0c7558c298179236f630da7684bfe05`.
+
+The port uses the existing bundled 10:33 metadata snapshot above, without replacing the 3D model.
+Executing the original producer function with that metadata and source tooth classes produces the
+canonical 32-entry `{id: {md, crown, roots}}` JSON SHA256
+`34eb375035f2e868be7103a3dceb1613d2285b164d985727ba42e03cc6be5fc5`. The regression test compares
+the port against that independently captured value; do not update it merely to bless a changed port.
+
+Forma preserves its theme, current model's selectable teeth and existing interaction handlers.
+Missing teeth retain empty proportional slots. The ordinary model remains 28 teeth; imported cases
+with wisdom teeth can use all 32 diagram positions. SVG drawings are illustrative atlas symbols,
+not projections of a patient's anatomy. Exact path-data parity does not establish rendered pixel
+equivalence; browser and DPR acceptance remain pending.
