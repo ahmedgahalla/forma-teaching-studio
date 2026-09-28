@@ -1,6 +1,6 @@
 # Phase 3 — demo path
 
-**Status:** Claude jaw opening and selection glow implemented; automated checks pass and browser acceptance pending · **Current branch:** `ahmed/phase-3-jaw-and-glow` · **PR:** pending draft · **Base:** [#25 (draft)](https://github.com/ahmedgahalla/forma-teaching-studio/pull/25)
+**Status:** Claude jaw opening and selection glow implemented; automated checks pass and browser acceptance pending · **Current branch:** `ahmed/phase-3-jaw-and-glow` · **PR:** [#26 (draft)](https://github.com/ahmedgahalla/forma-teaching-studio/pull/26) · **Base:** [#25 (draft)](https://github.com/ahmedgahalla/forma-teaching-studio/pull/25)
 
 **Goal:** a professor can explore the central model freely or open a finished lecture with notes, questions and model demonstrations, then return from a spontaneous experiment without losing the lecture. Builds on [product direction](../../PRODUCT_DIRECTION.md).
 
