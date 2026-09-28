@@ -1,6 +1,6 @@
 # Phase 3 — demo path
 
-**Status:** local AI startup repair and narrated professor pitch implemented; provider choice and browser acceptance pending · **Current branch:** `ahmed/phase-3-ai-pitch` · **PR:** pending draft · **Base:** [#24 (draft)](https://github.com/ahmedgahalla/forma-teaching-studio/pull/24)
+**Status:** local AI startup repair and narrated professor pitch implemented; provider choice and browser acceptance pending · **Current branch:** `ahmed/phase-3-ai-pitch` · **PR:** [#25 (draft)](https://github.com/ahmedgahalla/forma-teaching-studio/pull/25) · **Base:** [#24 (draft)](https://github.com/ahmedgahalla/forma-teaching-studio/pull/24)
 
 **Goal:** a professor can explore the central model freely or open a finished lecture with notes, questions and model demonstrations, then return from a spontaneous experiment without losing the lecture. Builds on [product direction](../../PRODUCT_DIRECTION.md).
 

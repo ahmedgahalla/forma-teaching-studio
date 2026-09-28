@@ -1,6 +1,6 @@
 # Handoff — local AI and Professor Nael pitch
 
-**Branch:** `ahmed/phase-3-ai-pitch` · **PR:** pending draft · **Base:** PR #24 at `7bd3eb8` · **Phase:** [3.25](../phases/phase-3-demo-path/3.25-ai-and-pitch.md).
+**Branch:** `ahmed/phase-3-ai-pitch` · **PR:** [#25 (draft)](https://github.com/ahmedgahalla/forma-teaching-studio/pull/25) · **Base:** PR #24 at `7bd3eb8` · **Phase:** [3.25](../phases/phase-3-demo-path/3.25-ai-and-pitch.md).
 
 Implemented opt-in app/backend startup and a bounded same-origin loopback gateway. The existing Responses backend, client validation and saved AI preferences remain authoritative. Added 40 focused mocked tests. Independent review caught and verified a Windows environment-casing fix; lesson 43 records it. No private configuration was copied and neither the provider nor local services were contacted for acceptance.
 
