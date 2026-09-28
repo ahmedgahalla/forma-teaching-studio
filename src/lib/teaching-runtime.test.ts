@@ -4,6 +4,7 @@ import { validateTeachingPlan, type TeachingContext } from './classroom';
 import type { TeachingAction } from './lecture';
 import { getTeachingCase, sampleCaseDemonstration, type TeachingCaseId } from './teaching-cases';
 import type { Transforms } from './model';
+import { SAMPLE_LECTURE_ID } from './lecture-documents/constants';
 
 type Scene = {
   context: TeachingContext;
@@ -129,6 +130,110 @@ afterEach(() => {
 });
 
 describe('classroom request execution', () => {
+  it('ignores redundant lecture entry during an active playback request without cancelling its remaining actions', async () => {
+    vi.useFakeTimers();
+    const { runtime, host, scene } = setup();
+    scene().context.presentation = {
+      documentId: SAMPLE_LECTURE_ID,
+      index: 1,
+      count: 4,
+      mode: 'teach',
+      exploring: false,
+    };
+    const open: TeachingAction = { kind: 'presentation', action: 'open', id: SAMPLE_LECTURE_ID };
+    const work = runtime.submitActions(
+      [
+        { kind: 'dental', command: { type: 'play' } },
+        { kind: 'toggle', target: 'gums', visible: false },
+      ],
+      'Play then hide gums',
+    );
+    await flush();
+    expect(scene().context.playing).toBe(true);
+    const pauses = host.pause.mock.calls.length,
+      status = runtime.getState();
+    const accepted = vi.fn();
+    await runtime.submit('Please open sample lecture.', {
+      interpreter: 'local',
+      onLocalAccept: accepted,
+    });
+    await runtime.submitActions([open], 'Lecture');
+    expect(accepted).toHaveBeenCalledOnce();
+    expect(host.pause).toHaveBeenCalledTimes(pauses);
+    expect(scene().context.playing).toBe(true);
+    expect(runtime.getState()).toEqual(status);
+    scene().context.playing = false;
+    await vi.advanceTimersByTimeAsync(30);
+    await work;
+    expect(scene().gums).toBe(false);
+    expect(runtime.getState().phase).toBe('idle');
+    await runtime.submit('undo');
+    expect(scene().gums).toBe(true);
+    await runtime.submit('redo');
+    expect(scene().gums).toBe(false);
+    expect(host.interpret).not.toHaveBeenCalled();
+  });
+
+  it.each([
+    { actions: [{ kind: 'presentation', action: 'open', id: SAMPLE_LECTURE_ID, extra: true }] },
+    { actions: [{ kind: 'workflow', action: 'open', id: SAMPLE_LECTURE_ID }] },
+    {
+      actions: [
+        { kind: 'presentation', action: 'open', id: SAMPLE_LECTURE_ID },
+        { kind: 'view', view: 'front' },
+      ],
+    },
+  ])(
+    'does not bypass validation for malformed or compound opening actions %#',
+    async ({ actions }) => {
+      const { runtime, host, scene } = setup();
+      scene().context.presentation = {
+        documentId: SAMPLE_LECTURE_ID,
+        index: 1,
+        count: 4,
+        mode: 'teach',
+        exploring: false,
+      };
+      await runtime.submitActions(actions as TeachingAction[], 'Invalid open');
+      expect(runtime.getState().error).toBe(true);
+      expect(host.pause).toHaveBeenCalledOnce();
+      expect(host.apply).not.toHaveBeenCalled();
+    },
+  );
+
+  it('keeps compound text and overlength opening requests on the existing validation path', async () => {
+    const { runtime, host, scene } = setup();
+    scene().context.presentation = {
+      documentId: SAMPLE_LECTURE_ID,
+      index: 1,
+      count: 4,
+      mode: 'teach',
+      exploring: false,
+    };
+    await runtime.submit('open lecture then hide roots', { interpreter: 'ai' });
+    expect(runtime.getState().message).toMatch(/separate request/);
+    expect(host.interpret).not.toHaveBeenCalled();
+    await runtime.submit(`${' '.repeat(1500)}lecture`);
+    expect(runtime.getState().error).toBe(true);
+    expect(host.apply).not.toHaveBeenCalled();
+    expect(host.pause).toHaveBeenCalledTimes(2);
+  });
+
+  it('processes a different lecture document through the normal action path', async () => {
+    const { runtime, host, scene } = setup();
+    scene().context.presentation = {
+      documentId: 'another-document',
+      index: 1,
+      count: 4,
+      mode: 'teach',
+      exploring: false,
+    };
+    const open: TeachingAction = { kind: 'presentation', action: 'open', id: SAMPLE_LECTURE_ID };
+    await runtime.submitActions([open], 'Open sample');
+    expect(runtime.getState().error).toBe(false);
+    expect(host.apply).toHaveBeenCalledExactlyOnceWith(open, expect.any(AbortSignal));
+  });
+
   it('sends a polite contextual appliance request through forced AI and independently accepts its matching targets', async () => {
     const { runtime, host, scene } = setup();
     scene().context.selectedIds = ['11', '21'];

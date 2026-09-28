@@ -40,6 +40,8 @@ describe('bounded lecture display commands', () => {
     ['Close biology', { action: 'hide-biology' }],
     ['Focus teaching teeth', { action: 'focus-tooth' }],
     ['Show full model', { action: 'show-context' }],
+    ['Fit model', { action: 'fit-view' }],
+    ['fit view', { action: 'fit-view' }],
   ])('matches click actions for typed and recognized speech: %s', (text, properties) => {
     const actions = [{ kind: 'presentation', ...properties }];
     expect(parseTeachingPlan(text as string, context).actions).toEqual(actions);
@@ -50,6 +52,7 @@ describe('bounded lecture display commands', () => {
     { action: 'biology', view: 'stress' },
     { action: 'biology', view: 'compression', tooth: '11' },
     { action: 'focus-tooth', strength: 10 },
+    { action: 'fit-view', tooth: '11' },
   ])('rejects unsupported targets and extra fields', properties => {
     expect(() => validateAction({ kind: 'presentation', ...properties }, context)).toThrow();
   });

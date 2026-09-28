@@ -1,10 +1,12 @@
 # Phase 3 — demo path
 
-**Status:** AI cancellation implemented; automated checks passed; lecture browser acceptance pending · **Current branch:** `ahmed/phase-3-ai-cancellation` · **Current PR:** [#17 (draft)](https://github.com/ahmedgahalla/forma-teaching-studio/pull/17) (stacked on [#16](https://github.com/ahmedgahalla/forma-teaching-studio/pull/16))
+**Status:** lecture control parity implemented; automated checks passed; browser acceptance pending · **Current branch:** `ahmed/phase-3-lecture-controls` · **Current PR:** [#18 (draft)](https://github.com/ahmedgahalla/forma-teaching-studio/pull/18) (stacked on [#17](https://github.com/ahmedgahalla/forma-teaching-studio/pull/17))
 
 **Goal:** a professor can explore the central model freely or open a finished lecture with notes, questions and model demonstrations, then return from a spontaneous experiment without losing the lecture. Builds on [product direction](../../PRODUCT_DIRECTION.md).
 
 ## Current implementation
+
+- [3.18 — Consistent lecture entry and view controls](3.18-lecture-controls.md): local text/voice sample entry, return to Explore, and compact camera/roots/Fit controls in Lecture. Reopening the active sample preserves its current work and history.
 
 - [3.17 — Cancel obsolete AI requests](3.17-ai-cancellation.md): async provider operations, shared deadlines and disconnect cleanup for commands, explanations and the authenticated phone bridge.
 

@@ -1,6 +1,7 @@
 import type { TeachingAction } from './actions';
 import { fields, oneOf, type TeachingContext, type TeachingPlan } from './types';
 import { validateTeachingPlan } from './plan-validate';
+import { SAMPLE_LECTURE_ID } from '../lecture-documents/constants';
 
 const controls = [
   'rehearse',
@@ -19,6 +20,7 @@ const controls = [
   'show-context',
   'hide-biology',
   'close-comparison',
+  'fit-view',
 ] as const;
 export const COMPARISON_TARGETS = ['start', 'translation', 'tip'] as const;
 export type LectureComparison = (typeof COMPARISON_TARGETS)[number];
@@ -84,6 +86,7 @@ export function isPresentationDisplay(action: PresentationAction) {
     'hide-biology',
     'focus-tooth',
     'show-context',
+    'fit-view',
   ].includes(action.action);
 }
 
@@ -100,6 +103,7 @@ export function advancePresentation(context: TeachingContext, action: TeachingAc
     return false;
   }
   const current = context.presentation;
+  if (action.action === 'open' && current?.documentId === action.id) return true;
   const display = isPresentationDisplay(action);
   if (context.tryPreview && !display)
     throw new Error('Apply or discard the preview before changing lecture steps or experiences.');
@@ -130,7 +134,14 @@ export function advancePresentation(context: TeachingContext, action: TeachingAc
   return true;
 }
 
+export function parseLectureOpening(source: string): PresentationAction | undefined {
+  if (/^(?:lecture|open lecture|open sample lecture|start sample lecture)$/.test(source))
+    return { kind: 'presentation', action: 'open', id: SAMPLE_LECTURE_ID };
+}
+
 function command(source: string): PresentationAction | undefined {
+  const opening = parseLectureOpening(source);
+  if (opening) return opening;
   const labels: Record<string, string> = {
     'starting arrangement': 'compare start',
     'translation example': 'compare translation',
@@ -187,6 +198,10 @@ function command(source: string): PresentationAction | undefined {
     'exit lecture': 'exit',
     'end lecture': 'exit',
     'exit lecture mode': 'exit',
+    explore: 'exit',
+    'return to explore': 'exit',
+    'fit model': 'fit-view',
+    'fit view': 'fit-view',
   };
   const action = aliases[source.replace(/\bthe (?=lecture|lesson|answer|notes)\b/g, '')];
   return action ? validatePresentationAction({ kind: 'presentation', action }) : undefined;
@@ -201,8 +216,9 @@ export function parsePresentationPlan(
     const parts = source.split(/\s+(?:and then|and|then)\s+|[;,]\s*|\.\s+/);
     if (parts.some(part => /^prepare (?:the )?lecture$/.test(part)))
       throw new Error('Lecture editing is unavailable. Use Rehearse or Teach.');
-    if (!context.presentation) return;
     const action = command(source);
+    const opensLecture = parts.some(part => command(part)?.action === 'open');
+    if (!context.presentation && !opensLecture) return;
     if (!action) {
       if (parts.some(part => command(part)))
         throw new Error('Use one lecture control as a separate request, then change the scene.');

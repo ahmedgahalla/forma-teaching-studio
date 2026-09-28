@@ -28,6 +28,12 @@ This branch is implemented but not declared released: local verification records
 
 Explore gains eight mechanics categories with 17 explicit variations using the existing solver, with prediction before calculation and one undoable load per setup. Research notes distinguish authored geometric paths, initial elastic responses and remodeling concepts; none is a patient-specific treatment forecast. The new feature remains subject to audit, applicable CI and real-device acceptance. Browser/DPR/projector verification is not claimed.
 
+## Consistent lecture controls · 28 September 2026
+
+[Phase 3.18](phases/phase-3-demo-path/3.18-lecture-controls.md) adds `lecture`, `open lecture`, `open sample lecture` and `start sample lecture` as local sample-entry commands. `explore` and `return to explore` leave the lecture for the original standalone workspace; `Explore this question` keeps its distinct temporary detour. Reopening the active sample preserves the current step, answers, return point, playback and Undo/Redo history. Legacy `start lecture` and `enter lecture mode` still mean the older Present layout; use `open lecture` for the finished sample.
+
+Lecture now retains a small View menu with the five camera presets and roots visibility, plus a Fit button. Their commands share validated actions with typed and recognized local voice input. Fit uses the existing preset camera framing. These changes are implemented on the draft stack; browser layout and device acceptance remain unverified.
+
 ## Product promise
 
 A professor can freely explore a clear 3D mouth or open a finished lecture, ask students to predict a change, then demonstrate, reveal and compare while keeping the model central.

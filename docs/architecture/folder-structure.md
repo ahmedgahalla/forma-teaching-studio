@@ -44,6 +44,8 @@ src/
 
 Conventions:
 
+- `lecture-builder/LectureViewControls.tsx` owns the compact lecture camera/roots/Fit disclosure; `lib/classroom/presentation.ts` owns local lecture command validation, with the fixed sample identifier shared through `lecture-documents/constants.ts`.
+
 - `backend/ai_request.py` ties async AI work to a consumed request, disconnect and total deadline; command, explanation and authenticated phone-bridge teaching routes share it.
 
 - `backend/scene_analysis_appliances.py` holds strict appliance facts/reference validation for the read-only scene explanation route; the endpoint and provider instructions remain in `scene_analysis.py`.

@@ -4,8 +4,14 @@ import { createRoot, type Root } from 'react-dom/client';
 import { afterEach, beforeEach, expect, it, vi } from 'vitest';
 import { TeachingProvider, useTeaching, useTeachingAdapter } from './TeachingController';
 import type { ToothStudyContext } from '@/lib/tooth-study/types';
+import { SAMPLE_LECTURE_ID } from '@/lib/lecture-documents/constants';
 
-type CaseScene = { selected: string; camera: string; study?: ToothStudyContext };
+type CaseScene = {
+  selected: string;
+  camera: string;
+  study?: ToothStudyContext;
+  lectureId?: string;
+};
 type WorkflowScene = { step: number; selected: string };
 let teaching: ReturnType<typeof useTeaching>, root: Root, container: HTMLDivElement;
 let rejectStudy = false;
@@ -42,6 +48,10 @@ function Harness() {
     narration: () => '',
     apply: action => {
       caseApply(action);
+      if (action.kind === 'presentation' && action.action === 'open') {
+        setCaseScene(previous => ({ ...previous, lectureId: action.id }));
+        return true;
+      }
       if (action.kind !== 'tooth-study' || rejectStudy) return false;
       if (action.action === 'open')
         setCaseScene({
@@ -199,5 +209,40 @@ it('clarifies empty-workspace navigation without applying an action or consultin
   }
   expect(caseApply).not.toHaveBeenCalled();
   expect(workflowApply).not.toHaveBeenCalled();
+  expect(fetch).not.toHaveBeenCalled();
+});
+
+it('preflights lecture entry in the case adapter before leaving a workflow and restores mode with Undo', async () => {
+  await enterWorkflow();
+  const beforeCase = scene('case'),
+    beforeWorkflow = scene('workflow');
+  const open = { kind: 'presentation', action: 'open', id: SAMPLE_LECTURE_ID };
+  const preflightMode: string[] = [];
+  casePreflight.mockImplementationOnce(() => {
+    preflightMode.push(teaching.mode);
+    throw new Error('Apply or discard the preview first.');
+  });
+  await act(async () => teaching.run('open lecture'));
+  expect(casePreflight).toHaveBeenLastCalledWith([open], undefined);
+  expect(preflightMode).toEqual(['workflow']);
+  expect(teaching.runtime.message).toMatch(/Apply or discard/);
+  expect(teaching.mode).toBe('workflow');
+  expect(caseApply).not.toHaveBeenCalled();
+  expect(scene('case')).toEqual(beforeCase);
+  expect(scene('workflow')).toEqual(beforeWorkflow);
+  await act(async () => teaching.run('open lecture'));
+  expect(teaching.runtime.error).toBe(false);
+  expect(teaching.mode).toBe('case');
+  expect(caseApply).toHaveBeenCalledExactlyOnceWith(open);
+  expect(scene('case')).toEqual({ ...beforeCase, lectureId: SAMPLE_LECTURE_ID });
+  expect(scene('workflow')).toEqual(beforeWorkflow);
+  expect(workflowApply).toHaveBeenCalledTimes(2);
+  await act(async () => teaching.run('undo'));
+  expect(teaching.mode).toBe('workflow');
+  expect(scene('case')).toEqual(beforeCase);
+  expect(scene('workflow')).toEqual(beforeWorkflow);
+  await act(async () => teaching.run('redo'));
+  expect(teaching.mode).toBe('case');
+  expect(scene('case')).toEqual({ ...beforeCase, lectureId: SAMPLE_LECTURE_ID });
   expect(fetch).not.toHaveBeenCalled();
 });

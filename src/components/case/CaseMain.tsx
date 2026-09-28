@@ -11,6 +11,7 @@ import { CaseLectureOverlay } from './CaseLectureOverlay';
 import { CaseStageDock } from './CaseStageDock';
 import type { TeacherLectures } from '../lecture-builder/useTeacherLectures';
 import { lectureStepTitle } from '../lecture-builder/comparison-labels';
+import { LectureViewControls } from '../lecture-builder/LectureViewControls';
 
 export function CaseMain({
   api,
@@ -28,13 +29,20 @@ export function CaseMain({
         <div className="workspace-scene">
           {customStep ? (
             <div className="teacher-step-heading">
-              <span>{teacher.document!.title}</span>
-              <h1>
-                {lectureStepTitle(
-                  teacher.document!.steps[teacher.session.index].title,
-                  teacher.session.comparison,
-                )}
-              </h1>
+              <div className="teacher-step-title">
+                <span>{teacher.document!.title}</span>
+                <h1>
+                  {lectureStepTitle(
+                    teacher.document!.steps[teacher.session.index].title,
+                    teacher.session.comparison,
+                  )}
+                </h1>
+              </div>
+              <LectureViewControls
+                view={api.view}
+                roots={api.roots}
+                execute={api.teaching.execute}
+              />
             </div>
           ) : (
             <CaseWorkspaceHeading api={api} />

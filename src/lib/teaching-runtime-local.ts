@@ -1,9 +1,31 @@
 import { parseTeachingPlan, type TeachingPlan, type TeachingContext } from './classroom';
-import type { TeachingAction } from './lecture';
+import { normalizeSpeechCommand, type TeachingAction } from './lecture';
+import { parseLectureOpening, validatePresentationAction } from './classroom/presentation';
 export type TeachingSubmitOptions = {
   interpreter?: 'auto' | 'ai' | 'local';
   onLocalAccept?: () => void;
 };
+
+/** The active Lecture tab is a no-op, including playback and request history. */
+export function isRedundantLectureOpen(
+  request: string | TeachingAction[],
+  context: TeachingContext,
+) {
+  if (!context.presentation || (typeof request === 'string' && request.length > 1500)) return false;
+  try {
+    const supplied =
+      typeof request === 'string'
+        ? parseLectureOpening(normalizeSpeechCommand(request))
+        : request.length === 1
+          ? request[0]
+          : undefined;
+    if (supplied?.kind !== 'presentation') return false;
+    const action = validatePresentationAction(supplied);
+    return action.action === 'open' && action.id === context.presentation.documentId;
+  } catch {
+    return false;
+  }
+}
 
 /** Aliases are plausible classroom words, so even clarification is a silent rejection. */
 export function parseLocalVoicePlan(

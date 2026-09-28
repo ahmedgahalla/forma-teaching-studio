@@ -1,5 +1,5 @@
 import { teachingNarrationTarget, type TeachingNarrationTarget } from './teaching-narration';
-import { abortable } from './teaching-runtime-async';
+import { abortable, waitForPlayback } from './teaching-runtime-async';
 import {
   parseTeachingPlan,
   validateTeachingPlan,
@@ -7,8 +7,12 @@ import {
   type TeachingPlan,
 } from './classroom';
 import type { TeachingAction } from './lecture';
-import { preserveLocalPlan, parseLocalVoicePlan } from './teaching-runtime-local';
-import type { TeachingSubmitOptions } from './teaching-runtime-local';
+import {
+  preserveLocalPlan,
+  parseLocalVoicePlan,
+  isRedundantLectureOpen,
+  type TeachingSubmitOptions,
+} from './teaching-runtime-local';
 export type RuntimeState = {
   phase: 'idle' | 'interpreting' | 'executing' | 'speaking';
   message: string;
@@ -70,19 +74,6 @@ export function createTeachingRuntime<S>(host: TeachingHost<S>) {
     if (disposed) return;
     interrupt();
     publish({ phase: 'idle', message, error: false });
-  };
-  const waitForPlayback = async (signal: AbortSignal) => {
-    while (host.context().playing && !signal.aborted)
-      await new Promise<void>(resolve => {
-        const done = () => {
-          clearTimeout(timer);
-          signal.removeEventListener('abort', done);
-          resolve();
-        };
-        const timer = setTimeout(done, 30);
-        signal.addEventListener('abort', done, { once: true });
-        if (signal.aborted) done();
-      });
   };
   const run = async (
     plan: TeachingPlan,
@@ -241,7 +232,7 @@ export function createTeachingRuntime<S>(host: TeachingHost<S>) {
               if (reapplied) await abortable(reapplied, signal);
               if (signal.aborted || own !== token) return;
             }
-          await waitForPlayback(signal);
+          await waitForPlayback(() => host.context().playing, signal);
         }
       }
       if (host.settle) await abortable(host.settle(signal), signal);
@@ -269,6 +260,7 @@ export function createTeachingRuntime<S>(host: TeachingHost<S>) {
       : undefined;
     if (localOnly && !local) return false;
     if (localOnly) options.onLocalAccept?.();
+    if (isRedundantLectureOpen(local?.actions ?? text, host.context())) return;
     if (/^(stop|cancel|pause everything)$/i.test(text.trim())) {
       cancel();
       publish({ transcript: text });
@@ -323,7 +315,7 @@ export function createTeachingRuntime<S>(host: TeachingHost<S>) {
     }
   };
   const submitActions = async (actions: TeachingAction[], summary: string) => {
-    if (disposed) return;
+    if (disposed || isRedundantLectureOpen(actions, host.context())) return;
     interrupt();
     const own = token;
     controller = new AbortController();

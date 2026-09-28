@@ -17,3 +17,5 @@ The later Phase 3 follow-up [3.15 — Lecture presentation and mechanics](phase-
 [3.16 — Mechanics-aware scene explanations](phase-3-demo-path/3.16-analysis-mechanics.md) follows PR #15 and supplies the configured support/load inputs to Analyze, preserving privacy and current/revealed result gating.
 
 [3.17 — Cancel obsolete AI requests](phase-3-demo-path/3.17-ai-cancellation.md) follows PR #16 with asynchronous provider cleanup, disconnect handling and shared total deadlines, including the phone bridge.
+
+[3.18 — Consistent lecture entry and view controls](phase-3-demo-path/3.18-lecture-controls.md) follows PR #17 with matching sample-entry commands and compact camera, roots and Fit controls in the lecture heading.
