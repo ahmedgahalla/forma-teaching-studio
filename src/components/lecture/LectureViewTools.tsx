@@ -1,7 +1,8 @@
 'use client';
 
-import { useEffect, useRef, type ReactNode } from 'react';
+import { useCallback, useEffect, useRef, type ReactNode, type PointerEvent } from 'react';
 import { Focus, MousePointer2, Scan, Expand } from 'lucide-react';
+import { setPublicLecturePointer } from '../viewer/public-overlays';
 import './lecture-view.css';
 
 export function LectureViewTools({
@@ -57,35 +58,52 @@ export function LectureViewTools({
 /** A screen pointer only: it never selects, moves or annotates a tooth. */
 export function LecturePointer({ enabled, onExit }: { enabled: boolean; onExit: () => void }) {
   const spot = useRef<HTMLSpanElement>(null);
+  const canvas = useRef<HTMLCanvasElement | null>(null);
   const exit = useRef(onExit);
+  const hide = useCallback(() => {
+    if (spot.current) spot.current.hidden = true;
+    setPublicLecturePointer(canvas.current);
+    canvas.current = null;
+  }, []);
   useEffect(() => {
     exit.current = onExit;
   });
   useEffect(() => {
     if (!enabled) return;
     const key = (event: KeyboardEvent) => {
-      if (event.key === 'Escape') exit.current();
+      if (event.key === 'Escape') {
+        hide();
+        exit.current();
+      }
     };
     window.addEventListener('keydown', key);
-    return () => window.removeEventListener('keydown', key);
-  }, [enabled]);
+    window.addEventListener('blur', hide);
+    return () => {
+      window.removeEventListener('keydown', key);
+      window.removeEventListener('blur', hide);
+      hide();
+    };
+  }, [enabled, hide]);
   if (!enabled) return null;
-  const hide = () => {
-    if (spot.current) spot.current.hidden = true;
+  const point = (event: PointerEvent<HTMLDivElement>) => {
+    if (!spot.current) return;
+    const next = event.currentTarget.parentElement?.querySelector('canvas') ?? null;
+    if (next !== canvas.current) setPublicLecturePointer(canvas.current);
+    canvas.current = next;
+    setPublicLecturePointer(next, event.clientX, event.clientY);
+    const box = event.currentTarget.getBoundingClientRect();
+    spot.current.hidden = false;
+    spot.current.style.transform = `translate(${event.clientX - box.left}px, ${event.clientY - box.top}px)`;
   };
   return (
     <div
       className="lecture-pointer"
       aria-hidden="true"
-      onPointerMove={event => {
-        if (!spot.current) return;
-        const box = event.currentTarget.getBoundingClientRect();
-        spot.current.hidden = false;
-        spot.current.style.transform = `translate(${event.clientX - box.left}px, ${event.clientY - box.top}px)`;
-      }}
+      onPointerMove={point}
       onPointerDown={event => {
         event.preventDefault();
         event.stopPropagation();
+        point(event);
         event.currentTarget.setPointerCapture(event.pointerId);
       }}
       onPointerUp={event => {

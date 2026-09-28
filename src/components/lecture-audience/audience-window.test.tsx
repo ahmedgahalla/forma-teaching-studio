@@ -5,6 +5,7 @@ import { afterEach, beforeEach, expect, it, vi } from 'vitest';
 import { AudienceLauncher } from './AudienceLauncher';
 import { useAudienceWindow } from './useAudienceWindow';
 import type { AudienceContent } from './types';
+import { createPublicOverlaySource } from '../viewer/public-overlays';
 
 class Popup extends EventTarget {
   document = document.implementation.createHTMLDocument();
@@ -301,4 +302,94 @@ it('renders public biology without controls and copies only local styles plus th
     local.remove();
     external.remove();
   }
+});
+
+function publicLabels(canvas: HTMLCanvasElement, id: string) {
+  const source = createPublicOverlaySource(canvas, {
+    teeth: [{ id, x: 500, y: 350, visible: true, selected: false }],
+    surfaces: [],
+    anatomy: [],
+  });
+  Object.assign(source.frame, { width: 1000, height: 700, ready: true });
+  source.publish();
+  return source;
+}
+function readyAudienceVideo() {
+  const video = popup.document.querySelector('video')!;
+  for (const [name, value] of Object.entries({
+    clientWidth: 600,
+    clientHeight: 600,
+    videoWidth: 2000,
+    videoHeight: 1400,
+    readyState: 4,
+  }))
+    Object.defineProperty(video, name, { configurable: true, value });
+  video.dispatchEvent(new Event('loadedmetadata'));
+  video.dispatchEvent(new Event('playing'));
+}
+
+it('binds public labels to each canvas generation, including replacement through an empty host', async () => {
+  await render();
+  const oldCanvas = container.querySelector('canvas')!;
+  const original = publicLabels(oldCanvas, '11');
+  const privateLabel = document.createElement('span');
+  privateLabel.className = 'tooth-label';
+  privateLabel.textContent = 'PRIVATE DOM TEXT';
+  oldCanvas.parentElement!.append(privateLabel);
+  const replacementCanvas = document.createElement('canvas');
+  const replacement = publicLabels(replacementCanvas, '22');
+  try {
+    await click();
+    const overlay = () => popup.document.querySelector<HTMLElement>('.audience-overlays')!;
+    expect(overlay().hidden).toBe(true);
+    await act(async () => readyAudienceVideo());
+    expect(overlay().textContent).toBe('11');
+    expect(overlay().hidden).toBe(false);
+    expect(popup.document.body.textContent).not.toContain('PRIVATE DOM TEXT');
+
+    const emptyHost = document.createElement('div');
+    emptyHost.className = 'three-canvas';
+    await act(async () => oldCanvas.parentElement!.replaceWith(emptyHost));
+    expect(tracks[0].stop).toHaveBeenCalledOnce();
+    expect(overlay().hidden).toBe(true);
+    expect(popup.document.querySelector('video')?.srcObject).toBeNull();
+    await act(async () => emptyHost.append(replacementCanvas));
+    expect(capture).toHaveBeenCalledTimes(2);
+    expect(popup.document.querySelector('video')?.srcObject).toBe(streams[1]);
+    expect(overlay().hidden).toBe(true);
+    original.frame.teeth[0].id = 'OLD SOURCE';
+    original.publish();
+    expect(overlay().hidden).toBe(true);
+    await act(async () => readyAudienceVideo());
+    expect(overlay().textContent).toBe('22');
+    expect(overlay().hidden).toBe(false);
+    original.dispose();
+    expect(overlay().hidden).toBe(false);
+    await click('Close audience window');
+    replacement.publish();
+    expect(popup.document.querySelector('.audience-overlays')).toBeNull();
+  } finally {
+    original.dispose();
+    replacement.dispose();
+  }
+});
+
+it('projects public mechanics qualifications without notes or answer leakage', async () => {
+  await render({
+    content: {
+      ...publicContent,
+      modelCaption: 'Initial elastic response · magnified 20×',
+      vectorLegend: true,
+      separation: 8,
+    },
+  });
+  await click();
+  const caption = popup.document.querySelector('[aria-label="Model display explanation"]');
+  expect(caption?.textContent).toContain('Initial elastic response · magnified 20×');
+  expect(caption?.textContent).toContain('Arrow size is schematic');
+  expect(caption?.textContent).toContain('Display separation 8 mm');
+  expect(popup.document.body.textContent).not.toContain('PRIVATE');
+  expect(popup.document.querySelector('button,input,textarea')).toBeNull();
+  await render();
+  expect(popup.document.querySelector('[aria-label="Model display explanation"]')).toBeNull();
 });

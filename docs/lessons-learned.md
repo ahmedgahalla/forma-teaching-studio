@@ -243,3 +243,17 @@ Numbers 17–19 were checked against the current lessons and the parallel Phase 
 - **Root cause:** idempotence was checked against the final scene snapshot without checking the earlier request lifecycle and history effects.
 - **Prevention:** recognize only validated, exact same-document opening requests before interruption. Keep compound, malformed and different-document requests on the normal path. Runtime regressions cover active playback, existing Undo/Redo entries, recognized speech and AI preference, alongside normal cancellation and replay tests.
 - **Status:** automated · **Count:** 1
+
+## 33. A canvas stream omits meaningful public overlays
+
+- **Mistake:** the [audience requirements review](reviews/from-builder/2026-09-28-lecture-control-gaps.md) found tooth numbers, tissue/surface labels and the lecture pointer absent from the audience video. Mechanics magnification and schematic-arrow captions were also omitted during question exploration.
+- **Root cause:** the WebGL canvas was treated as the complete public model view, although these cues were rendered in adjacent DOM. Generic nonclinical text does not explain an exaggerated display scale.
+- **Prevention:** [Phase 3.19](phases/phase-3-demo-path/3.19-audience-annotations.md) commits explicit public label coordinates only after a successful frame, using storage separate from pending geometry, and forwards display captions behind the existing reveal guards. Tests cover private-field exclusion, hidden results, source/presenter placement parity, reuse, pointer hiding and video-coordinate mapping. Real captured motion/alignment remains a device acceptance requirement.
+- **Status:** automated · **Count:** 1
+
+## 34. Canvas replacement can include a temporarily empty host
+
+- **Mistake caught during implementation:** the same [3.19 review](reviews/from-builder/2026-09-28-lecture-control-gaps.md) found the connection retargeted its observer only after finding a canvas. A replacement host inserted empty could later receive a canvas without triggering the observer on the old host.
+- **Root cause:** the replacement was assumed to be atomic across parent and child insertion.
+- **Prevention:** recognize the explicit replacement viewer host and observe its direct children while it is empty. A lifecycle regression inserts the host and canvas in separate steps, while the existing label-mutation regression prevents reintroducing subtree observation.
+- **Status:** automated · **Count:** 1

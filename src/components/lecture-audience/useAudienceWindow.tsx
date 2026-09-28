@@ -5,7 +5,7 @@ import { createAudienceConnection } from './audience-connection';
 import { AudienceView } from './AudienceView';
 import type { AudienceContent, AudienceStatus } from './types';
 
-type View = { target: HTMLElement; stream: MediaStream | null };
+type View = { target: HTMLElement; stream: MediaStream | null; canvas: HTMLCanvasElement | null };
 
 export function useAudienceWindow({
   active,
@@ -49,15 +49,15 @@ export function useAudienceWindow({
     }
     try {
       const next = createAudienceConnection(source.current, {
-        onStream: stream => {
+        onStream: (stream, canvas) => {
           setStatus('opening');
-          setView(previous => (previous ? { ...previous, stream } : null));
+          setView(previous => (previous ? { ...previous, stream, canvas } : null));
         },
         onError: fail,
         onClosed: close,
       });
       connection.current = next;
-      setView({ target: next.target, stream: next.stream });
+      setView({ target: next.target, stream: next.stream, canvas: next.canvas });
       setError('');
       setStatus('opening');
     } catch (problem) {
@@ -78,7 +78,13 @@ export function useAudienceWindow({
     // Render this portal beside the shell, outside its captured interaction events.
     portal: view
       ? createPortal(
-          <AudienceView content={content} stream={view.stream} onReady={ready} onError={fail} />,
+          <AudienceView
+            content={content}
+            stream={view.stream}
+            canvas={view.canvas}
+            onReady={ready}
+            onError={fail}
+          />,
           view.target,
         )
       : null,

@@ -44,6 +44,8 @@ src/
 
 Conventions:
 
+- `viewer/public-overlays.ts` commits explicit public label slots independently of unfinished renderer state. Viewer label presenters and `lib/*-label-layout.ts` reuse projection storage; `lecture-audience/audience-overlays.ts` owns pooled audience nodes and `overlay-layout.ts` maps source CSS pixels into video letterboxing. The lecture pointer writes only canvas-relative public coordinates.
+
 - `lecture-builder/LectureViewControls.tsx` owns the compact lecture camera/roots/Fit disclosure; `lib/classroom/presentation.ts` owns local lecture command validation, with the fixed sample identifier shared through `lecture-documents/constants.ts`.
 
 - `backend/ai_request.py` ties async AI work to a consumed request, disconnect and total deadline; command, explanation and authenticated phone-bridge teaching routes share it.

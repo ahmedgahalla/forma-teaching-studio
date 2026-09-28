@@ -14,6 +14,7 @@ import { LectureNavigation } from '../lecture-builder/LectureNavigation';
 import { lectureStepTitle } from '../lecture-builder/comparison-labels';
 import { AudienceLauncher } from '../lecture-audience/AudienceLauncher';
 import { useAudienceWindow } from '../lecture-audience/useAudienceWindow';
+import { mechanicsResponseCaption } from '@/lib/mechanics-presentation';
 import '../lecture-builder/lecture-builder.css';
 import '../lecture-builder/teacher-workspace.css';
 
@@ -51,6 +52,19 @@ export function CaseShell({ api, teacher }: { api: CaseStudioApi; teacher: Teach
       question: step?.question || '',
       answer: teacher.session.answerVisible ? step?.answer || null : null,
       biology: teacher.session.biology === 'off' ? undefined : teacher.session.biology,
+      modelCaption:
+        api.mechanics?.result && !sandbox.pending
+          ? api.responseRevealed
+            ? mechanicsResponseCaption(api.mechanics.result.diagnostics, api.magnification)
+            : 'Predict first · calculated response hidden'
+          : null,
+      vectorLegend: !!(
+        api.mechanics?.result &&
+        !sandbox.pending &&
+        api.forceVectors &&
+        api.responseRevealed
+      ),
+      separation: api.opening > 0 ? api.opening : null,
     },
   });
   const teacherError = teaching.runtime.error ? teaching.runtime.message : '';
