@@ -1,12 +1,14 @@
 """Read-only explanations of the supplied teaching scene; never returns editor actions."""
+import asyncio
 import os
 from typing import Annotated, Callable, Literal, Union
 
-from fastapi import APIRouter, HTTPException
-from openai import APIError, OpenAI
+from fastapi import APIRouter, HTTPException, Request
+from openai import APIError, AsyncOpenAI
 from pydantic import Field, ValidationError, field_validator, model_validator
 
 from mechanics import Tooth
+from ai_request import run_ai_request
 from scene_analysis_appliances import SceneAppliances, Strict
 
 
@@ -150,14 +152,14 @@ def analysis_model() -> str:
     return os.getenv("OPENAI_ANALYSIS_MODEL", "").strip() or os.getenv("OPENAI_MODEL", "gpt-6-luna")
 
 
-def analyze_with_openai(payload: AnalysisRequest) -> SceneExplanation:
+async def analyze_with_openai(payload: AnalysisRequest, timeout: float) -> SceneExplanation:
     key = os.getenv("OPENAI_API_KEY", "").strip()
     if not key:
         raise HTTPException(503, "AI explanation is not configured. Set OPENAI_API_KEY on the backend; scene controls remain available.")
     model = analysis_model()
     options = {"reasoning": {"effort": "none"}} if model.split("/")[-1] == "gpt-6-luna" else {}
-    with OpenAI(api_key=key, timeout=20, max_retries=0) as client:
-        response = client.responses.parse(
+    async with AsyncOpenAI(api_key=key, timeout=timeout, max_retries=0) as client:
+        response = await client.responses.parse(
             model=model,
             input=[{"role": "system", "content": ANALYSIS_INSTRUCTIONS},
                    {"role": "user", "content": payload.model_dump_json(by_alias=True)}],
@@ -172,13 +174,18 @@ def make_analysis_router(provider_error: Callable[[APIError], HTTPException]) ->
     router = APIRouter()
 
     @router.post("/api/analyze-teaching", response_model=AnalysisResponse)
-    def analyze_teaching(payload: AnalysisRequest):
-        try:
-            explanation = SceneExplanation.model_validate(analyze_with_openai(payload))
-        except APIError as error:
-            raise provider_error(error) from None
-        except (ValidationError, ValueError):
-            raise HTTPException(502, "AI explanation returned an invalid response. Try again; the model has not changed.") from None
-        return AnalysisResponse(**explanation.model_dump(), model=analysis_model())
+    async def analyze_teaching(payload: AnalysisRequest, request: Request):
+        async def analyze(deadline: float):
+            try:
+                remaining = min(20, deadline - asyncio.get_running_loop().time())
+                explanation = SceneExplanation.model_validate(await analyze_with_openai(payload, remaining))
+            except APIError as error:
+                raise provider_error(error) from None
+            except (ValidationError, ValueError):
+                raise HTTPException(502, "AI explanation returned an invalid response. Try again; the model has not changed.") from None
+            return AnalysisResponse(**explanation.model_dump(), model=analysis_model())
+
+        return await run_ai_request(request, analyze, timeout=20,
+            timeout_detail="AI explanation timed out. Try again; the model has not changed.")
 
     return router
