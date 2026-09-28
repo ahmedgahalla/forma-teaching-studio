@@ -1,6 +1,6 @@
 # Handoff — public audience annotations
 
-**Branch:** `ahmed/phase-3-audience-annotations` · **Base:** draft PR #18 at `0b2d126` · **Phase:** [3.19](../phases/phase-3-demo-path/3.19-audience-annotations.md) · **PR:** pending
+**Branch:** `ahmed/phase-3-audience-annotations` · **Base:** draft PR #18 at `0b2d126` · **Phase:** [3.19](../phases/phase-3-demo-path/3.19-audience-annotations.md) · **PR:** [#19 (draft)](https://github.com/ahmedgahalla/forma-teaching-studio/pull/19)
 
 This goal turn made progress: it closed the source-proven gap in audience tooth IDs, tissue/surface labels, captions and the pointer, and retained public mechanics magnification/arrow/separation qualifications during exploration. A canvas-specific feed commits public coordinates after successful rendering into fixed storage separate from unfinished layouts. The audience maps those coordinates into contained video with pooled nodes. Capture interruption, graphics loss, delayed canvas replacement and disposal clear or reconnect the feed; private notes, controls and names are excluded. Pointer activation remains in the existing Explore View controls, including question detours.
 

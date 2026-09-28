@@ -1,6 +1,6 @@
 # Phase 3 — demo path
 
-**Status:** audience annotations implemented; automated checks passed; browser acceptance pending · **Current branch:** `ahmed/phase-3-audience-annotations` · **Current PR:** pending (stacked on [#18](https://github.com/ahmedgahalla/forma-teaching-studio/pull/18))
+**Status:** audience annotations implemented; automated checks passed; browser acceptance pending · **Current branch:** `ahmed/phase-3-audience-annotations` · **Current PR:** [#19 (draft)](https://github.com/ahmedgahalla/forma-teaching-studio/pull/19), stacked on [#18](https://github.com/ahmedgahalla/forma-teaching-studio/pull/18)
 
 **Goal:** a professor can explore the central model freely or open a finished lecture with notes, questions and model demonstrations, then return from a spontaneous experiment without losing the lecture. Builds on [product direction](../../PRODUCT_DIRECTION.md).
 
