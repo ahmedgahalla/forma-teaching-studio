@@ -1,10 +1,12 @@
 # Phase 3 — demo path
 
-**Status:** sample plus researched mechanics/presentation improvements implemented; local automated checks passed, browser acceptance pending · **Current branch:** `ahmed/phase-3-lecture-mechanics` · **Current PR:** [#15 (draft)](https://github.com/ahmedgahalla/forma-teaching-studio/pull/15) (stacked on [#14](https://github.com/ahmedgahalla/forma-teaching-studio/pull/14))
+**Status:** mechanics-aware explanations implemented; automated checks passed; lecture browser acceptance pending · **Current branch:** `ahmed/phase-3-analysis-mechanics` · **Current PR:** pending (stacked on [#15](https://github.com/ahmedgahalla/forma-teaching-studio/pull/15))
 
 **Goal:** a professor can explore the central model freely or open a finished lecture with notes, questions and model demonstrations, then return from a spontaneous experiment without losing the lecture. Builds on [product direction](../../PRODUCT_DIRECTION.md).
 
 ## Current implementation
+
+- [3.16 — Mechanics-aware scene explanations](3.16-analysis-mechanics.md): Analyze receives actual support, anchorage, elastic and expander inputs with strict validation and anonymous appliance references. Hidden results and read-only replies remain protected.
 
 - [3.15 — Lecture focus, audience presentation and mechanics](3.15-lecture-mechanics.md): approved follow-up adds closer teaching focus, fixed-camera comparisons, reduced chrome, a public audience window, qualitative tissue explanations, local demo assets and eight mechanics categories/17 variations. No lecture creation is restored.
 

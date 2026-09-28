@@ -44,6 +44,8 @@ src/
 
 Conventions:
 
+- `backend/scene_analysis_appliances.py` holds strict appliance facts/reference validation for the read-only scene explanation route; the endpoint and provider instructions remain in `scene_analysis.py`.
+
 - `public/fonts/` owns locally served variable fonts and their license/source records; `public/audience.css` styles the projection window and `public/favicon.svg` supplies the icon. `scripts/check-demo.mjs` checks the corresponding exported assets.
 
 - A feature folder owns its components, tests, and stylesheets; stylesheets over 300 lines are an `@import` index plus ordered partials in `<name>.styles/` so the cascade order is explicit.

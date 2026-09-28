@@ -62,6 +62,8 @@ Optional text-only AI interpreter — the app fully works without it; local dete
 - `main.py` (~150 lines) keeps the app, `/health`, provider calls and the teaching route, re-exporting from `core.py`, `commands.py`, `teaching_schema.py`, `teaching_prompts.py`, `teaching_source.py` and `teaching_validation.py`; `mechanics.py` (text-intent validation, not physics), `classroom_language.py` (wording normalization, mirrored by frontend fixtures), `phone_bridge.py` (separate token-gated proxy app, port 8001).
 - The frontend discovers the service via Settings (default `http://127.0.0.1:8000`), localStorage, or same-origin `/forma-runtime-config.json`. Both sides validate independently; the AI can never bypass local bounds.
 
+`scene-analysis.ts` projects configured support, anchorage, wire, elastic and expander facts for the read-only explanation route. `scene_analysis_appliances.py` validates the bounded server contract, with anonymous fixed-anchor aliases and no appliance names. Configured loads remain distinct from current/revealed calculated results. Frontend and backend versions must match this required contract (Phase 3.16).
+
 ## Model assets
 
 - Runtime: `public/models/forma-teaching-v1.glb` (28 crowns + 28 roots + 2 gums, ~211k triangles, **units are millimetres**) + `.json` metadata sidecar (pivots, anatomical frames, calibration). Loaded by `lib/anatomy-assets.ts`; several vitest suites read these files directly.

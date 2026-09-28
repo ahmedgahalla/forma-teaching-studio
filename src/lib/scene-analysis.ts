@@ -1,5 +1,11 @@
 import { emptyPose, type Transforms, type Vec3 } from './model';
-import type { MechanicsExperiment, WireSection } from './mechanics/types';
+import type {
+  ForceLaw,
+  MechanicsEndpoint,
+  MechanicsExperiment,
+  WireSection,
+} from './mechanics/types';
+import { SUPPORT_PRESETS } from './mechanics/presets';
 
 export type SceneAnalysisContext = {
   synthetic: boolean;
@@ -8,6 +14,12 @@ export type SceneAnalysisContext = {
   teeth: { id: string; translationMm: Vec3; rotationDeg: Vec3; locked: boolean }[];
   layers: { roots: boolean; gingiva: boolean; bone: boolean };
   appliances: {
+    support: {
+      preset: keyof typeof SUPPORT_PRESETS;
+      translationNPerMm: number;
+      rotationNmmPerRad: number;
+    } | null;
+    fixedTeeth: string[];
     bracketTeeth: string[];
     wires: {
       teeth: string[];
@@ -15,6 +27,15 @@ export type SceneAnalysisContext = {
       section: WireSection;
       expansionMm: number;
       torqueDeg: number;
+    }[];
+    tads: { id: string; position: Vec3 }[];
+    elastics: { from: MechanicsEndpoint; to: MechanicsEndpoint; law: ForceLaw }[];
+    expanders: {
+      left: string[];
+      right: string[];
+      activationMm: number;
+      stiffnessNPerMm: number;
+      palateStiffnessNPerMm: number | null;
     }[];
     tadCount: number;
     elasticCount: number;
@@ -52,7 +73,13 @@ export function sceneAnalysisContext(input: {
   lesson?: SceneAnalysisContext['lesson'];
 }): SceneAnalysisContext {
   const config = input.mechanics?.config,
-    calculation = input.mechanics?.result;
+    calculation = input.mechanics?.result,
+    support = config ? SUPPORT_PRESETS[config.support] : null;
+  const anchorIds = new Map(config?.tads.map((tad, i) => [tad.id, `tad-${i + 1}`]));
+  const endpoint = (value: MechanicsEndpoint): MechanicsEndpoint =>
+    value.kind === 'tooth'
+      ? { kind: 'tooth', tooth: value.tooth, local: [...value.local] }
+      : { kind: 'tad', id: anchorIds.get(value.id)! };
   const result =
     calculation &&
     input.synthetic &&
@@ -75,6 +102,15 @@ export function sceneAnalysisContext(input: {
     }),
     layers: { roots: input.roots, gingiva: input.gums, bone: input.bone },
     appliances: {
+      support:
+        config && support
+          ? {
+              preset: config.support,
+              translationNPerMm: support.translationNPerMm,
+              rotationNmmPerRad: support.rotationNmmPerRad,
+            }
+          : null,
+      fixedTeeth: [...(config?.fixedTeeth || [])],
       bracketTeeth: Object.keys(config?.brackets || {}),
       wires:
         config?.wires.map(wire => ({
@@ -90,6 +126,30 @@ export function sceneAnalysisContext(input: {
                 },
           expansionMm: wire.expansionMm,
           torqueDeg: wire.torqueDeg,
+        })) || [],
+      tads:
+        config?.tads.map(tad => ({ id: anchorIds.get(tad.id)!, position: [...tad.position] })) ||
+        [],
+      elastics:
+        config?.elastics.map(elastic => ({
+          from: endpoint(elastic.from),
+          to: endpoint(elastic.to),
+          law:
+            elastic.law.kind === 'constant'
+              ? { kind: 'constant', forceN: elastic.law.forceN }
+              : {
+                  kind: 'spring',
+                  stiffnessNPerMm: elastic.law.stiffnessNPerMm,
+                  restLengthMm: elastic.law.restLengthMm,
+                },
+        })) || [],
+      expanders:
+        config?.expanders.map(expander => ({
+          left: [...expander.left],
+          right: [...expander.right],
+          activationMm: expander.activationMm,
+          stiffnessNPerMm: expander.stiffnessNPerMm,
+          palateStiffnessNPerMm: expander.palateStiffnessNPerMm ?? null,
         })) || [],
       tadCount: config?.tads.length || 0,
       elasticCount: config?.elastics.length || 0,

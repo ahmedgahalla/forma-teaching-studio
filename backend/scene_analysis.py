@@ -4,13 +4,10 @@ from typing import Annotated, Callable, Literal, Union
 
 from fastapi import APIRouter, HTTPException
 from openai import APIError, OpenAI
-from pydantic import BaseModel, ConfigDict, Field, ValidationError, field_validator, model_validator
+from pydantic import Field, ValidationError, field_validator, model_validator
 
-from mechanics import Material, Section, Tooth
-
-
-class Strict(BaseModel):
-    model_config = ConfigDict(extra="forbid", strict=True, allow_inf_nan=False)
+from mechanics import Tooth
+from scene_analysis_appliances import SceneAppliances, Strict
 
 
 Coordinate = Annotated[float, Field(ge=-200, le=200)]
@@ -31,22 +28,6 @@ class SceneLayers(Strict):
     roots: bool
     gingiva: bool
     bone: bool
-
-
-class SceneWire(Strict):
-    teeth: list[Tooth] = Field(min_length=2, max_length=32)
-    material: Material
-    section: Section
-    expansionMm: float = Field(ge=-2, le=2)
-    torqueDeg: float = Field(ge=-20, le=20)
-
-
-class SceneAppliances(Strict):
-    bracketTeeth: list[Tooth] = Field(max_length=32)
-    wires: list[SceneWire] = Field(max_length=4)
-    tadCount: int = Field(ge=0, le=8)
-    elasticCount: int = Field(ge=0, le=12)
-    expanderCount: int = Field(ge=0, le=1)
 
 
 class SceneResult(Strict):
@@ -76,14 +57,11 @@ class SceneContext(Strict):
         available = {tooth.id for tooth in self.teeth}
         if len(available) != len(self.teeth):
             raise ValueError("Scene tooth IDs must be unique.")
-        for ids in [self.selectedIds, self.appliances.bracketTeeth, *[wire.teeth for wire in self.appliances.wires]]:
-            if len(set(ids)) != len(ids) or not set(ids) <= available:
-                raise ValueError("Scene references must be unique and available.")
-        for wire in self.appliances.wires:
-            if not set(wire.teeth) <= set(self.appliances.bracketTeeth):
-                raise ValueError("Wire targets require installed brackets.")
-            if len({int(tooth[0]) <= 2 for tooth in wire.teeth}) != 1:
-                raise ValueError("Each wire must belong to one arch.")
+        if len(set(self.selectedIds)) != len(self.selectedIds) or not set(self.selectedIds) <= available:
+            raise ValueError("Scene references must be unique and available.")
+        self.appliances.validate_targets(available)
+        if self.result is not None and self.appliances.support is None:
+            raise ValueError("Calculated teaching results require a configured experiment.")
         if self.result is not None and not self.synthetic:
             raise ValueError("Calculated teaching results require synthetic anatomy.")
         return self
@@ -133,10 +111,22 @@ Axes are the application's fixed scene frame; do not infer clinical directions f
 axis unless the input identifies them. Selection is distinct from visible arch.
 Installed brackets alone do not move teeth. A wire or elastic count alone does not prove
 activation or a calculated result. If result is null, no current calculated response has
-been supplied: do not claim displacement, force, stress, equilibrium or treatment success.
+been supplied: do not claim calculated displacement, force, stress, equilibrium or success.
 The appliances fields describe the configured mechanics experiment. An authored lesson
 may show separate visual appliances described in its lesson text; do not claim that zero
 configured mechanics appliances means the lesson has no visible brackets or wires.
+Support coefficients are virtual teaching assumptions, not measured tissue properties.
+fixedTeeth describes mechanical anchorage; a tooth's locked flag only prevents geometric
+editing and does not imply mechanical anchorage. Null support means no configured experiment.
+Elastic constant forceN is a configured load in newtons, not a calculated or measured force.
+Spring stiffnessNPerMm and restLengthMm are inputs, not proof of extension or current tension.
+Expander activationMm, stiffnessNPerMm and optional palateStiffnessNPerMm are configured
+inputs, not calculated opening, force or biological change; null palate stiffness means
+that optional virtual compliance is absent. TAD positions use scene-space millimetres;
+tooth attachment local coordinates use each tooth's local frame. TAD IDs are anonymous
+connection references, not patient data or assessed surgical locations. This context omits
+reference tooth origins, orientation frames and bracket attachment coordinates. Do not infer
+load directions, moment arms, net forces or movement outcomes from this incomplete geometry.
 When result exists, quote actual supplied values and retain its assumptions and warnings.
 Its maxima describe the full calculated response; the shown tooth edits may instead be
 at an intermediate playback position. Do not describe those maxima as the current
@@ -170,7 +160,7 @@ def analyze_with_openai(payload: AnalysisRequest) -> SceneExplanation:
         response = client.responses.parse(
             model=model,
             input=[{"role": "system", "content": ANALYSIS_INSTRUCTIONS},
-                   {"role": "user", "content": payload.model_dump_json()}],
+                   {"role": "user", "content": payload.model_dump_json(by_alias=True)}],
             text_format=SceneExplanation, max_output_tokens=1800, store=False, **options,
         )
     if response.output_parsed is None:

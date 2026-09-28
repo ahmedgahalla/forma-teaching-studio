@@ -29,7 +29,9 @@ def scene_request():
                 "teeth": ["11", "21"], "material": "stainless-steel",
                 "section": {"shape": "round", "diameterMm": 0.4064},
                 "expansionMm": 0.5, "torqueDeg": 0,
-            }], "tadCount": 0, "elasticCount": 0, "expanderCount": 0},
+            }], "support": {"preset": "standard", "translationNPerMm": 100, "rotationNmmPerRad": 1000},
+                "fixedTeeth": [], "tads": [], "elastics": [], "expanders": [],
+                "tadCount": 0, "elasticCount": 0, "expanderCount": 0},
             "result": None, "lesson": None,
         },
     }

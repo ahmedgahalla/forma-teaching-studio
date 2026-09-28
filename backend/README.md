@@ -38,6 +38,16 @@ Keep this development server bound to `127.0.0.1`. It has no authentication, ten
 
 ## Request and response
 
+### Read-only scene explanation
+
+`POST /api/analyze-teaching` accepts a question and explicit scene facts. Alongside tooth edits, layers, wire settings and the active public lesson, its appliance context includes virtual support preset/coefficient values, mechanical fixed teeth, anonymous fixed-anchor positions, elastic endpoints/load laws and expander activation/stiffness inputs. Editing locks do not imply mechanical anchorage. Appliance counts must match their lists, and all references and numerical bounds are validated before the provider is called.
+
+The frontend replaces fixed-anchor names with request-local aliases and omits elastic/expander names and arbitrary metadata. Configured forces are inputs, not calculated results. Hidden or stale results are excluded; only a current, revealed synthetic result supplies response maxima. The explanation endpoint returns text only and cannot edit the scene or infer an appliance outcome from incomplete geometry.
+
+Phase 3.16 requires the expanded appliance fields, including explicit null/empty values when no mechanics experiment exists. Update the frontend and restart the backend from the same revision; mixed versions are rejected rather than filled with invented defaults. See [the phase contract and verification](../docs/phases/phase-3-demo-path/3.16-analysis-mechanics.md).
+
+### Teaching command response
+
 `GET /health` returns service status, model name, whether a key is configured, and a safe `provider` label: `OpenAI`, `OpenRouter`, or `Configured AI provider`. It does not call the provider, verify the key, or check available credit. It never returns the key or configured base URL.
 
 The dental command model below is embedded in teaching actions (a dental step inside a teaching plan carries exactly one of these command objects) and is validated server-side against the request's tooth-selection context (`selected_tooth`, `selected_teeth`, `available_teeth`):
