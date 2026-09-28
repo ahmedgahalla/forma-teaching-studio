@@ -22,6 +22,8 @@ Choose **Lecture** for the finished translation-versus-tipping sample, or **Expl
 
 Run `npm run demo` after setup to build, verify local assets and open Nael Teaching Studio. Once built, `npm start -- --open` serves the exported app without rebuilding. Fonts, icon, synthetic model and mechanics worker are local; optional AI and browser speech recognition may still need a network. `npm run check:demo` checks exported files, not microphone or projector operation.
 
+For optional OpenAI commands and explanations, configure the private backend settings and use `npm run start:ai` to start the app and AI backend together. See [local AI setup](backend/README.md#start-the-app-and-local-ai-together), including port 3012 and reconnecting saved profiles. The [Professor Nael pitch](docs/pitch/README.md) records the narrated feature-overview video and its production source.
+
 In Explore, open **Tools → Mechanics examples** for eight teaching categories with 17 variations: crown pull, counter-couple, axial rotation, inclination, intrusion/extrusion, molar load balance, anchorage and rectangular-wire effects. Ask the displayed prediction question, then choose **Load and calculate**; the existing Predict before reveal option can keep results hidden. These are initial responses in the synthetic engineering model; biology diagrams remain separate qualitative explanations. See [scope, research and verification](docs/phases/phase-3-demo-path/3.15-lecture-mechanics.md).
 
 ## Conversational control and model explanation
