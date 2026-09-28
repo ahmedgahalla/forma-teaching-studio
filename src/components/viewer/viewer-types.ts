@@ -61,6 +61,8 @@ export type ViewerProps = {
   archCurve?: Vec3[];
   removableRetainer?: boolean;
   isolateSelection?: boolean;
+  /** Enlarge the selected tooth while keeping neighboring enamel and roots faintly visible. */
+  teachingFocus?: boolean;
   mechanics?: MechanicsExperiment | null;
   mechanicsForces?: boolean;
   mechanicsRevealed?: boolean;

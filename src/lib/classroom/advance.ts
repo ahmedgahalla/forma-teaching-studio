@@ -2,14 +2,14 @@ import type { TeachingAction } from '../lecture';
 import { advanceMechanicsContext } from '../mechanics-commands';
 import { WORKFLOWS } from '../workflows';
 import { advanceLessonControl } from './lesson-controls';
-import { advancePresentation } from './presentation';
+import { advanceLocalSceneControl } from './mechanics-example';
 import { advanceWorkspace } from './advance-workspace';
 import { advanceCase } from './advance-case';
 import { advanceToothStudy } from './advance-tooth-study';
 import { DEMO_IDS, type TeachingContext } from './types';
 type Overrides = { arch: boolean; view: boolean; selection: boolean };
 export function advance(context: TeachingContext, action: TeachingAction, overrides: Overrides) {
-  if (advancePresentation(context, action)) return;
+  if (advanceLocalSceneControl(context, action)) return;
   const workflow = () => {
     if (context.mode === 'workflow' && context.workflowId === 'anatomy')
       return {

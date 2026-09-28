@@ -44,13 +44,15 @@ describe('synthetic support anatomy', () => {
   });
 
   it('leaves all source crown, root and gingiva positions, indices and authored poses untouched', () => {
+    const bytes = (array: ArrayBufferView) =>
+      Buffer.from(new Uint8Array(array.buffer, array.byteOffset, array.byteLength));
     const source = [
       ...model.teeth.flatMap(t => [t.geometry, t.rootGeometry!]),
       ...model.gums.map(g => g.geometry),
     ];
     const snapshots = source.map(g => ({
-      position: [...g.getAttribute('position').array],
-      index: g.index && [...g.index.array],
+      position: bytes(g.getAttribute('position').array),
+      index: g.index && bytes(g.index.array),
     }));
     const positions = model.teeth.map(t => [...t.position]);
     const kit = createTeachingAnatomy(model);
@@ -62,8 +64,10 @@ describe('synthetic support anatomy', () => {
     );
     kit.dispose();
     source.forEach((g, i) => {
-      expect([...g.getAttribute('position').array]).toEqual(snapshots[i].position);
-      expect(g.index && [...g.index.array]).toEqual(snapshots[i].index);
+      expect(bytes(g.getAttribute('position').array).equals(snapshots[i].position)).toBe(true);
+      const index = snapshots[i].index;
+      expect(g.index === null).toBe(index === null);
+      if (g.index && index) expect(bytes(g.index.array).equals(index)).toBe(true);
     });
     expect(model.teeth.map(t => t.position)).toEqual(positions);
   });

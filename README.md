@@ -14,6 +14,14 @@ Start with the [combined workspace guide](docs/COMBINED_WORKSPACE.md) to move be
 
 Everything after that is automatic: setup installs frontend and backend dependencies, configures git, and enables hooks that re-sync dependencies whenever a pull changes `package-lock.json` or `backend/requirements.txt`. Developers and AI tools follow [AGENTS.md](AGENTS.md).
 
+## Ready-made lecture and demo launch
+
+Choose **Lecture** for the finished translation-versus-tipping sample, or **Explore** for free model work. Lecture has closer tooth focus, prediction/reveal, same-camera comparisons and optional tissue-response diagrams. There is no lecture creation screen. **Open audience window** shows the model and public lesson content; keep notes on the teacher window and project/share only the audience window. Sharing the whole desktop still exposes the teacher screen. Audience capture support must be checked on the presenting browser.
+
+Run `npm run demo` after setup to build, verify local assets and open Forma. Once built, `npm start -- --open` serves the exported app without rebuilding. Fonts, icon, synthetic model and mechanics worker are local; optional AI and browser speech recognition may still need a network. `npm run check:demo` checks exported files, not microphone or projector operation.
+
+In Explore, open **Tools → Mechanics examples** for eight teaching categories with 17 variations: crown pull, counter-couple, axial rotation, inclination, intrusion/extrusion, molar load balance, anchorage and rectangular-wire effects. Ask the displayed prediction question, then choose **Load and calculate**; the existing Predict before reveal option can keep results hidden. These are initial responses in the synthetic engineering model; biology diagrams remain separate qualitative explanations. See [scope, research and verification](docs/phases/phase-3-demo-path/3.15-lecture-mechanics.md).
+
 ## Conversational control and model explanation
 
 Use **Ask AI** to control the scene in natural language, or **Analyze** to discuss the current setup without editing it. Try “For this lecture, could you make the gums disappear and reveal the roots?” or “Would you mind moving the upper front teeth buccally half a millimeter?” The application still validates every action, target and numeric amount; broad wording does not become unrestricted treatment planning.

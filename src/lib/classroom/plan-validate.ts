@@ -142,6 +142,8 @@ export function validateTeachingPlan(
   let expectedMechanics: MechanicsAction[] = [];
   for (const [index, raw] of requestedActions.entries()) {
     const action = validateAction(raw, next);
+    if (action.kind === 'mechanics-example' && requestedActions.length !== 1)
+      throw new Error('Load a mechanics example as a separate request.');
     if (action.kind === 'presentation' && requestedActions.length !== 1)
       throw new Error('Use one lecture control as a separate request, then change the scene.');
     if (

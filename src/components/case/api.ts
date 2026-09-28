@@ -40,6 +40,7 @@ import type { casePathAudit } from '@/lib/case-path-audit';
 import type { DENTAL_ARRANGEMENTS } from '@/lib/dental-arrangements';
 import type { TryAction, TryState } from '@/lib/try-mode';
 import type { MechanicsAction, MechanicsExperiment } from '@/lib/mechanics';
+import type { MechanicsExampleId } from '@/lib/mechanics-examples/catalog';
 import type { PointedReference } from '@/lib/mechanics-commands';
 import type { WorkflowTransfer } from '@/lib/workflow-transfer';
 import type { ClassroomSnapshot, LessonSnapshot } from './types';
@@ -152,6 +153,11 @@ export interface CaseStudioApi extends StateBundle {
   restoreClassroom: (saved: ClassroomSnapshot) => void;
   importWorkflowSetup: (setup: WorkflowTransfer, originSnapshot: unknown) => void;
   applyMechanics: (action: MechanicsAction, signal?: AbortSignal) => Promise<boolean>;
+  loadMechanicsExample: (
+    id: MechanicsExampleId,
+    variant: string,
+    signal?: AbortSignal,
+  ) => Promise<boolean>;
   sendMechanics: (actions: MechanicsAction[], summary: string) => void;
   chooseTool: (next: 'orbit' | 'translate' | 'rotate') => void;
   exportShown: () => void;

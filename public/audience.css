@@ -1,0 +1,121 @@
+body.audience-body {
+  margin: 0;
+  min-width: 0;
+  overflow: auto;
+  background: var(--ui-bg, #0b1319);
+  color: var(--ui-text, #edf6f5);
+  font-family: 'DM Sans', Arial, sans-serif;
+}
+.audience-view {
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  min-height: 100dvh;
+  height: 100dvh;
+  padding: clamp(12px, 2vw, 32px);
+  gap: 16px;
+}
+.audience-heading {
+  flex-shrink: 0;
+}
+.audience-heading p {
+  margin: 0 0 6px;
+  color: var(--ui-muted, #a1b4bd);
+  font-size: clamp(14px, 1.2vw, 22px);
+}
+.audience-heading h1 {
+  margin: 0;
+  font-family: Manrope, Arial, sans-serif;
+  font-size: clamp(22px, 2.4vw, 40px);
+  line-height: 1.2;
+}
+.audience-stage {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  flex: 1;
+  min-height: 220px;
+  gap: 20px;
+}
+.audience-stage[data-biology='true'] {
+  grid-template-columns: minmax(0, 7fr) minmax(260px, 3fr);
+}
+.audience-model {
+  position: relative;
+  min-height: 0;
+  min-width: 0;
+  overflow: hidden;
+  border-radius: 16px;
+  background: var(--ui-bg, #0b1319);
+}
+.audience-model video {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+.audience-model > p {
+  position: absolute;
+  inset: 40% 12px auto;
+  text-align: center;
+  font-size: 20px;
+}
+.audience-biology {
+  overflow: auto;
+  min-height: 0;
+  padding-right: 6px;
+}
+.audience-biology .biology-scope,
+.audience-biology .biology-vignette p {
+  font-size: clamp(14px, 1.15vw, 20px);
+}
+.audience-biology .biology-limits,
+.audience-biology .biology-sources {
+  font-size: clamp(12px, 1vw, 16px);
+}
+.audience-biology .biology-vignette strong {
+  font-size: clamp(18px, 1.4vw, 24px);
+}
+.audience-question {
+  flex-shrink: 0;
+  max-height: 30dvh;
+  overflow: auto;
+  padding: 16px 22px;
+  border-radius: 14px;
+  background: var(--ui-panel, #111f28);
+  border-left: 4px solid var(--ui-accent, #7ce9d3);
+}
+.audience-question h2 {
+  margin: 0;
+  font-size: clamp(20px, 2vw, 34px);
+  line-height: 1.35;
+}
+.audience-answer {
+  margin: 12px 0 0;
+  color: var(--ui-accent, #7ce9d3);
+  font-size: clamp(18px, 1.6vw, 28px);
+  line-height: 1.45;
+  white-space: pre-wrap;
+}
+.audience-footer {
+  flex-shrink: 0;
+  color: var(--ui-muted, #a1b4bd);
+  font-size: clamp(11px, 1vw, 16px);
+}
+@media (max-width: 760px) {
+  .audience-view {
+    height: auto;
+  }
+  .audience-stage,
+  .audience-stage[data-biology='true'] {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .audience-model {
+    min-height: 45dvh;
+  }
+  .audience-biology {
+    max-height: 55dvh;
+  }
+  .audience-question {
+    max-height: none;
+  }
+}

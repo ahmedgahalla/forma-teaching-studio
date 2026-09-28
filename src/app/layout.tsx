@@ -4,6 +4,7 @@ import './studio-theme.css';
 import { StudioThemeProvider } from '@/components/shared/StudioTheme';
 export const metadata: Metadata = {
   title: 'Forma · Teaching Studio',
+  icons: { icon: '/favicon.svg' },
   description:
     'A voice-controlled 3D classroom for orthodontic demonstrations. Explore tooth movements, brackets, roots, attachments, and guided teaching sequences.',
 };

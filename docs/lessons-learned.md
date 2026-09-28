@@ -179,3 +179,52 @@ Numbers 17–19 were checked against the current lessons and the parallel Phase 
 - **Root cause:** the guard covered tooth movement and scenario changes but omitted the separate attachment action kind.
 - **Prevention:** guard attachment edits through the same runtime boundary as movements; regression tests prove rejection during teaching and allowance after explicit exploration.
 - **Status:** automated · **Count:** 1
+
+## 24. Observe canvas replacement without observing the render loop
+
+- **Mistake caught during implementation:** [Phase 3.15 integration review](reviews/from-builder/2026-09-27-lecture-mechanics-audit.md) found the first audience-window observer subscribed to every descendant of the viewport, including labels rewritten during rendering.
+- **Root cause:** canvas replacement was treated as arbitrary subtree mutation, despite the canvas and its host having stable direct-parent boundaries.
+- **Prevention:** observe only the viewport's direct children and the current canvas host's direct children. Preserve model-replacement recovery while avoiding label/text updates; the audience lifecycle regression covers replacement and ignores label-only mutations.
+- **Status:** automated · **Count:** 1
+
+## 25. A mechanics configuration is not proof of a displayed mechanics result
+
+- **Mistake caught during implementation:** [Phase 3.15 review](reviews/from-builder/2026-09-27-lecture-mechanics-audit.md) found example loading permitted during a partial geometric replay after an earlier experiment, jumping to its unseen endpoint.
+- **Root cause:** the guard checked for a mechanics object, although geometric Apply retains a rebased configuration with `result: null` and the viewer then displays geometric replay.
+- **Prevention:** use the same visible-source distinction as the viewer: only an actual mechanics result can reuse its unloaded reference while partway through playback. Regression coverage checks a truthy configuration without a result and preserves valid mechanical-response comparison.
+- **Status:** automated · **Count:** 1
+
+## 26. Heavy independent regression scenarios need distinct test boundaries
+
+- **Mistake:** the existing actual-GLB BVH oracle repeatedly exceeded its aggregate 30-second limit while running three independent poses, although isolated runs could pass.
+- **Root cause:** reference occlusion, crowding and deepbite shared one timeout and one failure label; normal machine load changed whether their combined duration passed.
+- **Prevention:** [Phase 3.15](phases/phase-3-demo-path/3.15-lecture-mechanics.md) gives each existing pose a named case with its own fresh asset and unchanged 30-second limit. Keep the reference algorithm, exact results, deepbite crossing assertion and geometry/cache immutability checks. Do not remove assertions or change production behavior to satisfy timing.
+- **Status:** automated · **Count:** 1
+
+## 27. Lecture explanations must follow the displayed lecture state
+
+- **Mistake:** [backend integration review](reviews/from-builder/2026-09-28-analysis-context-and-cancellation.md) found Analyze forwarding an old prepared-case context during the fixed lecture, losing static steps and misreporting revealed answers as hidden.
+- **Root cause:** the session decorator updated command/narration context but inherited the separate analysis projection unchanged.
+- **Prevention:** project current lecture title, question, comparison and revealed answer at the same session boundary; exclude notes and hidden answers, and preserve live scene context during Explore. Add static-step, reveal/hide and comparison regressions.
+- **Status:** automated · **Count:** 1
+
+## 28. Mechanics facts must distinguish anchorage from editing locks
+
+- **Mistake:** the same [review](reviews/from-builder/2026-09-28-analysis-context-and-cancellation.md) found fixed supports and support stiffness changes generating identical Analyze facts.
+- **Root cause:** the explanation payload reduced mechanics to wires/counts and geometric editing locks, omitting the configured load/support system.
+- **Prevention:** add bounded matching client/server facts for supports, fixed teeth and connection/load laws, and compare payloads for otherwise identical rigs. Preserve hidden-result exclusions. Implementation remains pending.
+- **Status:** noted · **Count:** 1
+
+## 29. Frontend cancellation must reach the provider request
+
+- **Mistake:** the same [review](reviews/from-builder/2026-09-28-analysis-context-and-cancellation.md) reproduced an aborted ASGI caller while the synchronous provider call continued.
+- **Root cause:** browser cancellation and stale-result protection do not cancel a blocking SDK call running in a server worker thread.
+- **Prevention:** use async provider operations with disconnect cancellation and a shared deadline across initial/repair calls; test cancellation at both stages and preserve error sanitization. Implementation remains pending.
+- **Status:** noted · **Count:** 1
+
+## 30. Runtime journey fixtures should match loaded-model ownership
+
+- **Mistake:** [Phase 3.15](phases/phase-3-demo-path/3.15-lecture-mechanics.md) comparison journeys exceeded their test timeout while repeatedly rebuilding all procedural crowns, roots and gums. An anatomy immutability assertion also spent its budget converting large buffers into arrays for deep equality.
+- **Root cause:** the tests paid for fallback geometry generation on every step instead of matching the app's loaded canonical model, and used expensive scalar comparisons for unchanged binary geometry.
+- **Prevention:** reuse canonical geometry with fresh per-load metadata in runtime fixtures, dispose it at suite teardown, and compare independent complete byte snapshots for geometry immutability. Preserve all journey actions, pose assertions and timeouts; retain separate geometry-generation coverage.
+- **Status:** automated · **Count:** 1

@@ -15,6 +15,7 @@ export function lectureHarness() {
     shown = snapshot.lesson.transforms;
   const original = { current: null as ClassroomSnapshot | null };
   const paused = { current: null as ClassroomSnapshot | null };
+  const comparison = { current: null as ClassroomSnapshot | null };
   const refs = { pendingView: { current: null } } as unknown as CaseRefs;
   const set = (key: keyof ClassroomSnapshot, value: unknown) => {
     snapshot = { ...snapshot, [key]: value };
@@ -69,6 +70,7 @@ export function lectureHarness() {
       session.documentId ? document : undefined,
       original,
       paused,
+      comparison,
     ).decorate({
       context: () => ({
         mode: 'case',

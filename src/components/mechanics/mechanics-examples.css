@@ -1,0 +1,34 @@
+.mechanics-examples {
+  margin: 12px 0;
+  padding: 12px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+}
+.mechanics-examples summary {
+  cursor: pointer;
+  font-weight: 650;
+}
+.mechanics-examples p {
+  margin: 10px 0;
+  font-size: 12px;
+  line-height: 1.5;
+}
+.mechanics-examples label {
+  display: grid;
+  gap: 6px;
+  margin: 10px 0;
+  font-size: 12px;
+}
+.mechanics-examples select {
+  width: 100%;
+  min-width: 0;
+}
+.mechanics-examples .button {
+  width: 100%;
+}
+.mechanics-example-question {
+  font-weight: 650;
+}
+.mechanics-example-command {
+  overflow-wrap: anywhere;
+}

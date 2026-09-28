@@ -12,11 +12,13 @@ import { validateApplianceDisplay } from '@/lib/appliance-display';
 import type { CaseRefs, CaseStudioApi } from './api';
 import type { ClassroomSnapshot } from './types';
 import type { Command } from '@/lib/commands';
+import { preflightMechanicsExample } from './mechanics-example';
 
 export function createCasePreflight(api: CaseStudioApi, refs: CaseRefs) {
   const preflight = (actions: TeachingAction[], from?: unknown) =>
     ((actions, from) => {
       const saved = from as ClassroomSnapshot | undefined;
+      if (preflightMechanicsExample(api, actions, saved)) return;
       let transforms = saved?.history.current || api.plan.current,
         previewStage = saved?.lesson.stage ?? api.stage,
         count = saved?.lesson.stages ?? api.stages,

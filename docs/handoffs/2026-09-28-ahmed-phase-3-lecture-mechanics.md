@@ -1,0 +1,13 @@
+# Handoff — lecture presentation and mechanics
+
+**Branch:** `ahmed/phase-3-lecture-mechanics` · **Base:** PR #14 at `6f934e0` · **Phase:** [3.15](../phases/phase-3-demo-path/3.15-lecture-mechanics.md)
+
+The owner approved all six proposed lecture improvements plus research-backed mechanics. Implemented selected-tooth focus, absolute translation/tipping comparison with exact return, reduced lecture chrome, a separate read-only audience window, tissue-response illustrations and local presentation assets. Added eight mechanics categories/17 variations, loaded through existing validated runtime/solver paths. Kept the ready-made sample and removed-authoring direction.
+
+Research and limits are in `docs/research/2026-09-27-orthodontic-{mechanics,biology}.md`. No patient prediction, clinical force recommendation, new physical solver or automatic treatment plan is claimed. Notes are private only when the audience window alone is projected/shared; screen mirroring still shows the teacher window.
+
+Local verification passed: 2,545 frontend tests in 111 files (thread workers, one worker, isolation and original timeouts retained), 482 backend tests, typecheck, zero-warning lint, formatting, 415-file limits, production build and exported demo-asset check. Earlier worker-start/timing failures and the test-only fixture/equality corrections are recorded in the phase doc. Draft PR: [#15](https://github.com/ahmedgahalla/forma-teaching-studio/pull/15), stacked on #14. Real browser access remains blocked by policy; do not infer screenshot, DPR, microphone, WebGL stream or projector verification from DOM/source tests. The [auditor inbox item](../reviews/from-builder/2026-09-27-lecture-mechanics-audit.md) records the remaining acceptance work.
+
+Next for this slice: audit the stack, run applicable CI against main, complete the real-device/educator review and rehearse the estimated 3–4 minute sample. The preview server was restarted at port 3012 after the interrupted check sessions were confirmed absent. The primary checkout and its separate voice branch were not modified.
+
+The broader owner goal remains active. Independent backend review identified two next implementation targets in the [analysis/cancellation review](../reviews/from-builder/2026-09-28-analysis-context-and-cancellation.md): expose actual bounded mechanics support/load facts to Analyze, then propagate Stop/disconnect and a total deadline through async provider requests/repair. The related sample-lecture Analyze context defect is already fixed in this slice with ten regressions. Keep the remaining backend work separately numbered; do not call the broad app goal complete while those findings and real-device acceptance are unresolved.

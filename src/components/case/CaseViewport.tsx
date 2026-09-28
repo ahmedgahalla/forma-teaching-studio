@@ -1,29 +1,42 @@
 'use client';
+import type { RefObject } from 'react';
 import type { CaseStudioApi } from './api';
 import { Vector3 } from 'three';
 import type { Vec3 } from '@/lib/model';
 import { Focus, MousePointer2, Move3D, Rotate3D } from 'lucide-react';
 import Viewer from '../viewer/Viewer';
-import { LecturePointer } from '../lecture/LectureViewTools';
 import { toothMatrix } from '@/lib/analysis';
 import { applianceView } from '@/lib/appliance-display';
-import { mechanicsResponseCaption } from '@/lib/mechanics-presentation';
 import { VoiceHud, VOICE_VIEWPORT_PROPS } from '../teaching/VoiceHud';
 import { ToothStudyCard } from './ToothStudyCard';
 import { GlossaryCard } from './GlossaryCard';
 import { TOOTH_STUDY_DISPLAY } from '../viewer/tooth-study-display';
+import { CaseViewportDetails } from './CaseViewportDetails';
 
-export function CaseViewport({ api }: { api: CaseStudioApi }) {
+export function CaseViewport({
+  api,
+  audienceSource,
+  lecturePresentation,
+  teachingFocus,
+}: {
+  api: CaseStudioApi;
+  audienceSource?: RefObject<HTMLElement | null>;
+  lecturePresentation?: boolean;
+  teachingFocus?: boolean;
+}) {
   const { viewer, sceneInteraction } = api;
   const editing = !api.toothStudy && !api.lecture && (api.toolsOpen || api.mobilePanel === 'tools');
   return (
     <>
       <section
+        ref={audienceSource}
+        data-lecture-presentation={lecturePresentation || undefined}
         {...VOICE_VIEWPORT_PROPS.case}
         onPointerDownCapture={sceneInteraction}
         aria-label="3D workspace"
       >
         <Viewer
+          teachingFocus={teachingFocus}
           toothStudy={api.toothStudy}
           onReferenceInteraction={api.teaching.referenceInteraction}
           mechanics={
@@ -204,63 +217,7 @@ export function CaseViewport({ api }: { api: CaseStudioApi }) {
             </button>
           </div>
         )}
-        <div className="viewport-selection">
-          <MousePointer2 size={14} />
-          <span>
-            {api.selectedIds.length === 1 ? (
-              <>
-                Tooth <strong>{api.selected}</strong>
-              </>
-            ) : (
-              <strong>{api.selectedIds.length} teeth selected</strong>
-            )}
-          </span>
-          <span className="selection-line" />
-          <span>{api.selectedIds.length === 1 ? api.tooth.name : api.selectedIds.join(' · ')}</span>
-        </div>
-        <div className="orientation">
-          <span className="axis-y">Y</span>
-          <span className="axis-x">X</span>
-          <span className="axis-z">Z</span>
-          <i />
-        </div>
-        <div className="viewport-hint">
-          {api.measureMode && editing
-            ? 'Pick two crown-surface points'
-            : 'Drag to orbit · Scroll to zoom · Shift-click to select'}
-        </div>
-        <LecturePointer enabled={api.pointer && api.active} onExit={() => api.setPointer(false)} />
-        {api.pointer && (
-          <span className="lecture-pointer-notice">
-            Lecture pointer · Escape or Exit pointer to orbit
-          </span>
-        )}
-        {api.mechanics?.result && !api.sandbox.pending && (
-          <div className="mechanics-scale-badge">
-            {api.responseRevealed
-              ? mechanicsResponseCaption(api.mechanics.result.diagnostics, api.magnification)
-              : 'Predict first · calculated response hidden'}
-          </div>
-        )}
-        {api.mechanics?.result &&
-          !api.sandbox.pending &&
-          api.forceVectors &&
-          api.responseRevealed && (
-            <div className="mechanics-vector-legend">
-              <span>↗ Force direction</span>
-              <span>↻ Moment</span>
-              <small>Arrow size is schematic</small>
-            </div>
-          )}
-        {api.stage < api.stages && (
-          <div className="stage-preview-badge">
-            Stage {api.stage.toFixed(1)} / {api.stages}
-          </div>
-        )}
-        {api.opening > 0 && (
-          <div className="opening-badge">Display separation {api.opening} mm</div>
-        )}
-        {api.roots && <div className="roots-badge">Schematic roots · not reconstructed</div>}
+        <CaseViewportDetails api={api} editing={editing} />
       </section>
       {api.glossaryId ? <GlossaryCard api={api} /> : <ToothStudyCard api={api} />}
     </>

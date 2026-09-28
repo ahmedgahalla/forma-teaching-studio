@@ -7,9 +7,10 @@ import {
 } from '../mechanics-commands';
 import { parseLessonPlan } from './lesson-plan';
 import { parsePresentationPlan } from './presentation';
+import { parseMechanicsExamplePlan } from './mechanics-example';
 import { isGlossaryClose, parseGlossaryPlan } from '../glossary/parser';
 import { advance } from './advance';
-import { copyContext } from './types';
+import { copyContext, type TeachingContext, type TeachingPlan } from './types';
 import {
   clauses,
   isApplianceClause,
@@ -19,7 +20,6 @@ import {
   parseCaseAction,
 } from './parse-clauses';
 import { parseTryActions } from './parse-try';
-import type { TeachingContext, TeachingPlan } from './types';
 import { validateTeachingPlan } from './plan-validate';
 import { isDentalArrangementClause, parseArrangement } from './parse-arrangement';
 import { isNavigationClause, parseNavigation } from './parse-navigation';
@@ -34,7 +34,8 @@ export function buildTeachingPlan(text: string, context: TeachingContext): Teach
   if (typeof text !== 'string' || !text.trim() || text.length > 1500)
     throw new Error('Give a classroom request of at most 1500 characters.');
   const normalized = normalizeSpeechCommand(preserveToothStudyTop(text, context));
-  const presentation = parsePresentationPlan(normalized, context);
+  const presentation =
+    parseMechanicsExamplePlan(normalized, context) || parsePresentationPlan(normalized, context);
   if (presentation) return presentation;
   if (isGlossaryClose(normalized, context)) return parseGlossaryPlan(normalized, context)!;
   const lesson = parseLessonPlan(normalized, context);
@@ -51,7 +52,6 @@ export function buildTeachingPlan(text: string, context: TeachingContext): Teach
     throw new CommandValidationError(
       'Load a dental arrangement as a separate request, then give commands for its model.',
     );
-  // Match complete catalog titles before splitting their commas and conjunctions.
   const caseAction = parseCaseAction(source, context);
   if (caseAction) {
     try {

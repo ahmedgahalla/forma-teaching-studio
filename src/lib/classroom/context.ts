@@ -9,6 +9,7 @@ export function teachingActionMode(
   if (
     action.kind === 'case' ||
     action.kind === 'presentation' ||
+    action.kind === 'mechanics-example' ||
     action.kind === 'dental-arrangement' ||
     action.kind === 'tooth-study' ||
     (action.kind === 'glossary' && action.id !== null) ||

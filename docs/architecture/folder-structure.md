@@ -26,18 +26,25 @@ src/
     teaching/               TeachingController (runtime host), TeachingCommandBar + tests
     workflow/               WorkflowStudio
     lecture/                LectureConsole, LectureViewTools + css/partials + tests
+    lecture-builder/        fixed sample runner, notes/questions, comparison and tissue diagrams
+    lecture-audience/       public-only canvas projection popup, portal and lifecycle tests
     mechanics/              MechanicsPanel, AppliancePalette + css/partials
     try/                    TryPanel, PreviewDecisionBar + css/partials + test
     shared/                 StudioTheme, StageBar, combined-workspace.css
   lib/                      logic by concern (see architecture/overview.md)
     classroom/              teaching-plan parsing/validation package (barrel: lib/classroom.ts)
     mechanics/              the pure solver package
+    mechanics-examples/     validated force-system recipes and primary-model regression tests
+    lecture-documents/      fixed sample data and bounded scene/document validation
+    teaching-biology.ts     qualitative tissue content and research references
     lessons.ts              scripted demonstrations (content as data)
     ...                     one module per concern; content files stay data-only
   workers/                  mechanics worker entry (esbuild → public/workers/)
 ```
 
 Conventions:
+
+- `public/fonts/` owns locally served variable fonts and their license/source records; `public/audience.css` styles the projection window and `public/favicon.svg` supplies the icon. `scripts/check-demo.mjs` checks the corresponding exported assets.
 
 - A feature folder owns its components, tests, and stylesheets; stylesheets over 300 lines are an `@import` index plus ordered partials in `<name>.styles/` so the cascade order is explicit.
 - `lib/` packages (classroom/, mechanics/) keep a barrel at their old path so import sites stay stable.

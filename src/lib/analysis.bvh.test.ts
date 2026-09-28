@@ -102,39 +102,42 @@ describe('dual-BVH exact surface regression', () => {
     findSurfaceIntersections(model, {});
     expect(Object.hasOwn(b, 'boundsTree')).toBe(false);
   });
-  it('matches the previous triangle algorithm on the actual GLB and prepared case poses', async () => {
-    const data = readFileSync('public/models/forma-teaching-v1.glb');
-    const gltf = await new GLTFLoader().parseAsync(
-      data.buffer.slice(data.byteOffset, data.byteOffset + data.byteLength),
-      '',
-    );
-    const base = dentalCaseFromAsset(
-      gltf.scene,
-      JSON.parse(readFileSync('public/models/forma-teaching-v1.json', 'utf8')),
-    );
-    const before = base.teeth.map(t => bytes(t.geometry));
-    const frames = [
-      { model: createTeachingCase(base, 'reference-occlusion').model, transforms: {} },
-      {
-        model: createTeachingCase(base, 'crowding').model,
-        transforms: sampleCaseDemonstration('crowding', 'position-then-rotation', 0.5),
-      },
-      {
-        model: createTeachingCase(base, 'deepbite').model,
-        transforms: sampleCaseDemonstration('deepbite', 'posterior-extrusion', 1),
-      },
-    ];
-    for (const frame of frames)
-      expect(findSurfaceIntersections(frame.model, frame.transforms)).toEqual(
-        priorIntersections(frame.model, frame.transforms),
+  it.each([
+    { name: 'reference occlusion', caseId: 'reference-occlusion', transforms: {} },
+    {
+      name: 'crowding at the position-then-rotation midpoint',
+      caseId: 'crowding',
+      transforms: sampleCaseDemonstration('crowding', 'position-then-rotation', 0.5),
+    },
+    {
+      name: 'deepbite at the posterior-extrusion endpoint',
+      caseId: 'deepbite',
+      transforms: sampleCaseDemonstration('deepbite', 'posterior-extrusion', 1),
+    },
+  ])(
+    'matches the previous triangle algorithm on the actual GLB: $name',
+    async ({ caseId, transforms }) => {
+      // A fresh asset per pose prevents an earlier test from masking geometry mutations.
+      const data = readFileSync('public/models/forma-teaching-v1.glb');
+      const gltf = await new GLTFLoader().parseAsync(
+        data.buffer.slice(data.byteOffset, data.byteOffset + data.byteLength),
+        '',
       );
-    expect(findSurfaceIntersections(frames[2].model, frames[2].transforms).length).toBeGreaterThan(
-      0,
-    );
-    base.teeth.forEach((tooth, i) => {
-      const after = bytes(tooth.geometry);
-      after.forEach((array, j) => expect(array.equals(before[i][j])).toBe(true));
-      expect(Object.hasOwn(tooth.geometry, 'boundsTree')).toBe(false);
-    });
-  }, 30000);
+      const base = dentalCaseFromAsset(
+        gltf.scene,
+        JSON.parse(readFileSync('public/models/forma-teaching-v1.json', 'utf8')),
+      );
+      const before = base.teeth.map(t => bytes(t.geometry));
+      const { model } = createTeachingCase(base, caseId);
+      const intersections = findSurfaceIntersections(model, transforms);
+      expect(intersections).toEqual(priorIntersections(model, transforms));
+      if (caseId === 'deepbite') expect(intersections.length).toBeGreaterThan(0);
+      base.teeth.forEach((tooth, i) => {
+        const after = bytes(tooth.geometry);
+        after.forEach((array, j) => expect(array.equals(before[i][j])).toBe(true));
+        expect(Object.hasOwn(tooth.geometry, 'boundsTree')).toBe(false);
+      });
+    },
+    30000,
+  );
 });

@@ -1,5 +1,7 @@
 import type { CaseRefs, CaseStudioApi } from './api';
-import type { MechanicsAction } from '@/lib/mechanics';
+import type { MechanicsAction, MechanicsExperiment } from '@/lib/mechanics';
+import type { MechanicsExampleId } from '@/lib/mechanics-examples/catalog';
+import { prepareMechanicsExample } from './mechanics-example';
 import { assertTryRestoreUnlocked } from '@/lib/try-mode';
 import { findSurfaceIntersections } from '@/lib/analysis';
 import { attachMechanicsResult, experimentWithoutTad, transitionMechanics } from '@/lib/mechanics';
@@ -17,22 +19,33 @@ export function createMechanicsActions(api: CaseStudioApi, _refs: CaseRefs) {
   const applyMechanics = async (
     action: MechanicsAction,
     signal?: AbortSignal,
+    example?: { experiment: MechanicsExperiment; targets: string[] },
   ): Promise<boolean> => {
+    if (signal?.aborted) throw new DOMException('Calculation cancelled.', 'AbortError');
     if (!api.activeExperiment)
       throw new Error('Mechanical experiments require the synthetic teaching model.');
     if (api.prepared)
       throw new Error('Choose Explore this arrangement before building an experiment.');
-    let experiment = transitionMechanics(api.activeExperiment, action);
+    let experiment = transitionMechanics(example?.experiment ?? api.activeExperiment, action);
     api.setPlaying(false);
     api.setTool('orbit');
     api.setDragPreview(null);
     const publishExperiment = () => {
+      if (example) {
+        api.setSelectedIds(example.targets);
+        api.setSelected(example.targets[0]);
+        api.setForceVectors(true);
+        api.setRoots(true);
+        api.setIsolated(false);
+        api.setArch(Number(example.targets[0][0]) <= 2 ? 'upper' : 'lower');
+        api.setPointed(null);
+      }
       if (action.type === 'brackets' || action.type === 'wire') {
         api.setSelectedIds(action.teeth);
         api.setSelected(action.teeth[0]);
       }
       api.setMechanics(experiment);
-      api.setMechanicsFocus(reduceMechanicsFocus(api.mechanicsFocus, action));
+      api.setMechanicsFocus(reduceMechanicsFocus(example ? {} : api.mechanicsFocus, action));
       api.setPanel('braces');
       api.setApplianceDisplay({ preset: 'none', progress: 0, palate: false });
       api.setBraces(true);
@@ -159,5 +172,9 @@ export function createMechanicsActions(api: CaseStudioApi, _refs: CaseRefs) {
     );
   };
 
-  return { applyMechanics, sendMechanics };
+  const loadMechanicsExample = (id: MechanicsExampleId, variant: string, signal?: AbortSignal) => {
+    const example = prepareMechanicsExample(api, { kind: 'mechanics-example', id, variant });
+    return applyMechanics({ type: 'solve' }, signal, example);
+  };
+  return { applyMechanics, sendMechanics, loadMechanicsExample };
 }

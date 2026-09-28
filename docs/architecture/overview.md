@@ -42,6 +42,14 @@ Removed in Phase 2: `useSpeech.ts` and the dead speech controller; the legacy ba
 - **Mechanics engine:** `mechanics/` — pure bounded elastic solver (`solver.ts`, `beam.ts`, `math.ts`, `state.ts`, `validation.ts`, `types.ts`, `presets.ts`).
 - **Content as data** (keep separate from logic): `teaching-cases.ts` (12 prepared cases), `workflows.ts` (workflow storyboards), `dental-arrangements.ts` (Class I/II/III poses), `lessons.ts` (the scripted demonstrations; `lecture.ts` re-exports), the anatomy lesson in `workflow-scene.ts`, `mechanics/presets.ts`. `teaching-case-audit.json` is **generated** — never hand-edit (see the audit script below).
 
+## Ready-made lectures and projection (Phase 3.15)
+
+`lecture-builder/useTeacherLectures.ts` opens the fixed document in `lib/lecture-documents/sample.ts`. The session decorator handles validated local presentation actions, including whole-request snapshots of the original Explore workspace, a paused question detour and a temporary comparison. `lecture-comparison.ts` uses absolute authored endpoints and retains the current camera. There is no lecture editor or browser-storage access.
+
+`lecture-audience/` projects the existing WebGL canvas into a user-opened same-origin window through `captureStream(24)` and a read-only React portal. The explicit public payload contains only lecture/step titles, question, revealed answer and biology selection. Presenter notes, the command UI and runtime objects are excluded. No second renderer or model synchronization service is created. Capture remains a browser capability requiring device verification.
+
+`lib/mechanics-examples/` holds eight recipe categories/17 variations; a local-only catalog action validates the current source and invokes the existing worker/response checks atomically. `lib/teaching-biology.ts` and `lecture-builder/RemodelingDiagram.tsx` supply separate qualitative tissue illustrations, not solver-derived stresses. Viewer helpers own faded focus materials and reusable pose scratch space. Fonts and the favicon are local assets; `check-demo.mjs` verifies the static export contains the required demo files.
+
 ## The mechanics worker
 
 `src/workers/mechanics.worker.ts` (10 lines) wraps `solveMechanics`. It is **not** bundled by Next: `scripts/build-mechanics-worker.mjs` (runs automatically as `predev`/`prebuild`) esbuilds it to `public/workers/mechanics.js` (gitignored). `src/lib/mechanics-client.ts` spawns a fresh `Worker('/workers/mechanics.js?v=1')` per request (20 s timeout; AbortSignal terminates the worker so Stop really cancels).
