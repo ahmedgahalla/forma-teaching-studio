@@ -1,6 +1,6 @@
 # Phase 3 — demo path
 
-**Status:** Nael Teaching Studio branding implemented; automated checks pass; browser acceptance pending · **Current branch:** `ahmed/phase-3-nael-branding` · **PR:** pending draft · **Base:** [#23 (draft)](https://github.com/ahmedgahalla/forma-teaching-studio/pull/23)
+**Status:** Nael Teaching Studio branding implemented; automated checks pass; browser acceptance pending · **Current branch:** `ahmed/phase-3-nael-branding` · **PR:** [#24 (draft)](https://github.com/ahmedgahalla/forma-teaching-studio/pull/24) · **Base:** [#23 (draft)](https://github.com/ahmedgahalla/forma-teaching-studio/pull/23)
 
 **Goal:** a professor can explore the central model freely or open a finished lecture with notes, questions and model demonstrations, then return from a spontaneous experiment without losing the lecture. Builds on [product direction](../../PRODUCT_DIRECTION.md).
 

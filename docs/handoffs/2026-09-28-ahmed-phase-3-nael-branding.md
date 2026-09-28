@@ -1,6 +1,6 @@
 # Handoff — Nael Teaching Studio
 
-**Branch:** `ahmed/phase-3-nael-branding` · **PR:** pending draft · **Base:** PR #23 at `1e166f9` · **Phase:** [3.24](../phases/phase-3-demo-path/3.24-nael-branding.md).
+**Branch:** `ahmed/phase-3-nael-branding` · **PR:** [#24 (draft)](https://github.com/ahmedgahalla/forma-teaching-studio/pull/24) · **Base:** PR #23 at `1e166f9` · **Phase:** [3.24](../phases/phase-3-demo-path/3.24-nael-branding.md).
 
 Renamed the app's visible brand to Nael Teaching Studio, after Professor Nael: header, loading screen, workflow classroom, browser/audience titles, N favicon, launcher and relevant explanatory/error copy. The voice assistant's “Forma” wake phrase and examples remain supported. Technical identifiers, source asset provenance and saved-state formats are unchanged. The existing external mobile deployment was not republished.
 
