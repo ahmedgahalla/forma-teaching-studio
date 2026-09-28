@@ -95,6 +95,7 @@ export function createLectureSessionActions(
     doc = document,
     returnPoint = paused.current,
   ) => {
+    if (action.action === 'open' && state.documentId === action.id) return;
     const display = isPresentationDisplay(action);
     if (!display && (api.sandbox.pending || api.dragPreview || api.busy))
       throw new Error(
@@ -119,6 +120,7 @@ export function createLectureSessionActions(
   };
   const apply = (action: PresentationAction) => {
     preflight(action);
+    if (action.action === 'open' && session.documentId === action.id) return true;
     if (action.action === 'exit') {
       if (original.current) restore(original.current);
       original.current = paused.current = comparison.current = null;
@@ -172,6 +174,8 @@ export function createLectureSessionActions(
       comparison.current = null;
       api.setLecture(true);
       setSession({ ...session, comparison: null });
+    } else if (action.action === 'fit-view') {
+      refs.viewer.current?.fit();
     } else if (action.action === 'biology' || action.action === 'hide-biology') {
       setSession({ ...session, biology: action.action === 'biology' ? action.view : 'off' });
     } else if (action.action === 'focus-tooth' || action.action === 'show-context') {

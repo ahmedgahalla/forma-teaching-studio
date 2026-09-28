@@ -22,3 +22,17 @@ export const abortable = <T>(task: Promise<T>, signal: AbortSignal) =>
       },
     );
   });
+
+export async function waitForPlayback(playing: () => boolean | undefined, signal: AbortSignal) {
+  while (playing() && !signal.aborted)
+    await new Promise<void>(resolve => {
+      const done = () => {
+        clearTimeout(timer);
+        signal.removeEventListener('abort', done);
+        resolve();
+      };
+      const timer = setTimeout(done, 30);
+      signal.addEventListener('abort', done, { once: true });
+      if (signal.aborted) done();
+    });
+}

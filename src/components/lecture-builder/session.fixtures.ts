@@ -16,7 +16,10 @@ export function lectureHarness() {
   const original = { current: null as ClassroomSnapshot | null };
   const paused = { current: null as ClassroomSnapshot | null };
   const comparison = { current: null as ClassroomSnapshot | null };
-  const refs = { pendingView: { current: null } } as unknown as CaseRefs;
+  const refs = {
+    pendingView: { current: null },
+    viewer: { current: { fit: vi.fn() } },
+  } as unknown as CaseRefs;
   const set = (key: keyof ClassroomSnapshot, value: unknown) => {
     snapshot = { ...snapshot, [key]: value };
   };
@@ -121,6 +124,7 @@ export function lectureHarness() {
   return {
     document,
     api,
+    refs,
     adapter,
     runtime,
     interpret,

@@ -1,8 +1,9 @@
 import { getTeachingCase, sampleCaseDemonstration } from '../teaching-cases';
 import { validateLectureDocument } from './documents';
 import type { LectureDocument, LectureScene } from './types';
+import { SAMPLE_LECTURE_ID } from './constants';
 
-export const SAMPLE_LECTURE_ID = 'forma-translation-and-tipping';
+export { SAMPLE_LECTURE_ID } from './constants';
 
 /** Fixed authored content; opening it never incorporates the current workspace or saved edits. */
 export function createLectureSample(): LectureDocument {

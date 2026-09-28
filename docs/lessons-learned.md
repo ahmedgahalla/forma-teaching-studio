@@ -162,9 +162,10 @@ Numbers 17–19 were checked against the current lessons and the parallel Phase 
 - **Mistake:** the same [integration review](reviews/from-builder/2026-09-27-teacher-lecture-workflow.md) reproduced a related glossary click switching tooth 46 to tooth 16, while typing the same request retained tooth 46.
 - **Root cause:** the button called a context-free authored-action helper rather than the current-study planner already used by text and voice.
 - **Prevention:** route shortcuts through the context-aware helper and compare actual clicked actions with the parsed request in a component regression. The new lecture navigation likewise has click, text and local-speech runtime parity tests.
-- **Status:** automated · **Count:** 2
+- **Status:** automated · **Count:** 3
 
 - **Sample-lecture recurrence:** the visible “Explore this question” button text was absent from local command aliases. Test exact labels through the parser as well as their button actions; the retired preparation phrase is rejected locally. This is automated rather than an unapproved AGENTS amendment.
+- **Sample-entry recurrence:** the [3.18 review](reviews/from-builder/2026-09-28-lecture-control-gaps.md) found the Lecture button had no matching local opening command. Test entry from both case and workflow modes, destination preview rejection, AI preference and whole-request Undo/Redo through the actual provider routing boundary.
 
 ## 22. Replay preflight uses the saved request start
 
@@ -227,4 +228,18 @@ Numbers 17–19 were checked against the current lessons and the parallel Phase 
 - **Mistake:** [Phase 3.15](phases/phase-3-demo-path/3.15-lecture-mechanics.md) comparison journeys exceeded their test timeout while repeatedly rebuilding all procedural crowns, roots and gums. An anatomy immutability assertion also spent its budget converting large buffers into arrays for deep equality.
 - **Root cause:** the tests paid for fallback geometry generation on every step instead of matching the app's loaded canonical model, and used expensive scalar comparisons for unchanged binary geometry.
 - **Prevention:** reuse canonical geometry with fresh per-load metadata in runtime fixtures, dispose it at suite teardown, and compare independent complete byte snapshots for geometry immutability. Preserve all journey actions, pose assertions and timeouts; retain separate geometry-generation coverage.
+- **Status:** automated · **Count:** 1
+
+## 31. A simplified lecture must retain its essential view controls
+
+- **Mistake:** the [3.18 requirements check](reviews/from-builder/2026-09-28-lecture-control-gaps.md) found Lecture replaced the Explore heading and hid its toolbars, leaving no clickable camera, roots or Fit controls. Review of the replacement disclosure also found inherited viewport sizing could clip it inside the narrower model column.
+- **Root cause:** each hidden toolbar was considered independently, and a shared menu's anchoring assumed the original toolbar layout.
+- **Prevention:** mount the real lecture heading across teaching/rehearsal, static/demonstration and comparison states; verify essential controls remain and Explore keeps its own toolbar. Anchor the new popup to the complete heading and bound its width to that column. DOM/action-parity and CSS-contract regressions cover the correction; actual pixel layout still requires browser acceptance.
+- **Status:** automated · **Count:** 1
+
+## 32. An adapter no-op can still change request history
+
+- **Mistake caught during implementation:** the same [3.18 review](reviews/from-builder/2026-09-28-lecture-control-gaps.md) found repeated lecture entry returned early in the session adapter but still paused playback, added an Undo entry and cleared Redo in the surrounding runtime.
+- **Root cause:** idempotence was checked against the final scene snapshot without checking the earlier request lifecycle and history effects.
+- **Prevention:** recognize only validated, exact same-document opening requests before interruption. Keep compound, malformed and different-document requests on the normal path. Runtime regressions cover active playback, existing Undo/Redo entries, recognized speech and AI preference, alongside normal cancellation and replay tests.
 - **Status:** automated · **Count:** 1
