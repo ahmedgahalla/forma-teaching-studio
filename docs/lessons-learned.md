@@ -212,8 +212,8 @@ Numbers 17–19 were checked against the current lessons and the parallel Phase 
 
 - **Mistake:** the same [review](reviews/from-builder/2026-09-28-analysis-context-and-cancellation.md) found fixed supports and support stiffness changes generating identical Analyze facts.
 - **Root cause:** the explanation payload reduced mechanics to wires/counts and geometric editing locks, omitting the configured load/support system.
-- **Prevention:** add bounded matching client/server facts for supports, fixed teeth and connection/load laws, and compare payloads for otherwise identical rigs. Preserve hidden-result exclusions. Implementation remains pending.
-- **Status:** noted · **Count:** 1
+- **Prevention:** [Phase 3.16](phases/phase-3-demo-path/3.16-analysis-mechanics.md) adds bounded matching client/server support, fixed-tooth, elastic and expander facts. Paired rigs and strict-reference tests distinguish supports from edit locks; private appliance names are replaced with consistent request-local aliases. Hidden-result exclusions remain tested.
+- **Status:** automated · **Count:** 1
 
 ## 29. Frontend cancellation must reach the provider request
 

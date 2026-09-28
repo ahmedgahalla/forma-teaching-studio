@@ -41,8 +41,30 @@ function fixture() {
         },
       ],
       tads: [{ id: 'anchor-private-name', position: [1, 2, 3] }],
-      elastics: [],
-      expanders: [],
+      elastics: [
+        {
+          id: 'elastic-private-name',
+          from: { kind: 'tad', id: 'anchor-private-name' },
+          to: { kind: 'tooth', tooth: '11', local: [0, 0, 2] },
+          law: { kind: 'constant', forceN: 0.2 },
+        },
+        {
+          id: 'spring-private-name',
+          from: { kind: 'tooth', tooth: '11', local: [1, 0, 2] },
+          to: { kind: 'tooth', tooth: '21', local: [-1, 0, 2] },
+          law: { kind: 'spring', stiffnessNPerMm: 0.4, restLengthMm: 10 },
+        },
+      ],
+      expanders: [
+        {
+          id: 'expander-private-name',
+          left: ['21'],
+          right: ['11'],
+          activationMm: 0.5,
+          stiffnessNPerMm: 5,
+          palateStiffnessNPerMm: 100,
+        },
+      ],
       support: 'standard',
       fixedTeeth: ['21'],
     },
@@ -107,6 +129,10 @@ describe('read-only scene fact projection', () => {
     });
     Object.assign(source.lesson, { patientName: 'PRIVATE_LESSON_METADATA' });
     Object.assign(source.mechanics.config.wires[0].section, { apiKey: 'PRIVATE_SECTION_KEY' });
+    Object.assign(source.mechanics.config.tads[0], { patientName: 'PRIVATE_ANCHOR' });
+    Object.assign(source.mechanics.config.elastics[0].from, { mesh: 'PRIVATE_ENDPOINT' });
+    Object.assign(source.mechanics.config.elastics[0].law, { apiKey: 'PRIVATE_LAW' });
+    Object.assign(source.mechanics.config.expanders[0], { patientName: 'PRIVATE_EXPANDER' });
     const wire = sceneAnalysisContext(source);
     const serialized = JSON.stringify(wire);
     expect(serialized).not.toMatch(/PRIVATE_|private-name|mesh|apiKey|patientName/);
@@ -128,6 +154,16 @@ describe('read-only scene fact projection', () => {
     facts.appliances.wires[0].teeth.pop();
     if (facts.appliances.wires[0].section.shape === 'round')
       facts.appliances.wires[0].section.diameterMm = 0.5;
+    facts.appliances.support!.translationNPerMm = 999;
+    facts.appliances.fixedTeeth.length = 0;
+    facts.appliances.tads[0].position[0] = 99;
+    facts.appliances.tads[0].id = 'tad-8';
+    const target = facts.appliances.elastics[0].to;
+    if (target.kind === 'tooth') target.local[0] = 20;
+    const law = facts.appliances.elastics[0].law;
+    if (law.kind === 'constant') law.forceN = 1;
+    facts.appliances.expanders[0].left.length = 0;
+    facts.appliances.expanders[0].right.push('12');
     facts.result!.assumptions.push('extra');
     facts.result!.warnings.length = 0;
     facts.lesson!.explanation = 'Changed outside the scene';
@@ -148,8 +184,13 @@ describe('read-only scene fact projection', () => {
     expect(facts.result).toBeNull();
     expect(facts.lesson).toBeNull();
     expect(facts.appliances).toEqual({
+      support: null,
+      fixedTeeth: [],
       bracketTeeth: [],
       wires: [],
+      tads: [],
+      elastics: [],
+      expanders: [],
       tadCount: 0,
       elasticCount: 0,
       expanderCount: 0,
@@ -170,6 +211,105 @@ describe('read-only scene fact projection', () => {
       widthMm: 0.635,
       heightMm: 0.4826,
     });
+  });
+
+  it('distinguishes mechanical anchorage and support changes from editing locks', () => {
+    const source = fixture();
+    source.mechanics.config.fixedTeeth = [];
+    const before = sceneAnalysisContext(source);
+    source.mechanics.config.fixedTeeth = ['11'];
+    source.mechanics.config.support = 'firm';
+    const after = sceneAnalysisContext(source);
+    expect(after.teeth).toEqual(before.teeth);
+    expect(after.appliances.fixedTeeth).toEqual(['11']);
+    expect(after.appliances.support).toEqual({
+      preset: 'firm',
+      translationNPerMm: 200,
+      rotationNmmPerRad: 2000,
+    });
+    expect(before.appliances.support).toEqual({
+      preset: 'standard',
+      translationNPerMm: 100,
+      rotationNmmPerRad: 1000,
+    });
+    const locked = sceneAnalysisContext({ ...source, lockedIds: ['11'] });
+    expect(locked.appliances).toEqual(after.appliances);
+    expect(locked.teeth[0].locked).toBe(true);
+    expect(after.teeth[0].locked).toBe(false);
+  });
+
+  it('includes the soft virtual support coefficients without claiming a result', () => {
+    const source = fixture();
+    source.mechanics.config.support = 'soft';
+    source.mechanics.result = null;
+    const facts = sceneAnalysisContext(source);
+    expect(facts.appliances.support).toEqual({
+      preset: 'soft',
+      translationNPerMm: 50,
+      rotationNmmPerRad: 500,
+    });
+    expect(facts.result).toBeNull();
+  });
+
+  it('projects exact configured load laws and coordinates with consistent anonymous anchors', () => {
+    const facts = sceneAnalysisContext(fixture()).appliances;
+    expect(facts.tads).toEqual([{ id: 'tad-1', position: [1, 2, 3] }]);
+    expect(facts.elastics).toEqual([
+      {
+        from: { kind: 'tad', id: 'tad-1' },
+        to: { kind: 'tooth', tooth: '11', local: [0, 0, 2] },
+        law: { kind: 'constant', forceN: 0.2 },
+      },
+      {
+        from: { kind: 'tooth', tooth: '11', local: [1, 0, 2] },
+        to: { kind: 'tooth', tooth: '21', local: [-1, 0, 2] },
+        law: { kind: 'spring', stiffnessNPerMm: 0.4, restLengthMm: 10 },
+      },
+    ]);
+    expect(facts.expanders).toEqual([
+      {
+        left: ['21'],
+        right: ['11'],
+        activationMm: 0.5,
+        stiffnessNPerMm: 5,
+        palateStiffnessNPerMm: 100,
+      },
+    ]);
+    expect([facts.tadCount, facts.elasticCount, facts.expanderCount]).toEqual([1, 2, 1]);
+  });
+
+  it('does not expose anchor names when they resemble aliases or change between experiments', () => {
+    const source = fixture();
+    source.mechanics.config.tads.unshift({ id: 'tad-1', position: [-1, 3, 2] });
+    const first = sceneAnalysisContext(source).appliances;
+    expect(first.tads.map(tad => tad.id)).toEqual(['tad-1', 'tad-2']);
+    expect(first.elastics[0].from).toEqual({ kind: 'tad', id: 'tad-2' });
+    source.mechanics.config.tads[1].id = 'different-private-name';
+    source.mechanics.config.elastics[0].from = { kind: 'tad', id: 'different-private-name' };
+    expect(sceneAnalysisContext(source).appliances).toEqual(first);
+  });
+
+  it('keeps configured loads available while hiding stale, unrevealed and alternate results', () => {
+    const source = fixture();
+    const inputs = sceneAnalysisContext(source).appliances;
+    source.mechanics.applied = source.mechanics.result;
+    source.mechanics.comparison = source.mechanics.result;
+    for (const input of [
+      { ...source, revealResult: false },
+      { ...source, synthetic: false },
+      { ...source, mechanics: { ...source.mechanics, revision: 8 } },
+      { ...source, mechanics: { ...source.mechanics, result: null } },
+    ]) {
+      const facts = sceneAnalysisContext(input);
+      expect(facts.result).toBeNull();
+      expect(facts.appliances).toEqual(inputs);
+    }
+  });
+
+  it('represents an absent palate spring explicitly without inventing a coefficient', () => {
+    const source = fixture();
+    delete source.mechanics.config.expanders[0].palateStiffnessNPerMm;
+    expect(sceneAnalysisContext(source).appliances.expanders[0].palateStiffnessNPerMm).toBeNull();
   });
 });
 
