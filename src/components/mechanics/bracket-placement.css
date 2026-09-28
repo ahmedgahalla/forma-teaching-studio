@@ -1,0 +1,7 @@
+.bracket-placement .mechanics-actions > button {
+  white-space: normal;
+}
+
+.bracket-placement [role='alert'] {
+  color: var(--ui-text);
+}

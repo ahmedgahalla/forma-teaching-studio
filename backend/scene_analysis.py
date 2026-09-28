@@ -127,7 +127,8 @@ inputs, not calculated opening, force or biological change; null palate stiffnes
 that optional virtual compliance is absent. TAD positions use scene-space millimetres;
 tooth attachment local coordinates use each tooth's local frame. TAD IDs are anonymous
 connection references, not patient data or assessed surgical locations. This context omits
-reference tooth origins, orientation frames and bracket attachment coordinates. Do not infer
+reference tooth origins and orientation frames. bracketPlacements provides tooth-local slot
+and reference-slot coordinates plus in-plane angleDeg about the buccal axis, not torque prescription. Do not infer
 load directions, moment arms, net forces or movement outcomes from this incomplete geometry.
 When result exists, quote actual supplied values and retain its assumptions and warnings.
 Its maxima describe the full calculated response; the shown tooth edits may instead be

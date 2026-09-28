@@ -25,7 +25,19 @@ function fixture() {
   const mechanics: MechanicsExperiment = {
     version: 1,
     revision: 7,
-    reference: { teeth: [], transforms: {} },
+    reference: {
+      teeth: ['11', '21'].map(id => ({
+        id,
+        position: [0, 0, 0],
+        rotation: [0, 0, 0],
+        buccal: [0, 0, 1],
+        occlusal: [0, 1, 0],
+        bracketLocal: [0, 0, 1],
+        supportLocal: [0, -6, 0],
+        rootLengthMm: 12,
+      })),
+      transforms: {},
+    },
     stages: [],
     stageIndex: -1,
     config: {
@@ -97,6 +109,24 @@ const answer = (): SceneAnalysis => ({
 });
 
 describe('read-only scene fact projection', () => {
+  it('distinguishes bracket placement and tilt while preserving reference slots and caller data', () => {
+    const original = fixture();
+    const changed = fixture();
+    changed.mechanics.config.brackets['11'] = [0, 0.5, 1];
+    changed.mechanics.config.bracketAngles = { '11': 5 };
+    const before = structuredClone(changed);
+    const neutral = sceneAnalysisContext(original);
+    const placed = sceneAnalysisContext(changed);
+    expect(placed.appliances.bracketPlacements).not.toEqual(neutral.appliances.bracketPlacements);
+    expect(placed.appliances.bracketPlacements?.[0]).toEqual({
+      tooth: '11',
+      slotLocal: [0, 0.5, 1],
+      referenceSlotLocal: [0, 0, 1],
+      angleDeg: 5,
+    });
+    placed.appliances.bracketPlacements![0].slotLocal[1] = 8;
+    expect(changed).toEqual(before);
+  });
   it('sends actual geometric values, visible layers, locks and supplied result facts only', () => {
     const facts = sceneAnalysisContext(fixture());
     expect(facts.teeth).toEqual([
@@ -187,6 +217,7 @@ describe('read-only scene fact projection', () => {
       support: null,
       fixedTeeth: [],
       bracketTeeth: [],
+      bracketPlacements: [],
       wires: [],
       tads: [],
       elastics: [],

@@ -119,11 +119,16 @@ export function validateMechanicsAction(
       fields(v, ['type', 'teeth', 'installed']);
       return { type: v.type, teeth: teeth(v.teeth, availableIds), installed: bool(v.installed) };
     case 'bracket-position':
-      fields(v, ['type', 'tooth', 'local']);
+      fields(v, ['type', 'tooth', 'local'], ['angleDeg']);
       return {
         type: v.type,
         tooth: teeth([v.tooth], availableIds)[0],
         local: point(v.local, LIMIT.localPointMm),
+        ...(v.angleDeg === undefined
+          ? {}
+          : {
+              angleDeg: number(v.angleDeg, -LIMIT.bracketAngleDeg, LIMIT.bracketAngleDeg),
+            }),
       };
     case 'wire':
       fields(v, ['type', 'id', 'teeth', 'material', 'section'], ['expansionMm', 'torqueDeg']);

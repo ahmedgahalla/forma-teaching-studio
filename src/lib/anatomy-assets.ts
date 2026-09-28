@@ -1,9 +1,8 @@
 import { BufferGeometry, Mesh, Object3D, Vector3 } from 'three';
-import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { anatomicalFrame, type Vec3 } from './model';
 import type { DentalCase, DentalTooth, Gum } from './geometry';
 import { validateRootAnatomy } from './root-anatomy';
-import { ATLAS_ASSET_URL, ATLAS_METADATA_URL, dentalCaseFromAtlas } from './atlas-assets';
+import { loadAtlasModel } from './atlas-loader';
 
 const IDS = ['1', '2', '3', '4'].flatMap(quadrant =>
   Array.from({ length: 7 }, (_, i) => `${quadrant}${i + 1}`),
@@ -184,36 +183,13 @@ export function getTeachingAssetCase(): DentalCase | undefined {
 export function loadTeachingAsset(): Promise<void> {
   if (prepared) return Promise.resolve();
   if (!loading)
-    loading = (async () => {
-      const signal = AbortSignal.timeout(15000);
-      const [metadataResponse, modelResponse] = await Promise.all([
-        fetch(ATLAS_METADATA_URL, { signal }),
-        fetch(ATLAS_ASSET_URL, { signal }),
-      ]);
-      if (!metadataResponse.ok || !modelResponse.ok)
-        throw new Error('The refined teaching model could not be downloaded.');
-      const [raw, bytes] = await Promise.all([
-        metadataResponse.json(),
-        modelResponse.arrayBuffer(),
-      ]);
-      if (bytes.byteLength > 30 * 1024 * 1024)
-        throw new Error('The teaching model exceeds the display asset budget.');
-      const gltf = await new GLTFLoader().parseAsync(bytes, '/models/');
-      try {
-        prepared = dentalCaseFromAtlas(gltf.scene, raw);
-      } finally {
-        gltf.scene.traverse(object => {
-          const mesh = object as Mesh;
-          if (mesh.isMesh) {
-            mesh.geometry.dispose();
-            const materials = Array.isArray(mesh.material) ? mesh.material : [mesh.material];
-            materials.forEach(material => material.dispose());
-          }
-        });
-      }
-    })().catch(error => {
-      loading = undefined;
-      throw error;
-    });
+    loading = loadAtlasModel()
+      .then(model => {
+        prepared = model;
+      })
+      .catch(error => {
+        loading = undefined;
+        throw error;
+      });
   return loading;
 }

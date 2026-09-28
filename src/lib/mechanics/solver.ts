@@ -22,6 +22,7 @@ import {
 } from './math';
 import { beamBendingMatrix, sectionProperties, slotPlayRadians } from './beam';
 import { rotateLocal, validateMechanicsConfiguration } from './state';
+import { bracketSlopeTarget, wireBracketReference } from './bracket-wire';
 
 type Point = { initial: Vec3; rows: number[][] };
 type Beam = {
@@ -136,22 +137,17 @@ export function solveMechanics(experiment: MechanicsExperiment): MechanicsResult
   const beams: Beam[] = [],
     twists: Twist[] = [];
   for (const wire of config.wires) {
-    const wirePoints = wire.teeth.map(bracket),
-      xs = wirePoints.map(p => p.initial[0]),
-      span = Math.max(...xs) - Math.min(...xs),
-      middle = (Math.max(...xs) + Math.min(...xs)) / 2;
-    if (wire.expansionMm && span < 1)
-      throw new Error(
-        'Transverse wire expansion requires a span across at least 1 mm of the case X axis.',
-      );
-    const offsets = wirePoints.map(
-      p => [span ? ((p.initial[0] - middle) / span) * wire.expansionMm : 0, 0, 0] as Vec3,
+    const wirePoints = wire.teeth.map(bracket);
+    const { points, offsets } = wireBracketReference(
+      wire,
+      teeth,
+      wirePoints.map(point => point.initial),
     );
     for (let index = 0; index < wire.teeth.length - 1; index++) {
       const a = wirePoints[index],
         b = wirePoints[index + 1],
-        length = norm(sub(b.initial, a.initial)),
-        x = unit(sub(b.initial, a.initial));
+        length = norm(sub(points[index + 1], points[index])),
+        x = unit(sub(points[index + 1], points[index]));
       const occlusal = add(
         teeth[lookup(wire.teeth[index]) / 6].occlusal,
         teeth[lookup(wire.teeth[index + 1]) / 6].occlusal,
@@ -167,6 +163,7 @@ export function solveMechanics(experiment: MechanicsExperiment): MechanicsResult
       for (let end = 0; end < 2; end++) {
         const current = end ? b : a,
           toothIndex = lookup(wire.teeth[index + end]);
+        const slope = bracketSlopeTarget(teeth[toothIndex / 6], config);
         axes.forEach(axis => {
           rows.push(dotRow(axis, current.rows));
           target.push(dot(axis, offsets[index + end]));
@@ -177,7 +174,7 @@ export function solveMechanics(experiment: MechanicsExperiment): MechanicsResult
             row[toothIndex + 3 + j] = v;
           });
           rows.push(row);
-          target.push(0);
+          target.push(dot(axis, slope));
         });
       }
       const stiffness = beamBendingMatrix(length, wire.material, wire.section),

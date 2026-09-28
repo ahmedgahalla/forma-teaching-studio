@@ -1,8 +1,15 @@
 import { describe, expect, it, vi } from 'vitest';
+import { Buffer } from 'node:buffer';
 import * as THREE from 'three';
 import { DENTAL_DIRECT_DIFFUSE } from './atlas-shader';
 import { createDentalMaterials } from './viewer-materials';
 import { makePerikymataTexture, makeStipplingTexture } from './atlas-textures';
+
+function textureBytes(texture: THREE.DataTexture) {
+  const data = texture.image.data!;
+  // Compare every byte without the matcher recursively traversing a million entries.
+  return Buffer.from(data.buffer, data.byteOffset, data.byteLength);
+}
 
 function shaderFor(material: THREE.Material) {
   const shader = {
@@ -100,7 +107,7 @@ describe('deterministic atlas microtextures', () => {
     const texture = makePerikymataTexture();
     const again = makePerikymataTexture();
     expect(texture.image).toMatchObject({ width: 256, height: 1024 });
-    expect(texture.image.data).toEqual(again.image.data);
+    expect(textureBytes(texture).equals(textureBytes(again))).toBe(true);
     expect(texture).toMatchObject({
       flipY: false,
       wrapS: THREE.RepeatWrapping,
@@ -118,7 +125,7 @@ describe('deterministic atlas microtextures', () => {
     const body = Array.from(data.slice(256 * 500 * 4, 256 * 501 * 4)).filter((_, i) => i % 4 === 0);
     expect(Math.max(...body) - Math.min(...body)).toBeGreaterThan(30);
     const different = makePerikymataTexture(256, 1024, 70, 4);
-    expect(different.image.data).not.toEqual(data);
+    expect(textureBytes(different).equals(textureBytes(texture))).toBe(false);
     texture.dispose();
     again.dispose();
     different.dispose();
@@ -131,7 +138,7 @@ describe('deterministic atlas microtextures', () => {
     const again = makeStipplingTexture();
     random.mockRestore();
     expect(texture.image).toMatchObject({ width: 512, height: 512 });
-    expect(texture.image.data).toEqual(again.image.data);
+    expect(textureBytes(texture).equals(textureBytes(again))).toBe(true);
     expect(texture).toMatchObject({
       flipY: true,
       wrapS: THREE.RepeatWrapping,

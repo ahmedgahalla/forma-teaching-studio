@@ -1,9 +1,9 @@
 """Bounded, anonymous mechanics facts for read-only scene explanations."""
 from typing import Annotated, Literal, Union
 
-from pydantic import BaseModel, ConfigDict, Field, model_validator
+from pydantic import BaseModel, ConfigDict, Field, model_serializer, model_validator
 
-from mechanics import Law, Material, Point, Section, Support, Teeth, Tooth, ToothEndpoint
+from mechanics import BracketAngle, Law, LocalPoint, Material, Point, Section, Support, Teeth, Tooth, ToothEndpoint
 
 
 class Strict(BaseModel):
@@ -72,8 +72,16 @@ class SceneExpander(Strict):
         return self
 
 
+class SceneBracketPlacement(Strict):
+    tooth: Tooth
+    slotLocal: LocalPoint
+    referenceSlotLocal: LocalPoint
+    angleDeg: BracketAngle
+
+
 class SceneAppliances(Strict):
     bracketTeeth: list[Tooth] = Field(max_length=32)
+    bracketPlacements: list[SceneBracketPlacement] = Field(default_factory=list, max_length=32)
     wires: list[SceneWire] = Field(max_length=4)
     support: Union[SceneSupport, None]
     fixedTeeth: list[Tooth] = Field(max_length=32)
@@ -84,8 +92,18 @@ class SceneAppliances(Strict):
     elasticCount: int = Field(ge=0, le=12)
     expanderCount: int = Field(ge=0, le=1)
 
+    @model_serializer(mode="wrap")
+    def preserve_optional_placement_facts(self, handler):
+        result = handler(self)
+        if "bracketPlacements" not in self.model_fields_set:
+            result.pop("bracketPlacements", None)
+        return result
+
     @model_validator(mode="after")
     def consistent_configuration(self):
+        placements = [item.tooth for item in self.bracketPlacements]
+        if len(placements) != len(set(placements)) or not set(placements) <= set(self.bracketTeeth):
+            raise ValueError("Bracket placements must refer to unique installed brackets.")
         if (self.tadCount, self.elasticCount, self.expanderCount) != (
             len(self.tads), len(self.elastics), len(self.expanders)
         ):

@@ -25,3 +25,5 @@ The later Phase 3 follow-up [3.15 — Lecture presentation and mechanics](phase-
 [3.20 — Crown/root movement trails](phase-3-demo-path/3.20-crown-root-trails.md) follows PR #19 with selected-tooth paths sampled from the displayed movement. Further lecture work is deferred until the professor sees the demo and supplies approved lectures/cases.
 
 [3.21 — Claude atlas and demo lectures](phase-3-demo-path/3.21-atlas-demo-integration.md) follows PR #20 with the owner-selected model/UI and three ready-made lectures. The later request explicitly reopens demo content work; professor-specific authoring remains deferred.
+
+[3.22 — Following gingiva and bracket placement](phase-3-demo-path/3.22-gums-and-bracket-placement.md) follows PR #21 with the refreshed released atlas, tooth-following gum presentation and surface-projected bracket position/in-plane angle controls connected to the wire solver.

@@ -12,7 +12,7 @@ export type ForceLaw =
 type SupportPreset = 'standard' | 'soft' | 'firm';
 export type MechanicsAction =
   | { type: 'brackets'; teeth: string[]; installed: boolean }
-  | { type: 'bracket-position'; tooth: string; local: Vec3 }
+  | { type: 'bracket-position'; tooth: string; local: Vec3; angleDeg?: number }
   | {
       type: 'wire';
       id: string;
@@ -82,6 +82,8 @@ type MechanicsExpander = {
 export type MechanicsConfig = {
   /** Installed wire-slot centres in tooth-local mm. */
   brackets: Record<string, Vec3>;
+  /** Optional in-plane right-hand slot rotation about each tooth's outward buccal axis, degrees. */
+  bracketAngles?: Record<string, number>;
   wires: MechanicsWire[];
   tads: MechanicsTad[];
   elastics: MechanicsElastic[];

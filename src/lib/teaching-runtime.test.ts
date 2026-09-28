@@ -1377,7 +1377,7 @@ describe('interpretation and replay boundaries', () => {
     await runtime.submit('show what happens', { interpreter: 'ai' });
     expect(host.interpret).not.toHaveBeenCalled();
     expect(host.apply).not.toHaveBeenCalled();
-    expect(runtime.getState().message).toMatch(/passive wire/);
+    expect(runtime.getState().message).toMatch(/Set bracket placement, wire activation/);
   });
 
   it('does not let forced AI bypass a tooth lock or a preceding lock in the same request', async () => {

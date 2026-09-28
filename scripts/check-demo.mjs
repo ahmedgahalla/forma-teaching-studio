@@ -21,6 +21,7 @@ const assets = [
   'models/forma-teaching-v1.json',
   'models/forma-atlas-v1.glb',
   'models/forma-atlas-v1.json',
+  'models/forma-atlas-gums-v1.bin',
   'workers/mechanics.js',
 ];
 for (const asset of assets) {

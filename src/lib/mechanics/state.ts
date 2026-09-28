@@ -1,14 +1,7 @@
-import {
-  DoubleSide,
-  Euler,
-  MathUtils,
-  Mesh,
-  MeshBasicMaterial,
-  Quaternion,
-  Raycaster,
-  Vector3,
-} from 'three';
-import type { DentalCase, DentalTooth } from '../geometry';
+import { Euler, MathUtils, Quaternion, Vector3 } from 'three';
+import type { DentalCase } from '../geometry';
+import { bracketSlotLocal } from '../bracket-placement';
+import { hasMechanicsActivation, setBracketAngle, validateBracketAngles } from './bracket-wire';
 import { anatomicalFrame, emptyPose, isPose, type Transforms, type Vec3 } from '../model';
 import type {
   MechanicsAction,
@@ -24,33 +17,6 @@ const quaternion = (rotation: Vec3) =>
   new Quaternion().setFromEuler(new Euler(...(rotation.map(MathUtils.degToRad) as Vec3)));
 export const rotateLocal = (value: Vec3, rotation: Vec3): Vec3 =>
   new Vector3(...value).applyQuaternion(quaternion(rotation)).toArray() as Vec3;
-
-/** Match createApplianceKit: bracketPosition is its base; mechanics attaches at its slot. */
-function bracketSlotLocal(tooth: DentalTooth, buccal: Vec3): Vec3 {
-  const outward = new Vector3(...buccal);
-  let base = tooth.bracketPosition ? new Vector3(...tooth.bracketPosition) : null;
-  if (!base) {
-    tooth.geometry.computeBoundingBox();
-    const radius = tooth.geometry.boundingBox!.getSize(new Vector3()).length(),
-      material = new MeshBasicMaterial({ side: DoubleSide });
-    try {
-      const probe = new Mesh(tooth.geometry, material);
-      probe.updateMatrixWorld(true);
-      const hit = new Raycaster(
-        outward.clone().multiplyScalar(radius + 1),
-        outward.clone().negate(),
-      ).intersectObject(probe, false)[0];
-      if (hit) base = hit.point.addScaledVector(outward, 0.28);
-    } finally {
-      material.dispose();
-    }
-  }
-  if (!base) throw new Error(`Tooth ${tooth.id} has no buccal surface for the schematic bracket.`);
-  const slot = base.addScaledVector(outward, 0.67).toArray() as Vec3;
-  if (slot.some(value => !Number.isFinite(value) || Math.abs(value) > LIMIT.localPointMm))
-    throw new Error('The bracket slot is outside the mechanical attachment domain.');
-  return slot;
-}
 
 export function createMechanicsExperiment(
   model: DentalCase,
@@ -105,7 +71,7 @@ export function createMechanicsExperiment(
         rotation: [...pose.rotation],
         buccal: rotateLocal(frame.buccal, pose.rotation),
         occlusal: rotateLocal(frame.occlusal, pose.rotation),
-        bracketLocal: bracketSlotLocal(tooth, frame.buccal),
+        bracketLocal: bracketSlotLocal(tooth),
         supportLocal: frame.occlusal.map(n => -n * rootLengthMm * 0.5) as Vec3,
         rootLengthMm,
       };
@@ -158,6 +124,7 @@ function put<T extends { id: string }>(items: T[], value: T, max: number) {
   }
 }
 function validateConfig(config: MechanicsConfig, ids: string[]) {
+  validateBracketAngles(config, ids);
   for (const wire of config.wires) {
     validateMechanicsAction({ type: 'wire', ...wire }, ids);
     if (
@@ -209,13 +176,9 @@ export function transitionMechanics(
     config = state.config;
   if (action.type === 'solve') {
     validateConfig(config, ids);
-    if (
-      !config.wires.some(w => w.expansionMm !== 0 || w.torqueDeg !== 0) &&
-      !config.elastics.some(e => e.law.kind === 'spring' || e.law.forceN > 0) &&
-      !config.expanders.some(e => e.activationMm > 0)
-    )
+    if (!hasMechanicsActivation(config, state.reference.teeth))
       throw new Error(
-        'Add a wire activation, elastic load, or expander activation before showing the initial response.',
+        'Adjust bracket placement, wire activation, elastic load, or expander activation before showing the initial response.',
       );
     return state;
   }
@@ -256,12 +219,16 @@ export function transitionMechanics(
       throw new Error('Remove the connected wire before removing its brackets.');
     for (const id of action.teeth)
       if (action.installed)
-        config.brackets[id] = clone(state.reference.teeth.find(t => t.id === id)!.bracketLocal);
-      else delete config.brackets[id];
+        config.brackets[id] ??= clone(state.reference.teeth.find(t => t.id === id)!.bracketLocal);
+      else {
+        delete config.brackets[id];
+        setBracketAngle(config, id);
+      }
   } else if (action.type === 'bracket-position') {
     if (!config.brackets[action.tooth])
       throw new Error('Install the bracket before positioning it.');
     config.brackets[action.tooth] = clone(action.local);
+    if (action.angleDeg !== undefined) setBracketAngle(config, action.tooth, action.angleDeg);
   } else if (action.type === 'wire')
     put(
       config.wires,
@@ -372,8 +339,10 @@ export function validateMechanicsExperiment(raw: unknown, model: DentalCase): Me
     if (
       !config ||
       typeof config !== 'object' ||
-      Object.keys(config).sort().join(',') !==
-        'brackets,elastics,expanders,fixedTeeth,support,tads,wires' ||
+      Object.keys(config)
+        .filter(key => key !== 'bracketAngles')
+        .sort()
+        .join(',') !== 'brackets,elastics,expanders,fixedTeeth,support,tads,wires' ||
       !config.brackets ||
       typeof config.brackets !== 'object' ||
       Array.isArray(config.brackets) ||
@@ -382,6 +351,10 @@ export function validateMechanicsExperiment(raw: unknown, model: DentalCase): Me
       )
     )
       throw new Error('Invalid saved mechanics configuration.');
+    validateBracketAngles(
+      config,
+      state.reference.teeth.map(tooth => tooth.id),
+    );
     for (const [items, max] of [
       [config.wires, LIMIT.wires],
       [config.tads, LIMIT.tads],
@@ -398,6 +371,13 @@ export function validateMechanicsExperiment(raw: unknown, model: DentalCase): Me
     for (const [id, local] of Object.entries(config.brackets)) {
       next = transitionMechanics(next, { type: 'brackets', teeth: [id], installed: true });
       next = transitionMechanics(next, { type: 'bracket-position', tooth: id, local });
+      if (config.bracketAngles?.[id])
+        next = transitionMechanics(next, {
+          type: 'bracket-position',
+          tooth: id,
+          local,
+          angleDeg: config.bracketAngles[id],
+        });
     }
     next = transitionMechanics(next, { type: 'support', preset: config.support });
     if (config.fixedTeeth.length)

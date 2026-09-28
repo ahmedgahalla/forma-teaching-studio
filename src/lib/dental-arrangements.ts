@@ -137,11 +137,14 @@ export function createDentalArrangement(base: DentalCase, id: string): DentalArr
   const target = id === 'dental-class-i' ? 0 : id === 'dental-class-iii' ? -3 : 3;
   const upperShift = (target - discrepancy) / 2,
     lowerShift = -upperShift;
+  // Register the rigid arch baseline in both tissue origins; poses hold only individual edits.
+  for (const tooth of model.teeth)
+    tooth.position[2] += Number(tooth.id[0]) < 3 ? upperShift : lowerShift;
   const transforms: Transforms = Object.fromEntries(
     model.teeth.map(tooth => [
       tooth.id,
       {
-        translation: [0, 0, Number(tooth.id[0]) < 3 ? upperShift : lowerShift] as Vec3,
+        translation: [0, 0, 0] as Vec3,
         rotation: [0, 0, 0] as Vec3,
       },
     ]),

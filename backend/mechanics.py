@@ -4,6 +4,7 @@ import math
 import re
 from typing import Annotated, Literal, Union
 from pydantic import BaseModel, ConfigDict, Field, model_serializer, model_validator
+from bracket_placement import BracketAngle, advance_brackets, bracket_wire_active
 
 
 class Strict(BaseModel):
@@ -77,6 +78,7 @@ class BracketPosition(Strict):
     type: Literal["bracket-position"]
     tooth: Tooth
     local: LocalPoint
+    angleDeg: Union[BracketAngle, None] = None
 
 
 class Wire(Strict):
@@ -208,12 +210,19 @@ class ConfigExpander(Strict):
 
 class Config(Strict):
     brackets: dict[Tooth, LocalPoint]
+    bracketAngles: Union[dict[Tooth, BracketAngle], None] = None
     wires: list[ConfigWire] = Field(max_length=4)
     tads: list[ConfigTad] = Field(max_length=8)
     elastics: list[ConfigElastic] = Field(max_length=12)
     expanders: list[ConfigExpander] = Field(max_length=1)
     support: Support
     fixedTeeth: list[Tooth] = Field(max_length=32)
+
+    @model_validator(mode="after")
+    def valid_bracket_angles(self):
+        if self.bracketAngles and not set(self.bracketAngles) <= set(self.brackets):
+            raise ValueError("Bracket angles require installed brackets.")
+        return self
 
 
 class Focus(Strict):
@@ -503,17 +512,8 @@ def advance(scene, action):
         return value
     def replace(name, value):
         config[name] = [item for item in config[name] if item["id"] != value["id"]] + [value]
-    if kind == "brackets":
-        present(action["teeth"])
-        for tooth in action["teeth"]:
-            if action["installed"]:
-                if tooth not in context["bracketAnchors"]:
-                    raise ValueError("No synthetic bracket anchor exists.")
-                config["brackets"].setdefault(tooth, context["bracketAnchors"][tooth])
-            else:
-                config["brackets"].pop(tooth, None)
-        focus["teeth"] = action["teeth"]
-        scene["selectedIds"], scene["selected"] = action["teeth"], action["teeth"][0]
+    if kind in ("brackets", "bracket-position"):
+        advance_brackets(scene, action)
     elif kind == "wire":
         present(action["teeth"])
         if len(action["teeth"]) < 2 or any(tooth not in config["brackets"] for tooth in action["teeth"]) or len({int(tooth[0]) < 3 for tooth in action["teeth"]}) != 1:
@@ -560,8 +560,8 @@ def advance(scene, action):
         context["stageIndex"] = action["index"]
     elif kind == "solve":
         active = any(wire["expansionMm"] or wire["torqueDeg"] for wire in config["wires"]) or any(elastic["law"]["kind"] == "spring" or elastic["law"].get("forceN", 0) > 0 for elastic in config["elastics"]) or any(expander["activationMm"] for expander in config["expanders"])
-        if not active:
-            raise ValueError("Set a wire activation, elastic tension or expander activation first.")
+        if not active and not bracket_wire_active(config, context["bracketAnchors"]):
+            raise ValueError("Set bracket placement, wire activation, elastic tension or expander activation first.")
         context["hasResult"] = True
         return
     elif kind in ("explain", "apply", "compare-without-tad"):

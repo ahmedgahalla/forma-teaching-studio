@@ -28,6 +28,8 @@ Use **Ask AI** to control the scene in natural language, or **Analyze** to discu
 
 “Put wire on all teeth” adds missing brackets and connects the visible arch using the selected wire preset. With Both arches visible, it creates separate upper and lower connections. Say “Put wires on both arches” to target the whole mouth regardless of the view. Existing compatible wires are reused; passive installation does not cause tooth movement.
 
+To adjust an individual bracket, select its tooth and open **Mechanics → Brackets & wire → Bracket position**. Change the mesial/distal position or height within ±2 mm, or its in-plane **Angle on crown** within ±10°, then **Apply position**. With a wire attached, calculate the response to compare against the unchanged reference wire. Existing results recalculate when activation remains; Reset and Undo restore the setup. The angle is an in-plane tilt, separate from wire torque or a bracket prescription. Gingival margins now follow displayed tooth movement with a stable wider base; this is illustrative deformation, not tissue remodeling. See [placement and gingiva scope](docs/phases/phase-3-demo-path/3.22-gums-and-bracket-placement.md).
+
 Analyze answers questions such as “What is installed here?” and “Why did these teeth move so little?” from selected IDs, geometric poses, appliance settings, current lesson content and available revealed calculation facts. It does not see images or meshes. Its reply includes observations, an explanation, limitations and a student question, with no executable scene actions. Manual controls, Stop and Undo remain responsive while analysis is selected. See [conversational commands](docs/CONVERSATIONAL_COMMANDS.md) for examples and boundaries.
 
 ## Build an initial-response experiment

@@ -1,16 +1,19 @@
-import { beforeAll, describe, expect, it } from 'vitest';
+import { beforeAll, describe, expect, it, vi } from 'vitest';
 import { readFileSync } from 'node:fs';
-import { Vector3 } from 'three';
+import { Group, MathUtils, Vector3 } from 'three';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { dentalCaseFromAsset } from './anatomy-assets';
 import { findSurfaceIntersections, toothMatrix } from './analysis';
-import type { DentalCase, DentalTooth } from './geometry';
+import { loadCase, saveCase, type DentalCase, type DentalTooth } from './geometry';
 import {
   DENTAL_ARRANGEMENTS,
   createDentalArrangement,
   type DentalArrangement,
 } from './dental-arrangements';
 import { CASE_REFERENCE_SHIFT } from './teaching-cases';
+import { createGumFollower } from './gum-follow';
+import { createMechanicsExperiment } from './mechanics/state';
+import type { Vec3 } from './model';
 
 let base: DentalCase;
 const arrangements = new Map<string, DentalArrangement>();
@@ -60,6 +63,44 @@ function incisorRelationship(arrangement: DentalArrangement) {
 }
 
 describe('authored dental Angle-class arrangements', () => {
+  it('keeps each rigidly registered gum at rest instead of applying its arch shift twice', () => {
+    const { model, transforms } = arrangements.get('dental-class-iii')!;
+    const groups = new Map(
+      model.teeth.map(tooth => {
+        const group = new Group();
+        group.position
+          .fromArray(tooth.position)
+          .add(new Vector3(...transforms[tooth.id].translation));
+        return [tooth.id, group];
+      }),
+    );
+    for (const gum of model.gums) {
+      const geometry = gum.geometry.clone();
+      try {
+        const teeth = model.teeth.filter(
+          tooth => Number(tooth.id[0]) < 3 === (gum.arch === 'upper'),
+        );
+        const follow = createGumFollower(gum, teeth, geometry, groups);
+        const matchesRest = (name: string) =>
+          geometry
+            .getAttribute(name)
+            .array.every((value, i) => value === gum.geometry.getAttribute(name).array[i]);
+        follow(0);
+        expect(matchesRest('position')).toBe(true);
+        expect(matchesRest('normal')).toBe(true);
+        const group = groups.get(teeth[0].id)!;
+        group.position.x += 1;
+        follow(0);
+        expect(matchesRest('position')).toBe(false);
+        group.position.fromArray(teeth[0].position);
+        follow(0);
+        expect(matchesRest('position')).toBe(true);
+        expect(matchesRest('normal')).toBe(true);
+      } finally {
+        geometry.dispose();
+      }
+    }
+  });
   it('provides four source-linked dental examples without claiming skeletal diagnosis', () => {
     expect(DENTAL_ARRANGEMENTS.map(item => item.id)).toEqual([
       'dental-class-i',
@@ -71,6 +112,95 @@ describe('authored dental Angle-class arrangements', () => {
       expect(item.sources.every(source => source.url.startsWith('https://'))).toBe(true);
       expect(item.assumptions.join(' ')).toMatch(/does not establish a skeletal class/);
       expect(item.assumptions.join(' ')).toMatch(/not diagnostic thresholds/);
+    }
+  });
+  it('preserves every displayed tooth matrix when rigid arch shifts move into the neutral origins', () => {
+    for (const { model, transforms } of arrangements.values())
+      for (const tooth of model.teeth) {
+        const source = base.teeth.find(item => item.id === tooth.id)!;
+        const arch = Number(tooth.id[0]) < 3 ? 'upper' : 'lower';
+        const gumShift =
+          model.gums.find(gum => gum.arch === arch)!.position[2] -
+          base.gums.find(gum => gum.arch === arch)!.position[2];
+        const position: Vec3 = [...source.position];
+        position[1] += arch === 'upper' ? -CASE_REFERENCE_SHIFT : CASE_REFERENCE_SHIFT;
+        const pose = transforms[tooth.id];
+        const prior = toothMatrix(
+          { ...source, position },
+          {
+            [tooth.id]: {
+              rotation: pose.rotation,
+              translation: [
+                pose.translation[0],
+                pose.translation[1],
+                pose.translation[2] + gumShift,
+              ],
+            },
+          },
+        );
+        toothMatrix(tooth, transforms).elements.forEach((value, i) =>
+          expect(value).toBeCloseTo(prior.elements[i], 12),
+        );
+      }
+  });
+  it('round-trips registered origins and individual poses through the existing save format and mechanics reference', async () => {
+    const { model, transforms } = arrangements.get('dental-class-ii-division-2')!;
+    const before = createMechanicsExperiment(model, transforms);
+    let blob!: Blob;
+    vi.useFakeTimers();
+    vi.spyOn(URL, 'createObjectURL').mockImplementation(value => {
+      blob = value as Blob;
+      return 'blob:arrangement';
+    });
+    vi.spyOn(URL, 'revokeObjectURL').mockImplementation(() => {});
+    vi.stubGlobal('document', { createElement: () => ({ click() {} }) });
+    let restored: DentalCase | undefined;
+    try {
+      saveCase(model, transforms);
+      const saved = await loadCase(new File([blob], 'arrangement.json'));
+      restored = saved.model;
+      expect(saved.transforms).toEqual(transforms);
+      expect(restored.teeth.map(tooth => tooth.position)).toEqual(
+        model.teeth.map(tooth => tooth.position),
+      );
+      expect(restored.gums.map(gum => gum.position)).toEqual(model.gums.map(gum => gum.position));
+      expect(createMechanicsExperiment(restored, saved.transforms).reference).toEqual(
+        before.reference,
+      );
+      const groups = new Map(
+        restored.teeth.map(tooth => {
+          const group = new Group(),
+            pose = saved.transforms[tooth.id];
+          group.position.fromArray(tooth.position).add(new Vector3(...pose.translation));
+          group.rotation.set(...(pose.rotation.map(MathUtils.degToRad) as Vec3));
+          tooth.geometry.boundingBox = null;
+          if (tooth.rootGeometry) tooth.rootGeometry.boundingBox = null;
+          return [tooth.id, group];
+        }),
+      );
+      for (const gum of restored.gums) {
+        gum.geometry.boundingBox = null;
+        const geometry = gum.geometry.clone();
+        try {
+          const teeth = restored.teeth.filter(
+            tooth => Number(tooth.id[0]) < 3 === (gum.arch === 'upper'),
+          );
+          createGumFollower(gum, teeth, geometry, groups)(0);
+          expect(geometry.getAttribute('position').array.every(Number.isFinite)).toBe(true);
+        } finally {
+          geometry.dispose();
+        }
+      }
+    } finally {
+      for (const tooth of restored?.teeth || []) {
+        tooth.geometry.dispose();
+        tooth.rootGeometry?.dispose();
+      }
+      restored?.gums.forEach(gum => gum.geometry.dispose());
+      vi.clearAllTimers();
+      vi.useRealTimers();
+      vi.restoreAllMocks();
+      vi.unstubAllGlobals();
     }
   });
   it('reuses all 28 linked crowns and roots and applies the reference registration only once', () => {
@@ -99,18 +229,24 @@ describe('authored dental Angle-class arrangements', () => {
       for (const gum of model.gums) {
         const source = base.gums.find(item => item.id === gum.id)!;
         const example = gum.arch === 'upper' ? '16' : '46';
+        const tooth = model.teeth.find(item => item.id === example)!;
+        const sourceTooth = base.teeth.find(item => item.id === example)!;
         expect(gum.geometry).toBe(source.geometry);
         expect(gum.position[2] - source.position[2]).toBeCloseTo(
-          transforms[example].translation[2],
+          tooth.position[2] - sourceTooth.position[2],
           8,
         );
+        expect(transforms[example].translation).toEqual([0, 0, 0]);
       }
     }
   });
   it('moves the molar sagittal relation in opposite directions and shares it between both Class II divisions', () => {
     const relation = (id: string) => {
-      const { transforms } = arrangements.get(id)!;
-      return transforms['16'].translation[2] - transforms['46'].translation[2];
+      const { model } = arrangements.get(id)!;
+      return (
+        model.teeth.find(tooth => tooth.id === '16')!.position[2] -
+        model.teeth.find(tooth => tooth.id === '46')!.position[2]
+      );
     };
     const classI = relation('dental-class-i');
     expect(relation('dental-class-ii-division-1') - classI).toBeCloseTo(3, 8);

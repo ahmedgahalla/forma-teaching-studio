@@ -1,6 +1,6 @@
 'use client';
 import { useEffect, useState } from 'react';
-import { ArrowRight, Focus, Play, Plus, RotateCcw } from 'lucide-react';
+import { ArrowRight, Focus, Play, RotateCcw } from 'lucide-react';
 import type {
   MechanicsAction,
   MechanicsExperiment,
@@ -10,6 +10,8 @@ import type {
 import type { MechanicsFocus, PointedReference } from '@/lib/mechanics-commands';
 import { MATERIAL_PRESETS, MECHANICS_SOURCES, SUPPORT_PRESETS } from '@/lib/mechanics/presets';
 import { hasMechanicsMovement, MECHANICS_DISPLAY_SCALES } from '@/lib/mechanics-presentation';
+import type { DentalTooth } from '@/lib/geometry';
+import { BracketPlacementPanel } from './BracketPlacementPanel';
 
 const WIRE_OPTIONS: { label: string; section: WireSection }[] = [
   { label: 'Round · 0.014 in', section: { shape: 'round', diameterMm: 0.014 * 25.4 } },
@@ -37,6 +39,7 @@ const uniqueId = (prefix: string, ids: string[]) => {
 
 type Props = {
   experiment: MechanicsExperiment;
+  teeth: readonly DentalTooth[];
   selectedIds: string[];
   pointed: PointedReference | null;
   focus: MechanicsFocus;
@@ -168,32 +171,15 @@ export default function MechanicsPanel(p: Props) {
             <strong>01 · Brackets & wire</strong>
             <span>{Object.keys(config.brackets).length} brackets</span>
           </div>
-          <p className="mechanics-target">Selected: {p.selectedIds.join(' · ') || 'none'}</p>
-          <div className="mechanics-actions">
-            <button
-              onClick={() =>
-                perform(
-                  [{ type: 'brackets', teeth: p.selectedIds, installed: true }],
-                  'Install brackets on the selected teeth',
-                  false,
-                )
-              }
-            >
-              <Plus size={14} />
-              Install brackets
-            </button>
-            <button
-              onClick={() =>
-                perform(
-                  [{ type: 'brackets', teeth: p.selectedIds, installed: false }],
-                  'Remove selected brackets',
-                  false,
-                )
-              }
-            >
-              Remove
-            </button>
-          </div>
+          <BracketPlacementPanel
+            config={config}
+            referenceTeeth={p.experiment.reference.teeth}
+            teeth={p.teeth}
+            selectedIds={p.selectedIds}
+            hasResult={!!result}
+            disabled={p.busy}
+            onActions={p.onActions}
+          />
           {config.wires.length > 0 && (
             <label>
               Active wire

@@ -279,3 +279,31 @@ Numbers 17–19 were checked against the current lessons and the parallel Phase 
 - **Root cause:** isolated button tests replaced the real camera action and omitted the parent capture/global shortcut boundaries, so correct local callback arguments did not establish correct final behavior.
 - **Prevention:** exercise explicit arch views through the real camera action, register new disclosures with the shared overlay detector, and cover new reference controls against the existing scene-interaction classifier. Preserve genuine workspace-change cancellation.
 - **Status:** automated · **Count:** 1
+
+## 38. Recalculation must consider the proposed activation
+
+- **Mistake caught during integration:** [3.22 review](reviews/from-builder/2026-09-28-gums-and-bracket-placement.md) reproduced a neutral bracket reset followed by an invalid passive solve, rolling back the whole request. The editor also rounded unchanged coordinates during an angle-only edit.
+- **Root cause:** the editor decided to recalculate from the old result and rebuilt all values from formatted text, rather than evaluating the proposed configuration and preserving untouched committed fields.
+- **Prevention:** share activation eligibility with the state machine, evaluate the proposed configuration against immutable reference slots, and append Solve only when activation remains. Keep exact untouched fields. DOM tests use a real solved bracket-only experiment and cover reset, remaining independent activations and precision.
+- **Status:** automated · **Count:** 1
+
+## 39. Deformation needs one consistent rest frame
+
+- **Mistake caught during integration:** [3.22 review](reviews/from-builder/2026-09-28-gums-and-bracket-placement.md) found Class I/II/III gum margins receiving the existing rigid arch shift twice after tooth following was added.
+- **Root cause:** static gum positioning and tooth movement encoded the same arrangement offset in different places. A new follower treated both as independent motion.
+- **Prevention:** place rigid arrangement registration in matching rest origins and retain individual movement in poses. Assert world-pose equivalence for all arrangements, unchanged baseline gum buffers, local following, exact reset and saved mechanics-reference compatibility.
+- **Status:** automated · **Count:** 1
+
+## 40. Loaded geometry does not retain derived runtime bounds
+
+- **Mistake caught during integration:** the [3.22 saved-case regression](reviews/from-builder/2026-09-28-gums-and-bracket-placement.md) reproduced a missing-bounds crash when following freshly decoded atlas gingiva.
+- **Root cause:** the new deformation path assumed the asset adapter's derived bounding boxes also existed after JSON restoration, which reconstructs geometry attributes without those caches.
+- **Prevention:** compute missing bounds in the consuming geometry routine and test the actual save/load path with bounds explicitly absent. Preserve source attributes while rebuilding derived state.
+- **Status:** automated · **Count:** 1
+
+## 41. Major-version coverage does not verify a minor-version floor
+
+- **Mistake found during source review:** the [existing audit generator](reviews/from-builder/2026-09-28-audit-generator-node-floor.md) uses `registerHooks`, added in Node 22.15, although the declared minimum is 22.6.
+- **Root cause:** copying a working script on a recent Node 22 release does not establish compatibility with the minimum supported minor release; the CI matrix selects current major releases.
+- **Prevention:** check API introduction versions for new maintenance scripts and verify the exact declared floor when changing runtime-dependent tooling. The existing generator has a separate auditor follow-up.
+- **Status:** noted · **Count:** 1

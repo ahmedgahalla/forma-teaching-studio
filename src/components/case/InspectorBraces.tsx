@@ -16,6 +16,7 @@ export function InspectorBraces({ api }: { api: CaseStudioApi }) {
           {api.activeExperiment && !api.prepared && (
             <MechanicsPanel
               experiment={api.activeExperiment}
+              teeth={api.model.teeth}
               selectedIds={api.selectedIds}
               pointed={api.physicalPoint}
               focus={api.mechanicsFocus}
