@@ -8,6 +8,7 @@ import { DEFAULT_ATTACHMENT, errorText } from './constants';
 import { DEFAULT_APPLIANCE_DISPLAY, validateApplianceDisplay } from '@/lib/appliance-display';
 import { toothArch } from '@/lib/appliances';
 import { parseTeachingCommand } from '@/lib/lecture';
+import { supportsTeachingAnatomy, SUPPORT_ANATOMY_UNAVAILABLE } from '@/lib/anatomy-capability';
 
 export function createTeachingDispatch(api: CaseStudioApi, refs: CaseRefs) {
   const applyTeaching = (action: TeachingAction): boolean => {
@@ -82,8 +83,7 @@ export function createTeachingDispatch(api: CaseStudioApi, refs: CaseRefs) {
         return true;
       }
       if (action.kind === 'anatomy') {
-        if (!api.model.demo)
-          throw new Error('Generated anatomy is available only on the synthetic teaching model.');
+        if (!supportsTeachingAnatomy(api.model)) throw new Error(SUPPORT_ANATOMY_UNAVAILABLE);
         api.setAnatomy(
           action.action === 'opacity'
             ? { ...api.anatomy, bone: true, opacity: action.value }

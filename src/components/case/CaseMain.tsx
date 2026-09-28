@@ -12,6 +12,8 @@ import { CaseStageDock } from './CaseStageDock';
 import type { TeacherLectures } from '../lecture-builder/useTeacherLectures';
 import { lectureStepTitle } from '../lecture-builder/comparison-labels';
 import { LectureViewControls } from '../lecture-builder/LectureViewControls';
+import { AtlasToothChart } from './AtlasToothChart';
+import { AtlasToothInspector } from './AtlasToothInspector';
 
 export function CaseMain({
   api,
@@ -23,6 +25,7 @@ export function CaseMain({
   audienceSource?: RefObject<HTMLElement | null>;
 }) {
   const customStep = teacher?.document && !teacher.session.exploring;
+  const atlasExplore = !customStep && !api.toothStudy && !api.glossaryId && !api.lecture;
   return (
     <>
       <main className="main-workspace">
@@ -49,7 +52,7 @@ export function CaseMain({
           )}
           {!customStep && <CaseArchToolbar api={api} />}
           <div
-            className={`lecture-stage${api.toothStudy ? ' tooth-study-workspace' : ''}${api.glossaryId ? ' definition-workspace' : ''}`}
+            className={`lecture-stage${api.toothStudy ? ' tooth-study-workspace' : ''}${api.glossaryId ? ' definition-workspace' : ''}${atlasExplore ? ' atlas-explore-stage' : ''}`}
           >
             <CaseViewport
               api={api}
@@ -57,8 +60,10 @@ export function CaseMain({
               lecturePresentation={!!customStep}
               teachingFocus={!!customStep && teacher!.session.focus}
             />
+            {atlasExplore && !api.toolsOpen && <AtlasToothInspector api={api} />}
             {!customStep && <CaseLectureOverlay api={api} />}
           </div>
+          {atlasExplore && <AtlasToothChart api={api} />}
           {(!customStep || api.prepared || api.demonstration || api.sandbox.pending) && (
             <CaseStageDock api={api} hideExplore={!!customStep} />
           )}

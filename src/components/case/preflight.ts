@@ -13,6 +13,8 @@ import type { CaseRefs, CaseStudioApi } from './api';
 import type { ClassroomSnapshot } from './types';
 import type { Command } from '@/lib/commands';
 import { preflightMechanicsExample } from './mechanics-example';
+import { SUPPORT_ANATOMY_UNAVAILABLE } from '@/lib/anatomy-capability';
+import { getTeachingAssetCase } from '@/lib/anatomy-assets';
 
 export function createCasePreflight(api: CaseStudioApi, refs: CaseRefs) {
   const preflight = (actions: TeachingAction[], from?: unknown) =>
@@ -26,6 +28,7 @@ export function createCasePreflight(api: CaseStudioApi, refs: CaseRefs) {
       const source = saved?.lesson.model || api.model,
         teeth = source.teeth;
       let synthetic = source.demo,
+        supportAsset = source.asset,
         hasRoots = teeth.some(tooth => tooth.rootGeometry);
       let lesson = LESSONS.find(item => item.id === (saved?.lessonId ?? api.lessonId));
       let candidate = { ...(saved?.sandbox || api.sandbox), current: transforms };
@@ -113,6 +116,7 @@ export function createCasePreflight(api: CaseStudioApi, refs: CaseRefs) {
           if (action.action === 'load') {
             const definition = getTeachingCase(action.id);
             synthetic = hasRoots = true;
+            supportAsset = getTeachingAssetCase()?.asset;
             sourceScenario = {
               caseId: definition.id,
               variantId: definition.variants[0].id,
@@ -233,6 +237,8 @@ export function createCasePreflight(api: CaseStudioApi, refs: CaseRefs) {
           throw new Error(
             'Generated supporting anatomy is available only in the synthetic classroom.',
           );
+        if (action.kind === 'anatomy' && supportAsset === 'claude-atlas-v1')
+          throw new Error(SUPPORT_ANATOMY_UNAVAILABLE);
         if (
           action.kind === 'attachment' &&
           action.action === 'add' &&

@@ -15,12 +15,27 @@ it.each(['periodontal-ligament', 'alveolar-bone'])(
     const actions = glossaryActions(id);
     expect(() => preflight(actions)).not.toThrow();
     expect(api.captureClassroom()).toEqual(before);
+    expect(getGlossaryEntry(id)?.biology).toBe('overview');
+    expect(actions.some(action => action.kind === 'anatomy')).toBe(false);
+    expect(() =>
+      preflight([...actions, { kind: 'anatomy', action: 'bone', visible: true }]),
+    ).not.toThrow();
     expect(() => preflight(actions.slice(1))).toThrow(/root geometry|synthetic classroom/);
     expect(() =>
       preflight([{ kind: 'anatomy', action: 'bone', visible: true }, ...actions]),
     ).toThrow(/synthetic classroom/);
   },
 );
+
+it('rejects unsupported atlas tissue overlays without mutating the scene', () => {
+  const { api, preflight } = setupToothStudy();
+  api.setModel({ ...api.model, asset: 'claude-atlas-v1' });
+  const before = api.captureClassroom();
+  expect(() => preflight([{ kind: 'anatomy', action: 'bone', visible: true }])).toThrow(
+    'Matching bone',
+  );
+  expect(api.captureClassroom()).toEqual(before);
+});
 
 it('shows the model before narration and undoes/redoes the whole glossary request', async () => {
   const { api, host, settle } = setupToothStudy();

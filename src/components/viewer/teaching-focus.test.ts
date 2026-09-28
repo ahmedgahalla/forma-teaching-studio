@@ -86,6 +86,32 @@ describe('teaching focus', () => {
     geometry.dispose();
   });
 
+  it('retains atlas shaders and live uniforms through focus and theme copies without owning bump textures', () => {
+    const base = createDentalMaterials(true, 'midnight', { value: 1 });
+    const sources = [base.enamel, base.rootMaterial, base.lockedMaterial, base.contactMaterial];
+    const focus = createTeachingFocusMaterials(sources);
+    const geometry = new BoxGeometry(1, 1, 1);
+    const mesh = new Mesh(geometry, base.enamel);
+    const disposeTexture = vi.spyOn(base.enamel.bumpMap!, 'dispose');
+    for (const source of sources) {
+      focus.apply(mesh, source, true);
+      const faded = mesh.material;
+      expect(faded.onBeforeCompile).toBe(source.onBeforeCompile);
+      expect(faded.customProgramCacheKey).toBe(source.customProgramCacheKey);
+      expect(faded.userData.tissue).toBe(source.userData.tissue);
+      source.color.set('#eeeecc');
+      focus.sync();
+      expect(faded.color.equals(source.color)).toBe(true);
+      expect(faded.onBeforeCompile).toBe(source.onBeforeCompile);
+      expect(faded.userData.tissue).toBe(source.userData.tissue);
+    }
+    focus.dispose();
+    expect(disposeTexture).not.toHaveBeenCalled();
+    Object.values(base).forEach(material => material.dispose());
+    expect(disposeTexture).toHaveBeenCalledOnce();
+    geometry.dispose();
+  });
+
   it('refreshes theme colors and disposes only owned clones, once', () => {
     const texture = new Texture(),
       source = new MeshStandardMaterial({ map: texture });

@@ -17,6 +17,8 @@ import { useAudienceWindow } from '../lecture-audience/useAudienceWindow';
 import { mechanicsResponseCaption } from '@/lib/mechanics-presentation';
 import '../lecture-builder/lecture-builder.css';
 import '../lecture-builder/teacher-workspace.css';
+import './atlas-workspace.css';
+import { LecturePicker } from '../lecture-builder/LecturePicker';
 
 export function CaseShell({ api, teacher }: { api: CaseStudioApi; teacher: TeacherLectures }) {
   const {
@@ -71,7 +73,7 @@ export function CaseShell({ api, teacher }: { api: CaseStudioApi; teacher: Teach
   return (
     <>
       <div
-        className={`app-shell braces-studio teaching-studio try-studio studio-experience lecture-opening ${lecture ? 'lecture-mode' : ''}`}
+        className={`app-shell braces-studio teaching-studio try-studio studio-experience lecture-opening atlas-workspace ${lecture ? 'lecture-mode' : ''}`}
         data-mobile-panel={mobilePanel}
         data-tools-open={toolsOpen}
         data-preview={!!sandbox.pending}
@@ -121,6 +123,12 @@ export function CaseShell({ api, teacher }: { api: CaseStudioApi; teacher: Teach
         />
         {teacher.document && (
           <div className="teacher-presentation-toolbar">
+            <LecturePicker
+              lectures={teacher.catalog}
+              currentId={teacher.session.documentId}
+              onOpen={teacher.openLecture}
+              disabled={teacher.session.exploring}
+            />
             <LectureNavigation {...teacher.navigationProps} />
             <AudienceLauncher
               status={audience.status}

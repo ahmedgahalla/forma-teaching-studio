@@ -15,20 +15,20 @@ registerHooks({
   },
 });
 const load = name => import(pathToFileURL(path.resolve(`src/lib/${name}.ts`)));
-const { dentalCaseFromAsset } = await load('anatomy-assets');
+const { dentalCaseFromAtlas, ATLAS_ASSET_URL, ATLAS_METADATA_URL } = await load('atlas-assets');
 const { createTeachingCase, sampleCaseDemonstration, TEACHING_CASES, CASE_REFERENCE_SHIFT } =
   await load('teaching-cases');
 const { findSurfaceIntersections } = await load('analysis');
 const sourceBytes = readFileSync('src/lib/teaching-cases.ts');
-const assetFile = 'public/models/forma-teaching-v1.glb',
-  metadataFile = 'public/models/forma-teaching-v1.json';
+const assetFile = `public${ATLAS_ASSET_URL}`,
+  metadataFile = `public${ATLAS_METADATA_URL}`;
 const bytes = readFileSync(assetFile),
   rawMetadata = readFileSync(metadataFile);
 const gltf = await new GLTFLoader().parseAsync(
   bytes.buffer.slice(bytes.byteOffset, bytes.byteOffset + bytes.byteLength),
   '',
 );
-const base = dentalCaseFromAsset(gltf.scene, JSON.parse(rawMetadata.toString('utf8')));
+const base = dentalCaseFromAtlas(gltf.scene, JSON.parse(rawMetadata.toString('utf8')));
 const reference = createTeachingCase(base, 'reference-occlusion').model;
 const rootModel = model => ({
   ...model,
@@ -122,9 +122,14 @@ try {
   const sha256 = data => createHash('sha256').update(data).digest('hex');
   const report = {
     version: 1,
-    asset: { file: assetFile, sha256: sha256(bytes), metadataSha256: sha256(rawMetadata) },
+    asset: {
+      file: assetFile,
+      metadataFile,
+      sha256: sha256(bytes),
+      metadataSha256: sha256(rawMetadata),
+    },
     caseSourceSha256: sha256(sourceBytes),
-    referenceShiftMm: CASE_REFERENCE_SHIFT,
+    referenceShiftMm: base.asset ? 0 : CASE_REFERENCE_SHIFT,
     method:
       'Exact triangle-surface intersections at nine uniformly spaced poses plus every authored keyframe; unchanged pairs reuse their measured registered-reference result.',
     limitation:

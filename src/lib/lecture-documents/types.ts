@@ -4,6 +4,7 @@ import type { MechanicsExperiment } from '../mechanics/types';
 import type { Transforms } from '../model';
 import type { LectureSetup } from '../planning';
 import type { ToothStudyView } from '../tooth-study/types';
+import type { BiologyView } from '../teaching-biology';
 
 export type LectureSource = { kind: 'reference' } | { kind: 'case' | 'arrangement'; id: string };
 
@@ -32,6 +33,7 @@ export type LectureStep = {
   answer: string;
   scene: LectureScene;
   demo?: { caseId: string; variantId: string };
+  biology?: BiologyView;
 };
 
 export type LectureDocument = {

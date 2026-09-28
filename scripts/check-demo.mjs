@@ -11,8 +11,16 @@ const assets = [
   'fonts/DM-Sans-OFL.txt',
   'fonts/Manrope-Variable.ttf',
   'fonts/Manrope-OFL.txt',
+  'fonts/InstrumentSerif-Regular.ttf',
+  'fonts/instrumentserif-OFL.txt',
+  'fonts/IBMPlexSans-Variable.ttf',
+  'fonts/ibmplexsans-OFL.txt',
+  'fonts/IBMPlexMono-Regular.ttf',
+  'fonts/ibmplexmono-OFL.txt',
   'models/forma-teaching-v1.glb',
   'models/forma-teaching-v1.json',
+  'models/forma-atlas-v1.glb',
+  'models/forma-atlas-v1.json',
   'workers/mechanics.js',
 ];
 for (const asset of assets) {

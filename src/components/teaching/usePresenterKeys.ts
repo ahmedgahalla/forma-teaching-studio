@@ -12,7 +12,7 @@ function isVisible(element: Element): boolean {
 export function hasOpenTeachingOverlay(): boolean {
   const overlays = document.querySelectorAll(
     'dialog[open],[role="dialog"],[role="alertdialog"],[role="menu"],' +
-      'details[open]:is(.opening-menu,.opening-view-menu,.lecture-variant-picker,.stage-options),' +
+      'details[open]:is(.opening-menu,.opening-view-menu,.lecture-picker,.lecture-variant-picker,.stage-options),' +
       '[aria-haspopup="menu"][aria-expanded="true"]',
   );
   return [...overlays].some(isVisible);

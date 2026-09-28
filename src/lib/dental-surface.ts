@@ -101,6 +101,8 @@ export function dentalSurface(
   occlusal: Vec3,
   tissue: 'enamel' | 'root' | 'gingiva',
 ) {
+  // Atlas colour, UVs, normals and baked AO/thickness are already authored together.
+  if (source.hasAttribute('dentalData')) return source.clone();
   const geometry = source.clone(),
     positions = geometry.getAttribute('position');
   const axis = new THREE.Vector3(...occlusal),

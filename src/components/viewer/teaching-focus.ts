@@ -1,6 +1,7 @@
 import type { Material, Mesh } from 'three';
 import { toothArch } from '@/lib/appliances';
 import type { ViewerProps } from './viewer-types';
+import { preserveMaterialProgram } from '@/lib/atlas-shader';
 
 type FocusState = Pick<
   ViewerProps,
@@ -57,6 +58,7 @@ export function createTeachingFocusMaterials(sources: readonly Material[]) {
   const sync = () => {
     for (const [source, material] of faded) {
       material.copy(source);
+      preserveMaterialProgram(material, source);
       material.transparent = true;
       material.opacity = source.opacity * 0.24;
       material.depthWrite = false;

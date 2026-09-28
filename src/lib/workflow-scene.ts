@@ -1,85 +1,12 @@
+import { anatomySteps, anatomyDefinition } from './workflow-anatomy-lesson';
 import type { DentalCase } from './geometry';
-import { WORKFLOWS, getWorkflowFrame, type WorkflowFrame, type WorkflowStep } from './workflows';
+import { WORKFLOWS, getWorkflowFrame, type WorkflowFrame } from './workflows';
 import { applyDentalCommand, type Transforms } from './model';
 import type { TeachingAction } from './lecture';
 import type { AnatomyViewState } from './teaching-anatomy';
+import { workflowAnatomyModel } from './workflow-anatomy-model';
+import { supportsTeachingAnatomy, SUPPORT_ANATOMY_UNAVAILABLE } from './anatomy-capability';
 
-const anatomySteps: WorkflowStep[] = [
-  {
-    title: 'Explore the tooth and socket',
-    action: 'Inspect the labelled cutaway',
-    explanation:
-      'The crown and root belong to the tooth. Gingiva surrounds its neck; the periodontal ligament connects the root covering to the supporting alveolar bone. The coloured ligament sleeve is enlarged for visibility.',
-    observe:
-      'Locate the crown, root, gingiva, ligament and supporting bone. Orbit to inspect the open section.',
-    question: 'Is the coloured ligament sleeve drawn at its true thickness?',
-    answer: 'No. It is deliberately exaggerated to make the relationship visible in a lecture.',
-    phase: 'assessment',
-    view: 'perspective',
-    arch: 'upper',
-    arrows: false,
-    palate: false,
-  },
-  {
-    title: 'Demonstrate translation',
-    action: 'Move the whole tooth sideways without rotating it',
-    explanation:
-      'Translation gives each point the same displacement while maintaining orientation. The root and crown move together. The fixed socket and enlarged ligament are reference illustrations; they do not calculate living tissue response.',
-    observe:
-      'Watch the crown and root shift mesially across the front view by the same amount. Use the original overlay to compare their positions.',
-    question: 'Does the root remain stationary during translation?',
-    answer: 'No. In this geometric example the root and crown have the same displacement.',
-    phase: 'movement',
-    view: 'front',
-    arch: 'upper',
-    arrows: false,
-    palate: false,
-  },
-  {
-    title: 'Demonstrate tipping',
-    action: 'Rotate the tooth about an illustrative pivot',
-    explanation:
-      'An angular change alters the tooth orientation, so its points have different displacements. This example rotates about the existing crown-centre geometric pivot, not a calculated centre of resistance.',
-    observe:
-      'Compare root and crown movement. Turn on the original overlay to make the angular difference visible.',
-    question: 'Does the animation identify the clinical centre of resistance?',
-    answer: 'No. The pivot is chosen to demonstrate geometry and does not solve a force system.',
-    phase: 'movement',
-    view: 'front',
-    arch: 'upper',
-    arrows: false,
-    palate: false,
-  },
-  {
-    title: 'Compare and discuss',
-    action: 'Compare translation with tipping',
-    explanation:
-      'Translation preserves orientation; tipping changes it. Return to either movement step to replay it, or make a temporary variation with an explicit tooth movement. Return to the lesson restores its authored setup.',
-    observe:
-      'Use the Translation and Tipping buttons to compare the same tooth, then repeat more slowly.',
-    question: 'Can visible crown displacement alone describe the entire movement?',
-    answer:
-      'No. Root displacement and orientation also matter, and a geometric model does not establish the biological response.',
-    phase: 'retention',
-    view: 'front',
-    arch: 'upper',
-    arrows: false,
-    palate: false,
-  },
-];
-const anatomyDefinition = {
-  id: 'anatomy',
-  title: 'Inside a tooth: translation and tipping',
-  learningGoal:
-    'Identify the tissues around a tooth, then compare displacement with a change in orientation.',
-  steps: anatomySteps,
-  sources: [
-    {
-      title: 'NIDCR: tooth and supporting-tissue anatomy',
-      url: 'https://www.nidcr.nih.gov/sites/default/files/2021-04/Open-Wide-and-Trek-Inside.pdf',
-    },
-  ],
-};
 export type WorkflowScene = {
   id: string;
   step: number;
@@ -104,6 +31,7 @@ export type WorkflowScene = {
 export const classroomDefinition = (id: string) =>
   id === 'anatomy' ? anatomyDefinition : WORKFLOWS.find(item => item.id === id) || WORKFLOWS[0];
 export function initialWorkflowScene(model: DentalCase, id = 'fixed-braces'): WorkflowScene {
+  model = workflowAnatomyModel(model, id);
   const step = classroomDefinition(id).steps[0];
   return {
     id,
@@ -161,6 +89,7 @@ export function workflowSceneStep(
   index: number,
   base: DentalCase,
 ): WorkflowScene {
+  base = workflowAnatomyModel(base, s.id);
   const step = classroomDefinition(s.id).steps[index];
   if (!step)
     throw new Error(
@@ -245,11 +174,13 @@ export function applyWorkflowAction(
             : 4,
       next =
         index === s.step
-          ? { ...s, variation: null, model: base }
+          ? { ...s, variation: null, model: workflowAnatomyModel(base, s.id) }
           : workflowSceneStep(s, index, base);
     return { ...next, progress: action.value, playing: false };
   }
   if (action.kind === 'speed') return { ...s, speed: action.value };
+  if (action.kind === 'anatomy' && !supportsTeachingAnatomy(s.model))
+    throw new Error(SUPPORT_ANATOMY_UNAVAILABLE);
   if (action.kind === 'anatomy')
     return {
       ...s,

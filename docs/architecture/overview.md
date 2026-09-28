@@ -11,7 +11,7 @@ Inside `src/components/Studio.tsx`:
 
 ```
 Studio
-└─ ModelBootstrap            loads /models/forma-teaching-v1.glb + .json; procedural fallback (lib/demo.ts)
+└─ ModelBootstrap            loads /models/forma-atlas-v1.glb + .json; procedural fallback (lib/demo.ts)
    └─ TeachingProvider       TeachingController.tsx — the hub (see below)
       └─ TeachingScenes      both scenes stay mounted; inactive one is display:none / paused
          ├─ CaseStudio       main workspace (defined inside Studio.tsx)
@@ -70,7 +70,8 @@ Both provider routes use async SDK clients under `ai_request.py`, which observes
 
 ## Model assets
 
-- Runtime: `public/models/forma-teaching-v1.glb` (28 crowns + 28 roots + 2 gums, ~211k triangles, **units are millimetres**) + `.json` metadata sidecar (pivots, anatomical frames, calibration). Loaded by `lib/anatomy-assets.ts`; several vitest suites read these files directly.
+- Default runtime: `public/models/forma-atlas-v1.glb` + `.json`, a preserved Claude export containing 32 teeth and two gingival surfaces in millimetres. `anatomy-assets.ts` loads it and `atlas-assets.ts` adapts the 28 supported teaching teeth, preserving material channels and fitted occlusion. `atlas-materials`/`atlas-shader`/`atlas-textures`/`viewer-stage` preserve the source rendering treatment. `case-geometry.ts` preserves these attributes through saved-case JSON. The legacy `forma-teaching-v1` files remain fixtures and source history. See `assets/anatomy/claude-atlas/README.md` for hashes and mapping.
+- Supporting tissues: `anatomy-capability.ts` blocks unsupported atlas bone/PDL sleeves. `workflow-anatomy-model.ts` supplies a cached separate schematic model only for the socket classroom; appliance classrooms retain the atlas. Ready-made lectures use separate biology vignettes.
 - Source: `assets/anatomy/forma-teaching-v1.blend` + regeneration pipeline in `scripts/anatomy/` (Blender headless). Coordinate contract in `assets/anatomy/README.md`.
 - `sample-models/` — synthetic STLs for exercising the import UI only.
 

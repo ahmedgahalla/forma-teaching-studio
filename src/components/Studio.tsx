@@ -7,7 +7,6 @@ import { applyCaseAction } from './case/apply-case-action';
 import { useEffect, useMemo, useRef } from 'react';
 import { Vector3 } from 'three';
 import ModelBootstrap from './viewer/ModelBootstrap';
-import { getTeachingAssetCase } from '@/lib/anatomy-assets';
 import { casePathAudit } from '@/lib/case-path-audit';
 import { DENTAL_ARRANGEMENTS } from '@/lib/dental-arrangements';
 import { getTeachingCase, sampleCaseDemonstration } from '@/lib/teaching-cases';
@@ -221,10 +220,10 @@ function CaseStudio({ active }: { active: boolean }) {
   const caseVariant = caseDefinition?.variants.find(item => item.id === scenario?.variantId);
   const pathAudit = useMemo(
     () =>
-      scenarioCaseId && scenarioVariantId && getTeachingAssetCase()
-        ? casePathAudit(scenarioCaseId, scenarioVariantId)
+      scenarioCaseId && scenarioVariantId
+        ? casePathAudit(scenarioCaseId, scenarioVariantId, model.asset)
         : null,
-    [scenarioCaseId, scenarioVariantId],
+    [scenarioCaseId, scenarioVariantId, model.asset],
   );
   const caseStart = useMemo(
     () =>

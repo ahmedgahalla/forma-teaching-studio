@@ -1,0 +1,245 @@
+/* Adapted from the user's Claude Dentition Atlas; see assets/anatomy/claude-atlas. */
+@import './atlas-panels.css';
+@import './atlas-chart.css';
+@font-face {
+  font-family: 'Instrument Serif';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url('/fonts/InstrumentSerif-Regular.ttf') format('truetype');
+}
+@font-face {
+  font-family: 'IBM Plex Sans';
+  font-style: normal;
+  font-weight: 100 700;
+  font-display: swap;
+  src: url('/fonts/IBMPlexSans-Variable.ttf') format('truetype');
+}
+@font-face {
+  font-family: 'IBM Plex Mono';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url('/fonts/IBMPlexMono-Regular.ttf') format('truetype');
+}
+.app-shell.studio-experience.teaching-studio.atlas-workspace {
+  --ui-bg: #0d0a0a;
+  --ui-panel: #171211;
+  --ui-raised: #211918;
+  --ui-text: #efe6db;
+  --ui-muted: #b6a79d;
+  --ui-line: #3a302e;
+  --ui-accent: #8fc3e0;
+  --ui-accent-text: #0b1a22;
+  --ui-soft: #26343d;
+  --ui-preview: #8fc3e0;
+  --ui-preview-bg: #1b2b34;
+  --atlas-surface: #171211e8;
+  font-family: 'IBM Plex Sans', sans-serif;
+  background: var(--ui-bg);
+  color: var(--ui-text);
+}
+:root[data-forma-theme='clinical'] .app-shell.atlas-workspace {
+  --ui-bg: #f0ebe4;
+  --ui-panel: #fffaf4;
+  --ui-raised: #e6dfd6;
+  --ui-text: #29231e;
+  --ui-muted: #65584d;
+  --ui-line: #bcafa3;
+  --ui-accent: #255675;
+  --ui-accent-text: #fff;
+  --ui-soft: #dbe5ea;
+  --atlas-surface: #fffaf4ed;
+}
+.app-shell.studio-experience.teaching-studio.atlas-workspace .topbar {
+  min-height: 74px;
+  height: auto;
+  padding: 12px 20px;
+  background: transparent;
+  border-bottom: 0;
+}
+.atlas-workspace .brand {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 3px;
+  min-width: 0;
+}
+.atlas-workspace .atlas-brand-name {
+  font:
+    400 29px/1 'Instrument Serif',
+    Georgia,
+    serif;
+  letter-spacing: 0;
+  white-space: nowrap;
+}
+.atlas-brand-name em {
+  color: var(--ui-muted);
+  font-style: normal;
+}
+.atlas-workspace .atlas-brand-caption {
+  color: var(--ui-muted);
+  font-size: 11px;
+  font-weight: 400;
+}
+.atlas-workspace .teacher-experience-switch,
+.atlas-workspace .button,
+.atlas-workspace .opening-view-menu > summary {
+  border-radius: 6px;
+  border: 1px solid var(--ui-line);
+  background: var(--atlas-surface);
+}
+.atlas-workspace .teacher-experience-switch button {
+  border-radius: 3px;
+}
+.atlas-workspace .teacher-experience-switch button[aria-pressed='true'] {
+  box-shadow: inset 0 -2px 0 var(--ui-accent);
+}
+.app-shell.studio-experience.teaching-studio.atlas-workspace .main-workspace {
+  padding: 0 18px 8px;
+}
+.atlas-workspace .workspace-scene {
+  overflow: visible;
+}
+.atlas-workspace .workspace-heading {
+  align-items: center;
+  gap: 10px;
+}
+.atlas-workspace .workspace-heading > div:first-child {
+  min-width: 0;
+}
+.atlas-workspace .workspace-heading h2 {
+  font-family: 'IBM Plex Sans', sans-serif;
+  font-size: 14px;
+  font-weight: 400;
+  color: var(--ui-muted);
+}
+.atlas-workspace .view-actions {
+  flex-wrap: wrap;
+  gap: 7px;
+  justify-content: flex-end;
+}
+.atlas-camera-rail {
+  display: flex;
+  overflow: hidden;
+  border: 1px solid var(--ui-line);
+  border-radius: 6px;
+  background: var(--atlas-surface);
+}
+.atlas-camera-rail button {
+  min-width: 48px;
+  min-height: 40px;
+  padding: 6px 10px;
+  border: 0;
+  border-right: 1px solid var(--ui-line);
+  background: transparent;
+  color: var(--ui-muted);
+  font-size: 13px;
+}
+.atlas-camera-rail button:last-child {
+  border-right: 0;
+}
+.atlas-camera-rail button[aria-pressed='true'] {
+  color: var(--ui-text);
+  box-shadow: inset 0 -2px 0 var(--ui-accent);
+}
+.atlas-workspace .workspace-scene > .lecture-stage > .viewport {
+  border: 0;
+  border-radius: 6px;
+  box-shadow: none;
+}
+.studio-experience.teaching-studio.atlas-workspace
+  .workspace-scene
+  > .atlas-explore-stage:has(.atlas-tooth-inspector) {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 230px;
+  grid-template-rows: minmax(220px, 1fr) auto;
+  gap: 12px;
+}
+.atlas-explore-stage > .viewport {
+  grid-column: 1;
+  grid-row: 1;
+  min-width: 0;
+}
+.atlas-explore-stage > .lecture-console {
+  grid-column: 1 / -1;
+}
+.atlas-explore-stage .viewport-selection,
+.atlas-explore-stage .orientation,
+.atlas-explore-stage .roots-badge {
+  display: none;
+}
+.atlas-workspace .workspace-command-dock {
+  background: transparent;
+}
+.atlas-workspace .statusbar {
+  background: transparent;
+  border-top-color: var(--ui-line);
+}
+@media (max-width: 1100px) {
+  .atlas-workspace .workspace-heading {
+    flex-wrap: wrap;
+  }
+  .atlas-workspace .view-actions {
+    flex: 1;
+  }
+  .atlas-workspace .atlas-brand-name {
+    font-size: 24px;
+  }
+  .atlas-workspace .atlas-brand-caption {
+    display: none;
+  }
+}
+@media (max-width: 850px) {
+  .studio-experience.teaching-studio.atlas-workspace
+    .workspace-scene
+    > .atlas-explore-stage:has(.atlas-tooth-inspector) {
+    display: flex;
+    flex-direction: column;
+  }
+  .atlas-explore-stage > .atlas-tooth-inspector {
+    display: none;
+  }
+  .app-shell.studio-experience.teaching-studio.atlas-workspace .main-workspace {
+    padding: 0 10px 6px;
+  }
+  .atlas-odontogram {
+    padding: 3px;
+  }
+  .atlas-camera-rail button {
+    min-width: 40px;
+    min-height: 44px;
+    padding: 6px;
+  }
+}
+@media (max-width: 560px) {
+  .app-shell.studio-experience.teaching-studio.atlas-workspace .topbar {
+    padding: 8px 10px;
+    min-height: 66px;
+  }
+  .atlas-workspace .atlas-brand-name {
+    font-size: 22px;
+  }
+  .atlas-brand-name em {
+    display: none;
+  }
+  .atlas-workspace .view-actions {
+    justify-content: flex-start;
+  }
+  .atlas-workspace .atlas-display-body {
+    left: 0;
+    right: auto;
+  }
+  .atlas-camera-rail {
+    flex: 1 0 100%;
+  }
+  .atlas-camera-rail button {
+    flex: 1;
+  }
+  .atlas-odontogram {
+    align-self: stretch;
+  }
+  .atlas-chart-row button {
+    min-height: 44px;
+  }
+}

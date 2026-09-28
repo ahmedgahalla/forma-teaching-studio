@@ -1,0 +1,65 @@
+.atlas-odontogram {
+  align-self: center;
+  flex-shrink: 0;
+  max-width: 100%;
+  overflow-x: auto;
+  margin-top: 9px;
+  padding: 5px 12px;
+  border: 1px solid var(--ui-line);
+  border-radius: 6px;
+  background: var(--atlas-surface);
+}
+.atlas-chart-row {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+}
+.atlas-chart-row > span {
+  color: var(--ui-muted);
+  font:
+    11px 'IBM Plex Mono',
+    monospace;
+  width: 16px;
+}
+.atlas-chart-row button {
+  display: flex;
+  align-items: center;
+  flex-direction: column;
+  width: 29px;
+  flex: 0 0 29px;
+  border: 0;
+  border-radius: 4px;
+  padding: 2px 3px;
+  background: transparent;
+  color: var(--ui-muted);
+  font:
+    10px 'IBM Plex Mono',
+    monospace;
+}
+.atlas-chart-row svg {
+  width: 15px;
+  height: 22px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.2;
+}
+.atlas-chart-row.lower {
+  border-top: 1px solid #c07d7f55;
+}
+.atlas-chart-row.lower button {
+  flex-direction: column-reverse;
+}
+.atlas-chart-row.lower svg {
+  transform: rotate(180deg);
+}
+.atlas-chart-row button[aria-pressed='true'] {
+  color: var(--ui-accent);
+  background: var(--ui-soft);
+}
+.atlas-chart-row button[data-moved] {
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+.atlas-chart-row button:nth-child(8) {
+  margin-right: 7px;
+}

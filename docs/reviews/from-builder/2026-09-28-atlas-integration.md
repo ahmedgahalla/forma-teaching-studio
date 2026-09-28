@@ -1,0 +1,15 @@
+status: open
+
+# Atlas integration and demo lecture acceptance
+
+**Phase:** [3.21](../../phases/phase-3-demo-path/3.21-atlas-demo-integration.md) · **Branch:** `ahmed/phase-3-demo-lectures` · **Dependency:** draft PR #20.
+
+**Analysis:** the source model is structurally different from Forma's old export: 32 teeth, enamel/cementum groups, baked material channels, fitted occlusion and connected root trunks without branch profiles. A direct file replacement would strip appearance, apply the wrong arch correction, lose saved-case attributes and incorrectly bridge multi-root furcations with the old tissue sleeves. The dedicated adapter, persistence contract, material port and capability guards address those findings. The reference and authored-path audit now uses the new geometry.
+
+**Findings corrected during review:** the first biology lecture draft asked students to inspect unsupported cutaway geometry; it now opens the separate overview vignettes with matching notes/questions. Chart selection could target a hidden arch; it now reveals the target and preserves mixed selection. Imported crowns could offer an unsupported study action; that button now requires the same demo/calibration/root capability as the runtime. Shader callbacks lost through Three material clones are explicitly preserved and tested. Final review also caught workflow transfer dropping the asset identity and validating the separate socket model against the atlas; both now preserve the correct source contract. The first full suite caught stale preflight capability tracking after model replacement; glossary bone/ligament definitions now use separate diagrams with the new model.
+
+**Required auditor action:** review source fidelity, saved-geometry limits, tissue boundaries, all three lecture transitions and the same-request undo/return behavior. Perform actual GPU/browser acceptance at DPR 1 and 2, both backdrops and narrow screens; click a prepared case, braces workflow and typed command. Check audience capture/notes exclusion, source replacement, orbit/zoom, chart selection, supporting-tissue fallback and font loading without the network. Review all known authored-path intersections rather than treating the zero-intersection reference as proof that every animation is collision-free.
+
+**Final interaction review:** the camera rail's explicit arch must be applied after the camera helper's selected-tooth fallback. The lecture chooser must suppress global lecture/voice shortcuts while open, and reference controls must pass the shell's existing voice-preservation boundary. Focused DOM regressions cover these integrations. The mobile Display popup now opens from its left edge when the toolbar wraps; actual narrow-screen appearance remains pending.
+
+The builder's earlier browser security rejection remains in force. The implementation is reviewable through source and automated tests but does not claim screenshots, GPU appearance, microphone or projector acceptance. Keep the PR draft until the acceptance gap and stacked dependency/CI order are resolved.

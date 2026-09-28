@@ -1,5 +1,5 @@
 import { getTeachingCase } from '../teaching-cases';
-import { fields, identifier, object, text } from './fields';
+import { choice, fields, identifier, object, text } from './fields';
 import { validateLectureScene } from './scene';
 import type { LectureDocument, LectureStep } from './types';
 
@@ -7,7 +7,7 @@ export const MAX_LECTURE_STEPS = 100;
 
 function validateStep(raw: unknown): LectureStep {
   const value = object(raw);
-  fields(value, ['id', 'title', 'notes', 'question', 'answer', 'scene'], ['demo']);
+  fields(value, ['id', 'title', 'notes', 'question', 'answer', 'scene'], ['demo', 'biology']);
   const step: LectureStep = {
     id: identifier(value.id),
     title: text(value.title, 160),
@@ -16,6 +16,8 @@ function validateStep(raw: unknown): LectureStep {
     answer: text(value.answer, 10000, true),
     scene: validateLectureScene(value.scene),
   };
+  if (value.biology !== undefined)
+    step.biology = choice(value.biology, ['overview', 'compression', 'tension'] as const);
   if (value.demo !== undefined) {
     const demo = object(value.demo);
     fields(demo, ['caseId', 'variantId']);

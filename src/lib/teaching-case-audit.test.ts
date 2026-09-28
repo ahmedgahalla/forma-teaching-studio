@@ -2,7 +2,8 @@ import { createHash } from 'node:crypto';
 import { readFileSync } from 'node:fs';
 import { describe, expect, it } from 'vitest';
 import audit from './teaching-case-audit.json';
-import { CASE_REFERENCE_SHIFT, TEACHING_CASES } from './teaching-cases';
+import { TEACHING_CASES } from './teaching-cases';
+import { ATLAS_ASSET_URL, ATLAS_METADATA_URL } from './atlas-assets';
 
 type Pair = { a: string; b: string };
 type Frame = {
@@ -23,9 +24,10 @@ const sha256 = (file: string) => createHash('sha256').update(readFileSync(file))
 describe('published Blender teaching-case contact audit', () => {
   it('is tied to the exact shipped geometry, metadata and authored paths', () => {
     expect(audit.asset.sha256).toBe(sha256(audit.asset.file));
-    expect(audit.asset.metadataSha256).toBe(sha256('public/models/forma-teaching-v1.json'));
+    expect(audit.asset.file).toBe(`public${ATLAS_ASSET_URL}`);
+    expect(audit.asset.metadataSha256).toBe(sha256(`public${ATLAS_METADATA_URL}`));
     expect(audit.caseSourceSha256).toBe(sha256('src/lib/teaching-cases.ts'));
-    expect(audit.referenceShiftMm).toBe(CASE_REFERENCE_SHIFT);
+    expect(audit.referenceShiftMm).toBe(0);
     expect(audit.reference).toEqual({ crownPairs: [], rootPairs: [] });
   });
 

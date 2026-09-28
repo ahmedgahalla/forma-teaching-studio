@@ -16,6 +16,9 @@ const CONTROLS = [
   '.lecture-pointer',
   '.viewport',
   '.tooth-chart',
+  '.atlas-camera-rail',
+  '.atlas-odontogram',
+  '.atlas-tooth-inspector',
   '.selection-groups',
   '.mechanics-panel',
 ].join(', ');

@@ -693,7 +693,6 @@ export function getTeachingCase(id: string): TeachingCaseDefinition {
   return structuredClone(definition);
 }
 
-/** Metadata is copied; immutable crown/root/gum geometry remains owned by the supplied base. */
 export function createTeachingCase(base: DentalCase, id: string): PreparedTeachingCase {
   const definition = getTeachingCase(id),
     recipe = RECIPES.find(item => item.id === id)!;
@@ -719,8 +718,9 @@ export function createTeachingCase(base: DentalCase, id: string): PreparedTeachi
     anatomicalFrame(tooth);
   }
   const position = (value: Vec3, arch: 'upper' | 'lower'): Vec3 =>
-    value.map((n, i) => n + CASE_REFERENCE_OFFSETS[arch][i]) as Vec3;
+    value.map((n, i) => (base.asset ? n : n + CASE_REFERENCE_OFFSETS[arch][i])) as Vec3;
   const model: DentalCase = {
+    ...base,
     name: definition.title,
     demo: true,
     teeth: base.teeth

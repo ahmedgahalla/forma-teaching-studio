@@ -258,3 +258,24 @@ Numbers 17–19 were checked against the current lessons and the parallel Phase 
 - **Root cause:** the replacement was assumed to be atomic across parent and child insertion.
 - **Prevention:** recognize the explicit replacement viewer host and observe its direct children while it is empty. A lifecycle regression inserts the host and canvas in separate steps, while the existing label-mutation regression prevents reintroducing subtree observation.
 - **Status:** automated · **Count:** 1
+
+## 35. Anatomy replacement requires a capability and persistence audit
+
+- **Mistake caught during integration:** the new atlas has connected multi-root trunks, baked material channels and fitted arch positions; the prior generic assumptions would invent sleeves across furcations, erase appearance on save/load and reapply an obsolete arch correction. See [3.21 analysis](reviews/from-builder/2026-09-28-atlas-integration.md).
+- **Root cause:** model compatibility was broader than matching tooth IDs and vertex coordinates; root profiles, material programs and registration were implicit asset contracts.
+- **Prevention:** identify the source asset, preserve every required channel, recalculate actual crown pivots/attachments, gate unsupported tissue overlays and regenerate the real geometry audit. Pin source hashes and test saved round trips, workflow transfer identity, clone shader hooks and capability boundaries. Transfers must validate against the actual selected canonical model, including a separate schematic classroom.
+- **Status:** automated · **Count:** 1
+
+## 36. Authored lecture instructions must match the active model's capabilities
+
+- **Mistake caught during integration:** the first biology draft requested a bone/ligament cutaway on the new atlas after those overlays had correctly been disabled. See [3.21 review](reviews/from-builder/2026-09-28-atlas-integration.md).
+- **Root cause:** content inherited an older scene recipe while the visual anatomy contract changed independently.
+- **Prevention:** use the supported separate biology vignette, revise the exact presenter/student prompts, and assert every scene's anatomy flags and authored biology selection in the catalog tests. Apply the same boundary to glossary visual recipes and advance model capabilities during compound-request preflight.
+- **Status:** automated · **Count:** 1
+
+## 37. Adapted controls need tests through the existing interaction boundaries
+
+- **Mistake caught during integration:** [3.21 review](reviews/from-builder/2026-09-28-atlas-integration.md) found an explicit lower-arch shortcut overwritten by the existing camera helper's selected-tooth fallback. New control selectors also needed to participate in the shared keyboard-overlay and voice-interaction rules.
+- **Root cause:** isolated button tests replaced the real camera action and omitted the parent capture/global shortcut boundaries, so correct local callback arguments did not establish correct final behavior.
+- **Prevention:** exercise explicit arch views through the real camera action, register new disclosures with the shared overlay detector, and cover new reference controls against the existing scene-interaction classifier. Preserve genuine workspace-change cancellation.
+- **Status:** automated · **Count:** 1

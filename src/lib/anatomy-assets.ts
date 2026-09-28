@@ -3,9 +3,8 @@ import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { anatomicalFrame, type Vec3 } from './model';
 import type { DentalCase, DentalTooth, Gum } from './geometry';
 import { validateRootAnatomy } from './root-anatomy';
+import { ATLAS_ASSET_URL, ATLAS_METADATA_URL, dentalCaseFromAtlas } from './atlas-assets';
 
-const TEACHING_ASSET_URL = '/models/forma-teaching-v1.glb';
-const TEACHING_METADATA_URL = '/models/forma-teaching-v1.json';
 const IDS = ['1', '2', '3', '4'].flatMap(quadrant =>
   Array.from({ length: 7 }, (_, i) => `${quadrant}${i + 1}`),
 );
@@ -188,8 +187,8 @@ export function loadTeachingAsset(): Promise<void> {
     loading = (async () => {
       const signal = AbortSignal.timeout(15000);
       const [metadataResponse, modelResponse] = await Promise.all([
-        fetch(TEACHING_METADATA_URL, { signal }),
-        fetch(TEACHING_ASSET_URL, { signal }),
+        fetch(ATLAS_METADATA_URL, { signal }),
+        fetch(ATLAS_ASSET_URL, { signal }),
       ]);
       if (!metadataResponse.ok || !modelResponse.ok)
         throw new Error('The refined teaching model could not be downloaded.');
@@ -201,7 +200,7 @@ export function loadTeachingAsset(): Promise<void> {
         throw new Error('The teaching model exceeds the display asset budget.');
       const gltf = await new GLTFLoader().parseAsync(bytes, '/models/');
       try {
-        prepared = dentalCaseFromAsset(gltf.scene, raw);
+        prepared = dentalCaseFromAtlas(gltf.scene, raw);
       } finally {
         gltf.scene.traverse(object => {
           const mesh = object as Mesh;
