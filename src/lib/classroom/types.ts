@@ -7,6 +7,8 @@ import { hasToothAnatomy } from '../tooth-anatomy';
 import type { PresentationContext } from './presentation';
 
 export type TeachingContext = {
+  jawAvailable?: boolean;
+  jawOpen?: boolean;
   presentation?: PresentationContext;
   mode: 'case' | 'workflow';
   workflowId: string | null;
@@ -75,6 +77,7 @@ export const DEMO_IDS = [1, 2, 3, 4].flatMap(q =>
 export const VIEWS = ['front', 'right', 'left', 'occlusal', 'perspective'];
 export const PHASES = ['assessment', 'brackets', 'wire', 'forces', 'movement', 'retention'];
 export const LOCAL_ONLY_KINDS: readonly TeachingAction['kind'][] = [
+  'jaw',
   'case',
   'dental-arrangement',
   'try',

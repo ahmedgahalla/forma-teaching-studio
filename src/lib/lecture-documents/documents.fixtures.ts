@@ -46,6 +46,7 @@ export function fixtureScene(): LectureScene {
       grid: false,
       stage: 10,
       opening: 0,
+      jawOpen: false,
       anatomy: { bone: false, ligament: false, cutaway: false, opacity: 0.35 },
       magnification: 10,
       forceVectors: false,

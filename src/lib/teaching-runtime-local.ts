@@ -49,7 +49,7 @@ export function preserveLocalPlan(plan: TeachingPlan) {
     !!plan.clarification ||
     (plan.actions.length > 0 &&
       (plan.actions.some(action =>
-        ['tooth-study', 'glossary', 'lesson', 'presentation', 'mechanics-example'].includes(
+        ['jaw', 'tooth-study', 'glossary', 'lesson', 'presentation', 'mechanics-example'].includes(
           action.kind,
         ),
       ) ||

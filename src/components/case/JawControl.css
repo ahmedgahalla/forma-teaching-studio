@@ -1,0 +1,22 @@
+button.jaw-control {
+  width: 100%;
+  min-height: 44px;
+  margin: 0 0 12px;
+  padding: 8px 12px;
+  border: 1px solid var(--ui-line);
+  border-radius: 6px;
+  background: var(--ui-panel);
+  color: var(--ui-text);
+  font: inherit;
+  cursor: pointer;
+}
+button.jaw-control:hover,
+button.jaw-control[aria-pressed='true'] {
+  background: var(--ui-soft);
+  border-color: var(--ui-accent);
+  color: var(--ui-accent);
+}
+button.jaw-control:focus-visible {
+  outline: 2px solid var(--ui-accent);
+  outline-offset: 2px;
+}

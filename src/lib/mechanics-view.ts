@@ -4,10 +4,12 @@ import type { Transforms, Vec3 } from './model';
 import type { MechanicsEndpoint, MechanicsExperiment } from './mechanics/types';
 import { toothMatrix } from './analysis';
 import { toothArch } from './appliances';
+import { applyJawDirection, applyJawPoint, applyJawQuaternion } from './jaw-opening';
 
 type Display = {
   arch: 'upper' | 'lower' | 'both';
   opening: number;
+  jawOpen?: boolean;
   forces: boolean;
   revealed: boolean;
   visible: (id: string) => boolean;
@@ -84,7 +86,7 @@ export function createMechanicsVisuals(model: DentalCase) {
       const tooth = model.teeth.find(item => item.id === id);
       if (!tooth) return new THREE.Vector3();
       const point = new THREE.Vector3(...local).applyMatrix4(toothMatrix(tooth, poses));
-      if (toothArch(id) === 'lower') point.y -= display.opening;
+      if (toothArch(id) === 'lower') applyJawPoint(point, display.jawOpen).y -= display.opening;
       return point;
     };
     const anchor = (id: string) =>
@@ -102,7 +104,8 @@ export function createMechanicsVisuals(model: DentalCase) {
     const tadPosition = (id: string) => {
       const tad = config.tads.find(item => item.id === id)!;
       const point = new THREE.Vector3(...tad.position);
-      if (toothArch(nearest(tad.position).id) === 'lower') point.y -= display.opening;
+      if (toothArch(nearest(tad.position).id) === 'lower')
+        applyJawPoint(point, display.jawOpen).y -= display.opening;
       return point;
     };
     const endpoint = (end: MechanicsEndpoint) =>
@@ -141,6 +144,7 @@ export function createMechanicsVisuals(model: DentalCase) {
       if (!display.visible(tooth.id)) continue;
       const position = tadPosition(tad.id),
         direction = new THREE.Vector3(...tooth.buccal).normalize();
+      applyJawDirection(direction, display.jawOpen && toothArch(tooth.id) === 'lower');
       const shaft = mesh(
         new THREE.CylinderGeometry(0.32, 0.18, 3, 12),
         metal,
@@ -202,6 +206,7 @@ export function createMechanicsVisuals(model: DentalCase) {
         const direction = new THREE.Vector3(...tooth.forceN),
           magnitude = direction.length(),
           origin = anchor(tooth.id);
+        applyJawDirection(direction, display.jawOpen && toothArch(tooth.id) === 'lower');
         if (magnitude > 1e-7) {
           const arrow = new THREE.ArrowHelper(
             direction.normalize(),
@@ -224,6 +229,7 @@ export function createMechanicsVisuals(model: DentalCase) {
             new THREE.Vector3(0, 0, 1),
             moment.normalize(),
           );
+          applyJawQuaternion(orientation, display.jawOpen && toothArch(tooth.id) === 'lower');
           const points = Array.from({ length: 20 }, (_, i) => {
             const angle = (i / 19) * Math.PI * 1.4;
             return new THREE.Vector3(Math.cos(angle) * 2, Math.sin(angle) * 2, 0)

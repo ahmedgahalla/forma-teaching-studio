@@ -239,6 +239,8 @@ export function createCasePreflight(api: CaseStudioApi, refs: CaseRefs) {
           );
         if (action.kind === 'anatomy' && supportAsset === 'claude-atlas-v1')
           throw new Error(SUPPORT_ANATOMY_UNAVAILABLE);
+        if (action.kind === 'jaw' && supportAsset !== 'claude-atlas-v1')
+          throw new Error('Jaw opening requires the Atlas mouth.');
         if (
           action.kind === 'attachment' &&
           action.action === 'add' &&

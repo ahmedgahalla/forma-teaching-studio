@@ -14,6 +14,7 @@ import { lectureStepTitle } from '../lecture-builder/comparison-labels';
 import { LectureViewControls } from '../lecture-builder/LectureViewControls';
 import { AtlasToothChart } from './AtlasToothChart';
 import { AtlasToothInspector } from './AtlasToothInspector';
+import { supportsJawOpening } from '@/lib/classroom/jaw';
 
 export function CaseMain({
   api,
@@ -44,6 +45,8 @@ export function CaseMain({
               <LectureViewControls
                 view={api.view}
                 roots={api.roots}
+                jawAvailable={supportsJawOpening(api.model) && !api.toothStudy}
+                jawOpen={api.jawOpen}
                 execute={api.teaching.execute}
               />
             </div>

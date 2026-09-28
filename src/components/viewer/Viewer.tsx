@@ -2,6 +2,8 @@
 import { forwardRef, useEffect, useImperativeHandle, useRef, useState } from 'react';
 import * as THREE from 'three';
 import { createBracketPlacementUpdater } from '@/lib/bracket-placement';
+import { applyJawPoint } from '@/lib/jaw-opening';
+import { canonicalJawPoint, canonicalJawPose, jawCurvePoints, jawProps } from './jaw-display';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import { TransformControls } from 'three/addons/controls/TransformControls.js';
 import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js';
@@ -27,6 +29,7 @@ import { createRemovableRetainer } from '@/lib/removable-retainer';
 import { useStudioTheme } from '../shared/StudioTheme';
 import {
   cameraViewDirection,
+  createSelectionGlow,
   displayedToothBounds,
   displayedFitPoints,
   isToothVisible,
@@ -61,7 +64,7 @@ const Viewer = forwardRef<ViewerHandle, Props>(function Viewer(props, ref) {
   const host = useRef<HTMLDivElement>(null),
     labelsHost = useRef<HTMLDivElement>(null);
   const live = useRef(props);
-  live.current = props;
+  live.current = jawProps(props);
   const trailRenderer = useRef<ReturnType<typeof createMovementTrailRenderer> | null>(null);
   const renderBarrierRef = useRef<ReturnType<typeof createRenderBarrier> | null>(null);
   if (!renderBarrierRef.current) renderBarrierRef.current = createRenderBarrier();
@@ -161,7 +164,7 @@ const Viewer = forwardRef<ViewerHandle, Props>(function Viewer(props, ref) {
     controls.maxDistance = 3000;
     const {
       enamel,
-      contourMaterial,
+      selectionMaterial,
       lockedMaterial,
       contactMaterial,
       rootMaterial,
@@ -201,7 +204,7 @@ const Viewer = forwardRef<ViewerHandle, Props>(function Viewer(props, ref) {
       attachments = new Map<string, THREE.Mesh>(),
       ghosts = new Map<string, THREE.Mesh>(),
       rootGhosts = new Map<string, THREE.Mesh>(),
-      contours = new Map<string, { crown: THREE.Mesh; root?: THREE.Mesh }>();
+      selectionGlows = new Map<string, ReturnType<typeof createSelectionGlow>>();
     for (const tooth of props.model.teeth) {
       const group = new THREE.Group();
       group.position.fromArray(tooth.position);
@@ -216,11 +219,6 @@ const Viewer = forwardRef<ViewerHandle, Props>(function Viewer(props, ref) {
       crown.userData.tooth = tooth.id;
       group.add(crown);
       crowns.set(tooth.id, crown);
-      const outline = new THREE.Mesh(tooth.geometry, contourMaterial);
-      outline.renderOrder = 1;
-      outline.frustumCulled = false;
-      group.add(outline);
-      contours.set(tooth.id, { crown: outline });
       if (tooth.rootGeometry) {
         const root = new THREE.Mesh(
           surface(tooth.rootGeometry, tooth.occlusal || [0, -1, 0], 'root'),
@@ -234,13 +232,10 @@ const Viewer = forwardRef<ViewerHandle, Props>(function Viewer(props, ref) {
         scene.add(originalRoot);
         rootGhosts.set(tooth.id, originalRoot);
       }
-      if (tooth.rootGeometry) {
-        const outline = new THREE.Mesh(tooth.rootGeometry, contourMaterial);
-        outline.renderOrder = 1;
-        outline.frustumCulled = false;
-        group.add(outline);
-        contours.get(tooth.id)!.root = outline;
-      }
+      selectionGlows.set(
+        tooth.id,
+        createSelectionGlow(group, tooth.geometry, tooth.rootGeometry, selectionMaterial),
+      );
       const bracket = kit.bracket(tooth);
       if (bracket) {
         bracket.userData.updatePlacement = createBracketPlacementUpdater(bracket);
@@ -341,7 +336,6 @@ const Viewer = forwardRef<ViewerHandle, Props>(function Viewer(props, ref) {
       renderedTheme = liveTheme.current;
       const next = dentalStagePalette[renderedTheme];
       stage.setTheme(renderedTheme);
-      contourMaterial.uniforms.color.value.set(next.selected);
       lockedMaterial.color.set(next.locked);
       contactMaterial.color.set(next.contact);
       focusMaterials.sync();
@@ -417,6 +411,7 @@ const Viewer = forwardRef<ViewerHandle, Props>(function Viewer(props, ref) {
         selected: live.current.selected,
         arch: live.current.arch,
         opening: live.current.opening,
+        jawOpen: live.current.jawOpen,
         roots: live.current.roots,
         gums: live.current.gums,
       });
@@ -439,6 +434,7 @@ const Viewer = forwardRef<ViewerHandle, Props>(function Viewer(props, ref) {
             live.current.roots,
             live.current.opening,
             !selectedOnly && live.current.gums && !live.current.isolateSelection,
+            live.current.jawOpen,
           );
     const visibleBounds = (selectedOnly = false) => {
       const bounds = displayedToothBounds(
@@ -447,6 +443,7 @@ const Viewer = forwardRef<ViewerHandle, Props>(function Viewer(props, ref) {
         visibleIds(selectedOnly),
         live.current.roots,
         live.current.opening,
+        live.current.jawOpen,
       );
       // Exact visible tooth/gum points drive ordinary framing; cutaway uses support bounds.
       if (cutawayTooth()) bounds.union(anatomyKit.bounds);
@@ -533,7 +530,6 @@ const Viewer = forwardRef<ViewerHandle, Props>(function Viewer(props, ref) {
       controls,
       renderer,
       composer,
-      contourMaterial.uniforms.viewport.value,
       cameraMotion.finish,
       (direction, aspect) => {
         const focused = focusSelection(),
@@ -570,14 +566,8 @@ const Viewer = forwardRef<ViewerHandle, Props>(function Viewer(props, ref) {
       dragTooth = '',
       skipPick = false;
     const gizmoPose = (): Pose => {
-      const t = props.model.teeth.find(t => t.id === dragTooth)!;
-      const translation = pivot.position.clone().sub(new THREE.Vector3(...t.position));
-      if (toothArch(t.id) === 'lower') translation.y += live.current.opening;
-      const e = new THREE.Euler().setFromQuaternion(pivot.quaternion, 'XYZ');
-      return {
-        translation: translation.toArray() as Vec3,
-        rotation: [e.x, e.y, e.z].map(THREE.MathUtils.radToDeg) as Vec3,
-      };
+      const tooth = props.model.teeth.find(t => t.id === dragTooth)!;
+      return canonicalJawPose(tooth, pivot, live.current);
     };
     gizmo.addEventListener('mouseDown', () => {
       dragging = true;
@@ -652,8 +642,7 @@ const Viewer = forwardRef<ViewerHandle, Props>(function Viewer(props, ref) {
         live.current.onLandmark({ tooth: id, local: local.toArray() as Vec3 });
       } else {
         const localPoint = groups.get(id)!.worldToLocal(hit.point.clone()).toArray() as Vec3;
-        const worldPoint = hit.point.clone();
-        if (toothArch(id) === 'lower') worldPoint.y += live.current.opening;
+        const worldPoint = canonicalJawPoint(hit.point.clone(), id, live.current);
         live.current.onPoint?.({
           tooth: id,
           localPoint,
@@ -688,7 +677,8 @@ const Viewer = forwardRef<ViewerHandle, Props>(function Viewer(props, ref) {
       lastArch = live.current.arch,
       lastRoots = live.current.roots,
       lastGums = live.current.gums,
-      lastOpening = live.current.opening;
+      lastOpening = live.current.opening,
+      lastJaw = live.current.jawOpen;
     let anatomyState = '',
       lastAnatomyTransforms: Transforms | undefined,
       lastAnatomyFit = props.model.demo
@@ -716,9 +706,10 @@ const Viewer = forwardRef<ViewerHandle, Props>(function Viewer(props, ref) {
         labels: showLabels,
         roots: showRoots,
         opening,
+        jawOpen,
       } = p;
       const cutaway = cutawayTooth(),
-        nextAnatomyState = `${p.anatomy?.bone}/${p.anatomy?.opacity}/${p.anatomy?.cutaway}/${p.anatomy?.ligament}/${p.selected}/${p.arch}/${opening}/${showRoots}/${gums}/${!!p.isolateSelection}`;
+        nextAnatomyState = `${p.anatomy?.bone}/${p.anatomy?.opacity}/${p.anatomy?.cutaway}/${p.anatomy?.ligament}/${p.selected}/${p.arch}/${opening}/${jawOpen}/${showRoots}/${gums}/${!!p.isolateSelection}`;
       const focused = teachingFocusActive(p, !!cutaway);
       if (lastAnatomyTransforms !== transforms || anatomyState !== nextAnatomyState) {
         try {
@@ -726,6 +717,7 @@ const Viewer = forwardRef<ViewerHandle, Props>(function Viewer(props, ref) {
             selected: p.selected,
             arch: p.arch,
             opening,
+            jawOpen,
             roots: showRoots,
             gums,
           });
@@ -758,10 +750,11 @@ const Viewer = forwardRef<ViewerHandle, Props>(function Viewer(props, ref) {
               : enamel,
           faded,
         );
-        const contour = contours.get(tooth.id)!,
-          highlighted = selectedIds.includes(tooth.id) || (!!cutaway && tooth.id === p.selected);
-        contour.crown.visible = highlighted;
-        if (contour.root) contour.root.visible = highlighted && showRoots;
+        selectionGlows.get(tooth.id)!(
+          selectedIds.includes(tooth.id) || (!!cutaway && tooth.id === p.selected),
+          showRoots,
+          p.isolateSelection,
+        );
         const root = roots.get(tooth.id);
         if (root) focusMaterials.apply(root, rootMaterial, faded);
         if (brackets.has(tooth.id)) {
@@ -778,8 +771,8 @@ const Viewer = forwardRef<ViewerHandle, Props>(function Viewer(props, ref) {
         if (attachments.has(tooth.id)) attachments.get(tooth.id)!.visible = p.attachments;
       }
       curveLine.visible = !!p.archCurve?.length && !cutaway && !p.isolateSelection;
-      if (lastCurve !== p.archCurve) {
-        curveGeometry.setFromPoints((p.archCurve || []).map(point => new THREE.Vector3(...point)));
+      if (lastCurve !== p.archCurve || lastJaw !== jawOpen) {
+        curveGeometry.setFromPoints(jawCurvePoints(p.archCurve, p.archCurveArch === 'lower', p));
         curveLine.computeLineDistances();
         lastCurve = p.archCurve;
       }
@@ -803,7 +796,7 @@ const Viewer = forwardRef<ViewerHandle, Props>(function Viewer(props, ref) {
       }
       gumPresentation.update(p, cutaway?.id);
       grid.visible = p.grid && !cutaway;
-      const nextWireState = `${fixed.wires}/${p.arch}/${opening}/${cutaway?.id || ''}/${!!p.isolateSelection}`;
+      const nextWireState = `${fixed.wires}/${p.arch}/${opening}/${jawOpen}/${cutaway?.id || ''}/${!!p.isolateSelection}`;
       if (lastTransforms !== transforms || wireState !== nextWireState) {
         wireMeshes.forEach(mesh => {
           scene.remove(mesh);
@@ -849,13 +842,14 @@ const Viewer = forwardRef<ViewerHandle, Props>(function Viewer(props, ref) {
         wireState = nextWireState;
       }
       const nextWorkflowState = workflow
-        ? `${workflow.appliance}/${workflow.phase}/${workflow.progress}/${workflow.arrows}/${workflow.palate}/${p.arch}/${opening}/${cutaway?.id || ''}/${!!p.isolateSelection}`
+        ? `${workflow.appliance}/${workflow.phase}/${workflow.progress}/${workflow.arrows}/${workflow.palate}/${p.arch}/${opening}/${jawOpen}/${cutaway?.id || ''}/${!!p.isolateSelection}`
         : 'none';
       if (lastWorkflowTransforms !== transforms || workflowState !== nextWorkflowState) {
         try {
           workflowKit.update(transforms, cutaway || p.isolateSelection ? undefined : workflow, {
             arch: p.arch,
             opening,
+            jawOpen,
           });
         } catch (error) {
           setError(
@@ -867,13 +861,14 @@ const Viewer = forwardRef<ViewerHandle, Props>(function Viewer(props, ref) {
         lastWorkflowTransforms = transforms;
         workflowState = nextWorkflowState;
       }
-      const nextRemovableState = `${!!p.removableRetainer}/${p.arch}/${opening}/${!!cutaway}/${!!p.isolateSelection}`;
+      const nextRemovableState = `${!!p.removableRetainer}/${p.arch}/${opening}/${jawOpen}/${!!cutaway}/${!!p.isolateSelection}`;
       if (lastRemovableTransforms !== transforms || removableState !== nextRemovableState) {
         try {
           removableKit.update(transforms, {
             visible: !!p.removableRetainer && !p.isolateSelection,
             arch: p.arch,
             opening,
+            jawOpen,
             cutaway: !!cutaway,
           });
         } catch (error) {
@@ -886,7 +881,7 @@ const Viewer = forwardRef<ViewerHandle, Props>(function Viewer(props, ref) {
         lastRemovableTransforms = transforms;
         removableState = nextRemovableState;
       }
-      const mechanicsKey = `${p.arch}/${opening}/${!!cutaway}/${isolationKey()}/${p.mechanicsForces}/${p.mechanicsRevealed}/${braces}`;
+      const mechanicsKey = `${p.arch}/${opening}/${jawOpen}/${!!cutaway}/${isolationKey()}/${p.mechanicsForces}/${p.mechanicsRevealed}/${braces}`;
       if (
         lastMechanics !== p.mechanics ||
         lastMechanicsPoses !== transforms ||
@@ -895,6 +890,7 @@ const Viewer = forwardRef<ViewerHandle, Props>(function Viewer(props, ref) {
         mechanicsKit.update(braces ? p.mechanics : null, transforms, {
           arch: p.arch,
           opening,
+          jawOpen,
           forces: !!p.mechanicsForces,
           revealed: p.mechanicsRevealed !== false,
           visible,
@@ -910,7 +906,8 @@ const Viewer = forwardRef<ViewerHandle, Props>(function Viewer(props, ref) {
       if (p.pointed && groups.has(p.pointed.tooth)) {
         if (p.pointed.surface === 'gingiva') {
           targetMarker.position.fromArray(p.pointed.worldPoint);
-          if (toothArch(p.pointed.tooth) === 'lower') targetMarker.position.y -= opening;
+          if (toothArch(p.pointed.tooth) === 'lower')
+            applyJawPoint(targetMarker.position, jawOpen).y -= opening;
         } else
           targetMarker.position.copy(
             groups.get(p.pointed.tooth)!.localToWorld(new THREE.Vector3(...p.pointed.localPoint)),
@@ -938,6 +935,7 @@ const Viewer = forwardRef<ViewerHandle, Props>(function Viewer(props, ref) {
         lastRoots !== showRoots ||
         lastGums !== gums ||
         lastOpening !== opening ||
+        lastJaw !== jawOpen ||
         lastAnatomyFit !== anatomyFit ||
         lastIsolation !== isolated
       ) {
@@ -946,6 +944,7 @@ const Viewer = forwardRef<ViewerHandle, Props>(function Viewer(props, ref) {
         lastRoots = showRoots;
         lastGums = gums;
         lastOpening = opening;
+        lastJaw = jawOpen;
         lastAnatomyFit = anatomyFit;
         lastIsolation = isolated;
       }
@@ -1086,7 +1085,7 @@ const Viewer = forwardRef<ViewerHandle, Props>(function Viewer(props, ref) {
       toothLabels.dispose();
       [
         enamel,
-        contourMaterial,
+        selectionMaterial,
         lockedMaterial,
         contactMaterial,
         rootMaterial,

@@ -9,10 +9,16 @@ import { DEFAULT_APPLIANCE_DISPLAY, validateApplianceDisplay } from '@/lib/appli
 import { toothArch } from '@/lib/appliances';
 import { parseTeachingCommand } from '@/lib/lecture';
 import { supportsTeachingAnatomy, SUPPORT_ANATOMY_UNAVAILABLE } from '@/lib/anatomy-capability';
+import { supportsJawOpening, JAW_UNAVAILABLE } from '@/lib/classroom/jaw';
 
 export function createTeachingDispatch(api: CaseStudioApi, refs: CaseRefs) {
   const applyTeaching = (action: TeachingAction): boolean => {
     try {
+      if (action.kind === 'jaw') {
+        if (!supportsJawOpening(api.model) || api.toothStudy) throw new Error(JAW_UNAVAILABLE);
+        api.setJawOpen(action.open);
+        return true;
+      }
       if (action.kind === 'glossary') {
         if (action.id !== null && !getGlossaryEntry(action.id))
           throw new Error('Choose an authored glossary term.');

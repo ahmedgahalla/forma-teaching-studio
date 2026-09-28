@@ -18,6 +18,7 @@ export type WorkflowOriginState = { setup: WorkflowTransfer; snapshot: unknown }
 
 /** Display state captured before a lesson step so the step can be rewound. */
 export type LessonSnapshot = {
+  jawOpen?: boolean;
   toothStudy?: ToothStudyState | null;
   isolated?: boolean;
   anatomy?: AnatomyViewState;

@@ -87,6 +87,7 @@ export function lectureStepSnapshot(step: LectureStep, base: ClassroomSnapshot):
       stage: step.demo ? 0 : 10,
       stages: 10,
       opening: setup.opening,
+      jawOpen: model.asset === 'claude-atlas-v1' && (setup.jawOpen ?? false),
       toothStudy,
       isolated: scene.isolated,
       anatomy: setup.anatomy,

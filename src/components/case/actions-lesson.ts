@@ -6,6 +6,7 @@ import { returnTourToMouth } from './lesson-controls';
 
 export function createLessonActions(api: CaseStudioApi, refs: CaseRefs) {
   const snapshot = (): LessonSnapshot => ({
+    jawOpen: api.jawOpen,
     transforms: api.plan.current,
     model: api.model,
     selected: api.selected,
@@ -46,6 +47,7 @@ export function createLessonActions(api: CaseStudioApi, refs: CaseRefs) {
     api.setStage(s.stage);
     api.setStages(s.stages);
     api.setOpening(s.opening);
+    api.setJawOpen(s.model.asset === 'claude-atlas-v1' && (s.jawOpen ?? false));
     api.setToothStudy(s.toothStudy ?? null);
     api.setIsolated(s.isolated ?? false);
     if (s.anatomy) api.setAnatomy(s.anatomy);

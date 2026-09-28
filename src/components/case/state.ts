@@ -95,6 +95,7 @@ export function useModelState() {
 }
 
 export function useDisplayState() {
+  const [jawOpen, setJawOpen] = useState(false);
   const [comparisonName, setComparisonName] = useState<string | null>(null);
   const [traces, setTraces] = useState(false);
   const [curveVisible, setCurveVisible] = useState(false);
@@ -112,6 +113,8 @@ export function useDisplayState() {
   const [view, setView] = useState<ViewName>('perspective');
   return {
     comparisonName,
+    jawOpen,
+    setJawOpen,
     setComparisonName,
     traces,
     setTraces,

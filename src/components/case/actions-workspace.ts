@@ -22,6 +22,7 @@ export function createWorkspaceActions(api: CaseStudioApi, refs: CaseRefs) {
       grid: api.grid,
       stage: api.stage,
       opening: api.opening,
+      jawOpen: api.jawOpen,
       anatomy: api.anatomy,
       magnification: api.magnification,
       forceVectors: api.forceVectors,

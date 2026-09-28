@@ -1,4 +1,4 @@
-import { Vector3, type PerspectiveCamera, type Vector2, type WebGLRenderer } from 'three';
+import { Vector3, type PerspectiveCamera, type WebGLRenderer } from 'three';
 import type { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import type { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js';
 
@@ -9,7 +9,6 @@ export function createViewerResize(
   controls: OrbitControls,
   renderer: WebGLRenderer,
   composer: EffectComposer,
-  contourViewport: Vector2,
   finishCamera: () => void,
   fitFrame: (direction: Vector3, aspect: number) => { target: Vector3; distance: number } | null,
 ) {
@@ -38,7 +37,6 @@ export function createViewerResize(
     camera.updateProjectionMatrix();
     renderer.setSize(rect.width, rect.height);
     composer.setSize(rect.width, rect.height);
-    contourViewport.set(rect.width, rect.height);
     camera.lookAt(controls.target);
     width = rect.width;
     height = rect.height;

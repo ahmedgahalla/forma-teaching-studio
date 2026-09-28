@@ -3,11 +3,13 @@ import type { DentalCase } from '@/lib/geometry';
 import type { Vec3 } from '@/lib/model';
 import { toothArch } from '@/lib/appliances';
 import { createGumFollower } from '@/lib/gum-follow';
+import { applyJawPoint, applyJawQuaternion } from '@/lib/jaw-opening';
 
 type Display = {
   gums: boolean;
   roots: boolean;
   opening: number;
+  jawOpen?: boolean;
   arch: string;
   isolateSelection?: boolean;
 };
@@ -47,8 +49,12 @@ export function createGumPresentation(
             : !display.isolateSelection &&
               (!gum.arch || display.arch === 'both' || gum.arch === display.arch));
         mesh.position.fromArray(gum.position);
-        if (gum.arch === 'lower') mesh.position.y -= display.opening;
-        if (mesh.visible) follow?.(display.opening);
+        mesh.quaternion.identity();
+        if (gum.arch === 'lower') {
+          applyJawPoint(mesh.position, display.jawOpen).y -= display.opening;
+          applyJawQuaternion(mesh.quaternion, display.jawOpen);
+        }
+        if (mesh.visible) follow?.(display.opening, display.jawOpen);
       }
     },
   };

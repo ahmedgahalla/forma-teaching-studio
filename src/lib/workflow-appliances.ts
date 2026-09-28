@@ -4,6 +4,7 @@ import type { DentalCase, DentalTooth } from './geometry';
 import { anatomicalFrame, type Transforms } from './model';
 import { toothMatrix } from './analysis';
 import { toothArch } from './appliances';
+import { applyJawMatrix } from './jaw-opening';
 
 export type WorkflowViewState = {
   appliance: 'braces' | 'palatal-expander' | 'archwire-expansion';
@@ -12,7 +13,7 @@ export type WorkflowViewState = {
   arrows: boolean;
   palate: boolean;
 };
-type ViewOptions = { arch?: 'both' | 'upper' | 'lower'; opening?: number };
+type ViewOptions = { arch?: 'both' | 'upper' | 'lower'; opening?: number; jawOpen?: boolean };
 
 export function workflowFixedVisibility(workflow?: WorkflowViewState, normalBraces = true) {
   if (!workflow || !normalBraces)
@@ -274,26 +275,25 @@ export function createWorkflowAppliances(model: DentalCase) {
     if (!model.demo || !workflow) return;
     if (!Number.isFinite(workflow.progress) || workflow.progress < 0 || workflow.progress > 1)
       throw new Error('Workflow progress must be between 0 and 1.');
-    const arch = options.arch || 'both',
-      opening = options.opening || 0;
+    const arch = options.arch || 'both';
     const visible = (tooth: DentalTooth) => arch === 'both' || toothArch(tooth.id) === arch;
-    const world = (tooth: DentalTooth, local: THREE.Vector3) => {
-      const point = local.applyMatrix4(toothMatrix(tooth, transforms));
-      if (toothArch(tooth.id) === 'lower') point.y -= opening;
-      return point;
+    const displayMatrix = (tooth: DentalTooth) => {
+      const matrix = toothMatrix(tooth, transforms);
+      if (toothArch(tooth.id) === 'lower')
+        applyJawMatrix(matrix, options.jawOpen).elements[13] -= options.opening || 0;
+      return matrix;
     };
     const inwardAnchor = (tooth: DentalTooth, mesialOffset = 0) => {
       const frame = anatomicalFrame(tooth),
         inward = new THREE.Vector3(...frame.buccal).negate();
-      return world(
+      return surface(
         tooth,
-        surface(
-          tooth,
-          inward,
-          new THREE.Vector3(...frame.mesial).multiplyScalar(mesialOffset),
-          `lingual/${mesialOffset}`,
-        ).addScaledVector(inward, 0.4),
-      );
+        inward,
+        new THREE.Vector3(...frame.mesial).multiplyScalar(mesialOffset),
+        `lingual/${mesialOffset}`,
+      )
+        .addScaledVector(inward, 0.4)
+        .applyMatrix4(displayMatrix(tooth));
     };
     group.userData = { schematic: true, appliance: workflow.appliance, phase: workflow.phase };
     if (workflow.appliance === 'palatal-expander') {
@@ -315,7 +315,7 @@ export function createWorkflowAppliances(model: DentalCase) {
         if (right && left) {
           for (const tooth of [right, left])
             mesh(bandGeometry(tooth), steel, `molar-band-${tooth.id}`).applyMatrix4(
-              toothMatrix(tooth, transforms),
+              displayMatrix(tooth),
             );
           if (workflow.phase !== 'brackets') {
             const center = inwardAnchor(right)
@@ -395,7 +395,7 @@ export function createWorkflowAppliances(model: DentalCase) {
         anchors.forEach((anchor, i) => {
           const tooth = retained[i],
             frame = anatomicalFrame(tooth),
-            matrix = toothMatrix(tooth, transforms);
+            matrix = displayMatrix(tooth);
           const inward = new THREE.Vector3(...frame.buccal).negate().transformDirection(matrix),
             up = new THREE.Vector3(...frame.occlusal).transformDirection(matrix);
           const pad = mesh(
@@ -419,10 +419,8 @@ export function createWorkflowAppliances(model: DentalCase) {
       for (const id of ids) {
         const tooth = teeth.get(id);
         if (!tooth || !visible(tooth)) continue;
-        const outward = new THREE.Vector3(...tooth.buccal).transformDirection(
-          toothMatrix(tooth, transforms),
-        );
-        const position = world(tooth, new THREE.Vector3()),
+        const outward = new THREE.Vector3(...tooth.buccal).transformDirection(displayMatrix(tooth));
+        const position = new THREE.Vector3().applyMatrix4(displayMatrix(tooth)),
           origin = position.clone().addScaledVector(outward, 6);
         const direction =
           workflow.appliance === 'archwire-expansion'

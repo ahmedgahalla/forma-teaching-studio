@@ -8,9 +8,18 @@ import type { TeachingAction } from './actions';
 import type { TeachingContext, TeachingPlan } from './types';
 import { validateTeachingPlan } from './plan-validate';
 import { advancePresentation } from './presentation';
+import { advanceJaw, parseJawPlan } from './jaw';
 
 export function advanceLocalSceneControl(context: TeachingContext, action: TeachingAction) {
-  return advancePresentation(context, action) || advanceMechanicsExample(context, action);
+  return (
+    advanceJaw(context, action) ||
+    advancePresentation(context, action) ||
+    advanceMechanicsExample(context, action)
+  );
+}
+
+export function parseLocalScenePlan(source: string, context: TeachingContext) {
+  return parseJawPlan(source, context) || parseMechanicsExamplePlan(source, context);
 }
 
 export function advanceMechanicsExample(context: TeachingContext, action: TeachingAction) {

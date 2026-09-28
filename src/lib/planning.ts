@@ -14,6 +14,7 @@ export type PlanAction =
   | { type: 'undo' | 'redo' };
 export type Checkpoint = { id: string; name: string; transforms: Transforms };
 export type LectureSetup = {
+  jawOpen?: boolean;
   camera: {
     position: Vec3;
     target: Vec3;
@@ -97,7 +98,7 @@ export function validateLectureSetup(raw: unknown, ids: Set<string>, stages: num
   if (!v.wirePreset || !['stainless-steel', 'beta-titanium'].includes(v.wirePreset.material))
     throw new Error('Invalid saved wire preset.');
   if (
-    [v.mechanicsResponse, v.responseRevealed, v.predictResponse, v.reverse].some(
+    [v.jawOpen, v.mechanicsResponse, v.responseRevealed, v.predictResponse, v.reverse].some(
       value => value !== undefined && typeof value !== 'boolean',
     ) ||
     (v.playbackSpeed !== undefined && ![0.5, 1, 2].includes(v.playbackSpeed))
@@ -105,6 +106,7 @@ export function validateLectureSetup(raw: unknown, ids: Set<string>, stages: num
     throw new Error('Invalid saved lecture response playback.');
   return {
     ...v,
+    jawOpen: v.jawOpen ?? false,
     mechanicsResponse: v.mechanicsResponse ?? false,
     responseRevealed: v.responseRevealed ?? true,
     predictResponse: v.predictResponse ?? false,

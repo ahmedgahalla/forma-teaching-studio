@@ -8,6 +8,8 @@ The case workspace opens with **Tools** and **Commands** closed so the model has
 
 Use **View** beside the model heading for camera presets, arch visibility, Before/After/Overlay comparison, Measure, Focus selection, Isolate selection, Lecture pointer and **Export 3D image** (PNG). **Fit model** remains available beside View without opening the menu. On phones and tablets, Model, Select, Layers and Tools also remain in the bottom dock.
 
+For the Atlas mouth, **Open jaw / Close jaw** is in Explore's **Display** panel and Lecture's **View** menu. The same action accepts “open the jaw” or “close the mouth” through typing or speech and supports Undo. It rotates the lower arch around the authored hinge, carrying its gum, brackets and wires; measurements and mechanics remain in the original case coordinates. The existing jaw-separation slider is a separate display offset. Tooth study keeps its own focused presentation.
+
 The row below the model keeps **Commands** and one **Undo/Redo** pair available. Open Commands to type or use Analyze, or press `/` outside an editable field to open and focus the input. **Hide commands** closes the composer while brief feedback remains visible; **Stop** appears there during speech capture, a running request or playback. Preview Apply/Discard decisions remain visible independently of both Commands and Tools.
 
 ## Build and discuss an appliance
@@ -99,7 +101,7 @@ For a reviewed geometric edit, select a group and say `preview move selected tee
 
 ## What the model means
 
-The revised Blender model has 28 differentiated permanent crowns, connected root objects with explicit branches, and gingiva. It omits third molars and does not include a primary or mixed-dentition pack. Dental Class I, Class II divisions 1/2 and Class III arrangements illustrate tooth relationships, not skeletal diagnoses. Their approximate molar guides, assumptions and initial surface-crossing checks are exposed for review. Selected enamel stays natural with a thin contour; labels are decluttered.
+The revised Blender model has 28 differentiated permanent crowns, connected root objects with explicit branches, and gingiva. It omits third molars and does not include a primary or mixed-dentition pack. Dental Class I, Class II divisions 1/2 and Class III arrangements illustrate tooth relationships, not skeletal diagnoses. Their approximate molar guides, assumptions and initial surface-crossing checks are exposed for review. Selected enamel stays natural with a soft surface glow; labels are decluttered.
 
 Prepared cases and appliance workflows remain authored illustrations. The separate mechanics module calculates an initial elastic response under declared virtual-support and material assumptions. It does not calculate bone remodeling, tissue adaptation, clinical timing or patient outcome. Displayed support tissue is schematic; sampled crown checks do not establish root/bone clearance. Draft morphology, numerical examples and explanations still need orthodontic educator review before curriculum use.
 

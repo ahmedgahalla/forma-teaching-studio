@@ -3,11 +3,13 @@ import type { DentalCase, DentalTooth } from './geometry';
 import { anatomicalFrame, type Transforms } from './model';
 import { orderedArchIds, toothArch } from './appliances';
 import { toothMatrix } from './analysis';
+import { applyJawMatrix } from './jaw-opening';
 
 type Options = {
   visible: boolean;
   arch?: 'both' | 'upper' | 'lower';
   opening?: number;
+  jawOpen?: boolean;
   cutaway?: boolean;
 };
 type Vertex = { point: THREE.Vector3; normal: THREE.Vector3 };
@@ -180,7 +182,8 @@ export function createRemovableRetainer(model: DentalCase) {
     const opening = options.opening ?? 0;
     for (const item of teeth.values()) {
       item.group.matrix.copy(toothMatrix(item.tooth, transforms));
-      if (toothArch(item.tooth.id) === 'lower') item.group.matrix.elements[13] -= opening;
+      if (toothArch(item.tooth.id) === 'lower')
+        applyJawMatrix(item.group.matrix, options.jawOpen).elements[13] -= opening;
     }
     for (const arch of arches) {
       arch.group.visible = !options.arch || options.arch === 'both' || options.arch === arch.arch;

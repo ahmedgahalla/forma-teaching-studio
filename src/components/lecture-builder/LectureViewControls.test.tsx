@@ -21,6 +21,7 @@ const context: TeachingContext = {
   view: 'front',
   arch: 'both',
   speed: 1,
+  jawAvailable: true,
   presentation: { documentId: 'sample', index: 0, count: 4, mode: 'teach', exploring: false },
 };
 
@@ -52,6 +53,24 @@ beforeEach(() => {
   container = document.createElement('div');
   document.body.append(container);
   root = createRoot(container);
+});
+
+it.each([false, true])(
+  'offers one jaw toggle with click/typed/voice parity: open=%s',
+  async jawOpen => {
+    await render({ jawAvailable: true, jawOpen });
+    const label = jawOpen ? 'Close jaw' : 'Open jaw';
+    expect(button(label).getAttribute('aria-pressed')).toBe(String(jawOpen));
+    await openMenu();
+    await act(async () => button(label).click());
+    expect(execute).toHaveBeenCalledExactlyOnceWith([{ kind: 'jaw', open: !jawOpen }], label);
+    expectInputParity(label);
+  },
+);
+
+it('omits the jaw control for unsupported lecture models', async () => {
+  await render({ jawAvailable: false });
+  expect(container.textContent).not.toMatch(/Open jaw|Close jaw/);
 });
 afterEach(async () => {
   await act(async () => root.unmount());

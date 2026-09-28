@@ -3,10 +3,15 @@ import { SlidersHorizontal } from 'lucide-react';
 import type { CaseStudioApi } from './api';
 import { useDisclosureMenu } from './useDisclosureMenu';
 import { useStudioTheme } from '../shared/StudioTheme';
+import { JawControl } from './JawControl';
+import { supportsJawOpening } from '@/lib/classroom/jaw';
 
 type DisplayApi = Pick<
   CaseStudioApi,
   | 'opening'
+  | 'model'
+  | 'toothStudy'
+  | 'jawOpen'
   | 'setOpening'
   | 'arch'
   | 'setArch'
@@ -29,6 +34,11 @@ export function AtlasDisplayPanel({ api }: { api: DisplayApi }) {
       </summary>
       <div className="atlas-display-body">
         <h2>Model display</h2>
+        <JawControl
+          jawAvailable={supportsJawOpening(api.model) && !api.toothStudy}
+          jawOpen={api.jawOpen}
+          execute={api.teaching.execute}
+        />
         <label className="atlas-field">
           <span>
             Separate arches <output>{api.opening} mm</output>
