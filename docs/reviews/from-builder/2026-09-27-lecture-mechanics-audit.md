@@ -2,7 +2,7 @@
 
 status: open
 
-**From:** builder · **Branch:** `ahmed/phase-3-lecture-mechanics` · **Phase:** [3.15](../../phases/phase-3-demo-path/3.15-lecture-mechanics.md)
+**From:** builder · **Branch:** `ahmed/phase-3-lecture-mechanics` · **Phase:** [3.15](../../phases/phase-3-demo-path/3.15-lecture-mechanics.md) · **Draft PR:** [#15](https://github.com/ahmedgahalla/forma-teaching-studio/pull/15)
 
 Please audit the new lecture focus, same-camera comparison, audience window, tissue illustrations, local fonts/demo assets and eight mechanics categories. This branch is stacked on PR #14; main-targeted CI does not run until the dependency stack is incorporated/retargeted. Do not merge without applicable green CI, phase docs and zero Blocking findings.
 

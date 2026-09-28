@@ -1,6 +1,6 @@
 # Phase 3 — demo path
 
-**Status:** sample plus researched mechanics/presentation improvements implemented; local automated checks passed, browser acceptance pending · **Current branch:** `ahmed/phase-3-lecture-mechanics` · **Current PR:** pending (stacked on [#14](https://github.com/ahmedgahalla/forma-teaching-studio/pull/14))
+**Status:** sample plus researched mechanics/presentation improvements implemented; local automated checks passed, browser acceptance pending · **Current branch:** `ahmed/phase-3-lecture-mechanics` · **Current PR:** [#15 (draft)](https://github.com/ahmedgahalla/forma-teaching-studio/pull/15) (stacked on [#14](https://github.com/ahmedgahalla/forma-teaching-studio/pull/14))
 
 **Goal:** a professor can explore the central model freely or open a finished lecture with notes, questions and model demonstrations, then return from a spontaneous experiment without losing the lecture. Builds on [product direction](../../PRODUCT_DIRECTION.md).
 
