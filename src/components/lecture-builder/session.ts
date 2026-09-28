@@ -10,7 +10,7 @@ import {
 import type { BiologyView } from '@/lib/teaching-biology';
 import { createTryState } from '@/lib/try-mode';
 import { lectureStepSnapshot } from './scene-bridge';
-import { lectureComparisonSnapshot } from './lecture-comparison';
+import { availableLectureComparisons, lectureComparisonSnapshot } from './lecture-comparison';
 import { lectureAnalysisContext } from './lecture-analysis';
 
 export type LectureSession = {
@@ -85,7 +85,7 @@ export function createLectureSessionActions(
       exploring: false,
       answerVisible: false,
       notesVisible: next.mode === 'rehearse',
-      biology: 'off',
+      biology: step.biology ?? 'off',
       comparison: null,
     });
   };
@@ -107,6 +107,8 @@ export function createLectureSessionActions(
     }
     if (action.action === 'exit') return;
     if (!doc) throw new Error('Open a lecture first.');
+    if (action.action === 'compare' && !availableLectureComparisons(doc).includes(action.target))
+      throw new Error('This lecture does not include that movement comparison.');
     if (state.exploring && !display && !['return', 'exit'].includes(action.action))
       throw new Error('Return to the lecture before changing steps.');
     if (action.action === 'return' && !returnPoint)

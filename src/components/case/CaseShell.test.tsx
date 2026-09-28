@@ -6,6 +6,7 @@ import type { CaseStudioApi } from './api';
 import type { TeacherLectures } from '../lecture-builder/useTeacherLectures';
 import type { LectureComparison } from '@/lib/classroom/presentation';
 import { CaseShell } from './CaseShell';
+import { DEMO_LECTURES } from '@/lib/lecture-documents';
 
 const calls = vi.hoisted(() => ({
   mount: vi.fn(),
@@ -111,6 +112,8 @@ function Harness({
     ...model,
   } as unknown as CaseStudioApi;
   const teacher = {
+    catalog: DEMO_LECTURES,
+    openLecture: vi.fn(),
     session: {
       screen,
       mode,

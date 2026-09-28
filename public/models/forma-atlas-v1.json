@@ -1,0 +1,1747 @@
+{
+ "version": 1,
+ "units": "mm",
+ "frame": "+X patient left, +Y superior, +Z anterior",
+ "attributes": {
+  "albedo": "color",
+  "data": "color_1",
+  "uv": "uv",
+  "dataChannels": [
+   "nearAO",
+   "thickness",
+   "param",
+   "farAO"
+  ],
+  "param": {
+   "teeth": "crown height fraction (0 CEJ .. 1 incisal edge / cusp tips; 0 on roots)",
+   "gums": "zone: 0 marginal/papilla, .25 attached, .5 alveolar mucosa, .75 hard palate, 1 other lining mucosa"
+  },
+  "uvScale": {
+   "teeth": "u = angle about the long axis / 2pi (seam distal), v = crown fraction",
+   "gums": "1 unit = 8 mm"
+  }
+ },
+ "jaw": {
+  "hingePoint": [
+   0.0,
+   39.2,
+   -77.8
+  ],
+  "hingeAxis": [
+   1,
+   0,
+   0
+  ],
+  "maxOpenDeg": 14,
+  "note": "Bonwill triangle 100 mm, Balkwill angle 26 deg"
+ },
+ "arches": {
+  "upper": "upper_jaw",
+  "lower": "lower_jaw"
+ },
+ "gums": {
+  "upper": "gum_upper",
+  "lower": "gum_lower"
+ },
+ "tissue": {
+  "gum_upper": {
+   "present": true,
+   "triangles": 125000,
+   "vertices": 62502,
+   "bboxMin": [
+    -33.167,
+    1.935,
+    -54.629
+   ],
+   "bboxMax": [
+    33.22,
+    26.958,
+    2.557
+   ],
+   "zoneSource": "cache"
+  },
+  "gum_lower": {
+   "present": true,
+   "triangles": 125000,
+   "vertices": 62502,
+   "bboxMin": [
+    -37.98,
+    -28.46,
+    -59.804
+   ],
+   "bboxMax": [
+    38.209,
+    -1.791,
+    1.738
+   ],
+   "zoneSource": "cache"
+  }
+ },
+ "generated": "2026-09-28T05:29:16",
+ "teeth": {
+  "11": {
+   "node": "tooth_11",
+   "fdi": "11",
+   "cls": "U1",
+   "arch": "upper",
+   "side": "right",
+   "isThirdMolar": false,
+   "crownHeight": 10.84,
+   "crownMD": 8.62,
+   "crownBL": 7.04,
+   "rootLength": 13.05,
+   "cervixMD": 6.7,
+   "cervixBL": 6.28,
+   "totalLength": 23.89,
+   "center": [
+    -4.334,
+    9.708,
+    -2.087
+   ],
+   "bboxMin": [
+    -8.673,
+    -1.193,
+    -7.96
+   ],
+   "bboxMax": [
+    0.004,
+    20.61,
+    3.787
+   ],
+   "occlusalCenter": [
+    -4.266,
+    -0.95,
+    3.034
+   ],
+   "apicalAxis": [
+    -0.033,
+    0.9035,
+    -0.4273
+   ],
+   "buccalDir": [
+    -0.0897,
+    0.4231,
+    0.9016
+   ],
+   "mesialDir": [
+    0.9954,
+    0.068,
+    0.0671
+   ],
+   "triangles": 6830,
+   "vertices": 3417
+  },
+  "12": {
+   "node": "tooth_12",
+   "fdi": "12",
+   "cls": "U2",
+   "arch": "upper",
+   "side": "right",
+   "isThirdMolar": false,
+   "crownHeight": 9.21,
+   "crownMD": 6.62,
+   "crownBL": 6.03,
+   "rootLength": 13.08,
+   "cervixMD": 4.74,
+   "cervixBL": 5.39,
+   "totalLength": 22.29,
+   "center": [
+    -11.256,
+    9.64,
+    -4.743
+   ],
+   "bboxMin": [
+    -14.376,
+    -0.566,
+    -10.169
+   ],
+   "bboxMax": [
+    -8.137,
+    19.846,
+    0.682
+   ],
+   "occlusalCenter": [
+    -11.357,
+    -0.428,
+    -0.424
+   ],
+   "apicalAxis": [
+    0.0275,
+    0.9134,
+    -0.4062
+   ],
+   "buccalDir": [
+    -0.4462,
+    0.3749,
+    0.8126
+   ],
+   "mesialDir": [
+    0.8945,
+    0.1589,
+    0.4178
+   ],
+   "triangles": 6792,
+   "vertices": 3398
+  },
+  "13": {
+   "node": "tooth_13",
+   "fdi": "13",
+   "cls": "U3",
+   "arch": "upper",
+   "side": "right",
+   "isThirdMolar": false,
+   "crownHeight": 10.29,
+   "crownMD": 7.64,
+   "crownBL": 8.02,
+   "rootLength": 16.86,
+   "cervixMD": 5.52,
+   "cervixBL": 7.36,
+   "totalLength": 27.15,
+   "center": [
+    -15.486,
+    11.686,
+    -8.875
+   ],
+   "bboxMin": [
+    -19.289,
+    -1.143,
+    -14.317
+   ],
+   "bboxMax": [
+    -11.683,
+    24.515,
+    -3.434
+   ],
+   "occlusalCenter": [
+    -16.669,
+    -1.304,
+    -5.86
+   ],
+   "apicalAxis": [
+    0.1072,
+    0.9543,
+    -0.2788
+   ],
+   "buccalDir": [
+    -0.7837,
+    0.2537,
+    0.567
+   ],
+   "mesialDir": [
+    0.6118,
+    0.1577,
+    0.7751
+   ],
+   "triangles": 6812,
+   "vertices": 3408
+  },
+  "14": {
+   "node": "tooth_14",
+   "fdi": "14",
+   "cls": "U4",
+   "arch": "upper",
+   "side": "right",
+   "isThirdMolar": false,
+   "crownHeight": 8.53,
+   "crownMD": 7.15,
+   "crownBL": 9.27,
+   "rootLength": 13.76,
+   "cervixMD": 4.59,
+   "cervixBL": 8.09,
+   "totalLength": 21.9,
+   "center": [
+    -18.85,
+    9.914,
+    -13.56
+   ],
+   "bboxMin": [
+    -23.339,
+    -1.026,
+    -17.377
+   ],
+   "bboxMax": [
+    -14.36,
+    20.855,
+    -9.744
+   ],
+   "occlusalCenter": [
+    -18.952,
+    -1.096,
+    -13.231
+   ],
+   "apicalAxis": [
+    0.043,
+    0.995,
+    -0.0905
+   ],
+   "buccalDir": [
+    -0.9477,
+    0.0693,
+    0.3115
+   ],
+   "mesialDir": [
+    0.3162,
+    0.0724,
+    0.9459
+   ],
+   "triangles": 7716,
+   "vertices": 3860
+  },
+  "15": {
+   "node": "tooth_15",
+   "fdi": "15",
+   "cls": "U5",
+   "arch": "upper",
+   "side": "right",
+   "isThirdMolar": false,
+   "crownHeight": 8.12,
+   "crownMD": 6.81,
+   "crownBL": 9.18,
+   "rootLength": 14.11,
+   "cervixMD": 4.75,
+   "cervixBL": 8.06,
+   "totalLength": 22.22,
+   "center": [
+    -20.876,
+    9.376,
+    -19.958
+   ],
+   "bboxMin": [
+    -25.31,
+    -1.62,
+    -23.431
+   ],
+   "bboxMax": [
+    -16.441,
+    20.372,
+    -16.486
+   ],
+   "occlusalCenter": [
+    -21.142,
+    -1.817,
+    -19.889
+   ],
+   "apicalAxis": [
+    0.0642,
+    0.9968,
+    -0.047
+   ],
+   "buccalDir": [
+    -0.9515,
+    0.0753,
+    0.2982
+   ],
+   "mesialDir": [
+    0.3008,
+    0.0256,
+    0.9534
+   ],
+   "triangles": 7750,
+   "vertices": 3877
+  },
+  "16": {
+   "node": "tooth_16",
+   "fdi": "16",
+   "cls": "U6",
+   "arch": "upper",
+   "side": "right",
+   "isThirdMolar": false,
+   "crownHeight": 7.51,
+   "crownMD": 10.32,
+   "crownBL": 11.19,
+   "rootLength": 13.24,
+   "cervixMD": 7.64,
+   "cervixBL": 10.41,
+   "totalLength": 19.04,
+   "center": [
+    -21.71,
+    7.902,
+    -27.925
+   ],
+   "bboxMin": [
+    -28.955,
+    -2.046,
+    -33.619
+   ],
+   "bboxMax": [
+    -14.464,
+    17.85,
+    -22.232
+   ],
+   "occlusalCenter": [
+    -24.052,
+    -1.46,
+    -27.644
+   ],
+   "apicalAxis": [
+    0.1051,
+    0.9892,
+    -0.1024
+   ],
+   "buccalDir": [
+    -0.9501,
+    0.1303,
+    0.2834
+   ],
+   "mesialDir": [
+    0.2937,
+    0.0675,
+    0.9535
+   ],
+   "triangles": 9572,
+   "vertices": 4788
+  },
+  "17": {
+   "node": "tooth_17",
+   "fdi": "17",
+   "cls": "U7",
+   "arch": "upper",
+   "side": "right",
+   "isThirdMolar": false,
+   "crownHeight": 7.29,
+   "crownMD": 9.59,
+   "crownBL": 11.09,
+   "rootLength": 13.04,
+   "cervixMD": 7.19,
+   "cervixBL": 10.46,
+   "totalLength": 19.15,
+   "center": [
+    -24.33,
+    8.608,
+    -37.078
+   ],
+   "bboxMin": [
+    -30.711,
+    -1.214,
+    -42.402
+   ],
+   "bboxMax": [
+    -17.948,
+    18.43,
+    -31.754
+   ],
+   "occlusalCenter": [
+    -25.941,
+    -0.749,
+    -37.055
+   ],
+   "apicalAxis": [
+    0.112,
+    0.9927,
+    -0.0451
+   ],
+   "buccalDir": [
+    -0.9585,
+    0.1199,
+    0.2585
+   ],
+   "mesialDir": [
+    0.262,
+    0.0143,
+    0.965
+   ],
+   "triangles": 9576,
+   "vertices": 4790
+  },
+  "18": {
+   "node": "tooth_18",
+   "fdi": "18",
+   "cls": "U8",
+   "arch": "upper",
+   "side": "right",
+   "isThirdMolar": true,
+   "crownHeight": 6.94,
+   "crownMD": 9.04,
+   "crownBL": 10.44,
+   "rootLength": 10.97,
+   "cervixMD": 6.66,
+   "cervixBL": 10.04,
+   "totalLength": 17.36,
+   "center": [
+    -26.853,
+    9.14,
+    -45.516
+   ],
+   "bboxMin": [
+    -32.218,
+    0.28,
+    -50.255
+   ],
+   "bboxMax": [
+    -21.488,
+    18.001,
+    -40.777
+   ],
+   "occlusalCenter": [
+    -28.257,
+    0.667,
+    -45.993
+   ],
+   "apicalAxis": [
+    0.203,
+    0.9763,
+    0.0749
+   ],
+   "buccalDir": [
+    -0.9564,
+    0.1813,
+    0.2288
+   ],
+   "mesialDir": [
+    0.2098,
+    -0.1181,
+    0.9706
+   ],
+   "triangles": 9576,
+   "vertices": 4790
+  },
+  "21": {
+   "node": "tooth_21",
+   "fdi": "21",
+   "cls": "U1",
+   "arch": "upper",
+   "side": "left",
+   "isThirdMolar": false,
+   "crownHeight": 10.77,
+   "crownMD": 8.56,
+   "crownBL": 6.99,
+   "rootLength": 12.96,
+   "cervixMD": 6.65,
+   "cervixBL": 6.23,
+   "totalLength": 23.73,
+   "center": [
+    4.341,
+    9.642,
+    -2.058
+   ],
+   "bboxMin": [
+    0.025,
+    -1.179,
+    -7.895
+   ],
+   "bboxMax": [
+    8.657,
+    20.463,
+    3.778
+   ],
+   "occlusalCenter": [
+    4.266,
+    -0.95,
+    3.034
+   ],
+   "apicalAxis": [
+    0.0362,
+    0.9033,
+    -0.4276
+   ],
+   "buccalDir": [
+    0.0703,
+    0.4245,
+    0.9027
+   ],
+   "mesialDir": [
+    -0.9969,
+    0.0628,
+    0.0482
+   ],
+   "triangles": 6830,
+   "vertices": 3417
+  },
+  "22": {
+   "node": "tooth_22",
+   "fdi": "22",
+   "cls": "U2",
+   "arch": "upper",
+   "side": "left",
+   "isThirdMolar": false,
+   "crownHeight": 9.38,
+   "crownMD": 6.74,
+   "crownBL": 6.15,
+   "rootLength": 13.32,
+   "cervixMD": 4.83,
+   "cervixBL": 5.49,
+   "totalLength": 22.7,
+   "center": [
+    11.266,
+    9.92,
+    -4.859
+   ],
+   "bboxMin": [
+    8.091,
+    -0.453,
+    -10.389
+   ],
+   "bboxMax": [
+    14.442,
+    20.293,
+    0.671
+   ],
+   "occlusalCenter": [
+    11.431,
+    -0.332,
+    -0.438
+   ],
+   "apicalAxis": [
+    -0.0451,
+    0.9121,
+    -0.4074
+   ],
+   "buccalDir": [
+    0.4311,
+    0.3857,
+    0.8157
+   ],
+   "mesialDir": [
+    -0.9012,
+    0.1388,
+    0.4106
+   ],
+   "triangles": 6792,
+   "vertices": 3398
+  },
+  "23": {
+   "node": "tooth_23",
+   "fdi": "23",
+   "cls": "U3",
+   "arch": "upper",
+   "side": "left",
+   "isThirdMolar": false,
+   "crownHeight": 10.31,
+   "crownMD": 7.65,
+   "crownBL": 8.03,
+   "rootLength": 16.87,
+   "cervixMD": 5.52,
+   "cervixBL": 7.36,
+   "totalLength": 27.18,
+   "center": [
+    15.622,
+    11.574,
+    -8.849
+   ],
+   "bboxMin": [
+    11.853,
+    -1.276,
+    -14.312
+   ],
+   "bboxMax": [
+    19.39,
+    24.424,
+    -3.386
+   ],
+   "occlusalCenter": [
+    16.712,
+    -1.434,
+    -5.821
+   ],
+   "apicalAxis": [
+    -0.0981,
+    0.955,
+    -0.2801
+   ],
+   "buccalDir": [
+    0.7919,
+    0.2454,
+    0.5592
+   ],
+   "mesialDir": [
+    -0.6027,
+    0.1669,
+    0.7803
+   ],
+   "triangles": 6814,
+   "vertices": 3409
+  },
+  "24": {
+   "node": "tooth_24",
+   "fdi": "24",
+   "cls": "U4",
+   "arch": "upper",
+   "side": "left",
+   "isThirdMolar": false,
+   "crownHeight": 8.5,
+   "crownMD": 7.16,
+   "crownBL": 9.29,
+   "rootLength": 13.78,
+   "cervixMD": 4.6,
+   "cervixBL": 8.11,
+   "totalLength": 21.88,
+   "center": [
+    18.702,
+    10.097,
+    -13.694
+   ],
+   "bboxMin": [
+    14.102,
+    -0.836,
+    -17.505
+   ],
+   "bboxMax": [
+    23.303,
+    21.031,
+    -9.884
+   ],
+   "occlusalCenter": [
+    19.028,
+    -0.995,
+    -13.399
+   ],
+   "apicalAxis": [
+    -0.0603,
+    0.9945,
+    -0.0854
+   ],
+   "buccalDir": [
+    0.941,
+    0.0852,
+    0.3275
+   ],
+   "mesialDir": [
+    -0.333,
+    0.0606,
+    0.941
+   ],
+   "triangles": 7716,
+   "vertices": 3860
+  },
+  "25": {
+   "node": "tooth_25",
+   "fdi": "25",
+   "cls": "U5",
+   "arch": "upper",
+   "side": "left",
+   "isThirdMolar": false,
+   "crownHeight": 8.11,
+   "crownMD": 6.8,
+   "crownBL": 9.16,
+   "rootLength": 14.08,
+   "cervixMD": 4.74,
+   "cervixBL": 8.04,
+   "totalLength": 22.18,
+   "center": [
+    21.0,
+    9.398,
+    -20.03
+   ],
+   "bboxMin": [
+    16.57,
+    -1.578,
+    -23.487
+   ],
+   "bboxMax": [
+    25.431,
+    20.375,
+    -16.574
+   ],
+   "occlusalCenter": [
+    21.277,
+    -1.767,
+    -19.978
+   ],
+   "apicalAxis": [
+    -0.0665,
+    0.9968,
+    -0.0437
+   ],
+   "buccalDir": [
+    0.9553,
+    0.0763,
+    0.2857
+   ],
+   "mesialDir": [
+    -0.2881,
+    0.0227,
+    0.9573
+   ],
+   "triangles": 7748,
+   "vertices": 3876
+  },
+  "26": {
+   "node": "tooth_26",
+   "fdi": "26",
+   "cls": "U6",
+   "arch": "upper",
+   "side": "left",
+   "isThirdMolar": false,
+   "crownHeight": 7.48,
+   "crownMD": 10.29,
+   "crownBL": 11.15,
+   "rootLength": 13.21,
+   "cervixMD": 7.62,
+   "cervixBL": 10.39,
+   "totalLength": 18.95,
+   "center": [
+    22.246,
+    7.916,
+    -27.918
+   ],
+   "bboxMin": [
+    15.218,
+    -1.87,
+    -33.554
+   ],
+   "bboxMax": [
+    29.274,
+    17.703,
+    -22.282
+   ],
+   "occlusalCenter": [
+    24.08,
+    -1.463,
+    -27.594
+   ],
+   "apicalAxis": [
+    -0.0596,
+    0.9911,
+    -0.1193
+   ],
+   "buccalDir": [
+    0.9627,
+    0.0887,
+    0.2557
+   ],
+   "mesialDir": [
+    -0.264,
+    0.0996,
+    0.9594
+   ],
+   "triangles": 9582,
+   "vertices": 4793
+  },
+  "27": {
+   "node": "tooth_27",
+   "fdi": "27",
+   "cls": "U7",
+   "arch": "upper",
+   "side": "left",
+   "isThirdMolar": false,
+   "crownHeight": 7.33,
+   "crownMD": 9.52,
+   "crownBL": 11.02,
+   "rootLength": 12.95,
+   "cervixMD": 7.14,
+   "cervixBL": 10.39,
+   "totalLength": 19.04,
+   "center": [
+    24.395,
+    8.518,
+    -37.077
+   ],
+   "bboxMin": [
+    18.069,
+    -1.242,
+    -42.365
+   ],
+   "bboxMax": [
+    30.72,
+    18.277,
+    -31.789
+   ],
+   "occlusalCenter": [
+    25.967,
+    -0.762,
+    -37.072
+   ],
+   "apicalAxis": [
+    -0.1098,
+    0.9932,
+    -0.0396
+   ],
+   "buccalDir": [
+    0.9587,
+    0.1163,
+    0.2597
+   ],
+   "mesialDir": [
+    -0.2625,
+    0.0094,
+    0.9649
+   ],
+   "triangles": 9576,
+   "vertices": 4790
+  },
+  "28": {
+   "node": "tooth_28",
+   "fdi": "28",
+   "cls": "U8",
+   "arch": "upper",
+   "side": "left",
+   "isThirdMolar": true,
+   "crownHeight": 6.94,
+   "crownMD": 9.04,
+   "crownBL": 10.44,
+   "rootLength": 10.97,
+   "cervixMD": 6.65,
+   "cervixBL": 10.04,
+   "totalLength": 17.35,
+   "center": [
+    26.869,
+    9.173,
+    -45.45
+   ],
+   "bboxMin": [
+    21.502,
+    0.312,
+    -50.199
+   ],
+   "bboxMax": [
+    32.236,
+    18.034,
+    -40.701
+   ],
+   "occlusalCenter": [
+    28.312,
+    0.702,
+    -45.955
+   ],
+   "apicalAxis": [
+    -0.2076,
+    0.9751,
+    0.0782
+   ],
+   "buccalDir": [
+    0.9533,
+    0.1837,
+    0.2397
+   ],
+   "mesialDir": [
+    -0.2194,
+    -0.1243,
+    0.9677
+   ],
+   "triangles": 9570,
+   "vertices": 4787
+  },
+  "31": {
+   "node": "tooth_31",
+   "fdi": "31",
+   "cls": "L1",
+   "arch": "lower",
+   "side": "left",
+   "isThirdMolar": false,
+   "crownHeight": 8.9,
+   "crownMD": 5.19,
+   "crownBL": 5.83,
+   "rootLength": 12.6,
+   "cervixMD": 3.49,
+   "cervixBL": 5.33,
+   "totalLength": 21.49,
+   "center": [
+    2.615,
+    -9.47,
+    -2.051
+   ],
+   "bboxMin": [
+    0.023,
+    -19.871,
+    -5.908
+   ],
+   "bboxMax": [
+    5.207,
+    0.932,
+    1.806
+   ],
+   "occlusalCenter": [
+    2.615,
+    0.873,
+    0.464
+   ],
+   "apicalAxis": [
+    0.0039,
+    -0.9586,
+    -0.2847
+   ],
+   "buccalDir": [
+    0.0677,
+    -0.2838,
+    0.9565
+   ],
+   "mesialDir": [
+    -0.9977,
+    -0.023,
+    0.0638
+   ],
+   "triangles": 6780,
+   "vertices": 3392
+  },
+  "32": {
+   "node": "tooth_32",
+   "fdi": "32",
+   "cls": "L2",
+   "arch": "lower",
+   "side": "left",
+   "isThirdMolar": false,
+   "crownHeight": 9.34,
+   "crownMD": 5.61,
+   "crownBL": 6.23,
+   "rootLength": 13.61,
+   "cervixMD": 3.86,
+   "cervixBL": 5.79,
+   "totalLength": 22.95,
+   "center": [
+    7.787,
+    -10.077,
+    -3.143
+   ],
+   "bboxMin": [
+    5.067,
+    -21.265,
+    -6.972
+   ],
+   "bboxMax": [
+    10.508,
+    1.112,
+    0.685
+   ],
+   "occlusalCenter": [
+    7.884,
+    1.111,
+    -1.108
+   ],
+   "apicalAxis": [
+    -0.0499,
+    -0.9698,
+    -0.2388
+   ],
+   "buccalDir": [
+    0.1783,
+    -0.2439,
+    0.9533
+   ],
+   "mesialDir": [
+    -0.9827,
+    0.005,
+    0.1851
+   ],
+   "triangles": 6786,
+   "vertices": 3395
+  },
+  "33": {
+   "node": "tooth_33",
+   "fdi": "33",
+   "cls": "L3",
+   "arch": "lower",
+   "side": "left",
+   "isThirdMolar": false,
+   "crownHeight": 11.06,
+   "crownMD": 6.88,
+   "crownBL": 7.66,
+   "rootLength": 16.09,
+   "cervixMD": 5.32,
+   "cervixBL": 7.26,
+   "totalLength": 27.14,
+   "center": [
+    12.992,
+    -12.417,
+    -5.211
+   ],
+   "bboxMin": [
+    9.661,
+    -25.856,
+    -8.995
+   ],
+   "bboxMax": [
+    16.323,
+    1.022,
+    -1.428
+   ],
+   "occlusalCenter": [
+    13.194,
+    1.041,
+    -4.14
+   ],
+   "apicalAxis": [
+    -0.0539,
+    -0.9892,
+    -0.1363
+   ],
+   "buccalDir": [
+    0.7006,
+    -0.1347,
+    0.7007
+   ],
+   "mesialDir": [
+    -0.7115,
+    -0.0577,
+    0.7003
+   ],
+   "triangles": 6864,
+   "vertices": 3434
+  },
+  "34": {
+   "node": "tooth_34",
+   "fdi": "34",
+   "cls": "L4",
+   "arch": "lower",
+   "side": "left",
+   "isThirdMolar": false,
+   "crownHeight": 8.61,
+   "crownMD": 6.98,
+   "crownBL": 7.76,
+   "rootLength": 14.2,
+   "cervixMD": 4.93,
+   "cervixBL": 6.8,
+   "totalLength": 22.81,
+   "center": [
+    17.54,
+    -10.604,
+    -9.507
+   ],
+   "bboxMin": [
+    13.73,
+    -22.022,
+    -12.898
+   ],
+   "bboxMax": [
+    21.351,
+    0.814,
+    -6.116
+   ],
+   "occlusalCenter": [
+    16.788,
+    0.656,
+    -9.849
+   ],
+   "apicalAxis": [
+    0.0936,
+    -0.9946,
+    0.0455
+   ],
+   "buccalDir": [
+    0.9423,
+    0.1033,
+    0.3184
+   ],
+   "mesialDir": [
+    -0.3213,
+    0.0131,
+    0.9469
+   ],
+   "triangles": 7720,
+   "vertices": 3862
+  },
+  "35": {
+   "node": "tooth_35",
+   "fdi": "35",
+   "cls": "L5",
+   "arch": "lower",
+   "side": "left",
+   "isThirdMolar": false,
+   "crownHeight": 8.16,
+   "crownMD": 7.32,
+   "crownBL": 8.1,
+   "rootLength": 14.72,
+   "cervixMD": 5.05,
+   "cervixBL": 7.27,
+   "totalLength": 22.88,
+   "center": [
+    18.418,
+    -11.172,
+    -16.708
+   ],
+   "bboxMin": [
+    14.148,
+    -22.639,
+    -20.504
+   ],
+   "bboxMax": [
+    22.688,
+    0.296,
+    -12.912
+   ],
+   "occlusalCenter": [
+    17.771,
+    0.062,
+    -16.69
+   ],
+   "apicalAxis": [
+    0.1301,
+    -0.9914,
+    0.0122
+   ],
+   "buccalDir": [
+    0.9391,
+    0.1271,
+    0.3194
+   ],
+   "mesialDir": [
+    -0.3182,
+    -0.03,
+    0.9476
+   ],
+   "triangles": 7704,
+   "vertices": 3854
+  },
+  "36": {
+   "node": "tooth_36",
+   "fdi": "36",
+   "cls": "L6",
+   "arch": "lower",
+   "side": "left",
+   "isThirdMolar": false,
+   "crownHeight": 7.4,
+   "crownMD": 11.44,
+   "crownBL": 10.34,
+   "rootLength": 14.34,
+   "cervixMD": 9.18,
+   "cervixBL": 9.06,
+   "totalLength": 22.47,
+   "center": [
+    21.246,
+    -11.452,
+    -25.455
+   ],
+   "bboxMin": [
+    15.475,
+    -22.315,
+    -31.263
+   ],
+   "bboxMax": [
+    27.017,
+    -0.589,
+    -19.647
+   ],
+   "occlusalCenter": [
+    20.309,
+    -0.797,
+    -25.53
+   ],
+   "apicalAxis": [
+    0.2088,
+    -0.978,
+    -0.0026
+   ],
+   "buccalDir": [
+    0.9431,
+    0.2007,
+    0.2651
+   ],
+   "mesialDir": [
+    -0.2588,
+    -0.0578,
+    0.9642
+   ],
+   "triangles": 9530,
+   "vertices": 4767
+  },
+  "37": {
+   "node": "tooth_37",
+   "fdi": "37",
+   "cls": "L7",
+   "arch": "lower",
+   "side": "left",
+   "isThirdMolar": false,
+   "crownHeight": 7.12,
+   "crownMD": 10.83,
+   "crownBL": 10.02,
+   "rootLength": 13.88,
+   "cervixMD": 8.7,
+   "cervixBL": 8.95,
+   "totalLength": 21.52,
+   "center": [
+    24.94,
+    -10.363,
+    -36.116
+   ],
+   "bboxMin": [
+    19.03,
+    -20.777,
+    -41.689
+   ],
+   "bboxMax": [
+    30.851,
+    0.05,
+    -30.544
+   ],
+   "occlusalCenter": [
+    23.365,
+    -0.339,
+    -36.085
+   ],
+   "apicalAxis": [
+    0.2797,
+    -0.9599,
+    -0.0172
+   ],
+   "buccalDir": [
+    0.9386,
+    0.2697,
+    0.2151
+   ],
+   "mesialDir": [
+    -0.2018,
+    -0.0763,
+    0.9764
+   ],
+   "triangles": 9556,
+   "vertices": 4780
+  },
+  "38": {
+   "node": "tooth_38",
+   "fdi": "38",
+   "cls": "L8",
+   "arch": "lower",
+   "side": "left",
+   "isThirdMolar": true,
+   "crownHeight": 6.87,
+   "crownMD": 10.75,
+   "crownBL": 9.74,
+   "rootLength": 11.72,
+   "cervixMD": 8.42,
+   "cervixBL": 9.02,
+   "totalLength": 18.93,
+   "center": [
+    27.909,
+    -6.983,
+    -46.66
+   ],
+   "bboxMin": [
+    22.194,
+    -16.067,
+    -52.326
+   ],
+   "bboxMax": [
+    33.624,
+    2.102,
+    -40.994
+   ],
+   "occlusalCenter": [
+    25.642,
+    1.602,
+    -46.013
+   ],
+   "apicalAxis": [
+    0.3565,
+    -0.9262,
+    -0.1229
+   ],
+   "buccalDir": [
+    0.9254,
+    0.3319,
+    0.1831
+   ],
+   "mesialDir": [
+    -0.1288,
+    -0.179,
+    0.9754
+   ],
+   "triangles": 9544,
+   "vertices": 4774
+  },
+  "41": {
+   "node": "tooth_41",
+   "fdi": "41",
+   "cls": "L1",
+   "arch": "lower",
+   "side": "right",
+   "isThirdMolar": false,
+   "crownHeight": 8.97,
+   "crownMD": 5.23,
+   "crownBL": 5.88,
+   "rootLength": 12.7,
+   "cervixMD": 3.52,
+   "cervixBL": 5.37,
+   "totalLength": 21.67,
+   "center": [
+    -2.609,
+    -9.561,
+    -2.067
+   ],
+   "bboxMin": [
+    -5.222,
+    -20.042,
+    -5.953
+   ],
+   "bboxMax": [
+    0.004,
+    0.919,
+    1.819
+   ],
+   "occlusalCenter": [
+    -2.615,
+    0.873,
+    0.464
+   ],
+   "apicalAxis": [
+    0.0018,
+    -0.9587,
+    -0.2844
+   ],
+   "buccalDir": [
+    -0.0617,
+    -0.2839,
+    0.9569
+   ],
+   "mesialDir": [
+    0.9981,
+    -0.0158,
+    0.0596
+   ],
+   "triangles": 6780,
+   "vertices": 3392
+  },
+  "42": {
+   "node": "tooth_42",
+   "fdi": "42",
+   "cls": "L2",
+   "arch": "lower",
+   "side": "right",
+   "isThirdMolar": false,
+   "crownHeight": 9.4,
+   "crownMD": 5.65,
+   "crownBL": 6.27,
+   "rootLength": 13.69,
+   "cervixMD": 3.88,
+   "cervixBL": 5.82,
+   "totalLength": 23.09,
+   "center": [
+    -7.822,
+    -10.177,
+    -2.985
+   ],
+   "bboxMin": [
+    -10.554,
+    -21.46,
+    -6.743
+   ],
+   "bboxMax": [
+    -5.091,
+    1.107,
+    0.773
+   ],
+   "occlusalCenter": [
+    -7.923,
+    1.108,
+    -1.117
+   ],
+   "apicalAxis": [
+    0.0518,
+    -0.9727,
+    -0.2263
+   ],
+   "buccalDir": [
+    -0.1879,
+    -0.232,
+    0.9544
+   ],
+   "mesialDir": [
+    0.9808,
+    0.0069,
+    0.1948
+   ],
+   "triangles": 6786,
+   "vertices": 3395
+  },
+  "43": {
+   "node": "tooth_43",
+   "fdi": "43",
+   "cls": "L3",
+   "arch": "lower",
+   "side": "right",
+   "isThirdMolar": false,
+   "crownHeight": 10.95,
+   "crownMD": 6.82,
+   "crownBL": 7.59,
+   "rootLength": 15.94,
+   "cervixMD": 5.27,
+   "cervixBL": 7.19,
+   "totalLength": 26.89,
+   "center": [
+    -13.152,
+    -12.483,
+    -5.082
+   ],
+   "bboxMin": [
+    -16.397,
+    -25.8,
+    -8.85
+   ],
+   "bboxMax": [
+    -9.908,
+    0.834,
+    -1.314
+   ],
+   "occlusalCenter": [
+    -13.265,
+    0.863,
+    -4.049
+   ],
+   "apicalAxis": [
+    0.0436,
+    -0.99,
+    -0.1345
+   ],
+   "buccalDir": [
+    -0.6672,
+    -0.129,
+    0.7336
+   ],
+   "mesialDir": [
+    0.7436,
+    -0.0577,
+    0.6661
+   ],
+   "triangles": 6864,
+   "vertices": 3434
+  },
+  "44": {
+   "node": "tooth_44",
+   "fdi": "44",
+   "cls": "L4",
+   "arch": "lower",
+   "side": "right",
+   "isThirdMolar": false,
+   "crownHeight": 8.55,
+   "crownMD": 6.96,
+   "crownBL": 7.75,
+   "rootLength": 14.19,
+   "cervixMD": 4.92,
+   "cervixBL": 6.79,
+   "totalLength": 22.73,
+   "center": [
+    -17.562,
+    -10.464,
+    -9.503
+   ],
+   "bboxMin": [
+    -21.395,
+    -21.84,
+    -12.91
+   ],
+   "bboxMax": [
+    -13.728,
+    0.911,
+    -6.096
+   ],
+   "occlusalCenter": [
+    -16.692,
+    0.775,
+    -9.757
+   ],
+   "apicalAxis": [
+    -0.1151,
+    -0.993,
+    0.0248
+   ],
+   "buccalDir": [
+    -0.9499,
+    0.1174,
+    0.2895
+   ],
+   "mesialDir": [
+    0.2904,
+    -0.0097,
+    0.9568
+   ],
+   "triangles": 7722,
+   "vertices": 3863
+  },
+  "45": {
+   "node": "tooth_45",
+   "fdi": "45",
+   "cls": "L5",
+   "arch": "lower",
+   "side": "right",
+   "isThirdMolar": false,
+   "crownHeight": 8.09,
+   "crownMD": 7.26,
+   "crownBL": 8.03,
+   "rootLength": 14.6,
+   "cervixMD": 5.01,
+   "cervixBL": 7.21,
+   "totalLength": 22.7,
+   "center": [
+    -18.399,
+    -11.238,
+    -16.663
+   ],
+   "bboxMin": [
+    -22.631,
+    -22.606,
+    -20.402
+   ],
+   "bboxMax": [
+    -14.166,
+    0.13,
+    -12.923
+   ],
+   "occlusalCenter": [
+    -17.698,
+    -0.111,
+    -16.626
+   ],
+   "apicalAxis": [
+    -0.1374,
+    -0.9905,
+    -0.0016
+   ],
+   "buccalDir": [
+    -0.9547,
+    0.132,
+    0.2666
+   ],
+   "mesialDir": [
+    0.2639,
+    -0.0382,
+    0.9638
+   ],
+   "triangles": 7706,
+   "vertices": 3855
+  },
+  "46": {
+   "node": "tooth_46",
+   "fdi": "46",
+   "cls": "L6",
+   "arch": "lower",
+   "side": "right",
+   "isThirdMolar": false,
+   "crownHeight": 7.28,
+   "crownMD": 11.33,
+   "crownBL": 10.25,
+   "rootLength": 14.21,
+   "cervixMD": 9.09,
+   "cervixBL": 8.97,
+   "totalLength": 22.27,
+   "center": [
+    -21.15,
+    -11.401,
+    -25.377
+   ],
+   "bboxMin": [
+    -26.828,
+    -22.167,
+    -31.127
+   ],
+   "bboxMax": [
+    -15.471,
+    -0.635,
+    -19.627
+   ],
+   "occlusalCenter": [
+    -20.292,
+    -0.837,
+    -25.484
+   ],
+   "apicalAxis": [
+    -0.2007,
+    -0.9796,
+    0.0091
+   ],
+   "buccalDir": [
+    -0.9443,
+    0.1959,
+    0.2643
+   ],
+   "mesialDir": [
+    0.2607,
+    -0.0444,
+    0.9644
+   ],
+   "triangles": 9524,
+   "vertices": 4764
+  },
+  "47": {
+   "node": "tooth_47",
+   "fdi": "47",
+   "cls": "L7",
+   "arch": "lower",
+   "side": "right",
+   "isThirdMolar": false,
+   "crownHeight": 7.08,
+   "crownMD": 10.81,
+   "crownBL": 10.0,
+   "rootLength": 13.85,
+   "cervixMD": 8.69,
+   "cervixBL": 8.94,
+   "totalLength": 21.51,
+   "center": [
+    -24.971,
+    -10.364,
+    -35.975
+   ],
+   "bboxMin": [
+    -30.862,
+    -20.747,
+    -41.526
+   ],
+   "bboxMax": [
+    -19.081,
+    0.019,
+    -30.424
+   ],
+   "occlusalCenter": [
+    -23.39,
+    -0.364,
+    -35.989
+   ],
+   "apicalAxis": [
+    -0.281,
+    -0.9597,
+    -0.0042
+   ],
+   "buccalDir": [
+    -0.9396,
+    0.2743,
+    0.2048
+   ],
+   "mesialDir": [
+    0.1954,
+    -0.0615,
+    0.9788
+   ],
+   "triangles": 9558,
+   "vertices": 4781
+  },
+  "48": {
+   "node": "tooth_48",
+   "fdi": "48",
+   "cls": "L8",
+   "arch": "lower",
+   "side": "right",
+   "isThirdMolar": true,
+   "crownHeight": 6.85,
+   "crownMD": 10.76,
+   "crownBL": 9.75,
+   "rootLength": 11.74,
+   "cervixMD": 8.43,
+   "cervixBL": 9.03,
+   "totalLength": 18.91,
+   "center": [
+    -27.796,
+    -7.081,
+    -46.524
+   ],
+   "bboxMin": [
+    -33.468,
+    -16.208,
+    -52.172
+   ],
+   "bboxMax": [
+    -22.125,
+    2.046,
+    -40.875
+   ],
+   "occlusalCenter": [
+    -25.663,
+    1.578,
+    -45.914
+   ],
+   "apicalAxis": [
+    -0.3428,
+    -0.9318,
+    -0.1191
+   ],
+   "buccalDir": [
+    -0.9299,
+    0.3187,
+    0.1835
+   ],
+   "mesialDir": [
+    0.133,
+    -0.1737,
+    0.9758
+   ],
+   "triangles": 9544,
+   "vertices": 4774
+  }
+ }
+}

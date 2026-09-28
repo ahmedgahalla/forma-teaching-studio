@@ -93,7 +93,7 @@ Version 0.10 adds a dark Midnight Lab interface, a persistent bright Clinical St
 
 ## Blender anatomy, prepared cases and a mobile workspace
 
-Version 0.9 loads a refined 28-tooth synthetic model exported from Blender, with individually linked crowns and roots. The editable `.blend` and a contact sheet are included in `assets/anatomy`; no Blender installation is needed to run the browser app.
+The current demo loads 28 supported teaching teeth from Claude’s Dentition Atlas, with detailed enamel, roots and gingiva. The complete 32-tooth source export is preserved in `public/models/forma-atlas-v1.glb`; wisdom teeth are omitted from the current teaching runtime. Source hashes and mapping are documented in `assets/anatomy/claude-atlas/`. No Blender installation is needed. The legacy editable model remains in `assets/anatomy`.
 
 The Teaching library now contains **12 cases and 19 authored demonstrations**, including crowding, diastema, crossbite, open/deep bite, anchorage comparisons, finishing and removable retention. Choose an approach, ask its prediction question, play or scrub the sequence, and reveal the explanation. **Explore this arrangement** freezes the shown stage for free edits; **Return to prepared case** restores that stage. Alternative demonstrations share their own prepared baseline. These are draft teaching examples awaiting educator review, not treatment plans.
 
@@ -223,7 +223,7 @@ The support tissues are **schematic, stationary teaching references** while the 
 
 Manual movement controls create previews in Try Mode; use Apply or Discard. In v0.12, prefix a typed or spoken movement with `preview` to use that same review flow. `leave try mode` returns to the earlier direct-edit workspace once any preview is resolved. The ordinary checkpoint sequence remains separate from the current Try edit's playback path.
 
-1. The synthetic **28-tooth upper and lower dentition** loads with brackets and archwires. The demo omits third molars; the editor accepts all 32 permanent FDI IDs when supplied.
+1. The synthetic **28-tooth upper and lower dentition** opens for exploration. Use **Display** for roots, gingiva and arch visibility; use **Tools** to build appliances. The teaching model omits third molars; imported models can use all 32 permanent FDI IDs.
 2. Click a crown or tooth number. Shift-click to build a selection, or use the arch/group controls. Commands can also name groups directly.
 3. Use the move or rotate handles to drag the active tooth directly, or enter `intrude upper incisors 0.5 mm` followed by `torque upper incisors -3 degrees`. Handles use world axes for one tooth; named commands use each tooth's stored anatomical reference axes and support groups.
 4. Open **Lessons** and choose a guided demonstration. Use next/previous step, or say `next step`, to explain translation, tip and torque; upper/lower intrusion; group expansion; or appliances and before/after comparison. Lessons operate on the current case and may reset its tooth positions. Save a setup you want to retain first.
@@ -434,3 +434,7 @@ Technical references: [Three.js STLLoader](https://threejs.org/docs/pages/STLLoa
 ## Full feature recording
 
 [Watch the 4:38 fullscreen tour](https://forma-teaching-mobile.ahmedgah123.chatgpt.site/demos/forma-full-feature-demo.mp4): natural AI commands, all-teeth wires, read-only scene analysis, numerical single-tooth editing, original comparison, full animations, prepared cases, anatomy and the bracket-to-retention workflow. This private link uses the same account access as the app.
+
+### Ready-made demo lectures
+
+Choose **Lecture**, then **Demo lectures** for Translation and tipping (4 steps), Space closure and anchorage (6), or Why teeth move (6). **Rehearse** shows presenter notes; questions and answer reveals accompany the model. The picker includes objectives, suggested pacing and sources. There is no lecture creation option. Bone/ligament diagrams are separate qualitative illustrations; the older socket classroom uses its explicitly separate schematic model.

@@ -5,3 +5,5 @@
 *.png binary
 *.jpg binary
 *.ico binary
+# Preserve the imported atlas metadata snapshot and its recorded checksum.
+public/models/forma-atlas-v1.json -text whitespace=cr-at-eol

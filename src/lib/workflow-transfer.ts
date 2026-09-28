@@ -5,6 +5,7 @@ import { classroomDefinition, workflowSceneFrame, type WorkflowScene } from './w
 import type { WorkflowViewState } from './workflow-appliances';
 import type { AnatomyViewState } from './teaching-anatomy';
 import { createTryState, type TryState } from './try-mode';
+import { workflowAnatomyModel } from './workflow-anatomy-model';
 
 export type WorkflowTransfer = {
   model: DentalCase;
@@ -61,6 +62,7 @@ export function assertPreparedWorkflowCompatible(
   if (
     !model.demo ||
     !preparedBase.demo ||
+    model.asset !== preparedBase.asset ||
     !preparedBase.teeth.length ||
     model.teeth.length !== preparedBase.teeth.length ||
     model.gums.length !== preparedBase.gums.length
@@ -131,7 +133,7 @@ export function captureWorkflowArrangement(
   scene: WorkflowScene,
   preparedBase: DentalCase,
 ): WorkflowTransfer {
-  assertPreparedWorkflowCompatible(scene.model, preparedBase);
+  assertPreparedWorkflowCompatible(scene.model, workflowAnatomyModel(preparedBase, scene.id));
   if (scene.id !== 'anatomy' && !WORKFLOWS.some(workflow => workflow.id === scene.id))
     throw new Error('Choose a supported prepared workflow.');
   const definition = classroomDefinition(scene.id),
@@ -178,6 +180,7 @@ export function captureWorkflowArrangement(
   const frame = workflowSceneFrame(scene),
     transforms = copiedPoses(scene.variation ?? frame.transforms, scene.model);
   const model: DentalCase = {
+    ...scene.model,
     name: scene.model.name,
     demo: true,
     teeth: scene.model.teeth.map(tooth => {

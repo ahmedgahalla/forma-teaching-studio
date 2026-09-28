@@ -26,7 +26,7 @@ src/
     teaching/               TeachingController (runtime host), TeachingCommandBar + tests
     workflow/               WorkflowStudio
     lecture/                LectureConsole, LectureViewTools + css/partials + tests
-    lecture-builder/        fixed sample runner, notes/questions, comparison and tissue diagrams
+    lecture-builder/        demo lecture catalog/runner, notes/questions, comparison and tissue diagrams
     lecture-audience/       public-only canvas projection popup, portal and lifecycle tests
     mechanics/              MechanicsPanel, AppliancePalette + css/partials
     try/                    TryPanel, PreviewDecisionBar + css/partials + test
@@ -35,7 +35,7 @@ src/
     classroom/              teaching-plan parsing/validation package (barrel: lib/classroom.ts)
     mechanics/              the pure solver package
     mechanics-examples/     validated force-system recipes and primary-model regression tests
-    lecture-documents/      fixed sample data and bounded scene/document validation
+    lecture-documents/      three demo lectures and bounded scene/document validation
     teaching-biology.ts     qualitative tissue content and research references
     lessons.ts              scripted demonstrations (content as data)
     ...                     one module per concern; content files stay data-only
@@ -60,3 +60,7 @@ Conventions:
 - `lib/` packages (classroom/, mechanics/) keep a barrel at their old path so import sites stay stable.
 - New files respect the 300-line limit (`npm run check:limits`); the allowlist in `scripts/check-file-limits.mjs` documents every standing exception.
 - Component tests sit next to the component they test and move with it.
+
+- `case/Atlas*.tsx` and `atlas-*.css` adapt the selected Claude UI to the teaching runtime: camera rail, compact display panel, odontogram and tooth inspector. New controls keep narrow API picks.
+- `lib/atlas-assets.ts`, `atlas-materials.ts`, `atlas-shader.ts`, `atlas-textures.ts`, `atlas-stage.ts` and `viewer-stage.ts` adapt the preserved source export. `case-geometry.ts` owns attribute-preserving saved geometry. Snapshot provenance is in `assets/anatomy/claude-atlas/`.
+- `lecture-documents/catalog.ts`, `sample-anchorage.ts` and `sample-biology.ts` add ready-made content; `lecture-builder/LecturePicker.tsx` selects it through the existing validated session. `workflow-anatomy-lesson.ts` keeps the legacy socket lesson as data.

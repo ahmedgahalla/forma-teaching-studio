@@ -1,4 +1,5 @@
 import type { TeachingAction } from '../lecture';
+import type { BiologyView } from '../teaching-biology';
 
 export const GLOSSARY_REVIEW_STATUS = 'Teaching draft — pending educator review';
 export const GLOSSARY_DISCLAIMER = `${GLOSSARY_REVIEW_STATUS} · synthetic model`;
@@ -9,6 +10,7 @@ export type GlossaryEntry = {
   aliases: readonly string[];
   definition: string;
   show?: readonly TeachingAction[];
+  biology?: BiologyView;
   related: readonly string[];
   status: typeof GLOSSARY_REVIEW_STATUS;
 };

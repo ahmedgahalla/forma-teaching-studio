@@ -2,7 +2,7 @@
 import { act, type ReactNode } from 'react';
 import { createRoot, type Root } from 'react-dom/client';
 import { afterEach, beforeEach, expect, it, vi } from 'vitest';
-import type { LectureDocument } from '@/lib/lecture-documents';
+import { createLectureSample, type LectureDocument } from '@/lib/lecture-documents';
 import type { TeacherLectures } from './useTeacherLectures';
 import { LectureNavigation, type LectureNavigationProps } from './LectureNavigation';
 import { LecturePanel, type LecturePanelProps } from './LecturePanel';
@@ -92,7 +92,7 @@ it('shows the ready-made lecture without creation or editing controls in either 
     expect(container.querySelector('input, textarea, select, [contenteditable]')).toBeNull();
     expect(button('Reveal answer')).toBeDefined();
     expect(button('Show notes')).toBeDefined();
-    expect(container.querySelector('details')?.open).toBe(false);
+    expect(container.querySelector('details')).toBeNull();
     expect(container.textContent).not.toMatch(
       /Create lecture|Add step|Capture|Export|Import|Delete/,
     );
@@ -197,7 +197,7 @@ it('only labels notes as private when the separate audience window is open', asy
 });
 
 it('uses bounded focus, comparison and tissue-response controls without another playback bar', async () => {
-  const props = panelProps();
+  const props = panelProps({ document: createLectureSample() });
   await render(<LecturePanel {...props} />);
   await click('Focus teaching teeth');
   expect(props.onFocus).toHaveBeenCalledOnce();

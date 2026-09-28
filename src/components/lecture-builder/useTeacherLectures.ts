@@ -4,23 +4,23 @@ import type { CaseRefs, CaseStudioApi } from '../case/api';
 import type { ClassroomSnapshot } from '../case/types';
 import type { LectureComparison, PresentationAction } from '@/lib/classroom/presentation';
 import type { BiologyView } from '@/lib/teaching-biology';
-import { createLectureSample } from '@/lib/lecture-documents';
+import { createDemoLectures, DEMO_LECTURES, SAMPLE_LECTURE_ID } from '@/lib/lecture-documents';
 import { createLectureSessionActions, EMPTY_LECTURE_SESSION } from './session';
 
 export function useTeacherLectures(api: CaseStudioApi, refs: CaseRefs) {
-  const [sample] = useState(createLectureSample);
+  const [documents] = useState(createDemoLectures);
   const [session, setSession] = useState(EMPTY_LECTURE_SESSION);
   const original = useRef<ClassroomSnapshot | null>(null),
     paused = useRef<ClassroomSnapshot | null>(null),
     comparison = useRef<ClassroomSnapshot | null>(null);
-  const document = session.documentId === sample.id ? sample : undefined;
+  const document = documents.find(item => item.id === session.documentId);
   /* eslint-disable react-hooks/refs -- factory only closes over return-point refs; reads occur in runtime callbacks, never during rendering */
   const actions = createLectureSessionActions(
     api,
     refs,
     session,
     setSession,
-    id => (id === sample.id ? sample : undefined),
+    id => documents.find(item => item.id === id),
     document,
     original,
     paused,
@@ -35,8 +35,10 @@ export function useTeacherLectures(api: CaseStudioApi, refs: CaseRefs) {
     document,
     decorate: actions.decorate,
     active: session.screen === 'lecture',
+    catalog: DEMO_LECTURES,
+    openLecture: (id: string) => send({ kind: 'presentation', action: 'open', id }),
     openSample: () => {
-      if (!document) send({ kind: 'presentation', action: 'open', id: sample.id });
+      if (!document) send({ kind: 'presentation', action: 'open', id: SAMPLE_LECTURE_ID });
     },
     exit: () => send({ kind: 'presentation', action: 'exit' }),
     navigationProps: {

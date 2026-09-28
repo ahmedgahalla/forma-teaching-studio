@@ -31,7 +31,7 @@ import {
   workflowSceneStep,
   type WorkflowScene,
 } from '@/lib/workflow-scene';
-import AnatomyPanel from '../viewer/AnatomyPanel';
+import { WorkflowAnatomyPanel } from './WorkflowAnatomyPanel';
 import {
   TeachingCommandBar,
   useTeaching,
@@ -55,7 +55,7 @@ export function WorkflowLibrary({ onChoose }: { onChoose: (id: string) => void }
         <div>
           <strong>Inside a tooth: translation and tipping</strong>
           <p>Explore roots, supporting bone and the ligament in a labelled cutaway.</p>
-          <small>4 steps · anatomy layers · movement comparison</small>
+          <small>Schematic model · 4 steps · supporting tissues</small>
         </div>
         <ArrowUpRight size={21} />
       </button>
@@ -701,9 +701,9 @@ export default function WorkflowStudio({ active }: { active: boolean }) {
             </button>
             {answer && <p className="workflow-answer">{step.answer}</p>}
           </div>
-          <AnatomyPanel
+          <WorkflowAnatomyPanel
             value={scene.anatomy}
-            available={true}
+            model={model}
             selected={activeId}
             onChange={anatomy =>
               patch({

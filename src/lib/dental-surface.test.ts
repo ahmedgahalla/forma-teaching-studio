@@ -10,6 +10,35 @@ import {
 
 describe('display-only dental surfaces', () => {
   it.each(['enamel', 'root', 'gingiva'] as const)(
+    'preserves the atlas baked %s attributes without procedural recolouring',
+    tissue => {
+      const source = new THREE.BoxGeometry(5, 10, 4);
+      const count = source.getAttribute('position').count;
+      source.setAttribute(
+        'color',
+        new THREE.Float32BufferAttribute(new Float32Array(count * 3).fill(0.7), 3),
+      );
+      const baked = new THREE.Uint16BufferAttribute(
+        new Uint16Array(count * 4).fill(32123),
+        4,
+        true,
+      );
+      source.setAttribute('dentalData', baked);
+      source.setAttribute('color_1', baked);
+      const display = dentalSurface(source, [0, -1, 0], tissue);
+      expect(display).not.toBe(source);
+      for (const name of ['position', 'normal', 'uv', 'color', 'dentalData', 'color_1']) {
+        expect(display.getAttribute(name)).not.toBe(source.getAttribute(name));
+        expect(display.getAttribute(name).array).toEqual(source.getAttribute(name).array);
+        expect(display.getAttribute(name).normalized).toBe(source.getAttribute(name).normalized);
+      }
+      expect(display.getAttribute('dentalData').getX(0)).toBeCloseTo(32123 / 65535);
+      display.dispose();
+      source.dispose();
+    },
+  );
+
+  it.each(['enamel', 'root', 'gingiva'] as const)(
     'shades %s without changing the source mesh, indexing or measurements',
     tissue => {
       const source = new THREE.BoxGeometry(5, 10, 4),

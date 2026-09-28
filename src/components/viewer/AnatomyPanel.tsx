@@ -7,11 +7,13 @@ export default function AnatomyPanel({
   onChange,
   available,
   selected,
+  unavailableReason,
 }: {
   value: AnatomyViewState;
   onChange: (value: AnatomyViewState) => void;
   available: boolean;
   selected: string;
+  unavailableReason?: string;
 }) {
   const toggle = (key: 'bone' | 'cutaway' | 'ligament') =>
     onChange({
@@ -27,8 +29,8 @@ export default function AnatomyPanel({
       </div>
       {!available ? (
         <p>
-          Support tissues are available on the synthetic demo. Imported models use only the supplied
-          anatomy.
+          {unavailableReason ||
+            'Support tissues are available on the synthetic demo. Imported models use only the supplied anatomy.'}
         </p>
       ) : (
         <>

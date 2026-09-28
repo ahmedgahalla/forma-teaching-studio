@@ -5,6 +5,8 @@ import { afterEach, beforeEach, expect, it, vi } from 'vitest';
 import type { CaseRefs, CaseStudioApi } from '../case/api';
 import { useTeacherLectures, type TeacherLectures } from './useTeacherLectures';
 import { lectureHarness } from './session.fixtures';
+import { ANCHORAGE_LECTURE_ID } from '@/lib/lecture-documents/sample-anchorage';
+import { BIOLOGY_LECTURE_ID } from '@/lib/lecture-documents/sample-biology';
 
 let root: Root, container: HTMLDivElement, teacher: TeacherLectures;
 let harness: ReturnType<typeof lectureHarness>;
@@ -89,4 +91,64 @@ it('keeps previously saved lecture data untouched and works without browser stor
   expect(remove).not.toHaveBeenCalled();
   get.mockRestore();
   expect(localStorage.getItem(key)).toBe(existing);
+});
+
+it('opens either new lecture through presentation actions and exits to the original workspace', async () => {
+  const original = structuredClone(harness.snapshot.lesson.transforms);
+  await act(async () => teacher.openLecture(ANCHORAGE_LECTURE_ID));
+  expect(harness.api.teaching.execute).toHaveBeenLastCalledWith(
+    [{ kind: 'presentation', action: 'open', id: ANCHORAGE_LECTURE_ID }],
+    'Update lecture',
+  );
+  expect(teacher.document?.steps).toHaveLength(6);
+  expect(harness.snapshot.lesson.model.teeth.map(tooth => tooth.id)).not.toContain('14');
+  await act(async () => teacher.navigationProps.onNext());
+  expect(harness.snapshot.scenario?.variantId).toBe('posterior-held');
+  await act(async () => teacher.openSample());
+  expect(teacher.session).toMatchObject({ documentId: ANCHORAGE_LECTURE_ID, index: 1 });
+  await act(async () => teacher.openLecture(BIOLOGY_LECTURE_ID));
+  expect(teacher.session).toMatchObject({
+    documentId: BIOLOGY_LECTURE_ID,
+    index: 0,
+    biology: 'overview',
+  });
+  await act(async () => teacher.exit());
+  expect(harness.snapshot.lesson.transforms).toEqual(original);
+  expect(teacher.active).toBe(false);
+});
+
+it('loads authored biology on navigation, preserves a question detour, and clears it for movement', async () => {
+  await act(async () => teacher.openLecture(BIOLOGY_LECTURE_ID));
+  await act(async () => teacher.navigationProps.onNext());
+  expect(teacher.session.biology).toBe('compression');
+  await act(async () => teacher.navigationProps.onNext());
+  expect(teacher.session.biology).toBe('tension');
+  await act(async () => teacher.panelProps?.onReveal());
+  await act(async () => teacher.navigationProps.onExplore());
+  await act(async () => teacher.navigationProps.onReturn());
+  expect(teacher.session).toMatchObject({ biology: 'tension', answerVisible: true });
+  await act(async () => teacher.navigationProps.onNext());
+  expect(teacher.session).toMatchObject({ biology: 'overview', answerVisible: false });
+  await act(async () => teacher.navigationProps.onNext());
+  expect(teacher.session.biology).toBe('off');
+  expect(harness.snapshot.scenario).toMatchObject({
+    caseId: 'movement-types',
+    variantId: 'translation',
+  });
+  await act(async () => teacher.navigationProps.onPrevious());
+  expect(teacher.session.biology).toBe('overview');
+});
+
+it('rejects unavailable catalog IDs and unsupported comparisons before changing the scene', async () => {
+  await act(async () => teacher.openLecture(ANCHORAGE_LECTURE_ID));
+  const adapter = teacher.decorate(harness.adapter());
+  const snapshot = harness.snapshot;
+  expect(() =>
+    adapter.preflight([{ kind: 'presentation', action: 'open', id: 'missing-lecture' }]),
+  ).toThrow('available lecture');
+  expect(() =>
+    adapter.preflight([{ kind: 'presentation', action: 'compare', target: 'tip' }]),
+  ).toThrow('does not include');
+  expect(harness.snapshot).toBe(snapshot);
+  expect(teacher.session.documentId).toBe(ANCHORAGE_LECTURE_ID);
 });

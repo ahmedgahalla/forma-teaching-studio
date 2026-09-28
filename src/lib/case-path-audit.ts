@@ -1,4 +1,5 @@
 import audit from './teaching-case-audit.json';
+import type { DentalCase } from './geometry';
 
 type Pair = { a: string; b: string };
 type VariantAudit = {
@@ -8,7 +9,8 @@ type VariantAudit = {
 const cases = audit.cases as Record<string, { variants: Record<string, VariantAudit> }>;
 
 /** Reports measured discrete samples; never labels an interpolated path collision-free. */
-export function casePathAudit(caseId: string, variantId: string) {
+export function casePathAudit(caseId: string, variantId: string, asset: DentalCase['asset']) {
+  if (asset !== 'claude-atlas-v1') return null;
   const result = cases[caseId]?.variants[variantId];
   if (!result) return null;
   const pairs = new Map<string, { a: string; b: string; tissue: 'crown' | 'root' }>();

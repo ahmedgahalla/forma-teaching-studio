@@ -7,6 +7,14 @@ import { validateSession, type CaseSession } from './planning';
 import { validateAttachment, type AttachmentSpec } from './attachments';
 import { validateRootAnatomy } from './root-anatomy';
 import { validateMechanicsExperiment } from './mechanics/state';
+import {
+  hasAtlasSurfaceData,
+  makeGeometry,
+  serialGeometry,
+  serializedMeshSize,
+  validMesh,
+  type SerializedGeometry,
+} from './case-geometry';
 
 export type DentalTooth = Tooth & {
   geometry: THREE.BufferGeometry;
@@ -21,7 +29,13 @@ export type Gum = {
   position: Vec3;
   arch?: 'upper' | 'lower';
 };
-export type DentalCase = { name: string; demo: boolean; teeth: DentalTooth[]; gums: Gum[] };
+export type DentalCase = {
+  name: string;
+  demo: boolean;
+  asset?: 'claude-atlas-v1';
+  teeth: DentalTooth[];
+  gums: Gum[];
+};
 const names = [
   'Central incisor',
   'Lateral incisor',
@@ -141,14 +155,6 @@ export function download(name: string, data: BlobPart, type = 'application/json'
   a.click();
   setTimeout(() => URL.revokeObjectURL(url), 1000);
 }
-type SerializedGeometry = { vertices: number[]; normals?: number[]; indices?: number[] };
-function serialGeometry(g: THREE.BufferGeometry): SerializedGeometry {
-  return {
-    vertices: Array.from(g.getAttribute('position').array),
-    normals: Array.from(g.getAttribute('normal')?.array || []),
-    indices: g.index ? Array.from(g.index.array) : undefined,
-  };
-}
 export function saveCase(model: DentalCase, transforms: Transforms, session?: CaseSession) {
   const encode = (t: DentalTooth | Gum) => {
     const tooth = t as DentalTooth;
@@ -161,7 +167,10 @@ export function saveCase(model: DentalCase, transforms: Transforms, session?: Ca
     };
   };
   const version =
-    session?.mechanics || session?.lectureSetup || model.teeth.some(tooth => tooth.rootAnatomy)
+    model.asset ||
+    session?.mechanics ||
+    session?.lectureSetup ||
+    model.teeth.some(tooth => tooth.rootAnatomy)
       ? 3
       : 2;
   const contents = new Blob(
@@ -184,30 +193,6 @@ const finiteVec = (v: unknown): v is Vec3 =>
   Array.isArray(v) &&
   v.length === 3 &&
   v.every(x => typeof x === 'number' && Number.isFinite(x) && Math.abs(x) <= 1e5);
-function validMesh(value: SerializedGeometry | undefined): boolean {
-  if (
-    !value ||
-    !Array.isArray(value.vertices) ||
-    value.vertices.length < 9 ||
-    value.vertices.length % (value.indices === undefined ? 9 : 3) ||
-    !value.vertices.every(v => typeof v === 'number' && Number.isFinite(v) && Math.abs(v) < 1e5)
-  )
-    return false;
-  if (
-    value.indices !== undefined &&
-    (!Array.isArray(value.indices) ||
-      value.indices.length < 3 ||
-      value.indices.length % 3 ||
-      !value.indices.every(i => Number.isInteger(i) && i >= 0 && i < value.vertices.length / 3))
-  )
-    return false;
-  return (
-    value.normals === undefined ||
-    (Array.isArray(value.normals) &&
-      (value.normals.length === 0 || value.normals.length === value.vertices.length) &&
-      value.normals.every(v => typeof v === 'number' && Number.isFinite(v) && Math.abs(v) <= 2))
-  );
-}
 export async function loadCase(
   file: File,
 ): Promise<{ model: DentalCase; transforms: Transforms; session?: CaseSession }> {
@@ -226,6 +211,8 @@ export async function loadCase(
   )
     throw new Error('This is not a supported Forma case.');
   if (typeof data.model.name !== 'string') throw new Error('Invalid case name.');
+  if (data.model.asset !== undefined && data.model.asset !== 'claude-atlas-v1')
+    throw new Error('Invalid case anatomy asset.');
   if (!data.model.teeth.length || data.model.teeth.length > 32 || data.model.gums.length > 4)
     throw new Error('Invalid number of models.');
   const ids = new Set<string>();
@@ -235,11 +222,11 @@ export async function loadCase(
       throw new Error('Invalid mesh in case.');
     if (t.name !== undefined && typeof t.name !== 'string') throw new Error('Invalid mesh name.');
     if (t.root !== undefined && !validMesh(t.root)) throw new Error('Invalid root mesh.');
-    count +=
-      t.vertices.length +
-      (t.indices?.length || 0) +
-      (t.root?.vertices.length || 0) +
-      (t.root?.indices?.length || 0);
+    if (data.model.asset && (!hasAtlasSurfaceData(t) || (t.root && !hasAtlasSurfaceData(t.root))))
+      throw new Error(
+        'The saved atlas is missing its surface color, tissue data or UV coordinates.',
+      );
+    count += serializedMeshSize(t) + (t.root ? serializedMeshSize(t.root) : 0);
     if (count > 18_000_000) throw new Error('Case mesh is too large.');
   }
   for (const t of data.model.teeth) {
@@ -278,20 +265,12 @@ export async function loadCase(
     if (!ids.has(id) || !pose || !finiteVec(pose.translation) || !finiteVec(pose.rotation))
       throw new Error('Invalid movement data.');
   const session = validateSession(data.session, ids);
-  const makeGeometry = (value: SerializedGeometry) => {
-    const g = new THREE.BufferGeometry();
-    g.setAttribute('position', new THREE.Float32BufferAttribute(value.vertices, 3));
-    if (value.indices) g.setIndex(value.indices);
-    if (value.normals?.length)
-      g.setAttribute('normal', new THREE.Float32BufferAttribute(value.normals, 3));
-    else g.computeVertexNormals();
-    return g;
-  };
   const decode = (t: Record<string, unknown>) => {
     const {
       vertices,
       normals,
       indices,
+      attributes,
       root,
       geometry: _oldGeometry,
       rootGeometry: _oldRoot,
@@ -303,6 +282,7 @@ export async function loadCase(
         vertices: vertices as number[],
         normals: normals as number[],
         indices: indices as number[],
+        attributes: attributes as SerializedGeometry['attributes'],
       }),
       ...(root ? { rootGeometry: makeGeometry(root as SerializedGeometry) } : {}),
     };
@@ -310,6 +290,7 @@ export async function loadCase(
   const model: DentalCase = {
     name: String(data.model.name).slice(0, 80),
     demo: Boolean(data.model.demo),
+    ...(data.model.asset ? { asset: data.model.asset as 'claude-atlas-v1' } : {}),
     teeth: data.model.teeth.map(decode),
     gums: data.model.gums.map(decode),
   };

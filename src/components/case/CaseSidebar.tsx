@@ -5,6 +5,7 @@ import { ArrowUpRight, BookOpen, Box, ChevronRight, CircleHelp, Plus, Upload } f
 import { Toggle } from './ui';
 import AnatomyPanel from '../viewer/AnatomyPanel';
 import { orderedArchIds } from '@/lib/appliances';
+import { supportsTeachingAnatomy, SUPPORT_ANATOMY_UNAVAILABLE } from '@/lib/anatomy-capability';
 
 export function CaseSidebar({ api }: { api: CaseStudioApi }) {
   return (
@@ -120,7 +121,8 @@ export function CaseSidebar({ api }: { api: CaseStudioApi }) {
           <Toggle label="Gingiva" value={api.gums} onChange={() => api.setGums(!api.gums)} />
           <AnatomyPanel
             value={api.anatomy}
-            available={api.model.demo}
+            available={supportsTeachingAnatomy(api.model)}
+            unavailableReason={api.model.asset ? SUPPORT_ANATOMY_UNAVAILABLE : undefined}
             selected={api.selected}
             onChange={value => {
               api.teaching.interact();

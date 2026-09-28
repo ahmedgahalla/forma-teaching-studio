@@ -3,6 +3,7 @@ import { glossaryActionsForStudy } from '@/lib/glossary/plan';
 import type { ToothStudyContext } from '@/lib/tooth-study/types';
 import type { CaseStudioApi } from './api';
 import './GlossaryCard.css';
+import { BiologyIllustration } from '../lecture-builder/RemodelingDiagram';
 
 type GlossaryCardApi = Pick<CaseStudioApi, 'glossaryId'> & {
   toothStudy: Pick<ToothStudyContext, 'tooth' | 'view'> | null;
@@ -28,6 +29,7 @@ export function GlossaryCard({ api }: { api: GlossaryCardApi }) {
       <div className="glossary-details">
         <h2 id="glossary-title">{entry.term}</h2>
         <p>{entry.definition}</p>
+        {entry.biology && <BiologyIllustration view={entry.biology} />}
         <nav aria-label="Related glossary terms">
           {entry.related.map(id => {
             const related = getGlossaryEntry(id)!;

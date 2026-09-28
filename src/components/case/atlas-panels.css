@@ -1,0 +1,206 @@
+.atlas-display-body,
+.atlas-tooth-inspector {
+  background: var(--atlas-surface);
+  border: 1px solid var(--ui-line);
+  border-radius: 6px;
+  color: var(--ui-text);
+  backdrop-filter: blur(10px);
+}
+.atlas-display-body {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  z-index: 90;
+  width: min(248px, calc(100vw - 24px));
+  max-height: min(490px, 65dvh);
+  overflow-y: auto;
+  padding: 8px 14px 16px;
+}
+.atlas-display:not([open]) > .atlas-display-body {
+  display: none;
+}
+.atlas-display h2,
+.atlas-tooth-inspector h3 {
+  font:
+    500 11px/1.3 'IBM Plex Sans',
+    sans-serif;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--ui-muted);
+  margin: 14px 0 9px;
+}
+.atlas-field {
+  display: grid;
+  gap: 6px;
+  font-size: 13px;
+}
+.atlas-field > span {
+  display: flex;
+  justify-content: space-between;
+}
+.atlas-field output {
+  font:
+    12px 'IBM Plex Mono',
+    monospace;
+  color: var(--ui-muted);
+}
+.atlas-field input {
+  width: 100%;
+  accent-color: var(--ui-accent);
+  min-height: 24px;
+}
+.atlas-note {
+  color: var(--ui-muted);
+  font-size: 12px;
+  margin: 6px 0 14px;
+}
+.atlas-segment {
+  display: flex;
+  border: 1px solid var(--ui-line);
+  border-radius: 5px;
+  overflow: hidden;
+  margin: 8px 0;
+}
+.atlas-segment button {
+  flex: 1;
+  border: 0;
+  padding: 8px 6px;
+  background: transparent;
+  color: var(--ui-muted);
+  font-size: 13px;
+  min-height: 40px;
+}
+.atlas-segment button[aria-pressed='true'] {
+  color: var(--ui-text);
+  background: var(--ui-soft);
+}
+.atlas-switch {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  min-height: 40px;
+  border: 0;
+  padding: 6px 0;
+  background: transparent;
+  color: var(--ui-text);
+  font-size: 13px;
+}
+.atlas-switch i {
+  display: block;
+  width: 28px;
+  height: 16px;
+  border-radius: 9px;
+  background: var(--ui-line);
+  padding: 2px;
+}
+.atlas-switch i::after {
+  content: '';
+  display: block;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: var(--ui-muted);
+}
+.atlas-switch[aria-checked='true'] i {
+  background: var(--ui-soft);
+}
+.atlas-switch[aria-checked='true'] i::after {
+  transform: translateX(12px);
+  background: var(--ui-accent);
+}
+.atlas-tooth-inspector {
+  grid-column: 2;
+  grid-row: 1;
+  min-height: 0;
+  overflow-y: auto;
+  padding: 16px;
+  align-self: start;
+  max-height: 100%;
+}
+.atlas-inspector-kicker {
+  font:
+    11px 'IBM Plex Mono',
+    monospace;
+  color: var(--ui-accent);
+  letter-spacing: 0.06em;
+}
+.atlas-tooth-inspector h2 {
+  font:
+    400 28px/1.1 'Instrument Serif',
+    Georgia,
+    serif;
+  margin: 9px 0;
+}
+.atlas-tooth-inspector p,
+.atlas-tooth-inspector li {
+  font-size: 13px;
+  line-height: 1.55;
+}
+.atlas-tooth-inspector ul {
+  padding-left: 16px;
+  margin: 8px 0 16px;
+}
+.atlas-tooth-inspector li + li {
+  margin-top: 8px;
+}
+.atlas-inspector-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  padding-top: 12px;
+  border-top: 1px solid var(--ui-line);
+}
+.atlas-inspector-actions button {
+  min-height: 40px;
+  padding: 7px 10px;
+  border: 1px solid var(--ui-line);
+  border-radius: 5px;
+  background: transparent;
+  color: var(--ui-text);
+  font-size: 12px;
+}
+.atlas-inspector-actions button[aria-pressed='true'] {
+  background: var(--ui-soft);
+  color: var(--ui-accent);
+}
+.atlas-workspace .lecture-picker {
+  position: relative;
+}
+.atlas-workspace .lecture-picker summary {
+  min-height: 40px;
+  padding: 8px 12px;
+  border: 1px solid var(--ui-line);
+  border-radius: 6px;
+  background: var(--atlas-surface);
+  cursor: pointer;
+}
+.atlas-workspace .lecture-picker-list {
+  position: absolute;
+  z-index: 90;
+  top: calc(100% + 6px);
+  left: 0;
+  width: min(360px, calc(100vw - 28px));
+  max-height: 60dvh;
+  overflow-y: auto;
+  padding: 8px;
+  border: 1px solid var(--ui-line);
+  border-radius: 6px;
+  background: var(--ui-panel);
+}
+.atlas-workspace .lecture-picker-list > button {
+  display: grid;
+  gap: 5px;
+  width: 100%;
+  padding: 12px;
+  border: 0;
+  border-radius: 4px;
+  text-align: left;
+  background: transparent;
+}
+.atlas-workspace .lecture-picker-list > button[aria-pressed='true'] {
+  background: var(--ui-soft);
+}
+.atlas-workspace .lecture-picker-list small {
+  color: var(--ui-muted);
+}

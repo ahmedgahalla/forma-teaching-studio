@@ -3,17 +3,12 @@ import { forwardRef, useEffect, useImperativeHandle, useRef, useState } from 're
 import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import { TransformControls } from 'three/addons/controls/TransformControls.js';
-import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
 import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js';
 import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
 import { GTAOPass } from 'three/addons/postprocessing/GTAOPass.js';
 import { OutputPass } from 'three/addons/postprocessing/OutputPass.js';
-import {
-  dentalBackdrop,
-  dentalStagePalette,
-  dentalSurface,
-  updateDentalBackdrop,
-} from '@/lib/dental-surface';
+import { dentalStagePalette, dentalSurface } from '@/lib/dental-surface';
+import { createViewerStage } from '@/lib/viewer-stage';
 import { download, type DentalCase } from '@/lib/geometry';
 import type { Pose, Transforms, Vec3 } from '@/lib/model';
 import { createMechanicsVisuals } from '@/lib/mechanics-view';
@@ -121,27 +116,22 @@ const Viewer = forwardRef<ViewerHandle, Props>(function Viewer(props, ref) {
     renderer.shadowMap.enabled = true;
     renderer.shadowMap.type = THREE.PCFShadowMap;
     renderer.outputColorSpace = THREE.SRGBColorSpace;
-    renderer.toneMapping = THREE.ACESFilmicToneMapping;
-    renderer.toneMappingExposure = 0.88;
     let renderedTheme = liveTheme.current;
     const palette = dentalStagePalette[renderedTheme];
-    renderer.setClearColor(palette.clear, 1);
     container.appendChild(renderer.domElement);
     const scene = new THREE.Scene(),
       camera = new THREE.PerspectiveCamera(34, 1, 0.1, 10000);
-    const backdrop = dentalBackdrop(renderedTheme);
-    scene.background = backdrop;
-    scene.environmentIntensity = 0.55;
+    const stage = createViewerStage(renderer, scene, camera, props.model, renderedTheme);
     const target = new THREE.WebGLRenderTarget(1, 1, { type: THREE.HalfFloatType, samples: 4 });
     const composer = new EffectComposer(renderer, target),
       scenePass = new RenderPass(scene, camera),
       ao = new GTAOPass(scene, camera, 1, 1),
       outputPass = new OutputPass();
-    ao.blendIntensity = 0.48;
+    ao.blendIntensity = stage.farAO ? 0.45 : 0.48;
     ao.updateGtaoMaterial({
-      radius: 2.2,
-      thickness: 1.2,
-      distanceExponent: 2,
+      radius: stage.farAO ? 1.8 : 2.2,
+      thickness: stage.farAO ? 1 : 1.2,
+      distanceExponent: stage.farAO ? 1.5 : 2,
       distanceFallOff: 1,
       samples: 12,
       screenSpaceRadius: false,
@@ -154,12 +144,6 @@ const Viewer = forwardRef<ViewerHandle, Props>(function Viewer(props, ref) {
       renderer.setPixelRatio(ratio);
       composer.setPixelRatio(ratio);
     });
-    const pmrem = new THREE.PMREMGenerator(renderer),
-      room = new RoomEnvironment();
-    const environment = pmrem.fromScene(room, 0.04);
-    scene.environment = environment.texture;
-    room.dispose();
-    pmrem.dispose();
     const controls = new OrbitControls(camera, renderer.domElement);
     const motionPreference = window.matchMedia('(prefers-reduced-motion: reduce)');
     const cameraMotion = createCameraMotion(camera, controls, () => motionPreference.matches);
@@ -173,25 +157,6 @@ const Viewer = forwardRef<ViewerHandle, Props>(function Viewer(props, ref) {
     controls.dampingFactor = 0.11;
     controls.minDistance = 10;
     controls.maxDistance = 3000;
-    scene.add(new THREE.HemisphereLight(0xf8fbff, 0x56647d, 0.28));
-    const key = new THREE.DirectionalLight(0xfff6e8, 1.7);
-    key.position.set(-48, 65, 75);
-    key.castShadow = true;
-    key.shadow.mapSize.set(2048, 2048);
-    Object.assign(key.shadow.camera, { left: -90, right: 90, top: 90, bottom: -90 });
-    key.shadow.bias = -0.00015;
-    key.shadow.normalBias = 0.08;
-    key.shadow.radius = 3;
-    scene.add(key);
-    // A modest camera-relative fill keeps lingual and occlusal details readable during orbit.
-    const fill = new THREE.DirectionalLight(0xf0f5ff, 0.7);
-    fill.position.set(40, 15, 65);
-    fill.target.position.set(0, 0, -1);
-    camera.add(fill, fill.target);
-    scene.add(camera);
-    const rim = new THREE.DirectionalLight(0xd7eaff, 1.1);
-    rim.position.set(25, 45, -65);
-    scene.add(rim);
     const {
       enamel,
       contourMaterial,
@@ -201,7 +166,7 @@ const Viewer = forwardRef<ViewerHandle, Props>(function Viewer(props, ref) {
       ghostMaterial,
       gumMaterial,
       attachmentMaterial,
-    } = createDentalMaterials(!!props.model.demo, renderedTheme);
+    } = createDentalMaterials(!!props.model.demo, renderedTheme, stage.farAO);
     const focusMaterials = createTeachingFocusMaterials([
       enamel,
       rootMaterial,
@@ -382,8 +347,7 @@ const Viewer = forwardRef<ViewerHandle, Props>(function Viewer(props, ref) {
       if (renderedTheme === liveTheme.current) return;
       renderedTheme = liveTheme.current;
       const next = dentalStagePalette[renderedTheme];
-      updateDentalBackdrop(backdrop, renderedTheme);
-      renderer.setClearColor(next.clear, 1);
+      stage.setTheme(renderedTheme);
       contourMaterial.uniforms.color.value.set(next.selected);
       lockedMaterial.color.set(next.locked);
       contactMaterial.color.set(next.contact);
@@ -1064,6 +1028,7 @@ const Viewer = forwardRef<ViewerHandle, Props>(function Viewer(props, ref) {
         p.tool === 'orbit' &&
         !p.measureMode;
       try {
+        stage.update(controls.target, !!p.isolateSelection || !!p.toothStudy);
         composer.render();
       } catch (error) {
         const failure =
@@ -1128,14 +1093,12 @@ const Viewer = forwardRef<ViewerHandle, Props>(function Viewer(props, ref) {
       removableKit.dispose();
       kit.dispose();
       focusMaterials.dispose();
-      environment.dispose();
-      backdrop.dispose();
+      stage.dispose();
       ao.dispose();
       scenePass.dispose();
       outputPass.dispose();
       composer.dispose();
       displayGeometry.forEach(geometry => geometry.dispose());
-      key.shadow.dispose();
       publicOverlays.dispose();
       renderer.dispose();
       renderer.domElement.remove();

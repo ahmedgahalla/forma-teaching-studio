@@ -1,12 +1,14 @@
 # Phase 3 — demo path
 
-**Status:** crown/root trails implemented; automated checks passed; browser acceptance pending · **Current branch:** `ahmed/phase-3-crown-root-trails` · **Current PR:** [#20 (draft)](https://github.com/ahmedgahalla/forma-teaching-studio/pull/20), stacked on [#19](https://github.com/ahmedgahalla/forma-teaching-studio/pull/19)
+**Status:** Claude atlas and demo lecture integration implemented; automated checks pass; visual acceptance pending · **Current branch:** `ahmed/phase-3-demo-lectures` · **PR:** [#21 (draft)](https://github.com/ahmedgahalla/forma-teaching-studio/pull/21) · **Base:** [#20 (draft)](https://github.com/ahmedgahalla/forma-teaching-studio/pull/20)
 
 **Goal:** a professor can explore the central model freely or open a finished lecture with notes, questions and model demonstrations, then return from a spontaneous experiment without losing the lecture. Builds on [product direction](../../PRODUCT_DIRECTION.md).
 
 ## Current implementation
 
-- [3.20 — Crown and root movement trails](3.20-crown-root-trails.md): selected-tooth reference points and deterministic paths share the displayed playback source. Further lecture features/content are deferred until the professor's demo, approval and supplied lectures/cases.
+- [3.21 — Claude atlas and demo lectures](3.21-atlas-demo-integration.md): integrates the owner-selected Claude anatomy and visual language, with three finished lectures. This later explicit request supersedes the temporary lecture-content deferral in 3.20; professor-supplied courses and lecture authoring remain deferred.
+
+- [3.20 — Crown and root movement trails](3.20-crown-root-trails.md): selected-tooth reference points and deterministic paths share the displayed playback source. Its lecture-content deferral was subsequently reopened for the ready-made demos in 3.21; professor-specific courses remain deferred.
 
 - [3.19 — Public model annotations in the audience view](3.19-audience-annotations.md): tooth numbers, tissue/surface labels, schematic captions and the lecture pointer accompany the shared model. Public mechanics scale and display qualifications remain visible during question detours; notes stay private.
 
@@ -21,7 +23,7 @@
 - [3.9 — Ready-made lecture and free exploration](3.9-teacher-lectures.md): Lecture opens the fixed four-step translation/tipping sample directly in Teach. Rehearse exposes notes; questions precede answers; navigation and playback are deterministic; a question detour preserves the paused lecture and independent Explore workspace. There is no lecture authoring, local lecture library, import/export or saving.
 - [3.2 — Lecture-ready opening](3.2-lecture-ready-opening.md): collapsed editing and commands, grouped controls, full-width model and preserved preview decisions. Dependency: [PR #13](https://github.com/ahmedgahalla/forma-teaching-studio/pull/13).
 
-The current branch starts from [Phase 4](../phase-4-voice-lecture-assistant/README.md) at `ff1b3e5` and retains its voice, glossary, tooth-study and presentation work. The stacked PR does not trigger the current main-targeted CI workflow; it is not represented as CI-green or merged.
+The current branch follows draft PR #20 at `915de39` and retains the earlier [Phase 4](../phase-4-voice-lecture-assistant/README.md) voice, glossary, tooth-study and presentation work. The stacked PR does not trigger the current main-targeted CI workflow; it is not represented as CI-green or merged.
 
 ## Scope decision and remaining acceptance
 
@@ -29,6 +31,6 @@ See [acceptance evidence and rehearsal](3.19-acceptance.md) for the requirement-
 
 The owner's latest request supersedes the earlier teacher-authoring scope: provide our own finished sample and remove lecture creation. **3.9 remains the consolidated first vertical slice** of the [Explore/Lecture proposal](https://github.com/ahmedgahalla/forma-teaching-studio/pull/12), retaining its runner, return and input work. Proposed 3.10–3.14 are not duplicate outstanding milestones; editing and persistence are deliberately excluded. Former browser lecture saves are untouched because the revised feature does not access them.
 
-The sample's four suggested allocations total **205 seconds (3 minutes 25 seconds), not yet measured**. The earlier [3.9 verification record](3.9-teacher-lectures.md#acceptance-and-verification) recorded 2,383 passing tests and a BVH timeout; [3.15](3.15-lecture-mechanics.md#verification-and-acceptance) records the later timing fixes and full passing run. The current [3.20 verification](3.20-crown-root-trails.md#verification-and-acceptance) passes 2,674 frontend tests, 619 backend tests and the remaining automated local checks. Real browser access is blocked by security policy; no browser, DPR 1/2, microphone or projector acceptance is claimed.
+The original sample's four suggested allocations total **205 seconds (3 minutes 25 seconds), not yet measured**; the new anchorage and biology lectures each suggest 4–5 minutes. The earlier [3.9 verification record](3.9-teacher-lectures.md#acceptance-and-verification) recorded 2,383 passing tests and a BVH timeout; [3.15](3.15-lecture-mechanics.md#verification-and-acceptance) records the later timing fixes and full passing run. The current [3.21 verification](3.21-atlas-demo-integration.md#verification-and-remaining-acceptance) passes 2,764 frontend tests, 619 backend tests and the remaining automated local checks. Real browser access is blocked by security policy; no browser, DPR 1/2, microphone or projector acceptance is claimed.
 
 The owner subsequently authorized the presentation, local-asset, audience and biology improvements plus researched mechanics; those changes are recorded in 3.15. Educator review and real-device rehearsal remain outstanding. Authoring and arbitrary generated animation remain excluded.

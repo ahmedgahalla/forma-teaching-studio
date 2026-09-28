@@ -3,6 +3,8 @@ import type { ComponentProps } from 'react';
 import type { CaseStudioApi } from './api';
 import { ChevronRight, CircleHelp, Maximize } from 'lucide-react';
 import { CaseViewControls } from './CaseViewControls';
+import { AtlasCameraRail } from './AtlasCameraRail';
+import { AtlasDisplayPanel } from './AtlasDisplayPanel';
 
 type HeadingApi = Pick<
   CaseStudioApi,
@@ -16,7 +18,8 @@ type HeadingApi = Pick<
   | 'dentalArrangement'
   | 'setModal'
 > &
-  ComponentProps<typeof CaseViewControls>['api'];
+  ComponentProps<typeof CaseViewControls>['api'] &
+  ComponentProps<typeof AtlasDisplayPanel>['api'];
 
 export function CaseWorkspaceHeading({ api }: { api: HeadingApi }) {
   const { viewer } = api;
@@ -60,6 +63,8 @@ export function CaseWorkspaceHeading({ api }: { api: HeadingApi }) {
           </h2>
         </div>
         <div className="view-actions">
+          <AtlasCameraRail api={api} />
+          <AtlasDisplayPanel api={api} />
           {api.dentalArrangement && (
             <button
               className="icon-button"

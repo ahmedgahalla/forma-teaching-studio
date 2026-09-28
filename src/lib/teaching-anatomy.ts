@@ -3,6 +3,7 @@ import type { DentalCase, DentalTooth } from './geometry';
 import { anatomicalFrame, type Transforms } from './model';
 import { toothMatrix } from './analysis';
 import { toothArch } from './appliances';
+import { supportsTeachingAnatomy } from './anatomy-capability';
 
 export type AnatomyViewState = {
   bone: boolean;
@@ -47,7 +48,7 @@ export function anatomyCutawayTooth(
   state: AnatomyViewState | undefined,
   selected: string,
 ) {
-  return model.demo && state?.cutaway
+  return supportsTeachingAnatomy(model) && state?.cutaway
     ? model.teeth.find(tooth => tooth.id === selected && tooth.rootGeometry && tooth.calibrated)
     : undefined;
 }
@@ -69,9 +70,7 @@ const fromFrame = (frame: Frame, x: number, axial: number, z: number) =>
     .addScaledVector(frame.rootward, axial)
     .addScaledVector(frame.buccal, z);
 
-// New assets explicitly identify the cervical trunk and distal root branches.
-// Legacy schematic roots retain mesh-plane extraction by connected component.
-// These envelopes are teaching sockets, not segmented alveolar bone.
+// Root profiles define teaching sockets, not segmented alveolar bone.
 function rootProfiles(tooth: DentalTooth, frame: Frame): RootEnvelope[] {
   if (tooth.rootAnatomy) {
     const convert = (
@@ -364,7 +363,8 @@ export function createTeachingAnatomy(model: DentalCase) {
     result.gumPlanes = [];
     result.labels = [];
     result.cutawayTooth = undefined;
-    if (!model.demo || !state || (!state.bone && !state.ligament && !state.cutaway)) return;
+    if (!supportsTeachingAnatomy(model)) return;
+    if (!state || (!state.bone && !state.ligament && !state.cutaway)) return;
     if (!Number.isFinite(state.opacity) || state.opacity < 0 || state.opacity > 1)
       throw new Error('Bone opacity must be between 0 and 1.');
     const cutaway = anatomyCutawayTooth(model, state, options.selected),

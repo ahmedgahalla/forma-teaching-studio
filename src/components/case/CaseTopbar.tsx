@@ -55,12 +55,10 @@ export function CaseTopbar({
   return (
     <header className="topbar">
       <div className="brand" aria-label="Forma Teaching Studio">
-        <span className="brand-icon">
-          <Layers3 size={22} />
+        <span className="atlas-brand-name">
+          Forma <em>Teaching Studio</em>
         </span>
-        forma
-        <span className="brand-divider" />
-        <span className="brand-sub">TEACHING STUDIO</span>
+        <span className="atlas-brand-caption">Explore anatomy. Explain movement.</span>
       </div>
       <div className="top-center">
         {onExperienceChange ? (

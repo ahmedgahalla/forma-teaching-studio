@@ -3,8 +3,9 @@ import { useId } from 'react';
 import type { LectureDocument } from '@/lib/lecture-documents';
 import type { BiologyView } from '@/lib/teaching-biology';
 import { RemodelingDiagram } from './RemodelingDiagram';
-import { COMPARISON_TARGETS, type LectureComparison } from '@/lib/classroom/presentation';
+import type { LectureComparison } from '@/lib/classroom/presentation';
 import { LECTURE_COMPARISON_LABELS } from './comparison-labels';
+import { availableLectureComparisons } from './lecture-comparison';
 
 export type LecturePanelProps = {
   document: LectureDocument;
@@ -45,6 +46,7 @@ export function LecturePanel({
 }: LecturePanelProps) {
   const fieldId = useId();
   const step = document.steps[index];
+  const comparisons = availableLectureComparisons(document);
   return (
     <aside className="lecture-panel" data-mode={mode} aria-label="Lecture step">
       {step.question && <p className="lecture-question">{step.question}</p>}
@@ -90,34 +92,36 @@ export function LecturePanel({
       <button type="button" aria-pressed={focus} onClick={onFocus}>
         {focus ? 'Show surrounding teeth' : 'Focus teaching teeth'}
       </button>
-      <details className="lecture-disclosure">
-        <summary>Compare arrangements{comparison ? ' · shown' : ''}</summary>
-        <div
-          className="lecture-comparison-options"
-          role="group"
-          aria-label="Comparison arrangement"
-        >
-          {COMPARISON_TARGETS.map(target => (
-            <button
-              key={target}
-              type="button"
-              aria-pressed={comparison === target}
-              onClick={() => onCompare(target)}
-            >
-              {LECTURE_COMPARISON_LABELS[target]}
-            </button>
-          ))}
-          {comparison && (
-            <button type="button" onClick={onCloseComparison}>
-              Close comparison
-            </button>
-          )}
-        </div>
-        <p className="lecture-muted">
-          Show each authored arrangement from the same viewpoint. Close comparison to return to your
-          paused lecture.
-        </p>
-      </details>
+      {comparisons.length > 0 && (
+        <details className="lecture-disclosure">
+          <summary>Compare arrangements{comparison ? ' · shown' : ''}</summary>
+          <div
+            className="lecture-comparison-options"
+            role="group"
+            aria-label="Comparison arrangement"
+          >
+            {comparisons.map(target => (
+              <button
+                key={target}
+                type="button"
+                aria-pressed={comparison === target}
+                onClick={() => onCompare(target)}
+              >
+                {LECTURE_COMPARISON_LABELS[target]}
+              </button>
+            ))}
+            {comparison && (
+              <button type="button" onClick={onCloseComparison}>
+                Close comparison
+              </button>
+            )}
+          </div>
+          <p className="lecture-muted">
+            Show each authored arrangement from the same viewpoint. Close comparison to return to
+            your paused lecture.
+          </p>
+        </details>
+      )}
       {biology === 'off' ? (
         <button type="button" onClick={() => onBiology('overview')}>
           Explain tissue response

@@ -84,3 +84,12 @@ it('closes through the shared runtime and unmounts when state clears', async () 
   await render(null);
   expect(host.childElementCount).toBe(0);
 });
+
+it.each(['periodontal-ligament', 'alveolar-bone'])(
+  'shows separate supported biology illustrations for %s',
+  async id => {
+    await render(id);
+    expect(host.querySelector('[aria-label="Illustrative tissue biology"]')).not.toBeNull();
+    expect(host.querySelectorAll('svg[role="img"]')).toHaveLength(2);
+  },
+);
