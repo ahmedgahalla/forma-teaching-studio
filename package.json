@@ -9,6 +9,7 @@
     "dev": "next dev --hostname 127.0.0.1",
     "build": "next build",
     "start": "node scripts/serve.mjs",
+    "start:ai": "node scripts/start-ai.mjs",
     "demo": "npm run build && npm run check:demo && npm run start -- --open",
     "check:demo": "node scripts/check-demo.mjs",
     "test": "vitest run",

@@ -314,3 +314,10 @@ Numbers 17–19 were checked against the current lessons and the parallel Phase 
 - **Root cause:** the parent stylesheet imports the component stylesheet first, then adds responsive rules targeting the same component.
 - **Prevention:** search all selectors for a replaced component and check their import/source order at each affected breakpoint. Keep the chart's spacing in its own stylesheet and remove its obsolete parent override. Browser acceptance remains necessary for final appearance.
 - **Status:** noted · **Count:** 1
+
+## 43. Windows environment casing must survive configuration merging
+
+- **Mistake caught during review:** [3.25 launcher review](reviews/from-builder/2026-09-28-ai-pitch-acceptance.md) found that a mixed-case inherited provider variable could fail to override private file settings and escape an uppercase-only frontend environment filter.
+- **Root cause:** spreading Windows `process.env` into a plain object discards its case-insensitive lookup semantics; a case-sensitive prefix check also misses differently cased secrets.
+- **Prevention:** canonicalize provider variable names when merging Windows settings, with inherited values taking precedence, and filter frontend provider variables case-insensitively. Test mixed-case inherited configuration and the child environments with dummy values.
+- **Status:** automated · **Count:** 1

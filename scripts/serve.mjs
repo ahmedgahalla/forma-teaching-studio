@@ -3,10 +3,24 @@ import { createReadStream, existsSync, statSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { spawn } from 'node:child_process';
+import { createLocalAiGateway } from './local-ai-gateway.mjs';
 
 const root = path.resolve(fileURLToPath(new URL('../out/', import.meta.url)));
 const port = Number(process.env.PORT || 3000);
 const host = process.env.FORMA_HOST || '127.0.0.1';
+let aiGateway;
+try {
+  if (process.env.FORMA_LOCAL_AI_PORT)
+    aiGateway = createLocalAiGateway({
+      host,
+      port,
+      backendPort: process.env.FORMA_LOCAL_AI_PORT,
+      provider: process.env.FORMA_LOCAL_AI_PROVIDER,
+    });
+} catch {
+  console.error('Invalid local AI gateway settings. Use npm run start:ai on 127.0.0.1.');
+  process.exit(1);
+}
 if (!existsSync(path.join(root, 'index.html'))) {
   console.error('Build the app first with npm run build.');
   process.exit(1);
@@ -25,7 +39,8 @@ const types = {
   '.stl': 'model/stl',
   '.glb': 'model/gltf-binary',
 };
-const server = http.createServer((req, res) => {
+const server = http.createServer(async (req, res) => {
+  if (aiGateway && (await aiGateway(req, res))) return;
   if (req.method !== 'GET' && req.method !== 'HEAD') {
     res.writeHead(405);
     res.end();

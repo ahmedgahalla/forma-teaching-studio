@@ -1,10 +1,12 @@
 # Phase 3 — demo path
 
-**Status:** Nael Teaching Studio branding implemented; automated checks pass; browser acceptance pending · **Current branch:** `ahmed/phase-3-nael-branding` · **PR:** [#24 (draft)](https://github.com/ahmedgahalla/forma-teaching-studio/pull/24) · **Base:** [#23 (draft)](https://github.com/ahmedgahalla/forma-teaching-studio/pull/23)
+**Status:** local AI startup repair and narrated professor pitch implemented; provider choice and browser acceptance pending · **Current branch:** `ahmed/phase-3-ai-pitch` · **PR:** pending draft · **Base:** [#24 (draft)](https://github.com/ahmedgahalla/forma-teaching-studio/pull/24)
 
 **Goal:** a professor can explore the central model freely or open a finished lecture with notes, questions and model demonstrations, then return from a spontaneous experiment without losing the lecture. Builds on [product direction](../../PRODUCT_DIRECTION.md).
 
 ## Current implementation
+
+- [3.25 — Local AI startup and professor pitch](3.25-ai-and-pitch.md): opt-in backend/frontend startup, bounded same-origin gateway, and a 3:45 narrated feature overview using labelled illustrations of the bundled model.
 
 - [3.24 — Nael Teaching Studio](3.24-nael-branding.md): the owner-requested display name and N favicon, preserving existing voice commands and saved-state compatibility.
 
@@ -37,6 +39,6 @@ See [acceptance evidence and rehearsal](3.19-acceptance.md) for the requirement-
 
 The owner's latest request supersedes the earlier teacher-authoring scope: provide our own finished sample and remove lecture creation. **3.9 remains the consolidated first vertical slice** of the [Explore/Lecture proposal](https://github.com/ahmedgahalla/forma-teaching-studio/pull/12), retaining its runner, return and input work. Proposed 3.10–3.14 are not duplicate outstanding milestones; editing and persistence are deliberately excluded. Former browser lecture saves are untouched because the revised feature does not access them.
 
-The original sample's four suggested allocations total **205 seconds (3 minutes 25 seconds), not yet measured**; the new anchorage and biology lectures each suggest 4–5 minutes. The earlier [3.9 verification record](3.9-teacher-lectures.md#acceptance-and-verification) recorded 2,383 passing tests and a BVH timeout; [3.15](3.15-lecture-mechanics.md#verification-and-acceptance) records the later timing fixes and full passing run. The current [3.24 verification](3.24-nael-branding.md#verification) passes 2,861 frontend tests, 639 backend tests and the remaining automated local checks. Real browser access is blocked by security policy; no browser, DPR 1/2, microphone or projector acceptance is claimed.
+The original sample's four suggested allocations total **205 seconds (3 minutes 25 seconds), not yet measured**; the new anchorage and biology lectures each suggest 4–5 minutes. The earlier [3.9 verification record](3.9-teacher-lectures.md#acceptance-and-verification) recorded 2,383 passing tests and a BVH timeout; [3.15](3.15-lecture-mechanics.md#verification-and-acceptance) records the later timing fixes and full passing run. The current [3.25 verification](3.25-ai-and-pitch.md#verification-and-follow-up) passes 2,901 frontend tests, 639 backend tests and the remaining automated local checks. Real browser access is blocked by security policy; no browser, DPR 1/2, microphone or projector acceptance is claimed.
 
 The owner subsequently authorized the presentation, local-asset, audience and biology improvements plus researched mechanics; those changes are recorded in 3.15. Educator review and real-device rehearsal remain outstanding. Authoring and arbitrary generated animation remain excluded.

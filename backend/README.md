@@ -14,7 +14,28 @@ python -m venv .venv
 if (!(Test-Path .env)) { Copy-Item .env.example .env }
 ```
 
-Edit `.env` locally and put your provider's API key in `OPENAI_API_KEY`. Do not paste the key into the web app. For OpenAI, leave `OPENAI_BASE_URL` unset; the model defaults to `gpt-4.1-mini`. The selected model must support the Responses API and strict structured outputs through the configured provider. A ChatGPT subscription does not supply this API key or API credits.
+Edit `.env` locally and put your provider's API key in `OPENAI_API_KEY`. Do not paste the key into the web app. For OpenAI, leave `OPENAI_BASE_URL` unset. Set `OPENAI_MODEL` to a model available to your API account; the code and `.env.example` currently default to `gpt-6-luna`. The selected model must support the Responses API and strict structured outputs through the configured provider. A ChatGPT subscription does not supply this API key or API credits.
+
+### Start the app and local AI together
+
+After configuring the private `backend/.env`, run from the repository root:
+
+```powershell
+npm run build
+$env:PORT = '3012'
+$env:FORMA_AI_PORT = '8002'
+npm run start:ai
+```
+
+Choose unused ports. The defaults are 3000 for the app and 8002 for Python. The launcher waits for Python's successful bind, then starts the exported app at `http://127.0.0.1:3012` for the example above. Ctrl+C stops both children; either service stopping also stops the other. Add `-- --open` to open the app automatically. Ordinary `npm start` stays frontend-only.
+
+Private `.env` settings apply only to the backend; inherited process settings take precedence. The launcher requires a nonempty key, binds both services to `127.0.0.1`, and sets the backend's exact frontend CORS origin. It does not verify the provider credentials, account credit or model access. Direct OpenAI and OpenRouter require the matching provider's key; changing only the provider URL does not convert a key.
+
+The opt-in local server exposes only a safe same-origin discovery response, `/health`, and the two existing teaching endpoints through a fixed loopback gateway. Host/origin checks, 64 KiB JSON limits, two active requests and a 23-second deadline bound the gateway; cancellation reaches the backend. Incoming cookies and authorization headers are not forwarded. No API key is sent to the frontend. This local gateway is not a remote deployment or phone-sharing server.
+
+A fresh browser profile discovers the local service automatically. Saved service settings and deliberate AI opt-outs remain authoritative. To reconnect an existing profile, open Settings, enter the **app URL** (`http://127.0.0.1:3012` in the example), and choose **Connect service**. Health confirms that the local backend has a key configured; only a successful provider request verifies actual API operation.
+
+### Start only Python manually
 
 For OpenRouter, use its API key with this configuration; the key is deliberately empty in the example:
 

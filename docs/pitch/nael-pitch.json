@@ -1,0 +1,70 @@
+{
+  "title": "Nael Teaching Studio",
+  "format": "Narrated feature overview with model illustrations; not an app screen recording",
+  "chapters": [
+    {
+      "title": "Nael Teaching Studio",
+      "kicker": "A classroom built around the model",
+      "render": "hero",
+      "points": ["Explore in 3D", "Teach step by step", "Keep the professor in control"],
+      "text": "Professor Nael, Nael Teaching Studio brings orthodontic explanations into one interactive three-dimensional workspace. Instead of asking students to imagine what a tooth is doing, you can focus on the anatomy, ask a question, and make the movement visible. This short overview introduces the teaching experience using illustrations of the app's dental model."
+    },
+    {
+      "title": "Explore the anatomy",
+      "kicker": "Start with the question in the room",
+      "render": "upper-occlusal",
+      "points": [
+        "Select a tooth from the chart",
+        "Inspect crowns and roots",
+        "Switch views and focus"
+      ],
+      "text": "In Explore, the model is the centre of the lesson. Select a tooth from the dental chart, inspect its crown and roots, and change the viewing angle. You can show one arch or both, adjust the visible tissues, and focus attention on a particular tooth. The same workspace supports a prepared explanation or a spontaneous question from the class."
+    },
+    {
+      "title": "Ask. Predict. Reveal.",
+      "kicker": "Make students think before they watch",
+      "render": "roots",
+      "points": ["Pause for a prediction", "Replay and compare", "Follow crown and root paths"],
+      "text": "A useful demonstration starts before the animation. Ask students to predict what will happen, then reveal the authored movement. Pause, replay, or compare the result with the starting position. Crown and root trails help students follow two different points on the same tooth. Translation and tipping become a discussion about visible geometry, with a repeatable starting point."
+    },
+    {
+      "title": "Make mechanics discussable",
+      "kicker": "Change one thing. Discuss its effect.",
+      "render": "canine",
+      "points": ["Brackets and wires", "Bond position and angle", "Bounded mechanics examples"],
+      "text": "The appliance tools connect the model to a more detailed mechanics discussion. Add brackets and a wire, adjust a selected bracket's position and angle, and inspect the response in the bounded teaching model. Prepared examples cover movements, anchorage and wire effects. These are illustrative engineering experiments: the displayed result is not a prediction of a patient's treatment."
+    },
+    {
+      "title": "Connect movement and biology",
+      "kicker": "Give the mechanism its own explanation",
+      "render": "side",
+      "points": ["Why teeth move", "Separate tissue diagrams", "Questions before explanations"],
+      "text": "The biology lecture adds a separate visual story about the periodontal ligament, supporting bone, and the compression and tension concept. These teaching diagrams help connect the movement discussion to tissue responses. They are deliberately separate from the geometric and mechanical demonstrations, giving you room to explain the simplifications and develop the science with your students."
+    },
+    {
+      "title": "Control the lesson naturally",
+      "kicker": "Click, type or speak",
+      "render": "front",
+      "points": ["Direct controls", "Typed instructions", "Optional OpenAI interpretation"],
+      "text": "You can control the scene by clicking, typing, or speaking supported instructions. Familiar commands work locally. An optional OpenAI model connection adds more flexible wording and read-only explanations of the scene. Commands are validated before they change the model, and Undo restores the previous request. The professor remains responsible for the explanation and for deciding what the class should explore."
+    },
+    {
+      "title": "Ready-made lecture examples",
+      "kicker": "One model. A clear teaching sequence.",
+      "render": "hero",
+      "points": ["Translation and tipping", "Space closure and anchorage", "Why teeth move"],
+      "text": "Three sample lectures introduce the format: translation and tipping, space closure and anchorage, and why teeth move. Each provides a sequence of questions, notes and model demonstrations. You can explore a student's question and return to the lecture. A separate audience view is designed to show the public lesson content while keeping the presenter's notes on the teaching screen."
+    },
+    {
+      "title": "Built around your teaching",
+      "kicker": "Professor Nael, help shape the next step",
+      "render": "front",
+      "points": [
+        "Review the teaching approach",
+        "Choose the first real lecture",
+        "Build from approved cases"
+      ],
+      "text": "The next step is your feedback. If the approach fits your teaching, we can use your approved lectures and cases to shape the content, pacing and level of detail. Nael Teaching Studio is an educational prototype using synthetic anatomy, not a clinically validated treatment system. The goal is a clear, professor-led conversation in which students can see what you mean."
+    }
+  ]
+}
