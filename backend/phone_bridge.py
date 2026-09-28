@@ -11,6 +11,8 @@ from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse
 from starlette.requests import ClientDisconnect
 
+from ai_request import run_ai_request
+
 
 MAX_BODY_BYTES = 64 * 1024
 TEACHING_PATHS = {"/api/interpret-teaching", "/api/analyze-teaching"}
@@ -121,4 +123,10 @@ async def interpret(request: Request):
     except (ValueError, UnicodeError):
         return error(400, "Supply a valid JSON request object.")
     # Both allowlisted routes retain the backend's complete validation.
-    return await forward("POST", request.url.path, bytes(data))
+    async def operation(_deadline: float):
+        return await forward("POST", request.url.path, bytes(data))
+
+    return await run_ai_request(
+        request, operation, timeout=23,
+        timeout_detail="The local AI backend is unavailable. Try again shortly.",
+    )

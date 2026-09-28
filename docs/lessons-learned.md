@@ -219,8 +219,8 @@ Numbers 17–19 were checked against the current lessons and the parallel Phase 
 
 - **Mistake:** the same [review](reviews/from-builder/2026-09-28-analysis-context-and-cancellation.md) reproduced an aborted ASGI caller while the synchronous provider call continued.
 - **Root cause:** browser cancellation and stale-result protection do not cancel a blocking SDK call running in a server worker thread.
-- **Prevention:** use async provider operations with disconnect cancellation and a shared deadline across initial/repair calls; test cancellation at both stages and preserve error sanitization. Implementation remains pending.
-- **Status:** noted · **Count:** 1
+- **Prevention:** [Phase 3.17](phases/phase-3-demo-path/3.17-ai-cancellation.md) uses async provider operations with a shared deadline across initial/repair calls and one post-body disconnect receiver. Tests exercise cancellation and awaited cleanup at both stages, observed completion/disconnect races and the authenticated phone bridge, preserving sanitized failures.
+- **Status:** automated · **Count:** 1
 
 ## 30. Runtime journey fixtures should match loaded-model ownership
 

@@ -6,7 +6,7 @@ This is a nonclinical editor demonstration. Its numeric limits are editor guardr
 
 ## Start locally
 
-Use Python 3.10 or later. In a PowerShell terminal opened in this `backend` directory:
+Use Python 3.13, matching the repository setup and CI. In a PowerShell terminal opened in this `backend` directory:
 
 ```powershell
 python -m venv .venv
@@ -35,6 +35,12 @@ For macOS/Linux use `python3 -m venv .venv`, then `.venv/bin/python` instead of 
 In the frontend, use backend URL `http://127.0.0.1:8000` and explicitly choose AI interpretation. A missing key does not prevent startup; `/health` reports `ai_enabled: false` and interpretation returns HTTP 503.
 
 Keep this development server bound to `127.0.0.1`. It has no authentication, tenancy, rate limiting, or production deployment configuration. The default allowed browser origins are `http://localhost:3000` and `http://127.0.0.1:3000`; `CORS_ORIGINS` can override them with a comma-separated list of exact origins. CORS is not authentication.
+
+## Cancellation and time limits
+
+The two AI routes use asynchronous provider requests. If their HTTP caller cancels or disconnects, the backend cancels the local upstream operation and awaits client cleanup. Interpretation has one 21-second deadline, including its optional single validation-repair attempt; the first provider call gets at most 20 seconds. Repair requires at least six seconds remaining and is capped at ten seconds or the original remaining budget. Analyze has a 20-second total deadline. Deadline errors are sanitized; no cancelled response can authorize a scene change.
+
+The authenticated phone bridge also observes disconnect after reading a validated teaching request, cancels its local upstream request and releases its request slot. Its deadline remains 23 seconds. These deadlines bound pending work; awaited cooperative client cleanup can extend the final response beyond them. A deployment gateway must forward disconnection for this to reach the bridge. Closing a local connection cannot guarantee that a remote provider stops computation or billing. See [Phase 3.17](../docs/phases/phase-3-demo-path/3.17-ai-cancellation.md) for verification and limits.
 
 ## Request and response
 
@@ -239,7 +245,7 @@ python -m uvicorn phone_bridge:app --host 127.0.0.1 --port 8001 --workers 1 --no
 
 The trusted server gateway sends the token in `X-Forma-Bridge-Token`. Keep this credential on the server; do not include it in browser JavaScript, URLs or repository files. The gateway must also enforce its own private-user access. Tunnel only the bridge on port 8001, keeping the main API on loopback. Stopping the bridge or tunnel ends remote AI access.
 
-Only authenticated `GET /health` and `POST /api/interpret-teaching` are available. Query strings, compressed bodies and non-JSON teaching requests are rejected. The bridge caps streamed request bodies at 64 KiB, permits 30 teaching POST requests per rolling minute across the process, and allows at most two concurrent upstream calls, with a 23-second deadline. Use exactly one worker for these shared limits. Incoming browser headers, cookies and the bridge credential are never forwarded to the local backend. Responses are not cached; provider and transport errors are sanitized. No patient files or mesh-upload route is exposed.
+Only authenticated `GET /health`, `POST /api/interpret-teaching` and `POST /api/analyze-teaching` are available. Query strings, compressed bodies and non-JSON teaching requests are rejected. The bridge caps streamed request bodies at 64 KiB, permits 30 teaching POST requests per rolling minute across the process, and allows at most two concurrent upstream calls, with a 23-second deadline. Use exactly one worker for these shared limits. Incoming browser headers, cookies and the bridge credential are never forwarded to the local backend. Responses are not cached; provider and transport errors are sanitized. No patient files or mesh-upload route is exposed.
 
 Run `python -m pytest test_phone_bridge.py -q` to verify authentication, route restrictions, body/header handling, deadlines, sanitized errors, rate limiting and cancellation-safe concurrency accounting.
 

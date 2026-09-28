@@ -1,9 +1,10 @@
 """Teaching-plan contract and semantic audits; all provider calls are mocked."""
 
+import asyncio
 import copy
 import json
 from types import SimpleNamespace
-from unittest.mock import MagicMock
+from unittest.mock import AsyncMock, MagicMock
 
 import httpx
 import pytest
@@ -37,7 +38,7 @@ def dental(tooth="11", amount=1, direction="buccal"):
 
 
 def fake(monkeypatch, result):
-    provider = MagicMock(return_value=result)
+    provider = AsyncMock(return_value=result)
     monkeypatch.setattr(main, "interpret_teaching_with_openai", provider)
     return provider
 
@@ -627,10 +628,11 @@ def test_sdk_uses_server_key_minimal_context_strict_schema_and_no_storage(client
     monkeypatch.setenv("OPENAI_API_KEY", "server-secret")
     monkeypatch.setenv("OPENAI_MODEL", "configured-test-model")
     sdk = MagicMock()
-    sdk.__enter__.return_value = sdk
+    sdk.__aenter__.return_value = sdk
+    sdk.responses.parse = AsyncMock()
     sdk.responses.parse.return_value = SimpleNamespace(output_parsed=main.TeachingPlan.model_validate(plan({"kind": "toggle", "target": "roots", "visible": True})))
     factory = MagicMock(return_value=sdk)
-    monkeypatch.setattr(main, "OpenAI", factory)
+    monkeypatch.setattr(main, "AsyncOpenAI", factory)
     result = post(client, request())
     assert result.status_code == 200, result.text
     factory.assert_called_once_with(api_key="server-secret", timeout=20, max_retries=0)
@@ -692,9 +694,10 @@ def test_reordered_select_schema_retains_target_and_unknown_field_audits(client,
 def test_provider_refusal_returns_empty_clarification(client, monkeypatch):
     monkeypatch.setenv("OPENAI_API_KEY", "server-secret")
     sdk = MagicMock()
-    sdk.__enter__.return_value = sdk
+    sdk.__aenter__.return_value = sdk
+    sdk.responses.parse = AsyncMock()
     sdk.responses.parse.return_value = SimpleNamespace(output_parsed=None)
-    monkeypatch.setattr(main, "OpenAI", MagicMock(return_value=sdk))
+    monkeypatch.setattr(main, "AsyncOpenAI", MagicMock(return_value=sdk))
     result = post(client, request())
     assert result.status_code == 200
     assert result.json()["actions"] == []
@@ -702,7 +705,7 @@ def test_provider_refusal_returns_empty_clarification(client, monkeypatch):
 
 
 def test_provider_failures_do_not_echo_private_exception_details(client, monkeypatch):
-    def fail(_payload):
+    async def fail(_payload, _timeout):
         raise APITimeoutError(request=httpx.Request("POST", "https://example.com/private-text"))
     monkeypatch.setattr(main, "interpret_teaching_with_openai", fail)
     result = post(client, request())
@@ -721,7 +724,7 @@ def test_actionable_provider_configuration_errors_never_echo_secrets(client, mon
     response = httpx.Response(status, request=httpx.Request("POST", "https://example.com/private-request"))
     error_type = AuthenticationError if status == 401 else RateLimitError
     error = error_type(secret, response=response, body={"code": code, "message": secret})
-    monkeypatch.setattr(main, "interpret_teaching_with_openai", MagicMock(side_effect=error))
+    monkeypatch.setattr(main, "interpret_teaching_with_openai", AsyncMock(side_effect=error))
     result = client.post("/api/interpret-teaching", json=request())
     assert result.status_code == expected_status, result.text
     assert message in result.json()["detail"]
@@ -733,7 +736,7 @@ def test_openrouter_provider_label_and_credit_error_are_safe(client, monkeypatch
     monkeypatch.setenv("OPENAI_BASE_URL", "https://openrouter.ai/api/v1")
     assert client.get("/health").json()["provider"] == "OpenRouter"
     error = APIStatusError("secret upstream detail", response=httpx.Response(402, request=httpx.Request("POST", "https://openrouter.ai/api/v1/responses")), body={"message": "secret upstream detail"})
-    monkeypatch.setattr(main, "interpret_teaching_with_openai", MagicMock(side_effect=error))
+    monkeypatch.setattr(main, "interpret_teaching_with_openai", AsyncMock(side_effect=error))
     response = post(client, request())
     assert response.status_code == 402
     assert "OpenRouter needs available API credits" in response.json()["detail"]
@@ -748,10 +751,11 @@ def repair_sdk(monkeypatch, *plans):
     monkeypatch.setenv("OPENAI_API_KEY", "server-secret")
     monkeypatch.setenv("OPENAI_MODEL", "openai/gpt-6-luna")
     sdk = MagicMock()
-    sdk.__enter__.return_value = sdk
+    sdk.__aenter__.return_value = sdk
+    sdk.responses.parse = AsyncMock()
     sdk.responses.parse.side_effect = [SimpleNamespace(output_parsed=main.TeachingPlan.model_validate(value)) for value in plans]
     factory = MagicMock(return_value=sdk)
-    monkeypatch.setattr(main, "OpenAI", factory)
+    monkeypatch.setattr(main, "AsyncOpenAI", factory)
     return sdk, factory
 
 
@@ -808,7 +812,10 @@ def test_missing_movement_amount_can_be_repaired_only_to_a_clarification(client,
 
 def test_repair_does_not_run_when_request_deadline_has_insufficient_time(client, monkeypatch):
     sdk, _ = repair_sdk(monkeypatch, plan(dental(tooth="12")))
-    monkeypatch.setattr(main, "monotonic", MagicMock(side_effect=[100, 116]))
+    async def nearly_expired(_request, operation, **options):
+        assert options["timeout"] == 21
+        return await operation(asyncio.get_running_loop().time() + 5)
+    monkeypatch.setattr(main, "run_ai_request", nearly_expired)
     response = post(client, request("Move tooth 11 buccally 1 mm"))
     assert response.status_code == 422
     assert sdk.responses.parse.call_count == 1

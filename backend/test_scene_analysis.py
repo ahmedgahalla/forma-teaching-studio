@@ -1,8 +1,9 @@
 """Read-only scene explanation contracts; provider calls are mocked."""
+import asyncio
 import copy
 import json
 from types import SimpleNamespace
-from unittest.mock import MagicMock
+from unittest.mock import AsyncMock, MagicMock
 
 import httpx
 import pytest
@@ -57,7 +58,7 @@ def client(monkeypatch):
 
 def test_read_only_response_has_no_actions_and_preserves_input(client, monkeypatch):
     received = []
-    monkeypatch.setattr(analysis, "analyze_with_openai", lambda payload: received.append(payload.model_dump()) or explanation())
+    monkeypatch.setattr(analysis, "analyze_with_openai", AsyncMock(side_effect=lambda payload, timeout: received.append(payload.model_dump()) or explanation()))
     request = scene_request()
     original = copy.deepcopy(request)
     response = client.post("/api/analyze-teaching", json=request)
@@ -69,7 +70,7 @@ def test_read_only_response_has_no_actions_and_preserves_input(client, monkeypat
 
 def test_analysis_model_is_independent_and_metadata_is_not_provider_controlled(client, monkeypatch):
     monkeypatch.setenv("OPENAI_ANALYSIS_MODEL", "analysis-test")
-    monkeypatch.setattr(analysis, "analyze_with_openai", lambda payload: explanation())
+    monkeypatch.setattr(analysis, "analyze_with_openai", AsyncMock(return_value=explanation()))
     assert client.post("/api/analyze-teaching", json=scene_request()).json()["model"] == "analysis-test"
     monkeypatch.setenv("OPENAI_ANALYSIS_MODEL", " ")
     assert analysis.analysis_model() == "interpreter-test"
@@ -98,7 +99,7 @@ def test_analysis_model_is_independent_and_metadata_is_not_provider_controlled(c
     lambda p: p.update(question="x" * 801),
 ])
 def test_invalid_scene_never_calls_provider_or_echoes_input(client, monkeypatch, mutation):
-    provider = MagicMock()
+    provider = AsyncMock()
     monkeypatch.setattr(analysis, "analyze_with_openai", provider)
     payload = scene_request()
     mutation(payload)
@@ -109,7 +110,7 @@ def test_invalid_scene_never_calls_provider_or_echoes_input(client, monkeypatch,
 
 
 def test_one_wire_cannot_cross_arches(client, monkeypatch):
-    provider = MagicMock()
+    provider = AsyncMock()
     monkeypatch.setattr(analysis, "analyze_with_openai", provider)
     payload = scene_request()
     context = payload["context"]
@@ -129,7 +130,7 @@ def test_exact_supplied_result_and_lesson_are_forwarded_without_inference(client
     }
     payload["context"]["lesson"] = {"title": "Tipping and translation", "explanation": "Compare the two authored paths."}
     received = []
-    monkeypatch.setattr(analysis, "analyze_with_openai", lambda p: received.append(p.model_dump()) or explanation())
+    monkeypatch.setattr(analysis, "analyze_with_openai", AsyncMock(side_effect=lambda p, timeout: received.append(p.model_dump()) or explanation()))
     assert client.post("/api/analyze-teaching", json=payload).status_code == 200
     assert received == [payload]
     payload["context"]["synthetic"] = False
@@ -145,7 +146,7 @@ def test_exact_supplied_result_and_lesson_are_forwarded_without_inference(client
     {"observations": "Missing required sections."},
 ])
 def test_invalid_provider_response_is_rejected(client, monkeypatch, result):
-    monkeypatch.setattr(analysis, "analyze_with_openai", lambda payload: result)
+    monkeypatch.setattr(analysis, "analyze_with_openai", AsyncMock(return_value=result))
     response = client.post("/api/analyze-teaching", json=scene_request())
     assert response.status_code == 502
     assert "actions" not in response.json() and "provider-picked" not in response.text
@@ -162,7 +163,7 @@ def test_missing_key_is_actionable_and_does_not_change_scene(client):
     (RateLimitError("private credentials", response=httpx.Response(429, request=httpx.Request("POST", "https://private.invalid")), body={}), 429),
 ])
 def test_provider_errors_use_existing_sanitizer(client, monkeypatch, exception, status):
-    def fail(payload):
+    async def fail(payload, timeout):
         raise exception
     monkeypatch.setattr(analysis, "analyze_with_openai", fail)
     response = client.post("/api/analyze-teaching", json=scene_request())
@@ -174,12 +175,13 @@ def test_sdk_uses_strict_read_only_schema_minimal_facts_and_no_storage(monkeypat
     monkeypatch.setenv("OPENAI_API_KEY", "test-only")
     monkeypatch.setenv("OPENAI_ANALYSIS_MODEL", model)
     sdk = MagicMock()
+    sdk.responses.parse = AsyncMock()
     sdk.responses.parse.return_value = SimpleNamespace(output_parsed=analysis.SceneExplanation(**explanation()))
     factory = MagicMock()
-    factory.return_value.__enter__.return_value = sdk
-    monkeypatch.setattr(analysis, "OpenAI", factory)
+    factory.return_value.__aenter__.return_value = sdk
+    monkeypatch.setattr(analysis, "AsyncOpenAI", factory)
     payload = analysis.AnalysisRequest.model_validate(scene_request())
-    assert analysis.analyze_with_openai(payload).model_dump() == explanation()
+    assert asyncio.run(analysis.analyze_with_openai(payload, 20)).model_dump() == explanation()
     call = sdk.responses.parse.call_args.kwargs
     assert call["model"] == model and call["store"] is False
     assert call["text_format"] is analysis.SceneExplanation and call["max_output_tokens"] == 1800
@@ -200,9 +202,10 @@ def test_sdk_uses_strict_read_only_schema_minimal_facts_and_no_storage(monkeypat
 def test_empty_or_refused_provider_reply_fails_without_actions(client, monkeypatch):
     monkeypatch.setenv("OPENAI_API_KEY", "test-only")
     sdk = MagicMock()
+    sdk.responses.parse = AsyncMock()
     sdk.responses.parse.return_value = SimpleNamespace(output_parsed=None)
     factory = MagicMock()
-    factory.return_value.__enter__.return_value = sdk
-    monkeypatch.setattr(analysis, "OpenAI", factory)
+    factory.return_value.__aenter__.return_value = sdk
+    monkeypatch.setattr(analysis, "AsyncOpenAI", factory)
     response = client.post("/api/analyze-teaching", json=scene_request())
     assert response.status_code == 422 and "actions" not in response.json()

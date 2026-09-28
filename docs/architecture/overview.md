@@ -64,6 +64,8 @@ Optional text-only AI interpreter — the app fully works without it; local dete
 
 `scene-analysis.ts` projects configured support, anchorage, wire, elastic and expander facts for the read-only explanation route. `scene_analysis_appliances.py` validates the bounded server contract, with anonymous fixed-anchor aliases and no appliance names. Configured loads remain distinct from current/revealed calculated results. Frontend and backend versions must match this required contract (Phase 3.16).
 
+Both provider routes use async SDK clients under `ai_request.py`, which observes ASGI disconnect after body consumption, cancels and awaits pending work, and enforces one total deadline (21 seconds for interpretation including any repair, 20 for analysis). The phone bridge shares this lifecycle for its authenticated teaching POSTs with a 23-second budget. Local cancellation does not prove remote-provider computation or billing stops (Phase 3.17).
+
 ## Model assets
 
 - Runtime: `public/models/forma-teaching-v1.glb` (28 crowns + 28 roots + 2 gums, ~211k triangles, **units are millimetres**) + `.json` metadata sidecar (pivots, anatomical frames, calibration). Loaded by `lib/anatomy-assets.ts`; several vitest suites read these files directly.

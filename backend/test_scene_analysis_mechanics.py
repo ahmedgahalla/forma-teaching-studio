@@ -1,8 +1,9 @@
 """Configured mechanics facts remain complete, bounded and read-only."""
+import asyncio
 import copy
 import json
 from types import SimpleNamespace
-from unittest.mock import MagicMock
+from unittest.mock import AsyncMock, MagicMock
 
 import pytest
 
@@ -49,7 +50,7 @@ def test_complete_rig_reaches_provider_without_changing_the_scene(
     appliances["expanders"][0]["palateStiffnessNPerMm"] = palate
     original = copy.deepcopy(payload)
     received = []
-    monkeypatch.setattr(analysis, "analyze_with_openai", lambda p: received.append(p.model_dump(by_alias=True)) or explanation())
+    monkeypatch.setattr(analysis, "analyze_with_openai", AsyncMock(side_effect=lambda p, timeout: received.append(p.model_dump(by_alias=True)) or explanation()))
     response = client.post("/api/analyze-teaching", json=payload)
     assert response.status_code == 200
     assert received == [original] and payload == original
@@ -75,7 +76,7 @@ def test_otherwise_identical_rigs_send_distinct_configuration_facts(client, monk
     second = copy.deepcopy(first)
     replace(second, path, value)
     received = []
-    monkeypatch.setattr(analysis, "analyze_with_openai", lambda p: received.append(p.model_dump(by_alias=True)) or explanation())
+    monkeypatch.setattr(analysis, "analyze_with_openai", AsyncMock(side_effect=lambda p, timeout: received.append(p.model_dump(by_alias=True)) or explanation()))
     for payload in (first, second):
         assert client.post("/api/analyze-teaching", json=payload).status_code == 200
     assert received == [first, second] and received[0] != received[1]
@@ -87,7 +88,7 @@ def test_absent_experiment_is_explicit_and_does_not_invent_support(client, monke
     payload = scene_request()
     payload["context"]["appliances"].update(support=None, bracketTeeth=[], wires=[])
     received = []
-    monkeypatch.setattr(analysis, "analyze_with_openai", lambda p: received.append(p.model_dump(by_alias=True)) or explanation())
+    monkeypatch.setattr(analysis, "analyze_with_openai", AsyncMock(side_effect=lambda p, timeout: received.append(p.model_dump(by_alias=True)) or explanation()))
     assert client.post("/api/analyze-teaching", json=payload).status_code == 200
     assert received == [payload]
     payload["context"]["result"] = {
@@ -101,7 +102,7 @@ def test_absent_experiment_is_explicit_and_does_not_invent_support(client, monke
 def test_old_or_incomplete_configuration_is_rejected_instead_of_defaulted(client, monkeypatch, field):
     payload = mechanics_request()
     del payload["context"]["appliances"][field]
-    provider = MagicMock()
+    provider = AsyncMock()
     monkeypatch.setattr(analysis, "analyze_with_openai", provider)
     assert client.post("/api/analyze-teaching", json=payload).status_code == 422
     provider.assert_not_called()
@@ -164,7 +165,7 @@ def test_old_or_incomplete_configuration_is_rejected_instead_of_defaulted(client
 def test_invalid_mechanics_never_reaches_provider_or_echoes_private_values(client, monkeypatch, path, value):
     payload = mechanics_request()
     replace(payload, path, value)
-    provider = MagicMock()
+    provider = AsyncMock()
     monkeypatch.setattr(analysis, "analyze_with_openai", provider)
     response = client.post("/api/analyze-teaching", json=payload)
     assert response.status_code == 422
@@ -183,7 +184,7 @@ def test_invalid_mechanics_never_reaches_provider_or_echoes_private_values(clien
 def test_all_new_numerical_facts_reject_nonfinite_values(client, monkeypatch, path, value):
     payload = mechanics_request()
     replace(payload, path, value)
-    provider = MagicMock()
+    provider = AsyncMock()
     monkeypatch.setattr(analysis, "analyze_with_openai", provider)
     response = client.post("/api/analyze-teaching", content=json.dumps(payload), headers={"Content-Type": "application/json"})
     assert response.status_code == 422
@@ -197,14 +198,14 @@ def test_appliance_lists_respect_existing_object_limits(client, monkeypatch, fie
     size = {"tads": 9, "elastics": 13, "expanders": 2}[field]
     appliances[field] = [copy.deepcopy(appliances[field][0]) for _ in range(size)]
     appliances[count] = size
-    provider = MagicMock()
+    provider = AsyncMock()
     monkeypatch.setattr(analysis, "analyze_with_openai", provider)
     assert client.post("/api/analyze-teaching", json=payload).status_code == 422
     provider.assert_not_called()
 
 
 def test_duplicate_tad_ids_and_same_tad_endpoints_are_rejected(client, monkeypatch):
-    provider = MagicMock()
+    provider = AsyncMock()
     monkeypatch.setattr(analysis, "analyze_with_openai", provider)
     payload = mechanics_request()
     appliances = payload["context"]["appliances"]
@@ -219,7 +220,7 @@ def test_duplicate_tad_ids_and_same_tad_endpoints_are_rejected(client, monkeypat
 
 
 def test_expander_cannot_reference_present_lower_teeth(client, monkeypatch):
-    provider = MagicMock()
+    provider = AsyncMock()
     monkeypatch.setattr(analysis, "analyze_with_openai", provider)
     payload = mechanics_request()
     payload["context"]["teeth"].append({"id": "31", "translationMm": [0, 0, 0], "rotationDeg": [0, 0, 0], "locked": False})
@@ -231,13 +232,14 @@ def test_expander_cannot_reference_present_lower_teeth(client, monkeypatch):
 def test_sdk_receives_anonymous_connections_exact_inputs_and_no_inferred_response(monkeypatch):
     monkeypatch.setenv("OPENAI_API_KEY", "test-only")
     sdk = MagicMock()
+    sdk.responses.parse = AsyncMock()
     sdk.responses.parse.return_value = SimpleNamespace(output_parsed=analysis.SceneExplanation(**explanation()))
     factory = MagicMock()
-    factory.return_value.__enter__.return_value = sdk
-    monkeypatch.setattr(analysis, "OpenAI", factory)
+    factory.return_value.__aenter__.return_value = sdk
+    monkeypatch.setattr(analysis, "AsyncOpenAI", factory)
     original = mechanics_request()
     payload = analysis.AnalysisRequest.model_validate(original)
-    assert analysis.analyze_with_openai(payload).model_dump() == explanation()
+    assert asyncio.run(analysis.analyze_with_openai(payload, 20)).model_dump() == explanation()
     call = sdk.responses.parse.call_args.kwargs
     sent = json.loads(call["input"][1]["content"])
     assert sent == original

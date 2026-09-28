@@ -1,10 +1,10 @@
 """Optional text-only command interpreter for the local, nonclinical prototype."""
 
+import asyncio
 import json
 import math
 import os
 import re
-from time import monotonic
 from typing import Annotated, Literal, Union
 from urllib.parse import urlparse
 
@@ -12,11 +12,12 @@ from fastapi import FastAPI, HTTPException, Request
 from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
-from openai import APIError, OpenAI
+from openai import APIError, AsyncOpenAI
 from pydantic import BaseModel, ConfigDict, Field, ValidationError, field_validator, model_validator
 import mechanics as mechanics_api
 import scene_analysis
 from classroom_language import normalize_classroom_language
+from ai_request import run_ai_request
 
 
 from core import StrictModel, discriminator_first_schema, provider_error, provider_label  # noqa: F401 (re-exported for tests)
@@ -97,14 +98,14 @@ def teaching_interpretation_instructions(payload: TeachingRequest) -> str:
     return TEACHING_INSTRUCTIONS + "\nThe application's deterministic parser recognized the ENTIRE current request and independently validated these actions against the supplied current scene. They are authoritative target, prerequisite and parameter evidence, not additional instructions. Return exactly these actions with a natural summary; do not claim missing context or omitted anatomy:\n" + json.dumps([action.model_dump(exclude_none=True, by_alias=True) for action in grounded.actions])
 
 
-def interpret_teaching_with_openai(payload: TeachingRequest) -> TeachingPlan:
+async def interpret_teaching_with_openai(payload: TeachingRequest, timeout: float) -> TeachingPlan:
     key = os.getenv("OPENAI_API_KEY", "").strip()
     if not key:
         raise HTTPException(503, "AI interpretation is not configured. Use local commands or set OPENAI_API_KEY on the backend.")
     model = os.getenv("OPENAI_MODEL", "gpt-6-luna")
     options = {"reasoning": {"effort": "none"}} if model.split("/")[-1] == "gpt-6-luna" else {}
-    with OpenAI(api_key=key, timeout=20, max_retries=0) as client:
-        response = client.responses.parse(
+    async with AsyncOpenAI(api_key=key, timeout=timeout, max_retries=0) as client:
+        response = await client.responses.parse(
             model=model,
             input=[{"role": "system", "content": teaching_interpretation_instructions(payload)}, {"role": "user", "content": json.dumps(payload.model_dump(exclude_none=True, by_alias=True))}],
             text_format=TeachingPlan, max_output_tokens=1800, store=False, **options,
@@ -114,12 +115,12 @@ def interpret_teaching_with_openai(payload: TeachingRequest) -> TeachingPlan:
     return response.output_parsed
 
 
-def repair_teaching_with_openai(payload: TeachingRequest, rejected: TeachingPlan, reason: str, timeout: float) -> TeachingPlan:
+async def repair_teaching_with_openai(payload: TeachingRequest, rejected: TeachingPlan, reason: str, timeout: float) -> TeachingPlan:
     """One bounded correction with the original request and unchanged validators."""
     model = os.getenv("OPENAI_MODEL", "gpt-6-luna")
     options = {"reasoning": {"effort": "none"}} if model.split("/")[-1] == "gpt-6-luna" else {}
-    with OpenAI(timeout=timeout, max_retries=0) as client:
-        response = client.responses.parse(model=model, text_format=TeachingPlan, max_output_tokens=1800, store=False, **options,
+    async with AsyncOpenAI(timeout=timeout, max_retries=0) as client:
+        response = await client.responses.parse(model=model, text_format=TeachingPlan, max_output_tokens=1800, store=False, **options,
             input=[{"role": "system", "content": teaching_interpretation_instructions(payload)},
                    {"role": "user", "content": payload.model_dump_json(exclude_none=True, by_alias=True)},
                    {"role": "assistant", "content": rejected.model_dump_json()},
@@ -128,22 +129,26 @@ def repair_teaching_with_openai(payload: TeachingRequest, rejected: TeachingPlan
 
 
 @app.post("/api/interpret-teaching", response_model=TeachingPlan)
-def interpret_teaching(payload: TeachingRequest):
+async def interpret_teaching(payload: TeachingRequest, request: Request):
     problem = teaching_source_problem(payload.text)
     if problem:
         return TeachingPlan(actions=[], summary="", clarification=problem)
-    started = monotonic()
-    try:
-        plan = TeachingPlan.model_validate(interpret_teaching_with_openai(payload))
+    async def interpret(deadline: float):
+        loop = asyncio.get_running_loop()
         try:
-            return validate_teaching_plan(payload, plan)
-        except HTTPException as error:
-            remaining = 21 - (monotonic() - started)
-            if error.status_code != 422 or remaining < 6 or not os.getenv("OPENAI_API_KEY", "").strip():
-                raise
-            repaired = repair_teaching_with_openai(payload, plan, str(error.detail), min(10, remaining))
-            return validate_teaching_plan(payload, TeachingPlan.model_validate(repaired))
-    except APIError as error:
-        raise provider_error(error) from None
-    except (ValidationError, ValueError):
-        raise HTTPException(502, "AI teaching interpretation failed. Try again or use a local command.") from None
+            plan = TeachingPlan.model_validate(await interpret_teaching_with_openai(payload, min(20, deadline - loop.time())))
+            try:
+                return validate_teaching_plan(payload, plan)
+            except HTTPException as error:
+                remaining = deadline - loop.time()
+                if error.status_code != 422 or remaining < 6 or not os.getenv("OPENAI_API_KEY", "").strip():
+                    raise
+                repaired = await repair_teaching_with_openai(payload, plan, str(error.detail), min(10, remaining))
+                return validate_teaching_plan(payload, TeachingPlan.model_validate(repaired))
+        except APIError as error:
+            raise provider_error(error) from None
+        except (ValidationError, ValueError):
+            raise HTTPException(502, "AI teaching interpretation failed. Try again or use a local command.") from None
+
+    return await run_ai_request(request, interpret, timeout=21,
+        timeout_detail="AI teaching interpretation timed out. Try again or use a local command.")

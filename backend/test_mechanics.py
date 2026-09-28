@@ -1,6 +1,6 @@
 """Independent source/parameter auditing for conversational appliance intents."""
 import copy
-from unittest.mock import MagicMock
+from unittest.mock import AsyncMock
 import pytest
 from fastapi.testclient import TestClient
 import main
@@ -33,7 +33,7 @@ def client():
 
 
 def post(client, monkeypatch, source, result, scene=None):
-    provider = MagicMock(return_value=result)
+    provider = AsyncMock(return_value=result)
     monkeypatch.setattr(main, "interpret_teaching_with_openai", provider)
     response = client.post("/api/interpret-teaching", json={"text": source, "context": scene or context()})
     return response, provider

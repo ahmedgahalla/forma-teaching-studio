@@ -1,10 +1,12 @@
 # Phase 3 — demo path
 
-**Status:** mechanics-aware explanations implemented; automated checks passed; lecture browser acceptance pending · **Current branch:** `ahmed/phase-3-analysis-mechanics` · **Current PR:** [#16 (draft)](https://github.com/ahmedgahalla/forma-teaching-studio/pull/16) (stacked on [#15](https://github.com/ahmedgahalla/forma-teaching-studio/pull/15))
+**Status:** AI cancellation implemented; automated checks passed; lecture browser acceptance pending · **Current branch:** `ahmed/phase-3-ai-cancellation` · **Current PR:** [#17 (draft)](https://github.com/ahmedgahalla/forma-teaching-studio/pull/17) (stacked on [#16](https://github.com/ahmedgahalla/forma-teaching-studio/pull/16))
 
 **Goal:** a professor can explore the central model freely or open a finished lecture with notes, questions and model demonstrations, then return from a spontaneous experiment without losing the lecture. Builds on [product direction](../../PRODUCT_DIRECTION.md).
 
 ## Current implementation
+
+- [3.17 — Cancel obsolete AI requests](3.17-ai-cancellation.md): async provider operations, shared deadlines and disconnect cleanup for commands, explanations and the authenticated phone bridge.
 
 - [3.16 — Mechanics-aware scene explanations](3.16-analysis-mechanics.md): Analyze receives actual support, anchorage, elastic and expander inputs with strict validation and anonymous appliance references. Hidden results and read-only replies remain protected.
 
