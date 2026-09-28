@@ -23,9 +23,16 @@
   background: var(--ui-panel);
   box-shadow: 0 1px 4px #00000012;
 }
-.app-shell[data-teacher-screen] > .lecture-navigation {
+.teacher-presentation-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
   margin: 8px 18px 0;
   flex-shrink: 0;
+}
+.teacher-presentation-toolbar > .lecture-navigation {
+  flex: 1;
 }
 .teacher-step-heading {
   padding: 6px 0 12px;
@@ -50,7 +57,11 @@
   width: min(320px, 23vw);
   flex-basis: min(320px, 23vw);
 }
-.app-shell[data-teacher-screen='lecture'][data-teacher-mode='teach'] .teacher-step-heading h1 {
+[data-lecture-presentation='true'] .viewport-selection,
+[data-lecture-presentation='true'] .orientation,
+[data-lecture-presentation='true'] .viewport-hint,
+[data-lecture-presentation='true'] .stage-preview-badge,
+[data-lecture-presentation='true'] .roots-badge {
   display: none;
 }
 .teacher-error {
@@ -102,7 +113,7 @@
   .teacher-experience-switch button {
     flex: 1;
   }
-  .app-shell[data-teacher-screen] > .lecture-navigation {
+  .teacher-presentation-toolbar {
     margin: 6px 10px 0;
   }
 }

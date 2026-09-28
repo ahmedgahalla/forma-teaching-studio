@@ -1,4 +1,5 @@
 'use client';
+import { applyCaseAction } from './case/apply-case-action';
 /* eslint-disable react-hooks/refs -- CaseStudio wires handler factories with a
    ref container (CaseRefs); the factories only build event-time closures and no
    ref is read during render, but the rule's taint analysis marks the whole api
@@ -839,10 +840,7 @@ function CaseStudio({ active }: { active: boolean }) {
       sourceLesson: from =>
         from ? (from as ClassroomSnapshot).workflowOrigin?.snapshot : workflowOrigin?.snapshot,
       settle: signal => viewer.current?.whenRendered(signal) ?? Promise.resolve(),
-      apply: (action, signal) =>
-        action.kind === 'mechanics'
-          ? api.applyMechanics(action.action, signal)
-          : api.applyTeaching(action),
+      apply: (action, signal) => applyCaseAction(api, action, signal),
       preflight: casePreflight,
       pause: () => {
         setPlaying(false);

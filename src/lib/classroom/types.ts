@@ -87,6 +87,7 @@ export const LOCAL_ONLY_KINDS: readonly TeachingAction['kind'][] = [
   'glossary',
   'lesson',
   'presentation',
+  'mechanics-example',
 ];
 
 export function record(value: unknown): Record<string, unknown> {

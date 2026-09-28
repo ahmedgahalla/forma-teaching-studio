@@ -48,6 +48,14 @@ import { createToothStudyPresentation } from './tooth-study-presentation';
 import { createCameraMotion } from './camera-motion';
 import { createViewerResize } from './viewer-resize';
 import { TOOTH_STUDY_CAMERA_MARGIN } from '@/lib/tooth-study/camera';
+import { createToothPoseUpdater } from './tooth-pose';
+import {
+  createSelectionFramingKey,
+  createTeachingFocusMaterials,
+  isTeachingSelected,
+  teachingFocusActive,
+  TEACHING_FOCUS_MARGIN,
+} from './teaching-focus';
 
 export type { ViewName, ArchView, ViewerCamera, ViewerHandle } from './viewer-types';
 import type { ViewName, ViewerCamera, ViewerHandle, ViewerProps as Props } from './viewer-types';
@@ -196,6 +204,12 @@ const Viewer = forwardRef<ViewerHandle, Props>(function Viewer(props, ref) {
       gumMaterial,
       attachmentMaterial,
     } = createDentalMaterials(!!props.model.demo, renderedTheme);
+    const focusMaterials = createTeachingFocusMaterials([
+      enamel,
+      rootMaterial,
+      lockedMaterial,
+      contactMaterial,
+    ]);
     const kit = createApplianceKit();
     const workflowKit = createWorkflowAppliances(props.model);
     scene.add(workflowKit.group);
@@ -393,6 +407,7 @@ const Viewer = forwardRef<ViewerHandle, Props>(function Viewer(props, ref) {
       contourMaterial.uniforms.color.value.set(next.selected);
       lockedMaterial.color.set(next.locked);
       contactMaterial.color.set(next.contact);
+      focusMaterials.sync();
       ghostMaterial.color.set(next.ghost);
       ghostMaterial.opacity = next.ghostOpacity;
       markerMaterial.color.set(next.marker);
@@ -447,8 +462,9 @@ const Viewer = forwardRef<ViewerHandle, Props>(function Viewer(props, ref) {
       anatomyCutawayTooth(props.model, live.current.anatomy, live.current.selected);
     const selection = () =>
       live.current.selectedIds.length ? live.current.selectedIds : [live.current.selected];
-    const isolationKey = () =>
-      live.current.isolateSelection ? [...selection()].sort().join(',') : 'all';
+    const selectionKey = createSelectionFramingKey();
+    const isolationKey = () => selectionKey(live.current);
+    const focusSelection = () => teachingFocusActive(live.current, !!cutawayTooth());
     const visible = (id: string) =>
       isToothVisible(id, {
         arch: live.current.arch,
@@ -533,7 +549,8 @@ const Viewer = forwardRef<ViewerHandle, Props>(function Viewer(props, ref) {
     };
     const fit = (view: ViewName, section = false, instant = false) => {
       currentView = view;
-      const bounds = visibleBounds();
+      const focused = focusSelection(),
+        bounds = visibleBounds(focused);
       if (bounds.isEmpty()) return;
       const tooth = cutawayTooth();
       const direction =
@@ -543,9 +560,10 @@ const Viewer = forwardRef<ViewerHandle, Props>(function Viewer(props, ref) {
       positionCamera(
         bounds,
         direction,
-        tooth ? 1.48 : LECTURE_CAMERA_MARGIN,
+        tooth ? 1.48 : focused ? TEACHING_FOCUS_MARGIN : LECTURE_CAMERA_MARGIN,
         new THREE.Vector3(0, 1, 0),
         instant,
+        focused,
       );
     };
     commands.current = {
@@ -580,7 +598,8 @@ const Viewer = forwardRef<ViewerHandle, Props>(function Viewer(props, ref) {
       contourMaterial.uniforms.viewport.value,
       cameraMotion.finish,
       (direction, aspect) => {
-        const bounds = visibleBounds(),
+        const focused = focusSelection(),
+          bounds = visibleBounds(focused),
           study = live.current.toothStudy;
         return bounds.isEmpty()
           ? null
@@ -590,8 +609,12 @@ const Viewer = forwardRef<ViewerHandle, Props>(function Viewer(props, ref) {
               camera.up,
               camera.fov,
               aspect,
-              study ? TOOTH_STUDY_CAMERA_MARGIN : LECTURE_CAMERA_MARGIN,
-              study ? undefined : visiblePoints(),
+              study
+                ? TOOTH_STUDY_CAMERA_MARGIN
+                : focused
+                  ? TEACHING_FOCUS_MARGIN
+                  : LECTURE_CAMERA_MARGIN,
+              study ? undefined : visiblePoints(focused),
             );
       },
     );
@@ -733,6 +756,7 @@ const Viewer = forwardRef<ViewerHandle, Props>(function Viewer(props, ref) {
         ? `${live.current.anatomy?.bone}/${live.current.anatomy?.ligament}/${cutawayTooth()?.id || ''}`
         : '';
     let lastIsolation = isolationKey();
+    const updateToothPose = createToothPoseUpdater(groups, ghosts, rootGhosts, roots);
     function render() {
       if (live.current.paused) {
         frame = requestAnimationFrame(render);
@@ -755,6 +779,7 @@ const Viewer = forwardRef<ViewerHandle, Props>(function Viewer(props, ref) {
       } = p;
       const cutaway = cutawayTooth(),
         nextAnatomyState = `${p.anatomy?.bone}/${p.anatomy?.opacity}/${p.anatomy?.cutaway}/${p.anatomy?.ligament}/${p.selected}/${p.arch}/${opening}/${showRoots}/${gums}/${!!p.isolateSelection}`;
+      const focused = teachingFocusActive(p, !!cutaway);
       if (lastAnatomyTransforms !== transforms || anatomyState !== nextAnatomyState) {
         try {
           anatomyKit.update(transforms, shownAnatomy(), {
@@ -781,29 +806,24 @@ const Viewer = forwardRef<ViewerHandle, Props>(function Viewer(props, ref) {
       kit.update(p.bracketStyle, p.ligatureColor);
       for (const tooth of props.model.teeth) {
         const group = groups.get(tooth.id)!,
-          pose = transforms[tooth.id],
-          isLower = toothArch(tooth.id) === 'lower';
-        group.position.fromArray(tooth.position);
-        group.quaternion.identity();
-        if (isLower) group.position.y -= opening;
-        if (pose) {
-          group.position.add(new THREE.Vector3(...pose.translation));
-          group.quaternion.setFromEuler(
-            new THREE.Euler(...(pose.rotation.map(THREE.MathUtils.degToRad) as Vec3)),
-          );
-        }
+          faded = focused && !isTeachingSelected(p, tooth.id);
         group.visible = visible(tooth.id);
-        group.updateMatrixWorld(true);
-        crowns.get(tooth.id)!.material = p.intersections.includes(tooth.id)
-          ? contactMaterial
-          : p.lockedIds?.includes(tooth.id)
-            ? lockedMaterial
-            : enamel;
+        updateToothPose(tooth, p);
+        focusMaterials.apply(
+          crowns.get(tooth.id)!,
+          p.intersections.includes(tooth.id)
+            ? contactMaterial
+            : p.lockedIds?.includes(tooth.id)
+              ? lockedMaterial
+              : enamel,
+          faded,
+        );
         const contour = contours.get(tooth.id)!,
           highlighted = selectedIds.includes(tooth.id) || (!!cutaway && tooth.id === p.selected);
         contour.crown.visible = highlighted;
         if (contour.root) contour.root.visible = highlighted && showRoots;
-        if (roots.has(tooth.id)) roots.get(tooth.id)!.visible = showRoots;
+        const root = roots.get(tooth.id);
+        if (root) focusMaterials.apply(root, rootMaterial, faded);
         if (brackets.has(tooth.id)) {
           const bracket = brackets.get(tooth.id)!;
           bracket.visible = p.mechanics
@@ -819,28 +839,6 @@ const Viewer = forwardRef<ViewerHandle, Props>(function Viewer(props, ref) {
             );
         }
         if (attachments.has(tooth.id)) attachments.get(tooth.id)!.visible = p.attachments;
-        const original = ghosts.get(tooth.id)!,
-          reference = p.ghostTransforms?.[tooth.id];
-        original.position.fromArray(tooth.position);
-        original.quaternion.identity();
-        if (isLower) original.position.y -= opening;
-        if (reference) {
-          original.position.add(new THREE.Vector3(...reference.translation));
-          original.quaternion.setFromEuler(
-            new THREE.Euler(...(reference.rotation.map(THREE.MathUtils.degToRad) as Vec3)),
-          );
-        }
-        original.visible =
-          group.visible &&
-          ghost &&
-          (original.position.distanceToSquared(group.position) > 1e-8 ||
-            original.quaternion.angleTo(group.quaternion) > 1e-5);
-        const originalRoot = rootGhosts.get(tooth.id);
-        if (originalRoot) {
-          originalRoot.position.copy(original.position);
-          originalRoot.quaternion.copy(original.quaternion);
-          originalRoot.visible = original.visible && showRoots;
-        }
         const label = labels.get(tooth.id)!;
         label.textContent = `${tooth.id}${p.lockedIds?.includes(tooth.id) ? ' · locked' : ''}`;
         label.style.display = 'none';
@@ -1139,6 +1137,7 @@ const Viewer = forwardRef<ViewerHandle, Props>(function Viewer(props, ref) {
       // Screen-space occlusion is confined to opaque views: cutaway clipping and
       // transparent roots/overlays must never cast fictitious screen-space shadows.
       ao.enabled =
+        !focused &&
         !showRoots &&
         !ghost &&
         !cutaway &&
@@ -1202,6 +1201,7 @@ const Viewer = forwardRef<ViewerHandle, Props>(function Viewer(props, ref) {
       workflowKit.dispose();
       removableKit.dispose();
       kit.dispose();
+      focusMaterials.dispose();
       environment.dispose();
       backdrop.dispose();
       ao.dispose();

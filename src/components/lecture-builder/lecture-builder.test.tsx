@@ -46,6 +46,14 @@ function panelProps(patch: Partial<LecturePanelProps> = {}): LecturePanelProps {
     notesVisible: false,
     onReveal: vi.fn(),
     onNotes: vi.fn(),
+    focus: false,
+    onFocus: vi.fn(),
+    comparison: null,
+    onCompare: vi.fn(),
+    onCloseComparison: vi.fn(),
+    biology: 'off',
+    onBiology: vi.fn(),
+    onHideBiology: vi.fn(),
     ...patch,
   };
 }
@@ -79,13 +87,12 @@ afterEach(async () => {
 it('shows the ready-made lecture without creation or editing controls in either view', async () => {
   for (const mode of ['rehearse', 'teach'] as const) {
     await render(<LecturePanel {...panelProps({ mode })} />);
-    expect(container.textContent).toContain('READY TO TEACH');
-    expect(container.querySelector('h2')?.textContent).toBe('Observe');
+    expect(container.querySelector('h2')).toBeNull();
+    expect(container.textContent).not.toMatch(/STEP 1/);
     expect(container.querySelector('input, textarea, select, [contenteditable]')).toBeNull();
-    expect([...container.querySelectorAll('button')].map(item => item.textContent)).toEqual([
-      'Reveal answer',
-      'Show notes',
-    ]);
+    expect(button('Reveal answer')).toBeDefined();
+    expect(button('Show notes')).toBeDefined();
+    expect(container.querySelector('details')?.open).toBe(false);
     expect(container.textContent).not.toMatch(
       /Create lecture|Add step|Capture|Export|Import|Delete/,
     );
@@ -119,7 +126,7 @@ it('renders the current rehearsal notes read-only and hides absent optional cont
   await render(
     <LecturePanel {...panelProps({ mode: 'rehearse', index: 1, notesVisible: true })} />,
   );
-  expect(container.querySelector('h2')?.textContent).toBe('Predict');
+  expect(container.querySelector('.lecture-question')?.textContent).toBe('Question for Predict');
   expect(container.textContent).toContain('Notes for Predict');
   expect(container.textContent).not.toContain('Notes for Observe');
   expect(container.querySelector('textarea')).toBeNull();
@@ -128,7 +135,7 @@ it('renders the current rehearsal notes read-only and hides absent optional cont
     steps: [{ ...lecture.steps[0], question: '', answer: '', notes: '' }],
   };
   await render(<LecturePanel {...panelProps({ document: empty })} />);
-  expect(container.querySelectorAll('button')).toHaveLength(0);
+  expect(container.querySelector('.lecture-question, .lecture-answer, .lecture-notes')).toBeNull();
 });
 
 it('provides only Rehearse and Teach with bounded step navigation and separate playback', async () => {
@@ -174,4 +181,45 @@ it('renders one context panel when a lecture is active and no library overlay', 
   expect(container.querySelector('.teacher-library-screen')).toBeNull();
   await render(<TeacherWorkspace teacher={{ ...teacher, panelProps: null }} />);
   expect(container.innerHTML).toBe('');
+});
+
+it('only labels notes as private when the separate audience window is open', async () => {
+  const teacher = { panelProps: panelProps({ notesVisible: true }) } as unknown as TeacherLectures;
+  await render(<TeacherWorkspace teacher={teacher} audienceOpen />);
+  expect(container.querySelector('.lecture-notes')?.textContent).toContain(
+    'NOT IN AUDIENCE WINDOW',
+  );
+  await render(<TeacherWorkspace teacher={teacher} audienceOpen={false} />);
+  expect(container.querySelector('.lecture-notes')?.textContent).toContain(
+    'VISIBLE ON THIS SCREEN',
+  );
+  expect(container.textContent).not.toContain('NOT IN AUDIENCE WINDOW');
+});
+
+it('uses bounded focus, comparison and tissue-response controls without another playback bar', async () => {
+  const props = panelProps();
+  await render(<LecturePanel {...props} />);
+  await click('Focus teaching teeth');
+  expect(props.onFocus).toHaveBeenCalledOnce();
+  const disclosure = container.querySelector('details')!;
+  await act(async () => disclosure.querySelector('summary')!.click());
+  expect(disclosure.open).toBe(true);
+  await click('Starting arrangement');
+  await click('Translation example');
+  await click('Tipping example');
+  expect(props.onCompare).toHaveBeenNthCalledWith(1, 'start');
+  expect(props.onCompare).toHaveBeenNthCalledWith(2, 'translation');
+  expect(props.onCompare).toHaveBeenNthCalledWith(3, 'tip');
+  await click('Explain tissue response');
+  expect(props.onBiology).toHaveBeenCalledExactlyOnceWith('overview');
+  await render(<LecturePanel {...props} focus comparison="tip" biology="compression" />);
+  expect(button('Show surrounding teeth').getAttribute('aria-pressed')).toBe('true');
+  expect(button('Tipping example').getAttribute('aria-pressed')).toBe('true');
+  await click('Close comparison');
+  await click('Tension');
+  await click('Close biology');
+  expect(props.onCloseComparison).toHaveBeenCalledOnce();
+  expect(props.onBiology).toHaveBeenLastCalledWith('tension');
+  expect(props.onHideBiology).toHaveBeenCalledOnce();
+  expect(container.textContent).not.toMatch(/Play|Pause|Replay/);
 });

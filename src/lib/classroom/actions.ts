@@ -6,8 +6,10 @@ import type { DentalArrangementId } from '../dental-arrangements';
 import type { LessonAction } from './lesson-controls';
 import type { ToothStudyAction } from '../tooth-study/types';
 import type { PresentationAction } from './presentation';
+import type { MechanicsExampleAction } from '../mechanics-examples/catalog';
 
 export type TeachingAction =
+  | MechanicsExampleAction
   | PresentationAction
   | ToothStudyAction
   | LessonAction

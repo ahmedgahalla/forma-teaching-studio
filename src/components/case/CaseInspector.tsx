@@ -9,6 +9,7 @@ import { InspectorMove } from './InspectorMove';
 import { InspectorBraces } from './InspectorBraces';
 import { InspectorAnalysis } from './InspectorAnalysis';
 import { InspectorHistory } from './InspectorHistory';
+import { MechanicsExamples } from '../mechanics/MechanicsExamples';
 
 export function CaseInspector({ api }: { api: CaseStudioApi }) {
   return (
@@ -78,6 +79,21 @@ export function CaseInspector({ api }: { api: CaseStudioApi }) {
         </div>
 
         <InspectorScenario api={api} />
+        {api.activeExperiment &&
+          !api.lecture &&
+          !api.prepared &&
+          !api.toothStudy &&
+          !api.lessonId && (
+            <MechanicsExamples
+              selected={api.selected}
+              availableIds={api.ids}
+              disabled={api.teaching.runtime.phase !== 'idle'}
+              pending={!!api.sandbox.pending || !!api.dragPreview}
+              onLoad={action =>
+                void api.teaching.execute([action], 'Load and calculate mechanics example')
+              }
+            />
+          )}
         {api.panel === 'move' && api.tryActive && (
           <>
             {!api.calibrated && (

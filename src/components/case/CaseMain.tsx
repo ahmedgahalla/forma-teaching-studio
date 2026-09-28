@@ -1,4 +1,5 @@
 'use client';
+import type { RefObject } from 'react';
 import type { CaseStudioApi } from './api';
 import { OpeningCommandDock } from './OpeningCommandDock';
 import { TeachingCommandBar } from '../teaching/TeachingController';
@@ -9,8 +10,17 @@ import { CaseViewport } from './CaseViewport';
 import { CaseLectureOverlay } from './CaseLectureOverlay';
 import { CaseStageDock } from './CaseStageDock';
 import type { TeacherLectures } from '../lecture-builder/useTeacherLectures';
+import { lectureStepTitle } from '../lecture-builder/comparison-labels';
 
-export function CaseMain({ api, teacher }: { api: CaseStudioApi; teacher?: TeacherLectures }) {
+export function CaseMain({
+  api,
+  teacher,
+  audienceSource,
+}: {
+  api: CaseStudioApi;
+  teacher?: TeacherLectures;
+  audienceSource?: RefObject<HTMLElement | null>;
+}) {
   const customStep = teacher?.document && !teacher.session.exploring;
   return (
     <>
@@ -19,7 +29,12 @@ export function CaseMain({ api, teacher }: { api: CaseStudioApi; teacher?: Teach
           {customStep ? (
             <div className="teacher-step-heading">
               <span>{teacher.document!.title}</span>
-              <h1>{teacher.document!.steps[teacher.session.index].title}</h1>
+              <h1>
+                {lectureStepTitle(
+                  teacher.document!.steps[teacher.session.index].title,
+                  teacher.session.comparison,
+                )}
+              </h1>
             </div>
           ) : (
             <CaseWorkspaceHeading api={api} />
@@ -28,7 +43,12 @@ export function CaseMain({ api, teacher }: { api: CaseStudioApi; teacher?: Teach
           <div
             className={`lecture-stage${api.toothStudy ? ' tooth-study-workspace' : ''}${api.glossaryId ? ' definition-workspace' : ''}`}
           >
-            <CaseViewport api={api} />
+            <CaseViewport
+              api={api}
+              audienceSource={audienceSource}
+              lecturePresentation={!!customStep}
+              teachingFocus={!!customStep && teacher!.session.focus}
+            />
             {!customStep && <CaseLectureOverlay api={api} />}
           </div>
           {(!customStep || api.prepared || api.demonstration || api.sandbox.pending) && (

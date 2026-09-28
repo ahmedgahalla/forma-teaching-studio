@@ -11,3 +11,5 @@ Numbered work phases, in execution order. Every feature — including builder wo
 Historical pre-phase work is recorded in `docs/VERIFICATION.md` (v0.2 → v0.12) and `docs/UPGRADE_PLAN.md`.
 
 Phase [4 — voice-led lecture assistant](phase-4-voice-lecture-assistant/README.md) begins with 4.1 hands-free control on top of the Phase 3.2 PR #13 dependency. Tooth study (4.2) is separately owned in parallel; visual clarity (4.3) is planned.
+
+The later Phase 3 follow-up [3.15 — Lecture presentation and mechanics](phase-3-demo-path/3.15-lecture-mechanics.md) builds on the ready-made lecture in PR #14 with selected-tooth focus, comparison, audience projection, tissue explanations and eight mechanics categories. Implementation and verification are recorded per branch; this index does not claim the dependency stack has merged.

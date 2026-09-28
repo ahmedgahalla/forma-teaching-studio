@@ -4,6 +4,7 @@ import { createRoot, type Root } from 'react-dom/client';
 import { afterEach, beforeEach, expect, it, vi } from 'vitest';
 import type { CaseStudioApi } from './api';
 import type { TeacherLectures } from '../lecture-builder/useTeacherLectures';
+import type { LectureComparison } from '@/lib/classroom/presentation';
 import { CaseShell } from './CaseShell';
 
 const calls = vi.hoisted(() => ({
@@ -14,6 +15,10 @@ const calls = vi.hoisted(() => ({
   save: vi.fn(),
   importCase: vi.fn(),
   modal: vi.fn(),
+  scene: vi.fn(),
+  audience: vi.fn(),
+  audienceOpen: vi.fn(),
+  audienceClose: vi.fn(),
 }));
 vi.mock('./CaseMain', async () => {
   const { useEffect } = await import('react');
@@ -40,6 +45,19 @@ vi.mock('../lecture-builder/LecturePanel', () => ({
 vi.mock('../lecture-builder/LectureNavigation', () => ({
   LectureNavigation: () => <nav aria-label="Lecture controls" />,
 }));
+vi.mock('../lecture-audience/useAudienceWindow', () => ({
+  useAudienceWindow: (options: unknown) => {
+    calls.audience(options);
+    return {
+      status: 'closed',
+      error: '',
+      isOpen: false,
+      open: calls.audienceOpen,
+      close: calls.audienceClose,
+      portal: <div data-testid="public-projection">Public model projection</div>,
+    };
+  },
+}));
 
 type Screen = 'explore' | 'lecture';
 function Harness({
@@ -48,12 +66,14 @@ function Harness({
   busy = false,
   error = '',
   exploring = false,
+  comparison = null,
 }: {
   initialScreen?: Screen;
   mode?: 'rehearse' | 'teach';
   busy?: boolean;
   error?: string;
   exploring?: boolean;
+  comparison?: LectureComparison | null;
 }) {
   const [screen, setScreen] = useState<Screen>(initialScreen);
   const [lecture, setLecture] = useState(mode === 'teach');
@@ -78,15 +98,36 @@ function Harness({
     setPanel: vi.fn(),
     teaching: { cancel: vi.fn(), runtime: { error: !!error, message: error } },
     aiEnabled: false,
-    sceneInteraction: vi.fn(),
+    sceneInteraction: calls.scene,
     save: calls.save,
     importCase: calls.importCase,
   } as unknown as CaseStudioApi;
   const teacher = {
-    session: { screen, mode, exploring },
+    session: {
+      screen,
+      mode,
+      exploring,
+      index: 0,
+      answerVisible: false,
+      biology: 'off',
+      comparison,
+    },
     active: screen !== 'explore',
     error: '',
-    document: screen === 'lecture' ? { title: 'Lecture', steps: [{}] } : undefined,
+    document:
+      screen === 'lecture'
+        ? {
+            title: 'Lecture',
+            steps: [
+              {
+                title: 'Predict',
+                question: 'What moves?',
+                answer: 'A tooth',
+                notes: 'PRIVATE NOTES',
+              },
+            ],
+          }
+        : undefined,
     panelProps: screen === 'lecture' ? {} : null,
     navigationProps: {},
     openSample: () => {
@@ -203,3 +244,43 @@ it('preserves case opening, saving and the busy import guard in Explore', async 
   await act(async () => input.dispatchEvent(new Event('change', { bubbles: true })));
   expect(calls.importCase).toHaveBeenCalledExactlyOnceWith(file);
 });
+
+it('passes only audience-safe content and keeps projection events outside the editing shell', async () => {
+  await render({ exploring: true });
+  const options = calls.audience.mock.lastCall![0];
+  expect(options.active).toBe(true);
+  expect(options.content).toEqual({
+    lectureTitle: 'Lecture',
+    stepTitle: 'Discussion · Predict',
+    question: 'What moves?',
+    answer: null,
+    biology: undefined,
+  });
+  expect(options.content).not.toHaveProperty('notes');
+  await click('Open audience window');
+  expect(calls.audienceOpen).toHaveBeenCalledOnce();
+  const projection = byTestId('public-projection')!;
+  expect(container.querySelector('.app-shell')!.contains(projection)).toBe(false);
+  calls.scene.mockClear();
+  await act(async () => projection.dispatchEvent(new MouseEvent('click', { bubbles: true })));
+  expect(calls.scene).not.toHaveBeenCalled();
+  await click('Explore');
+  expect(calls.audience.mock.lastCall![0].active).toBe(false);
+  expect(findButton('Open audience window')).toBeUndefined();
+});
+
+it.each([
+  ['start', 'Starting arrangement'],
+  ['translation', 'Translation example'],
+  ['tip', 'Tipping example'],
+] as const)(
+  'labels the public %s comparison instead of the paused lecture scene',
+  async (comparison, label) => {
+    await render({ comparison });
+    expect(calls.audience.mock.lastCall![0].content.stepTitle).toBe(`Comparison · ${label}`);
+    await render({ comparison, exploring: true });
+    expect(calls.audience.mock.lastCall![0].content.stepTitle).toBe('Discussion · Predict');
+    await render();
+    expect(calls.audience.mock.lastCall![0].content.stepTitle).toBe('Predict');
+  },
+);

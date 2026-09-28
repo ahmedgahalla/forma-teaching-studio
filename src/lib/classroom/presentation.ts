@@ -15,10 +15,18 @@ const controls = [
   'hide-answer',
   'notes',
   'hide-notes',
+  'focus-tooth',
+  'show-context',
+  'hide-biology',
+  'close-comparison',
 ] as const;
+export const COMPARISON_TARGETS = ['start', 'translation', 'tip'] as const;
+export type LectureComparison = (typeof COMPARISON_TARGETS)[number];
 export type PresentationAction =
   | { kind: 'presentation'; action: 'open'; id: string }
   | { kind: 'presentation'; action: 'go'; index: number }
+  | { kind: 'presentation'; action: 'compare'; target: LectureComparison }
+  | { kind: 'presentation'; action: 'biology'; view: 'overview' | 'compression' | 'tension' }
   | { kind: 'presentation'; action: (typeof controls)[number] };
 export type PresentationContext = {
   documentId: string;
@@ -29,6 +37,22 @@ export type PresentationContext = {
 };
 
 export function validatePresentationAction(action: Record<string, unknown>): PresentationAction {
+  if (action.action === 'compare') {
+    fields(action, ['kind', 'action', 'target']);
+    return {
+      kind: 'presentation',
+      action: 'compare',
+      target: oneOf(action.target, COMPARISON_TARGETS),
+    };
+  }
+  if (action.action === 'biology') {
+    fields(action, ['kind', 'action', 'view']);
+    return {
+      kind: 'presentation',
+      action: 'biology',
+      view: oneOf(action.view, ['overview', 'compression', 'tension']),
+    };
+  }
   if (action.action === 'open') {
     fields(action, ['kind', 'action', 'id']);
     if (typeof action.id !== 'string' || !action.id.trim() || action.id.length > 100)
@@ -50,6 +74,19 @@ export function validatePresentationAction(action: Record<string, unknown>): Pre
   return { kind: 'presentation', action: oneOf(action.action, controls) };
 }
 
+export function isPresentationDisplay(action: PresentationAction) {
+  return [
+    'reveal',
+    'hide-answer',
+    'notes',
+    'hide-notes',
+    'biology',
+    'hide-biology',
+    'focus-tooth',
+    'show-context',
+  ].includes(action.action);
+}
+
 /** Only advance preflight metadata; document lookup and scene restoration belong to the adapter. */
 export function advancePresentation(context: TeachingContext, action: TeachingAction): boolean {
   if (action.kind !== 'presentation') {
@@ -63,7 +100,7 @@ export function advancePresentation(context: TeachingContext, action: TeachingAc
     return false;
   }
   const current = context.presentation;
-  const display = ['reveal', 'hide-answer', 'notes', 'hide-notes'].includes(action.action);
+  const display = isPresentationDisplay(action);
   if (context.tryPreview && !display)
     throw new Error('Apply or discard the preview before changing lecture steps or experiences.');
   if (current?.exploring && !display && !['return', 'exit'].includes(action.action))
@@ -94,6 +131,33 @@ export function advancePresentation(context: TeachingContext, action: TeachingAc
 }
 
 function command(source: string): PresentationAction | undefined {
+  const labels: Record<string, string> = {
+    'starting arrangement': 'compare start',
+    'translation example': 'compare translation',
+    'tipping example': 'compare tipping',
+    'explain tissue response': 'show biology',
+    both: 'show biology',
+    compression: 'show compression',
+    tension: 'show tension',
+    'close biology': 'hide biology',
+    'focus teaching teeth': 'focus teaching tooth',
+    'show full model': 'show surrounding teeth',
+  };
+  source = labels[source] ?? source;
+  const comparison = /^compare (start|translation|tipping)$/.exec(source);
+  if (comparison)
+    return {
+      kind: 'presentation',
+      action: 'compare',
+      target: comparison[1] === 'tipping' ? 'tip' : (comparison[1] as 'start' | 'translation'),
+    };
+  const biology = /^show (biology|compression|tension)$/.exec(source);
+  if (biology)
+    return {
+      kind: 'presentation',
+      action: 'biology',
+      view: biology[1] === 'biology' ? 'overview' : (biology[1] as 'compression' | 'tension'),
+    };
   if (/^next(?: (?:lecture )?step)?$/.test(source)) return { kind: 'presentation', action: 'next' };
   if (/^(?:previous|back)(?: (?:lecture )?step)?$/.test(source))
     return { kind: 'presentation', action: 'previous' };
@@ -111,6 +175,10 @@ function command(source: string): PresentationAction | undefined {
     'hide answer': 'hide-answer',
     'show notes': 'notes',
     'hide notes': 'hide-notes',
+    'focus teaching tooth': 'focus-tooth',
+    'show surrounding teeth': 'show-context',
+    'hide biology': 'hide-biology',
+    'close comparison': 'close-comparison',
     'restart lecture': 'restart',
     'teach lecture': 'teach',
     'rehearse lecture': 'rehearse',

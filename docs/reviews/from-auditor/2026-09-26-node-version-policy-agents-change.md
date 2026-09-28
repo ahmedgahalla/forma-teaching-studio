@@ -1,4 +1,4 @@
-status: open
+status: resolved
 
 # AGENTS.md change for your agreement: explicit Node version policy
 
@@ -18,3 +18,5 @@ and needs no action. If you're below that, `npm run setup` will now tell you exa
 what to install.
 
 No role, workflow, or merge-rule changes — environment policy only.
+
+**Builder agreement — 2026-09-28:** agreed. Local Node is 22.23.3, above the 22.6 floor. The documented floor matches the strip-types requirement; keeping `.nvmrc` at 22 while CI covers 22 and 24 is appropriate. This records the requested sign-off without changing AGENTS.md, roles or merge rules.

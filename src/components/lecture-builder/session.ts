@@ -2,9 +2,16 @@ import type { ClassroomSnapshot } from '../case/types';
 import type { CaseRefs, CaseStudioApi } from '../case/api';
 import type { TeachingAdapter } from '../teaching/TeachingController';
 import type { LectureDocument } from '@/lib/lecture-documents';
-import type { PresentationAction } from '@/lib/classroom/presentation';
+import {
+  isPresentationDisplay,
+  type LectureComparison,
+  type PresentationAction,
+} from '@/lib/classroom/presentation';
+import type { BiologyView } from '@/lib/teaching-biology';
 import { createTryState } from '@/lib/try-mode';
 import { lectureStepSnapshot } from './scene-bridge';
+import { lectureComparisonSnapshot } from './lecture-comparison';
+import { lectureAnalysisContext } from './lecture-analysis';
 
 export type LectureSession = {
   screen: 'explore' | 'lecture';
@@ -14,6 +21,9 @@ export type LectureSession = {
   exploring: boolean;
   answerVisible: boolean;
   notesVisible: boolean;
+  focus: boolean;
+  biology: 'off' | BiologyView;
+  comparison: LectureComparison | null;
 };
 export const EMPTY_LECTURE_SESSION: LectureSession = {
   screen: 'explore',
@@ -23,16 +33,23 @@ export const EMPTY_LECTURE_SESSION: LectureSession = {
   exploring: false,
   answerVisible: false,
   notesVisible: false,
+  focus: true,
+  biology: 'off',
+  comparison: null,
 };
 export type LectureReturn = { current: ClassroomSnapshot | null };
 type PausedLecture = ClassroomSnapshot & {
-  lectureDisplay: Pick<LectureSession, 'answerVisible' | 'notesVisible'>;
+  lectureDisplay: Pick<
+    LectureSession,
+    'answerVisible' | 'notesVisible' | 'focus' | 'biology' | 'comparison'
+  >;
 };
 type TeacherSnapshot = ClassroomSnapshot & {
   teacher?: {
     session: LectureSession;
     original: ClassroomSnapshot | null;
     paused: ClassroomSnapshot | null;
+    comparison: ClassroomSnapshot | null;
   };
 };
 
@@ -45,6 +62,7 @@ export function createLectureSessionActions(
   document: LectureDocument | undefined,
   original: LectureReturn,
   paused: LectureReturn,
+  comparison: LectureReturn,
 ) {
   const restore = (saved: ClassroomSnapshot) => {
     api.restoreClassroom(saved);
@@ -59,6 +77,7 @@ export function createLectureSessionActions(
     if (!step) throw new Error('Choose an available lecture step.');
     const snapshot = lectureStepSnapshot(step, api.captureClassroom());
     restore(snapshot);
+    comparison.current = null;
     api.setLecture(true);
     setSession({
       ...next,
@@ -66,6 +85,8 @@ export function createLectureSessionActions(
       exploring: false,
       answerVisible: false,
       notesVisible: next.mode === 'rehearse',
+      biology: 'off',
+      comparison: null,
     });
   };
   const preflight = (
@@ -74,7 +95,7 @@ export function createLectureSessionActions(
     doc = document,
     returnPoint = paused.current,
   ) => {
-    const display = ['reveal', 'hide-answer', 'notes', 'hide-notes'].includes(action.action);
+    const display = isPresentationDisplay(action);
     if (!display && (api.sandbox.pending || api.dragPreview || api.busy))
       throw new Error(
         'Apply or discard the preview and finish loading before changing lecture steps.',
@@ -100,7 +121,7 @@ export function createLectureSessionActions(
     preflight(action);
     if (action.action === 'exit') {
       if (original.current) restore(original.current);
-      original.current = paused.current = null;
+      original.current = paused.current = comparison.current = null;
       setSession({ ...EMPTY_LECTURE_SESSION });
     } else if (action.action === 'open') {
       original.current ||= api.captureClassroom();
@@ -112,6 +133,9 @@ export function createLectureSessionActions(
         lectureDisplay: {
           answerVisible: session.answerVisible,
           notesVisible: session.notesVisible,
+          focus: session.focus,
+          biology: session.biology,
+          comparison: session.comparison,
         },
       } as PausedLecture;
       const transforms = structuredClone(api.shown);
@@ -135,6 +159,23 @@ export function createLectureSessionActions(
       api.setLecture(true);
       paused.current = null;
       setSession({ ...session, ...saved.lectureDisplay, exploring: false });
+    } else if (action.action === 'compare') {
+      const current = api.captureClassroom();
+      const next = lectureComparisonSnapshot(document!, action.target, current);
+      comparison.current ||= current;
+      restore(next);
+      api.setLecture(true);
+      setSession({ ...session, comparison: action.target });
+    } else if (action.action === 'close-comparison') {
+      if (!comparison.current) throw new Error('Open a comparison first.');
+      restore(comparison.current);
+      comparison.current = null;
+      api.setLecture(true);
+      setSession({ ...session, comparison: null });
+    } else if (action.action === 'biology' || action.action === 'hide-biology') {
+      setSession({ ...session, biology: action.action === 'biology' ? action.view : 'off' });
+    } else if (action.action === 'focus-tooth' || action.action === 'show-context') {
+      setSession({ ...session, focus: action.action === 'focus-tooth' });
     } else if (['reveal', 'hide-answer', 'notes', 'hide-notes'].includes(action.action)) {
       setSession({
         ...session,
@@ -160,6 +201,9 @@ export function createLectureSessionActions(
   };
   const decorate = (adapter: TeachingAdapter): TeachingAdapter => ({
     ...adapter,
+    analysisContext: adapter.analysisContext
+      ? () => lectureAnalysisContext(adapter.analysisContext!(), document, session)
+      : undefined,
     context: () => ({
       ...adapter.context(),
       ...(document
@@ -180,6 +224,7 @@ export function createLectureSessionActions(
         session,
         original: original.current,
         paused: paused.current,
+        comparison: comparison.current,
       },
     }),
     restore: value => {
@@ -189,6 +234,7 @@ export function createLectureSessionActions(
         setSession(saved.teacher.session);
         original.current = saved.teacher.original;
         paused.current = saved.teacher.paused;
+        comparison.current = saved.teacher.comparison;
       }
     },
     preflight: (actions, from) => {
@@ -208,6 +254,7 @@ export function createLectureSessionActions(
             [
               'try',
               'mechanics',
+              'mechanics-example',
               'dental-arrangement',
               'lesson',
               'workspace',

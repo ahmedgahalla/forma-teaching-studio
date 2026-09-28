@@ -1,0 +1,155 @@
+.remodeling-diagram,
+.biology-illustration {
+  color: var(--ui-text, #e4eaf0);
+  min-width: 0;
+}
+.remodeling-diagram {
+  border-top: 1px solid var(--ui-line, #3b4756);
+  padding-top: 12px;
+}
+.biology-heading,
+.biology-controls,
+.biology-sources {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+.biology-heading {
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+.biology-heading h3 {
+  margin: 0;
+  font-size: 17px;
+}
+.remodeling-diagram button {
+  min-height: 44px;
+  border: 1px solid var(--ui-line, #3b4756);
+  border-radius: 8px;
+  padding: 8px 10px;
+  color: inherit;
+  background: var(--ui-panel, #172333);
+  font: inherit;
+  cursor: pointer;
+}
+.biology-controls button[aria-pressed='true'] {
+  border-color: var(--ui-accent, #68c8c0);
+  background: var(--ui-soft, #233a49);
+  font-weight: 700;
+}
+.remodeling-diagram button:focus-visible,
+.biology-sources a:focus-visible {
+  outline: 2px solid var(--ui-accent, #68c8c0);
+  outline-offset: 3px;
+}
+.biology-controls {
+  margin-bottom: 12px;
+}
+.biology-illustration p {
+  margin: 0;
+  line-height: 1.5;
+}
+.biology-scope {
+  font-size: 13px;
+  font-weight: 600;
+}
+.biology-vignettes {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(240px, 100%), 1fr));
+  gap: 12px;
+  margin: 12px 0;
+}
+.biology-vignette {
+  margin: 0;
+  padding: 10px;
+  border: 1px solid var(--ui-line, #3b4756);
+  border-radius: 10px;
+  background: var(--ui-panel, #172333);
+}
+.biology-vignette strong {
+  display: block;
+  margin-bottom: 4px;
+  font-size: 16px;
+}
+.biology-vignette p {
+  font-size: 13px;
+}
+.biology-vignette svg {
+  display: block;
+  width: 100%;
+  height: auto;
+  margin-top: 8px;
+  border-radius: 6px;
+  background: #f4f1e9;
+  color: #283947;
+}
+.biology-vignette svg text {
+  fill: #283947;
+  font:
+    12px system-ui,
+    sans-serif;
+}
+.biology-vignette svg .biology-response-label {
+  font-size: 14px;
+  font-weight: 700;
+}
+.biology-root {
+  fill: #dcc69e;
+  stroke: #917750;
+}
+.biology-pdl {
+  fill: #fff1ce;
+}
+.biology-fibre {
+  fill: none;
+  stroke: #a38a48;
+  stroke-width: 1.5;
+}
+.biology-bone {
+  fill: #c7c9b6;
+  stroke: #747d67;
+}
+.biology-osteoclast {
+  fill: #96536b;
+  stroke: #5f3445;
+}
+.biology-nucleus {
+  fill: #fce9ef;
+}
+.biology-new-bone {
+  fill: #b5dacd;
+  stroke: #367465;
+}
+.biology-deposition {
+  fill: none;
+  stroke: #367465;
+  stroke-width: 1;
+}
+.biology-osteoblast {
+  fill: #367465;
+  stroke: #214d45;
+}
+.biology-load {
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+}
+.biology-callout {
+  fill: none;
+  stroke: #283947;
+  stroke-width: 1;
+}
+.biology-limits,
+.biology-sources {
+  font-size: 12px;
+  color: var(--ui-muted, #aebbc7);
+}
+.biology-sources {
+  margin-top: 10px;
+}
+.biology-sources a {
+  color: inherit;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}

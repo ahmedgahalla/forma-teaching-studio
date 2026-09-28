@@ -22,6 +22,12 @@ Phase 4's explicitly enabled hands-free voice, glossary, tooth study and visual 
 
 This branch is implemented but not declared released: local verification records one existing full-suite BVH timeout (passing alone), and real browser access is blocked by security policy. [PR #14](https://github.com/ahmedgahalla/forma-teaching-studio/pull/14) is stacked; the current main-targeted CI trigger does not run on it. The four-step script totals an estimated **205 seconds (3 minutes 25 seconds), not yet measured**. No browser, DPR 1/2, microphone or projector verification is claimed. Lecture authoring, PDF/PowerPoint import, a separate audience window, arbitrary animation, cloud services and new biology content remain outside this scope.
 
+## Research-backed lecture improvements · 27 September 2026
+
+[Phase 3.15](phases/phase-3-demo-path/3.15-lecture-mechanics.md), stacked on PR #14, implements the owner's next approved scope: selected-tooth focus, fixed-camera movement comparison with exact return, fewer repeated lecture labels, a separate audience window, qualitative tissue diagrams and local fonts/favicon. This supersedes the earlier exclusion of audience projection and biology from 3.9; lecture creation remains excluded. Notes are private when only the audience window is presented, not when the whole desktop is mirrored.
+
+Explore gains eight mechanics categories with 17 explicit variations using the existing solver, with prediction before calculation and one undoable load per setup. Research notes distinguish authored geometric paths, initial elastic responses and remodeling concepts; none is a patient-specific treatment forecast. The new feature remains subject to audit, applicable CI and real-device acceptance. Browser/DPR/projector verification is not claimed.
+
 ## Product promise
 
 A professor can freely explore a clear 3D mouth or open a finished lecture, ask students to predict a change, then demonstrate, reveal and compare while keeping the model central.
