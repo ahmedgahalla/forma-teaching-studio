@@ -40,6 +40,8 @@ The [3.19 audience-annotation follow-up](phases/phase-3-demo-path/3.19-audience-
 
 ## Product promise
 
+The owner's 28 September follow-up approves [crown/root movement trails](phases/phase-3-demo-path/3.20-crown-root-trails.md) for the demo. Further lecture features and content are deferred until the professor sees the demo, approves the direction and supplies their lectures/cases. The fixed sample remains available; no lecture creator is added.
+
 A professor can freely explore a clear 3D mouth or open a finished lecture, ask students to predict a change, then demonstrate, reveal and compare while keeping the model central.
 
 Free experimentation and guided demonstrations use the same model workspace. A case changes the starting arrangement and available authored demonstrations; it should not feel like opening a different application.

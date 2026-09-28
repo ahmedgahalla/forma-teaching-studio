@@ -6,6 +6,7 @@
  * follow-up once the split has settled.
  */
 import type { RefObject } from 'react';
+import type { DisplayedMotion } from '@/lib/displayed-motion';
 import type { useExplanationState } from './explanation-state';
 import type {
   useAttachmentState,
@@ -116,6 +117,7 @@ export interface CaseStudioApi extends StateBundle {
   activeExperiment: MechanicsExperiment | null;
   actualShown: Transforms;
   shown: Transforms;
+  displayedMotion: DisplayedMotion;
   physicalPoint: (PointedReference & { worldPoint?: Vec3 }) | null;
   mechanicsGhost: Transforms | undefined;
   curve: Vec3[] | undefined;

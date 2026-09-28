@@ -21,3 +21,5 @@ The later Phase 3 follow-up [3.15 — Lecture presentation and mechanics](phase-
 [3.18 — Consistent lecture entry and view controls](phase-3-demo-path/3.18-lecture-controls.md) follows PR #17 with matching sample-entry commands and compact camera, roots and Fit controls in the lecture heading.
 
 [3.19 — Public model annotations](phase-3-demo-path/3.19-audience-annotations.md) follows PR #18 with explicit public labels, captions and pointer data alongside audience video, preserving privacy and source-replacement cleanup.
+
+[3.20 — Crown/root movement trails](phase-3-demo-path/3.20-crown-root-trails.md) follows PR #19 with selected-tooth paths sampled from the displayed movement. Further lecture work is deferred until the professor sees the demo and supplies approved lectures/cases.

@@ -6,6 +6,7 @@ import { advanceLocalSceneControl } from './mechanics-example';
 import { advanceWorkspace } from './advance-workspace';
 import { advanceCase } from './advance-case';
 import { advanceToothStudy } from './advance-tooth-study';
+import { advanceTryDisplay } from './advance-try-display';
 import { DEMO_IDS, type TeachingContext } from './types';
 type Overrides = { arch: boolean; view: boolean; selection: boolean };
 export function advance(context: TeachingContext, action: TeachingAction, overrides: Overrides) {
@@ -79,12 +80,7 @@ export function advance(context: TeachingContext, action: TeachingAction, overri
         'This teaching appliance preset requires a synthetic model. Imported cases support braces or no appliance.',
       );
   } else if (action.kind === 'try-display' || action.kind === 'try-playback') {
-    if (context.mode !== 'case' || !context.tryMode)
-      throw new Error('Enter Try Mode in your case before using its display controls.');
-    if (action.kind === 'try-playback') {
-      context.playing = true;
-      context.stage = action.direction === 'reverse' ? 0 : (context.stages ?? 10);
-    }
+    advanceTryDisplay(context, action);
   } else if (action.kind === 'try') {
     if (context.mode !== 'case') throw new Error('Return to your case before using Try Mode.');
     const edit = action.action;

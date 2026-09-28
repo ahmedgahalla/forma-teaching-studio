@@ -44,6 +44,8 @@ src/
 
 Conventions:
 
+- `case/useDisplayedMotion.ts` shares `lib/displayed-motion.ts` playback sampling with `useMovementTrail.ts`. `lib/movement-trails.ts` samples geometry reference points; `viewer/movement-trail-renderer.ts` and its label helper own fixed path buffers and in-canvas cues. `classroom/advance-try-display.ts` validates the existing local display/playback actions.
+
 - `viewer/public-overlays.ts` commits explicit public label slots independently of unfinished renderer state. Viewer label presenters and `lib/*-label-layout.ts` reuse projection storage; `lecture-audience/audience-overlays.ts` owns pooled audience nodes and `overlay-layout.ts` maps source CSS pixels into video letterboxing. The lecture pointer writes only canvas-relative public coordinates.
 
 - `lecture-builder/LectureViewControls.tsx` owns the compact lecture camera/roots/Fit disclosure; `lib/classroom/presentation.ts` owns local lecture command validation, with the fixed sample identifier shared through `lecture-documents/constants.ts`.

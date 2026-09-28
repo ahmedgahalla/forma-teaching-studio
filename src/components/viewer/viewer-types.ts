@@ -6,6 +6,7 @@ import type { AnatomyViewState } from '@/lib/teaching-anatomy';
 import type { MechanicsExperiment } from '@/lib/mechanics/types';
 import type { PointedReference } from '@/lib/mechanics-commands';
 import type { ToothStudyView } from '@/lib/tooth-study/types';
+import type { MovementTrail } from '@/lib/movement-trails';
 
 export type ViewerToothStudy = { tooth: string; view: ToothStudyView; revision: number };
 export type ViewName = 'perspective' | 'occlusal' | 'front' | 'right' | 'left';
@@ -57,7 +58,8 @@ export type ViewerProps = {
   anatomy?: AnatomyViewState;
   ghostTransforms?: Transforms;
   lockedIds?: string[];
-  traceFrom?: Transforms;
+  movementTrail?: MovementTrail | null;
+  trailProgress?: number;
   archCurve?: Vec3[];
   removableRetainer?: boolean;
   isolateSelection?: boolean;
