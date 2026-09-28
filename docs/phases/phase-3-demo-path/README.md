@@ -23,6 +23,8 @@ The current branch starts from [Phase 4](../phase-4-voice-lecture-assistant/READ
 
 ## Scope decision and remaining acceptance
 
+See [acceptance evidence and rehearsal](3.19-acceptance.md) for the requirement-by-requirement source/test evidence, PR dependency order and unrun device/educator checks. Automated correctness and presentation acceptance are tracked separately.
+
 The owner's latest request supersedes the earlier teacher-authoring scope: provide our own finished sample and remove lecture creation. **3.9 remains the consolidated first vertical slice** of the [Explore/Lecture proposal](https://github.com/ahmedgahalla/forma-teaching-studio/pull/12), retaining its runner, return and input work. Proposed 3.10–3.14 are not duplicate outstanding milestones; editing and persistence are deliberately excluded. Former browser lecture saves are untouched because the revised feature does not access them.
 
 The sample's four suggested allocations total **205 seconds (3 minutes 25 seconds), not yet measured**. The earlier [3.9 verification record](3.9-teacher-lectures.md#acceptance-and-verification) recorded 2,383 passing tests and a BVH timeout; [3.15](3.15-lecture-mechanics.md#verification-and-acceptance) records the later timing fixes and full passing run. The current [3.19 verification](3.19-audience-annotations.md#verification-and-remaining-work) passes 2,644 frontend tests, 619 backend tests and the remaining automated local checks. Real browser access is blocked by security policy; no browser, DPR 1/2, microphone or projector acceptance is claimed.
