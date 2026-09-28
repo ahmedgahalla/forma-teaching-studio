@@ -1,6 +1,6 @@
 # Phase 3 — demo path
 
-**Status:** following gingiva and bracket placement implemented; automated checks pass; browser acceptance pending · **Current branch:** `ahmed/phase-3-gums-brackets` · **Base:** [#21 (draft)](https://github.com/ahmedgahalla/forma-teaching-studio/pull/21)
+**Status:** following gingiva and bracket placement implemented; automated checks pass; browser acceptance pending · **Current branch:** `ahmed/phase-3-gums-brackets` · **PR:** [#22 (draft)](https://github.com/ahmedgahalla/forma-teaching-studio/pull/22) · **Base:** [#21 (draft)](https://github.com/ahmedgahalla/forma-teaching-studio/pull/21)
 
 **Goal:** a professor can explore the central model freely or open a finished lecture with notes, questions and model demonstrations, then return from a spontaneous experiment without losing the lecture. Builds on [product direction](../../PRODUCT_DIRECTION.md).
 

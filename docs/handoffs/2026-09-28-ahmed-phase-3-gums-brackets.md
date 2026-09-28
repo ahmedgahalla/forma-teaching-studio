@@ -1,6 +1,6 @@
 # Handoff — Following gingiva and bracket placement
 
-**Branch:** `ahmed/phase-3-gums-brackets` · **Base:** PR #21 at `3bcf0e2` · **Phase:** [3.22](../phases/phase-3-demo-path/3.22-gums-and-bracket-placement.md)
+**Branch:** `ahmed/phase-3-gums-brackets` · **PR:** [#22 (draft)](https://github.com/ahmedgahalla/forma-teaching-studio/pull/22) · **Base:** PR #21 at `3bcf0e2` · **Phase:** [3.22](../phases/phase-3-demo-path/3.22-gums-and-bracket-placement.md)
 
 The latest coherent Claude 10:33 model/metadata snapshot is imported unchanged. Its full source contract and hashes are in the provenance record; 28 supported teaching teeth are displayed. The reference audit remains free of detected crown/root intersections; authored-path limitations remain recorded. Later sandbox-only cosmetic experiments are not imported.
 
