@@ -1,6 +1,6 @@
 # Handoff — crown/root movement trails
 
-**Branch:** `ahmed/phase-3-crown-root-trails` · **Base:** PR #19 at `59750c5` · **Phase:** [3.20](../phases/phase-3-demo-path/3.20-crown-root-trails.md) · **PR:** pending
+**Branch:** `ahmed/phase-3-crown-root-trails` · **Base:** PR #19 at `59750c5` · **Phase:** [3.20](../phases/phase-3-demo-path/3.20-crown-root-trails.md) · **PR:** [#20 (draft)](https://github.com/ahmedgahalla/forma-teaching-studio/pull/20)
 
 The owner approved only crown/root points and paths from the suggested improvements. Further lecture features/content are deferred until the professor's demo, approval and supplied lectures/cases. Existing sample and lecture behavior remain intact.
 

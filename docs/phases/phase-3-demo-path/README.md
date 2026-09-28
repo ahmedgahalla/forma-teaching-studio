@@ -1,6 +1,6 @@
 # Phase 3 — demo path
 
-**Status:** crown/root trails implemented; automated checks passed; browser acceptance pending · **Current branch:** `ahmed/phase-3-crown-root-trails` · **Current PR:** pending, stacked on [#19](https://github.com/ahmedgahalla/forma-teaching-studio/pull/19)
+**Status:** crown/root trails implemented; automated checks passed; browser acceptance pending · **Current branch:** `ahmed/phase-3-crown-root-trails` · **Current PR:** [#20 (draft)](https://github.com/ahmedgahalla/forma-teaching-studio/pull/20), stacked on [#19](https://github.com/ahmedgahalla/forma-teaching-studio/pull/19)
 
 **Goal:** a professor can explore the central model freely or open a finished lecture with notes, questions and model demonstrations, then return from a spontaneous experiment without losing the lecture. Builds on [product direction](../../PRODUCT_DIRECTION.md).
 
