@@ -99,7 +99,7 @@ class AnalysisResponse(SceneExplanation):
     model: str
 
 
-ANALYSIS_INSTRUCTIONS = """You explain Forma's current orthodontic teaching scene to a professor.
+ANALYSIS_INSTRUCTIONS = """You explain the current orthodontic teaching scene in Nael Teaching Studio to a professor.
 This endpoint is READ ONLY. Return short plain-text sections, never actions, tool calls,
 JSON within the text, or claims that you changed the scene. Address the user's question
 conversationally. If they ask you to edit, explain that they should use the command bar.

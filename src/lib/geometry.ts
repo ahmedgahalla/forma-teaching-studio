@@ -209,7 +209,7 @@ export async function loadCase(
     typeof data.transforms !== 'object' ||
     Array.isArray(data.transforms)
   )
-    throw new Error('This is not a supported Forma case.');
+    throw new Error('This is not a supported teaching case.');
   if (typeof data.model.name !== 'string') throw new Error('Invalid case name.');
   if (data.model.asset !== undefined && data.model.asset !== 'claude-atlas-v1')
     throw new Error('Invalid case anatomy asset.');

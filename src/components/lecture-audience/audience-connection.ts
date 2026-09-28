@@ -6,7 +6,7 @@ type Callbacks = {
 
 function prepareDocument(popup: Window) {
   const target = popup.document.createElement('div');
-  popup.document.title = 'Forma · Audience';
+  popup.document.title = 'Nael Teaching Studio · Audience';
   popup.document.documentElement.lang = 'en';
   popup.document.body.className = 'audience-body';
   for (const sheet of document.head.querySelectorAll('link[rel="stylesheet"], style')) {
@@ -33,7 +33,7 @@ export function createAudienceConnection(source: HTMLElement, callbacks: Callbac
     throw new Error('This browser cannot share the 3D model. Keep presenting in the main window.');
   const popup = window.open('about:blank', '_blank', 'popup,width=1280,height=800');
   if (!popup)
-    throw new Error('The audience window was blocked. Allow popups for Forma, then try again.');
+    throw new Error('The audience window was blocked. Allow popups for this app, then try again.');
 
   let stream: MediaStream | null = null;
   let disposed = false;

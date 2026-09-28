@@ -66,6 +66,11 @@ folds, or alter exported source gingiva, collision checks, solver results or cli
 `public/models/forma-atlas-gums-v1.bin` is a Forma-generated version-1 sidecar, not a producer file.
 It contains the exact display weights for both 14-tooth arches and the upper 12-tooth extraction-lecture
 subset. Size: 3,268,315 bytes. SHA256:
+`62bc9d4bec01b320134250ab3afe2366116e213f1d254b481ac94fe95a45fcaa`.
+
+Phase 3.24 updated only the generator-input fingerprint after rewording a loader recovery message
+for the Nael Teaching Studio name. The complete numeric binding payload and other header fields
+are byte-for-byte unchanged from 3.22; the earlier complete-file hash was
 `43e71b6e2e844ab7323339fc57ea90db9b7be932460247507d5f218fdc142300`.
 
 Regenerate it with `node --experimental-strip-types scripts/generate-atlas-gum-bindings.mjs` after

@@ -192,7 +192,7 @@ export const ANATOMY_GLOSSARY: readonly GlossaryContent[] = [
     term: 'Alveolar bone',
     aliases: ['alveolar process', 'tooth socket', 'socket bone'],
     definition:
-      'Alveolar bone forms and supports the sockets that hold the tooth roots. Forma’s separate tissue diagrams illustrate its relationship with the periodontal ligament, without patient-specific bone anatomy.',
+      'Alveolar bone forms and supports the sockets that hold the tooth roots. Nael Teaching Studio’s separate tissue diagrams illustrate its relationship with the periodontal ligament, without patient-specific bone anatomy.',
     show: [
       { kind: 'case', action: 'load', id: 'reference-occlusion' },
       { kind: 'toggle', target: 'roots', visible: true },

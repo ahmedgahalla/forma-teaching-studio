@@ -79,7 +79,7 @@ server.on('error', error => {
 server.listen(port, host, () => {
   const url = `http://${host}:${port}`;
   console.log(
-    `Forma Dental Studio is ready at ${url}\nKeep this terminal open while using the app. Press Ctrl+C to stop.`,
+    `Nael Teaching Studio is ready at ${url}\nKeep this terminal open while using the app. Press Ctrl+C to stop.`,
   );
   if (process.argv.includes('--open')) {
     if (process.platform === 'win32')

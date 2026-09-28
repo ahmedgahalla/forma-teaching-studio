@@ -1,4 +1,6 @@
-# Forma Teaching Studio · v0.12
+# Nael Teaching Studio · v0.12
+
+Named for Professor Nael. The voice assistant retains “Forma” as its hands-free wake phrase.
 
 A local 3D dental workspace for university lectures, geometric demonstrations and **initial elastic mechanics experiments**. Build an appliance on synthetic teeth, declare an activation or load, ask students to predict, then calculate and compare. The **Workflow Classroom** retains authored appliance and anatomy lessons. One shared command bar accepts typed requests or **hold-to-talk** speech across both workspaces. Combine up to eight supported actions, undo the complete request, or return to an authored setup. Next.js/React provide the interface, Three.js renders the model, and an optional Python/FastAPI service uses OpenAI or an OpenAI-compatible Responses provider for flexible wording. Familiar commands run locally without an API key.
 
@@ -18,7 +20,7 @@ Everything after that is automatic: setup installs frontend and backend dependen
 
 Choose **Lecture** for the finished translation-versus-tipping sample, or **Explore** for free model work. Lecture has closer tooth focus, prediction/reveal, same-camera comparisons and optional tissue-response diagrams. There is no lecture creation screen. **Open audience window** shows the model and public lesson content; keep notes on the teacher window and project/share only the audience window. Sharing the whole desktop still exposes the teacher screen. Audience capture support must be checked on the presenting browser.
 
-Run `npm run demo` after setup to build, verify local assets and open Forma. Once built, `npm start -- --open` serves the exported app without rebuilding. Fonts, icon, synthetic model and mechanics worker are local; optional AI and browser speech recognition may still need a network. `npm run check:demo` checks exported files, not microphone or projector operation.
+Run `npm run demo` after setup to build, verify local assets and open Nael Teaching Studio. Once built, `npm start -- --open` serves the exported app without rebuilding. Fonts, icon, synthetic model and mechanics worker are local; optional AI and browser speech recognition may still need a network. `npm run check:demo` checks exported files, not microphone or projector operation.
 
 In Explore, open **Tools → Mechanics examples** for eight teaching categories with 17 variations: crown pull, counter-couple, axial rotation, inclination, intrusion/extrusion, molar load balance, anchorage and rectangular-wire effects. Ask the displayed prediction question, then choose **Load and calculate**; the existing Predict before reveal option can keep results hidden. These are initial responses in the synthetic engineering model; biology diagrams remain separate qualitative explanations. See [scope, research and verification](docs/phases/phase-3-demo-path/3.15-lecture-mechanics.md).
 

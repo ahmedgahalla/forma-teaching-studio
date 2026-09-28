@@ -29,3 +29,5 @@ The later Phase 3 follow-up [3.15 — Lecture presentation and mechanics](phase-
 [3.22 — Following gingiva and bracket placement](phase-3-demo-path/3.22-gums-and-bracket-placement.md) follows PR #21 with the refreshed released atlas, tooth-following gum presentation and surface-projected bracket position/in-plane angle controls connected to the wire solver.
 
 [3.23 — Claude tooth diagram](phase-3-demo-path/3.23-atlas-tooth-diagram.md) follows PR #22 with the original crown/root drawings, proportional two-arch chart and preserved tooth selection/missing-tooth positions.
+
+[3.24 — Nael Teaching Studio](phase-3-demo-path/3.24-nael-branding.md) follows PR #23 with the owner-requested app name and N favicon, preserving voice commands and saved-state compatibility.
