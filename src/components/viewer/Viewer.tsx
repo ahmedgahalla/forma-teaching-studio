@@ -24,11 +24,7 @@ import { toothMatrix } from '@/lib/analysis';
 import { LECTURE_CAMERA_MARGIN, perspectiveFitFrame } from '@/lib/camera-fit';
 import { sameViewerGeometry } from '@/lib/viewer-model';
 import { createWorkflowAppliances, workflowFixedVisibility } from '@/lib/workflow-appliances';
-import {
-  anatomyCutawayTooth,
-  createTeachingAnatomy,
-  layoutAnatomyLabels,
-} from '@/lib/teaching-anatomy';
+import { anatomyCutawayTooth, createTeachingAnatomy } from '@/lib/teaching-anatomy';
 import { createRenderBarrier } from '@/lib/render-barrier';
 import { createDentalMaterials } from '@/lib/viewer-materials';
 import { observePixelRatio } from '@/lib/pixel-ratio';
@@ -39,12 +35,13 @@ import {
   displayedToothBounds,
   displayedFitPoints,
   isToothVisible,
-  layoutToothLabels,
-  type ToothLabelAnchor,
 } from '@/lib/viewer-presentation';
 import './teaching-anatomy.css';
 import './tooth-study-labels.css';
 import { createToothStudyPresentation } from './tooth-study-presentation';
+import { createToothLabelPresentation } from './tooth-label-presentation';
+import { createAnatomyLabelPresentation } from './anatomy-label-presentation';
+import { createPublicOverlaySource } from './public-overlays';
 import { createCameraMotion } from './camera-motion';
 import { createViewerResize } from './viewer-resize';
 import { TOOTH_STUDY_CAMERA_MARGIN } from '@/lib/tooth-study/camera';
@@ -217,22 +214,7 @@ const Viewer = forwardRef<ViewerHandle, Props>(function Viewer(props, ref) {
     scene.add(removableKit.group);
     const anatomyKit = createTeachingAnatomy(props.model);
     scene.add(anatomyKit.group);
-    const anatomyOverlay = document.createElement('div');
-    anatomyOverlay.className = 'anatomy-overlay';
-    anatomyOverlay.hidden = true;
-    container.appendChild(anatomyOverlay);
-    const anatomyLines = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
-    anatomyLines.setAttribute('aria-hidden', 'true');
-    anatomyOverlay.appendChild(anatomyLines);
-    const anatomyLabels = new Map<
-      string,
-      { element: HTMLDivElement; line: SVGLineElement; dot: SVGCircleElement }
-    >();
-    const anatomyCaption = document.createElement('p');
-    anatomyCaption.className = 'anatomy-caption';
-    anatomyCaption.textContent =
-      'Schematic section · PDL enlarged for visibility · support tissues stay fixed';
-    anatomyOverlay.appendChild(anatomyCaption);
+    const anatomyLabels = createAnatomyLabelPresentation(container, camera);
     const displayGeometry: THREE.BufferGeometry[] = [];
     const surface = (
       geometry: THREE.BufferGeometry,
@@ -251,7 +233,6 @@ const Viewer = forwardRef<ViewerHandle, Props>(function Viewer(props, ref) {
       attachments = new Map<string, THREE.Mesh>(),
       ghosts = new Map<string, THREE.Mesh>(),
       rootGhosts = new Map<string, THREE.Mesh>(),
-      labels = new Map<string, HTMLButtonElement>(),
       contours = new Map<string, { crown: THREE.Mesh; root?: THREE.Mesh }>();
     for (const tooth of props.model.teeth) {
       const group = new THREE.Group();
@@ -317,14 +298,19 @@ const Viewer = forwardRef<ViewerHandle, Props>(function Viewer(props, ref) {
       ghost.position.fromArray(tooth.position);
       scene.add(ghost);
       ghosts.set(tooth.id, ghost);
-      const label = document.createElement('button');
-      label.className = 'tooth-label';
-      label.textContent = tooth.id;
-      label.setAttribute('aria-label', `Select tooth ${tooth.id}`);
-      label.onclick = e => live.current.onSelect(tooth.id, e.shiftKey || e.ctrlKey || e.metaKey);
-      labelContainer.appendChild(label);
-      labels.set(tooth.id, label);
     }
+    const toothLabels = createToothLabelPresentation(
+      props.model,
+      groups,
+      labelContainer,
+      camera,
+      (id, additive) => live.current.onSelect(id, additive),
+    );
+    const publicOverlays = createPublicOverlaySource(renderer.domElement, {
+      teeth: toothLabels.labels,
+      surfaces: toothStudy.labels,
+      anatomy: anatomyLabels.labels,
+    });
     const gumMeshes = props.model.gums.map(gum => {
       const mesh = new THREE.Mesh(
         surface(gum.geometry, [0, gum.arch === 'upper' ? -1 : 1, 0], 'gingiva'),
@@ -433,6 +419,7 @@ const Viewer = forwardRef<ViewerHandle, Props>(function Viewer(props, ref) {
     let currentView: ViewName = restoreCamera ? previousCamera.view : 'perspective',
       snapshotRequested = false,
       disposed = false,
+      graphicsLost = false,
       restoringSavedStudy = !!restoreCamera,
       pendingCamera: ViewerCamera | null = null;
     const cancelCameraRestore = () => {
@@ -728,7 +715,9 @@ const Viewer = forwardRef<ViewerHandle, Props>(function Viewer(props, ref) {
     };
     const onLost = (event: Event) => {
       event.preventDefault();
+      graphicsLost = true;
       const message = 'Graphics were interrupted. Save your case, then reload the viewer.';
+      publicOverlays.clear();
       renderBarrier.fail(new Error(message));
       setError(message);
     };
@@ -737,8 +726,7 @@ const Viewer = forwardRef<ViewerHandle, Props>(function Viewer(props, ref) {
     renderer.domElement.addEventListener('pointercancel', cancelDrag);
     window.addEventListener('blur', cancelDrag);
     renderer.domElement.addEventListener('webglcontextlost', onLost);
-    const projected = new THREE.Vector3(),
-      inverseCamera = new THREE.Quaternion();
+    const inverseCamera = new THREE.Quaternion();
     let frame = 0,
       wireState = '',
       workflowState = '',
@@ -758,6 +746,7 @@ const Viewer = forwardRef<ViewerHandle, Props>(function Viewer(props, ref) {
     let lastIsolation = isolationKey();
     const updateToothPose = createToothPoseUpdater(groups, ghosts, rootGhosts, roots);
     function render() {
+      if (graphicsLost) return;
       if (live.current.paused) {
         frame = requestAnimationFrame(render);
         return;
@@ -839,10 +828,6 @@ const Viewer = forwardRef<ViewerHandle, Props>(function Viewer(props, ref) {
             );
         }
         if (attachments.has(tooth.id)) attachments.get(tooth.id)!.visible = p.attachments;
-        const label = labels.get(tooth.id)!;
-        label.textContent = `${tooth.id}${p.lockedIds?.includes(tooth.id) ? ' · locked' : ''}`;
-        label.style.display = 'none';
-        label.classList.toggle('selected', selectedIds.includes(tooth.id));
       }
       traceLines.visible = !!p.traceFrom;
       if (p.traceFrom) {
@@ -1056,73 +1041,20 @@ const Viewer = forwardRef<ViewerHandle, Props>(function Viewer(props, ref) {
       inverseCamera.copy(camera.quaternion).invert();
       camera.updateMatrixWorld();
       toothStudy.render(sizing.width, sizing.height);
-      anatomyOverlay.hidden = !cutaway;
-      if (showLabels && !cutaway) {
-        const anchors: ToothLabelAnchor[] = [];
-        for (const [id, group] of groups)
-          if (group.visible) {
-            projected
-              .copy(group.position)
-              .add(new THREE.Vector3(0, toothArch(id) === 'lower' ? -6 : 6, 2))
-              .project(camera);
-            anchors.push({
-              id,
-              x: ((projected.x + 1) * sizing.width) / 2,
-              y: ((1 - projected.y) * sizing.height) / 2,
-              depth: projected.z,
-              selected: selectedIds.includes(id),
-              locked: !!p.lockedIds?.includes(id),
-            });
-          }
-        for (const label of layoutToothLabels(anchors, sizing.width, sizing.height)) {
-          const element = labels.get(label.id)!;
-          element.style.display = 'block';
-          element.style.transform = `translate(-50%, -50%) translate(${label.x}px,${label.y}px)`;
-        }
-      }
-      anatomyCaption.textContent = p.anatomy?.ligament
-        ? 'Schematic section · PDL enlarged for visibility · support tissues stay fixed'
-        : 'Schematic section · support tissues stay fixed';
-      anatomyLabels.forEach(item => {
-        item.element.hidden = true;
-        item.line.style.display = item.dot.style.display = 'none';
-      });
-      if (cutaway)
-        for (const label of layoutAnatomyLabels(
-          anatomyKit.labels,
-          camera,
-          container.clientWidth,
-          container.clientHeight,
-        )) {
-          let item = anatomyLabels.get(label.name);
-          if (!item) {
-            const element = document.createElement('div');
-            element.className = 'anatomy-label';
-            element.textContent = label.name;
-            anatomyOverlay.appendChild(element);
-            const line = document.createElementNS('http://www.w3.org/2000/svg', 'line'),
-              dot = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
-            dot.setAttribute('r', '2.5');
-            anatomyLines.append(line, dot);
-            item = { element, line, dot };
-            anatomyLabels.set(label.name, item);
-          }
-          const shown = label.depth > -1 && label.depth < 1;
-          item.element.hidden = !shown;
-          item.line.style.display = item.dot.style.display = shown ? '' : 'none';
-          item.element.style.cssText = `left:${label.x}px;top:${label.y}px;width:${label.width}px;--tissue:${label.color}`;
-          item.line.setAttribute(
-            'x1',
-            String(label.side === 'left' ? label.x + label.width : label.x),
-          );
-          item.line.setAttribute('y1', String(label.y + 14));
-          item.line.setAttribute('x2', String(label.anchorX));
-          item.line.setAttribute('y2', String(label.anchorY));
-          item.line.setAttribute('stroke', label.color);
-          item.dot.setAttribute('cx', String(label.anchorX));
-          item.dot.setAttribute('cy', String(label.anchorY));
-          item.dot.setAttribute('fill', label.color);
-        }
+      toothLabels.render(
+        showLabels && !cutaway,
+        selectedIds,
+        p.lockedIds,
+        sizing.width,
+        sizing.height,
+      );
+      anatomyLabels.render(
+        !!cutaway,
+        anatomyKit.labels,
+        !!p.anatomy?.ligament,
+        container.clientWidth,
+        container.clientHeight,
+      );
       for (const [axis, vector] of [
         ['x', new THREE.Vector3(1, 0, 0)],
         ['y', new THREE.Vector3(0, 1, 0)],
@@ -1152,10 +1084,18 @@ const Viewer = forwardRef<ViewerHandle, Props>(function Viewer(props, ref) {
       } catch (error) {
         const failure =
           error instanceof Error ? error : new Error('The 3D frame could not be rendered.');
+        publicOverlays.clear();
         renderBarrier.fail(failure);
         setError(failure.message);
         return;
       }
+      if (graphicsLost) return;
+      publicOverlays.frame.width = sizing.width;
+      publicOverlays.frame.height = sizing.height;
+      publicOverlays.frame.ready = true;
+      publicOverlays.frame.studyCaption = toothStudy.caption;
+      publicOverlays.frame.anatomyCaption = anatomyLabels.caption;
+      publicOverlays.publish();
       renderBarrier.rendered(!cameraMotion.active);
       if (snapshotRequested && !cameraMotion.active) {
         snapshotRequested = false;
@@ -1196,7 +1136,7 @@ const Viewer = forwardRef<ViewerHandle, Props>(function Viewer(props, ref) {
       attachments.forEach(mesh => mesh.geometry.dispose());
       anatomyKit.dispose();
       toothStudy.dispose();
-      anatomyOverlay.remove();
+      anatomyLabels.dispose();
       mechanicsKit.dispose();
       workflowKit.dispose();
       removableKit.dispose();
@@ -1210,9 +1150,10 @@ const Viewer = forwardRef<ViewerHandle, Props>(function Viewer(props, ref) {
       composer.dispose();
       displayGeometry.forEach(geometry => geometry.dispose());
       key.shadow.dispose();
+      publicOverlays.dispose();
       renderer.dispose();
       renderer.domElement.remove();
-      labels.forEach(label => label.remove());
+      toothLabels.dispose();
       [
         enamel,
         contourMaterial,

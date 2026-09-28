@@ -1,5 +1,5 @@
 type Callbacks = {
-  onStream: (stream: MediaStream | null) => void;
+  onStream: (stream: MediaStream | null, canvas: HTMLCanvasElement | null) => void;
   onError: (message: string) => void;
   onClosed: () => void;
 };
@@ -95,17 +95,19 @@ export function createAudienceConnection(source: HTMLElement, callbacks: Callbac
     };
     observer = new MutationObserver(() => {
       const next = source.querySelector('canvas');
-      if (next === canvas || disposed) return;
-      stopStream();
-      canvas = next;
-      if (next && next.parentElement !== canvasHost) {
-        canvasHost = next.parentElement;
+      const nextHost = next?.parentElement ?? source.querySelector<HTMLElement>('.three-canvas');
+      if (disposed) return;
+      if (nextHost !== canvasHost) {
+        canvasHost = nextHost;
         observer!.disconnect();
         observeHosts();
       }
+      if (next === canvas) return;
+      stopStream();
+      canvas = next;
       try {
         capture();
-        callbacks.onStream(stream);
+        callbacks.onStream(stream, canvas);
       } catch {
         fail('The model could not be shared. Reopen the audience window after the model loads.');
       }
@@ -117,7 +119,7 @@ export function createAudienceConnection(source: HTMLElement, callbacks: Callbac
     closedTimer = setInterval(() => {
       if (popup.closed) closed();
     }, 1000);
-    return { target, stream, dispose, focus: () => popup.focus() };
+    return { target, stream, canvas, dispose, focus: () => popup.focus() };
   } catch {
     dispose();
     throw new Error('The model could not be shared. Keep presenting in the main window.');

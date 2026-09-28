@@ -35,6 +35,7 @@ it('projects reusable surface labels, hides the camera-facing surface and dispos
     controls.update();
   });
   const transforms = {};
+  const publicSlots = [...presentation.labels];
   presentation.prepare(study, transforms, 0, false);
   const caption = host.querySelector<HTMLElement>('.tooth-study-model-caption')!;
   const captionHeight = vi.fn(() => 42);
@@ -57,6 +58,16 @@ it('projects reusable surface labels, hides the camera-facing surface and dispos
     parseFloat(labels.find(label => label.textContent === 'Apex')!.style.top) - 24,
   ).toBeGreaterThanOrEqual(12 + 42 + 8);
   expect(host.textContent).toContain(TOOTH_ANATOMY_DISCLAIMER);
+  expect(presentation.caption).toBe(TOOTH_ANATOMY_DISCLAIMER);
+  for (const [index, label] of presentation.labels.entries()) {
+    expect(label).toBe(publicSlots[index]);
+    expect(label.text).toBe(labels[index].textContent);
+    expect(label.visible).toBe(!labels[index].hidden);
+    if (label.visible) {
+      expect(label.x).toBe(parseFloat(labels[index].style.left));
+      expect(label.y).toBe(parseFloat(labels[index].style.top));
+    }
+  }
   const saved = camera.position.clone();
   saved.x += 4;
   camera.position.copy(saved);
@@ -71,6 +82,8 @@ it('projects reusable surface labels, hides the camera-facing surface and dispos
   expect(host.querySelectorAll('.tooth-study-surface-label')[0]).toBe(labels[0]);
   presentation.prepare(null, transforms, 0, true);
   expect(host.querySelector<HTMLDivElement>('.tooth-study-labels')?.hidden).toBe(true);
+  expect(presentation.labels.every(label => !label.visible)).toBe(true);
+  expect(presentation.caption).toBeNull();
   presentation.dispose();
   expect(host.childElementCount).toBe(0);
   controls.dispose();

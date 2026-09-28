@@ -7,6 +7,9 @@ export type AudienceContent = {
   question: string;
   answer: string | null;
   biology?: BiologyView;
+  modelCaption?: string | null;
+  vectorLegend?: boolean;
+  separation?: number | null;
 };
 
 export type AudienceStatus = 'closed' | 'opening' | 'live' | 'error';

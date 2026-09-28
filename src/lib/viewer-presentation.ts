@@ -136,46 +136,7 @@ export function selectionContourMaterial(color: ColorRepresentation) {
   });
 }
 
-export type ToothLabelAnchor = {
-  id: string;
-  x: number;
-  y: number;
-  depth: number;
-  selected: boolean;
-  locked: boolean;
-};
-
-/** Keep labels on stable anchors; omit collisions with selected teeth taking priority. */
-export function layoutToothLabels(anchors: ToothLabelAnchor[], width: number, height: number) {
-  const placed: (ToothLabelAnchor & { width: number; height: number })[] = [];
-  const ordered = [...anchors].sort(
-    (a, b) => Number(b.selected) - Number(a.selected) || a.id.localeCompare(b.id),
-  );
-  for (const anchor of ordered) {
-    const w = anchor.locked ? 77 : 32,
-      h = 22;
-    if (
-      ![anchor.x, anchor.y, anchor.depth].every(Number.isFinite) ||
-      anchor.depth <= -1 ||
-      anchor.depth >= 1 ||
-      anchor.x - w / 2 < 6 ||
-      anchor.x + w / 2 > width - 6 ||
-      anchor.y - h / 2 < 6 ||
-      anchor.y + h / 2 > height - 6
-    )
-      continue;
-    if (
-      placed.some(
-        other =>
-          Math.abs(other.x - anchor.x) < (other.width + w) / 2 + 4 &&
-          Math.abs(other.y - anchor.y) < (other.height + h) / 2 + 3,
-      )
-    )
-      continue;
-    placed.push({ ...anchor, width: w, height: h });
-  }
-  return placed;
-}
+export { layoutToothLabels, type ToothLabelAnchor } from './tooth-label-layout';
 
 export function cameraViewDirection(
   view: 'perspective' | 'occlusal' | 'front' | 'right' | 'left',

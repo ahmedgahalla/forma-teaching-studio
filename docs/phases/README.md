@@ -19,3 +19,5 @@ The later Phase 3 follow-up [3.15 — Lecture presentation and mechanics](phase-
 [3.17 — Cancel obsolete AI requests](phase-3-demo-path/3.17-ai-cancellation.md) follows PR #16 with asynchronous provider cleanup, disconnect handling and shared total deadlines, including the phone bridge.
 
 [3.18 — Consistent lecture entry and view controls](phase-3-demo-path/3.18-lecture-controls.md) follows PR #17 with matching sample-entry commands and compact camera, roots and Fit controls in the lecture heading.
+
+[3.19 — Public model annotations](phase-3-demo-path/3.19-audience-annotations.md) follows PR #18 with explicit public labels, captions and pointer data alongside audience video, preserving privacy and source-replacement cleanup.

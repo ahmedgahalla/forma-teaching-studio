@@ -34,6 +34,10 @@ Explore gains eight mechanics categories with 17 explicit variations using the e
 
 Lecture now retains a small View menu with the five camera presets and roots visibility, plus a Fit button. Their commands share validated actions with typed and recognized local voice input. Fit uses the existing preset camera framing. These changes are implemented on the draft stack; browser layout and device acceptance remain unverified.
 
+## Public audience annotations · 28 September 2026
+
+The [3.19 audience-annotation follow-up](phases/phase-3-demo-path/3.19-audience-annotations.md) carries public tooth numbers, anatomy/study labels and the lecture pointer beside the existing audience video. Schematic tissue captions, revealed mechanics magnification, schematic arrows and display-only jaw separation retain their explanation. This remains a public-only projection: no presenter notes, editing-lock text or command controls are copied. Labels use the model's projected positions; actual video latency, popup playback and projector alignment still need device acceptance.
+
 ## Product promise
 
 A professor can freely explore a clear 3D mouth or open a finished lecture, ask students to predict a change, then demonstrate, reveal and compare while keeping the model central.

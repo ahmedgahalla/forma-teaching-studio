@@ -67,6 +67,7 @@ function Harness({
   error = '',
   exploring = false,
   comparison = null,
+  model = {},
 }: {
   initialScreen?: Screen;
   mode?: 'rehearse' | 'teach';
@@ -74,6 +75,12 @@ function Harness({
   error?: string;
   exploring?: boolean;
   comparison?: LectureComparison | null;
+  model?: Partial<
+    Pick<
+      CaseStudioApi,
+      'mechanics' | 'responseRevealed' | 'magnification' | 'forceVectors' | 'opening' | 'sandbox'
+    >
+  >;
 }) {
   const [screen, setScreen] = useState<Screen>(initialScreen);
   const [lecture, setLecture] = useState(mode === 'teach');
@@ -101,6 +108,7 @@ function Harness({
     sceneInteraction: calls.scene,
     save: calls.save,
     importCase: calls.importCase,
+    ...model,
   } as unknown as CaseStudioApi;
   const teacher = {
     session: {
@@ -255,6 +263,9 @@ it('passes only audience-safe content and keeps projection events outside the ed
     question: 'What moves?',
     answer: null,
     biology: undefined,
+    modelCaption: null,
+    vectorLegend: false,
+    separation: null,
   });
   expect(options.content).not.toHaveProperty('notes');
   await click('Open audience window');
@@ -267,6 +278,41 @@ it('passes only audience-safe content and keeps projection events outside the ed
   await click('Explore');
   expect(calls.audience.mock.lastCall![0].active).toBe(false);
   expect(findButton('Open audience window')).toBeUndefined();
+});
+
+it('shares only revealed mechanics scale and public display qualifications during a question', async () => {
+  const mechanics = {
+    result: { diagnostics: { maxDisplacementMm: 0.0123, maxRotationDeg: 0.025 } },
+    config: { privateName: 'SECRET APPLIANCE' },
+  } as unknown as NonNullable<CaseStudioApi['mechanics']>;
+  const model = { mechanics, magnification: 50, forceVectors: true, opening: 12 };
+  await render({ exploring: true, model });
+  expect(calls.audience.mock.lastCall![0].content).toMatchObject({
+    modelCaption: 'Predict first · calculated response hidden',
+    vectorLegend: false,
+    separation: 12,
+  });
+  await render({ exploring: true, model: { ...model, responseRevealed: true } });
+  const content = calls.audience.mock.lastCall![0].content;
+  expect(content.modelCaption).toBe(
+    'Actual maximum: 0.0123 mm · 0.025° · visualization exaggerated 50×',
+  );
+  expect(content.vectorLegend).toBe(true);
+  expect(JSON.stringify(content)).not.toMatch(/PRIVATE|SECRET|diagnostics|config/);
+  await render({
+    exploring: true,
+    model: {
+      ...model,
+      responseRevealed: true,
+      sandbox: { pending: {} } as CaseStudioApi['sandbox'],
+      opening: 0,
+    },
+  });
+  expect(calls.audience.mock.lastCall![0].content).toMatchObject({
+    modelCaption: null,
+    vectorLegend: false,
+    separation: null,
+  });
 });
 
 it.each([

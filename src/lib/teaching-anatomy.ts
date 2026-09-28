@@ -504,43 +504,4 @@ export function createTeachingAnatomy(model: DentalCase) {
   return result;
 }
 
-/** Bounded label columns leave the centre clear, including narrow lecture screens. */
-export function layoutAnatomyLabels(
-  labels: AnatomyLabel[],
-  camera: THREE.Camera,
-  width: number,
-  height: number,
-) {
-  const compact = width < 520,
-    labelWidth = Math.min(compact ? 121 : 170, Math.max(70, width * 0.3));
-  const top = Math.min(96, height * 0.25),
-    bottom = Math.max(top + 1, height - 48),
-    row = Math.min(42, (bottom - top) / 3);
-  const projected = labels.map(label => {
-    const point = label.position.clone().project(camera);
-    return {
-      ...label,
-      anchorX: ((point.x + 1) * width) / 2,
-      anchorY: ((1 - point.y) * height) / 2,
-      depth: point.z,
-      x: label.side === 'left' ? 9 : width - labelWidth - 9,
-      y: 0,
-      width: labelWidth,
-    };
-  });
-  for (const side of ['left', 'right']) {
-    const column = projected
-      .filter(label => label.side === side)
-      .sort((a, b) => a.anchorY - b.anchorY);
-    column.forEach((label, i) => {
-      label.y = THREE.MathUtils.clamp(
-        label.anchorY - 14,
-        top + i * row,
-        bottom - (column.length - i) * row,
-      );
-    });
-    for (let i = 1; i < column.length; i++)
-      column[i].y = Math.max(column[i].y, column[i - 1].y + row);
-  }
-  return projected;
-}
+export { layoutAnatomyLabels } from './anatomy-label-layout';
