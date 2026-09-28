@@ -1,6 +1,6 @@
 # Handoff — mechanics-aware scene explanations
 
-**Branch:** `ahmed/phase-3-analysis-mechanics` · **Base:** PR #15 at `31a0eca` · **Phase:** [3.16](../phases/phase-3-demo-path/3.16-analysis-mechanics.md) · **PR:** pending
+**Branch:** `ahmed/phase-3-analysis-mechanics` · **Base:** PR #15 at `31a0eca` · **Phase:** [3.16](../phases/phase-3-demo-path/3.16-analysis-mechanics.md) · **PR:** [#16 (draft)](https://github.com/ahmedgahalla/forma-teaching-studio/pull/16)
 
 Implemented the mechanics-context finding from the previous backend review: support coefficients, fixed teeth, anonymous TAD coordinates, elastic endpoints/laws and expander settings now reach Analyze through matching strict contracts. Editing locks and calculated results remain separate. Private appliance names and arbitrary nested metadata are excluded. Frontend and backend must run matching versions; no compatibility defaults invent missing facts.
 

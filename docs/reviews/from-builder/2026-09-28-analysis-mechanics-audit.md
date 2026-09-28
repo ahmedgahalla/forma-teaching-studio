@@ -2,7 +2,7 @@
 
 status: open
 
-**Branch:** `ahmed/phase-3-analysis-mechanics` · **Phase:** [3.16](../../phases/phase-3-demo-path/3.16-analysis-mechanics.md) · **Base:** draft PR #15
+**Branch:** `ahmed/phase-3-analysis-mechanics` · **Phase:** [3.16](../../phases/phase-3-demo-path/3.16-analysis-mechanics.md) · **Base:** draft PR #15 · **PR:** [#16 (draft)](https://github.com/ahmedgahalla/forma-teaching-studio/pull/16)
 
 Please review the explicit frontend/server mechanics-fact contract, especially private-name exclusion, consistent anonymous anchor references, separation of mechanical supports from editing locks and preservation of current/revealed result gating. The provider prompt distinguishes configured loads from calculated outcomes and identifies the missing geometry.
 
