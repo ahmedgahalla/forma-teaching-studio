@@ -1,6 +1,6 @@
 # Handoff — cancellable AI requests
 
-**Branch:** `ahmed/phase-3-ai-cancellation` · **Base:** PR #16 at `a70eccd` · **Phase:** [3.17](../phases/phase-3-demo-path/3.17-ai-cancellation.md) · **PR:** pending
+**Branch:** `ahmed/phase-3-ai-cancellation` · **Base:** PR #16 at `a70eccd` · **Phase:** [3.17](../phases/phase-3-demo-path/3.17-ai-cancellation.md) · **PR:** [#17 (draft)](https://github.com/ahmedgahalla/forma-teaching-studio/pull/17)
 
 Interpretation and Analyze now use async provider calls under a shared request-lifetime/deadline wrapper. It observes disconnect after body consumption, cancels and awaits upstream work, preserves caller cancellation and returns fixed safe errors. One validation repair remains bounded by the original interpretation deadline. The authenticated phone bridge uses the same wrapper, releasing its concurrency slot after cancelled client cleanup.
 
