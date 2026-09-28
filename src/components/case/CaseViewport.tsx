@@ -12,6 +12,7 @@ import { ToothStudyCard } from './ToothStudyCard';
 import { GlossaryCard } from './GlossaryCard';
 import { TOOTH_STUDY_DISPLAY } from '../viewer/tooth-study-display';
 import { CaseViewportDetails } from './CaseViewportDetails';
+import { useMovementTrail } from './useMovementTrail';
 
 export function CaseViewport({
   api,
@@ -25,6 +26,7 @@ export function CaseViewport({
   teachingFocus?: boolean;
 }) {
   const { viewer, sceneInteraction } = api;
+  const movementTrail = useMovementTrail(api);
   const editing = !api.toothStudy && !api.lecture && (api.toolsOpen || api.mobilePanel === 'tools');
   return (
     <>
@@ -96,15 +98,8 @@ export function CaseViewport({
               : api.sandbox.snapshots.find(item => item.name === api.comparisonName)?.transforms)
           }
           lockedIds={api.sandbox.lockedIds}
-          traceFrom={
-            api.traces
-              ? api.mechanics?.reference.transforms ||
-                api.demonstration?.from ||
-                api.caseStart ||
-                api.sandbox.original ||
-                {}
-              : undefined
-          }
+          movementTrail={movementTrail}
+          trailProgress={api.stage / api.stages}
           archCurve={api.curve}
           gums={api.gums}
           labels={api.labels}

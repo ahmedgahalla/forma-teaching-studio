@@ -105,7 +105,7 @@ it('temporarily removes overlays and editing handles from individual tooth prese
     attachments: false,
     mechanicsForces: false,
     archCurve: undefined,
-    traceFrom: undefined,
+    movementTrail: null,
     anatomy: undefined,
     pointed: null,
     landmarks: [],

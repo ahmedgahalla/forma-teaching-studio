@@ -20,7 +20,6 @@ import { createMechanicsVisuals } from '@/lib/mechanics-view';
 import type { MechanicsExperiment } from '@/lib/mechanics/types';
 import { createAttachmentGeometry } from '@/lib/attachments';
 import { createApplianceKit, orderedArchIds, toothArch } from '@/lib/appliances';
-import { toothMatrix } from '@/lib/analysis';
 import { LECTURE_CAMERA_MARGIN, perspectiveFitFrame } from '@/lib/camera-fit';
 import { sameViewerGeometry } from '@/lib/viewer-model';
 import { createWorkflowAppliances, workflowFixedVisibility } from '@/lib/workflow-appliances';
@@ -46,6 +45,7 @@ import { createCameraMotion } from './camera-motion';
 import { createViewerResize } from './viewer-resize';
 import { TOOTH_STUDY_CAMERA_MARGIN } from '@/lib/tooth-study/camera';
 import { createToothPoseUpdater } from './tooth-pose';
+import { createMovementTrailRenderer } from './movement-trail-renderer';
 import {
   createSelectionFramingKey,
   createTeachingFocusMaterials,
@@ -65,6 +65,7 @@ const Viewer = forwardRef<ViewerHandle, Props>(function Viewer(props, ref) {
     labelsHost = useRef<HTMLDivElement>(null);
   const live = useRef(props);
   live.current = props;
+  const trailRenderer = useRef<ReturnType<typeof createMovementTrailRenderer> | null>(null);
   const renderBarrierRef = useRef<ReturnType<typeof createRenderBarrier> | null>(null);
   if (!renderBarrierRef.current) renderBarrierRef.current = createRenderBarrier();
   const renderBarrier = renderBarrierRef.current;
@@ -365,18 +366,11 @@ const Viewer = forwardRef<ViewerHandle, Props>(function Viewer(props, ref) {
     );
     measureLine.renderOrder = 3;
     scene.add(measureLine);
-    const traceGeometry = new THREE.BufferGeometry();
-    traceGeometry.setAttribute(
-      'position',
-      new THREE.BufferAttribute(new Float32Array(props.model.teeth.length * 6), 3),
-    );
-    const traceLines = new THREE.LineSegments(
-      traceGeometry,
-      new THREE.LineBasicMaterial({ color: palette.trace, depthTest: false }),
-    );
-    traceLines.frustumCulled = false;
-    traceLines.renderOrder = 3;
-    scene.add(traceLines);
+    const trails = createMovementTrailRenderer(camera);
+    trails.setPalette(palette);
+    trails.setTrail(live.current.movementTrail);
+    trailRenderer.current = trails;
+    scene.add(trails.group);
     const curveGeometry = new THREE.BufferGeometry(),
       curveLine = new THREE.Line(
         curveGeometry,
@@ -398,7 +392,7 @@ const Viewer = forwardRef<ViewerHandle, Props>(function Viewer(props, ref) {
       ghostMaterial.opacity = next.ghostOpacity;
       markerMaterial.color.set(next.marker);
       measureLine.material.color.set(next.measurement);
-      traceLines.material.color.set(next.trace);
+      trails.setPalette(next);
       curveLine.material.color.set(next.curve);
       const positions = grid.geometry.getAttribute('position'),
         colors = grid.geometry.getAttribute('color');
@@ -829,23 +823,6 @@ const Viewer = forwardRef<ViewerHandle, Props>(function Viewer(props, ref) {
         }
         if (attachments.has(tooth.id)) attachments.get(tooth.id)!.visible = p.attachments;
       }
-      traceLines.visible = !!p.traceFrom;
-      if (p.traceFrom) {
-        const positions = traceGeometry.getAttribute('position');
-        props.model.teeth.forEach((tooth, index) => {
-          const from = toothMatrix(tooth, p.traceFrom!).elements,
-            to = groups.get(tooth.id)!.position,
-            offset = toothArch(tooth.id) === 'lower' ? opening : 0;
-          positions.setXYZ(index * 2, from[12], from[13] - offset, from[14]);
-          positions.setXYZ(
-            index * 2 + 1,
-            visible(tooth.id) ? to.x : from[12],
-            visible(tooth.id) ? to.y : from[13] - offset,
-            visible(tooth.id) ? to.z : from[14],
-          );
-        });
-        positions.needsUpdate = true;
-      }
       curveLine.visible = !!p.archCurve?.length && !cutaway && !p.isolateSelection;
       if (lastCurve !== p.archCurve) {
         curveGeometry.setFromPoints((p.archCurve || []).map(point => new THREE.Vector3(...point)));
@@ -1040,6 +1017,13 @@ const Viewer = forwardRef<ViewerHandle, Props>(function Viewer(props, ref) {
       cameraMotion.update();
       inverseCamera.copy(camera.quaternion).invert();
       camera.updateMatrixWorld();
+      trails.update(
+        p,
+        groups.get(p.selected),
+        sizing.width,
+        sizing.height,
+        dragging || !!p.toothStudy,
+      );
       toothStudy.render(sizing.width, sizing.height);
       toothLabels.render(
         showLabels && !cutaway,
@@ -1138,6 +1122,8 @@ const Viewer = forwardRef<ViewerHandle, Props>(function Viewer(props, ref) {
       toothStudy.dispose();
       anatomyLabels.dispose();
       mechanicsKit.dispose();
+      trails.dispose();
+      if (trailRenderer.current === trails) trailRenderer.current = null;
       workflowKit.dispose();
       removableKit.dispose();
       kit.dispose();
@@ -1165,7 +1151,6 @@ const Viewer = forwardRef<ViewerHandle, Props>(function Viewer(props, ref) {
         attachmentMaterial,
         markerMaterial,
         measureLine.material as THREE.Material,
-        traceLines.material,
         curveLine.material,
         grid.material as THREE.Material,
       ].forEach(m => m.dispose());
@@ -1175,13 +1160,15 @@ const Viewer = forwardRef<ViewerHandle, Props>(function Viewer(props, ref) {
         grid.geometry,
         markerGeometry,
         lineGeometry,
-        traceGeometry,
         curveGeometry,
         ...[...wireMeshes.values()].map(m => m.geometry),
       ].forEach(g => g.dispose());
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps -- intentional dep subset: the effect must not re-run on the excluded values
   }, [props.model]);
+  useEffect(() => {
+    trailRenderer.current?.setTrail(props.movementTrail);
+  }, [props.movementTrail]);
   return (
     <>
       <div

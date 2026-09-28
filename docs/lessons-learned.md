@@ -162,10 +162,11 @@ Numbers 17–19 were checked against the current lessons and the parallel Phase 
 - **Mistake:** the same [integration review](reviews/from-builder/2026-09-27-teacher-lecture-workflow.md) reproduced a related glossary click switching tooth 46 to tooth 16, while typing the same request retained tooth 46.
 - **Root cause:** the button called a context-free authored-action helper rather than the current-study planner already used by text and voice.
 - **Prevention:** route shortcuts through the context-aware helper and compare actual clicked actions with the parsed request in a component regression. The new lecture navigation likewise has click, text and local-speech runtime parity tests.
-- **Status:** automated · **Count:** 3
+- **Status:** automated · **Count:** 4
 
 - **Sample-lecture recurrence:** the visible “Explore this question” button text was absent from local command aliases. Test exact labels through the parser as well as their button actions; the retired preparation phrase is rejected locally. This is automated rather than an unapproved AGENTS amendment.
 - **Sample-entry recurrence:** the [3.18 review](reviews/from-builder/2026-09-28-lecture-control-gaps.md) found the Lecture button had no matching local opening command. Test entry from both case and workflow modes, destination preview rejection, AI preference and whole-request Undo/Redo through the actual provider routing boundary.
+- **Trace-display recurrence:** the [3.20 review](reviews/from-builder/2026-09-28-crown-root-trails.md) caught a runtime-routed toggle still rejected outside Try Mode. Button/parser action equality alone missed the validator restriction. Exercise real plan validation in every visible control context, including prepared and ordinary cases; preserve local-only authority.
 
 ## 22. Replay preflight uses the saved request start
 

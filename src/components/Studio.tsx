@@ -14,7 +14,7 @@ import { getTeachingCase, sampleCaseDemonstration } from '@/lib/teaching-cases';
 import { type ViewerCamera, type ViewerHandle, type ViewName } from './viewer/Viewer';
 import {} from '@/lib/geometry';
 import { anatomicalFrame, emptyPose, type Vec3 } from '@/lib/model';
-import { interpolateTransforms, stageTransforms } from '@/lib/planning';
+import { useDisplayedMotion } from './case/useDisplayedMotion';
 import { archSpans, centreDistance, toothMatrix } from '@/lib/analysis';
 import { toothArch } from '@/lib/appliances';
 import {} from '@/lib/attachments';
@@ -29,7 +29,7 @@ import { sceneAnalysisContext } from '@/lib/scene-analysis';
 import './mechanics/mechanics.css';
 import './case/classroom-workspace.css';
 import { mechanicsCommandContext } from '@/lib/mechanics-commands';
-import { previewPose, archCurvePoints } from '@/lib/try-mode';
+import { archCurvePoints } from '@/lib/try-mode';
 
 import { DEFAULT_ATTACHMENT } from './case/constants';
 import type { ClassroomSnapshot, LessonSnapshot } from './case/types';
@@ -273,25 +273,20 @@ function CaseStudio({ active }: { active: boolean }) {
         ? demonstration.edit.arch
         : toothArch(selected)
       : arch;
-  const geometricShown = useMemo(
-    () =>
-      prepared && scenarioCaseId && scenarioVariantId
-        ? sampleCaseDemonstration(scenarioCaseId, scenarioVariantId, stage / stages)
-        : demonstration
-          ? previewPose(demonstration, stage / stages)
-          : stageTransforms(current, checkpoints, stage, stages, sandbox.original),
-    [
-      prepared,
-      scenarioCaseId,
-      scenarioVariantId,
-      demonstration,
-      current,
-      checkpoints,
-      stage,
-      stages,
-      sandbox.original,
-    ],
-  );
+  const { geometricShown, actualShown, shown, displayedMotion } = useDisplayedMotion({
+    caseId: prepared ? scenarioCaseId : null,
+    variantId: scenarioVariantId,
+    demonstration,
+    current,
+    checkpoints,
+    original: sandbox.original,
+    mechanics,
+    pending: !!sandbox.pending,
+    responseRevealed,
+    magnification,
+    stage,
+    stages,
+  });
   const emptyExperiment = useMemo(
     () =>
       model.demo && model.teeth.every(item => item.calibrated)
@@ -300,29 +295,6 @@ function CaseStudio({ active }: { active: boolean }) {
     [model, current],
   );
   const activeExperiment = mechanics || emptyExperiment;
-  const actualShown = useMemo(
-    () =>
-      mechanics?.result && !sandbox.pending
-        ? interpolateTransforms(
-            mechanics.reference.transforms,
-            mechanics.result.transforms,
-            responseRevealed ? stage / stages : 0,
-          )
-        : geometricShown,
-    [mechanics, geometricShown, responseRevealed, stage, stages, sandbox.pending],
-  );
-  const shown = useMemo(
-    () =>
-      mechanics?.result && !sandbox.pending
-        ? mechanicsDisplayPoses(
-            mechanics.reference.transforms,
-            mechanics.result.transforms,
-            responseRevealed ? stage / stages : 0,
-            magnification,
-          )
-        : geometricShown,
-    [mechanics, geometricShown, responseRevealed, stage, stages, magnification, sandbox.pending],
-  );
   const physicalPoint = useMemo(() => {
     if (!pointed) return null;
     if (pointed.surface === 'gingiva') return pointed;
@@ -633,6 +605,7 @@ function CaseStudio({ active }: { active: boolean }) {
     activeExperiment,
     actualShown,
     shown,
+    displayedMotion,
     physicalPoint,
     mechanicsGhost,
     curve,

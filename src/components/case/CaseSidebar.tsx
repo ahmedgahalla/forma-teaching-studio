@@ -154,7 +154,12 @@ export function CaseSidebar({ api }: { api: CaseStudioApi }) {
           <Toggle
             label="Displacement traces"
             value={api.traces}
-            onChange={() => api.setTraces(!api.traces)}
+            onChange={() =>
+              void api.teaching.execute(
+                [{ kind: 'try-display', target: 'traces', visible: !api.traces }],
+                api.traces ? 'Hide displacement traces' : 'Show displacement traces',
+              )
+            }
           />
           <Toggle
             label="Arch reference curve"

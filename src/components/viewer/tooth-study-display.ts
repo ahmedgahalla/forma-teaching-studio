@@ -10,7 +10,7 @@ export const TOOTH_STUDY_DISPLAY: Partial<ViewerProps> = {
   arch: 'both',
   braces: false,
   attachments: false,
-  traceFrom: undefined,
+  movementTrail: null,
   archCurve: undefined,
   anatomy: undefined,
   removableRetainer: false,
