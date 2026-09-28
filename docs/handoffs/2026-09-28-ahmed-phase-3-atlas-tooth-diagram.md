@@ -1,6 +1,6 @@
 # Handoff — Claude tooth diagram
 
-**Branch:** `ahmed/phase-3-atlas-tooth-diagram` · **PR:** pending draft · **Base:** PR #22 at `0c8e9b2` · **Phase:** [3.23](../phases/phase-3-demo-path/3.23-atlas-tooth-diagram.md).
+**Branch:** `ahmed/phase-3-atlas-tooth-diagram` · **PR:** [#23 (draft)](https://github.com/ahmedgahalla/forma-teaching-studio/pull/23) · **Base:** PR #22 at `0c8e9b2` · **Phase:** [3.23](../phases/phase-3-demo-path/3.23-atlas-tooth-diagram.md).
 
 The bottom Explore chart now uses Claude's original crown/root SVG formulas and bundled tooth dimensions, with proportional widths, quadrant dividers, R/L markers and vertically reflected lower teeth. Existing selection behavior remains. Missing teeth leave blank slots; default cases remain 28 teeth, with wisdom positions available only when the current case contains them. There is no new model import, lecture behavior change or producer-workspace edit.
 
