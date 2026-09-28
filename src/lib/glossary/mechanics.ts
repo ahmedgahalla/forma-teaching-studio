@@ -7,7 +7,7 @@ export const MECHANICS_GLOSSARY: readonly GlossaryContent[] = [
     term: 'Anchorage',
     aliases: ['orthodontic anchorage', 'anchor age'],
     definition:
-      'Anchorage is resistance to unwanted tooth movement during an orthodontic movement. Forma’s prepared example compares authored anterior and posterior movement allocations, without calculating biological anchorage.',
+      'Anchorage is resistance to unwanted tooth movement during an orthodontic movement. Nael Teaching Studio’s prepared example compares authored anterior and posterior movement allocations, without calculating biological anchorage.',
     show: caseVisual('anchorage-space-closure', 'posterior-held'),
     related: ['translation', 'periodontal-ligament'],
   },
@@ -25,7 +25,7 @@ export const MECHANICS_GLOSSARY: readonly GlossaryContent[] = [
     term: 'Tipping',
     aliases: ['tip', 'tooth tipping', 'tilting'],
     definition:
-      'Tipping changes a tooth’s inclination, so crown and root points follow different paths around a centre of rotation. Forma shows an authored geometric example rather than predicting a clinical centre of rotation.',
+      'Tipping changes a tooth’s inclination, so crown and root points follow different paths around a centre of rotation. Nael Teaching Studio shows an authored geometric example rather than predicting a clinical centre of rotation.',
     show: caseVisual('movement-types', 'tip'),
     related: ['translation', 'torque', 'rotation'],
   },
@@ -34,7 +34,7 @@ export const MECHANICS_GLOSSARY: readonly GlossaryContent[] = [
     term: 'Torque',
     aliases: ['root torque', 'tooth torque', 'tork'],
     definition:
-      'In orthodontic teaching, torque refers to buccolingual root control and tooth inclination. Forma’s example shows an authored inclination change, without calculating the force system or tissue response that produces it.',
+      'In orthodontic teaching, torque refers to buccolingual root control and tooth inclination. Nael Teaching Studio’s example shows an authored inclination change, without calculating the force system or tissue response that produces it.',
     show: caseVisual('movement-types', 'torque'),
     related: ['tipping', 'translation', 'buccal'],
   },
@@ -52,7 +52,7 @@ export const MECHANICS_GLOSSARY: readonly GlossaryContent[] = [
     term: 'Intrusion',
     aliases: ['tooth intrusion', 'dental intrusion'],
     definition:
-      'Intrusion is movement of a tooth rootward into its supporting socket, approximately along its long axis. Forma illustrates the displacement without predicting the supporting tissues’ response.',
+      'Intrusion is movement of a tooth rootward into its supporting socket, approximately along its long axis. Nael Teaching Studio illustrates the displacement without predicting the supporting tissues’ response.',
     show: caseVisual('deepbite', 'anterior-intrusion'),
     related: ['extrusion', 'deep-bite', 'apex'],
   },
@@ -70,7 +70,7 @@ export const MECHANICS_GLOSSARY: readonly GlossaryContent[] = [
     term: 'Retention',
     aliases: ['orthodontic retention', 'retaining teeth'],
     definition:
-      'Retention is the maintenance of tooth positions after active movement. Forma’s passive holding example keeps the authored arrangement still; it does not prescribe a retainer or a wear schedule.',
+      'Retention is the maintenance of tooth positions after active movement. Nael Teaching Studio’s passive holding example keeps the authored arrangement still; it does not prescribe a retainer or a wear schedule.',
     show: caseVisual('removable-retention', 'passive-hold'),
     related: ['translation', 'crowding', 'diastema'],
   },

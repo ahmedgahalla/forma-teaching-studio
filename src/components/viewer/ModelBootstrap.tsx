@@ -38,7 +38,7 @@ export default function ModelBootstrap({ children }: { children: ReactNode }) {
         <Box size={36} />
       </div>
       <span className="model-bootstrap-brand">
-        forma <span>TEACHING STUDIO</span>
+        Nael <span>Teaching Studio</span>
       </span>
       <h1>
         {state === 'loading' ? 'Preparing your teaching model' : 'The refined model could not load'}

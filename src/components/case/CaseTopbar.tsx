@@ -54,9 +54,9 @@ export function CaseTopbar({
 
   return (
     <header className="topbar">
-      <div className="brand" aria-label="Forma Teaching Studio">
+      <div className="brand" aria-label="Nael Teaching Studio">
         <span className="atlas-brand-name">
-          Forma <em>Teaching Studio</em>
+          Nael <em>Teaching Studio</em>
         </span>
         <span className="atlas-brand-caption">Explore anatomy. Explain movement.</span>
       </div>

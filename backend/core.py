@@ -31,7 +31,7 @@ def provider_error(error: APIError) -> HTTPException:
     status = getattr(error, "status_code", None)
     provider = provider_label()
     if status == 401:
-        return HTTPException(503, f"{provider} rejected the backend API key. Replace OPENAI_API_KEY on the computer running Forma and restart its backend. Local commands still work.")
+        return HTTPException(503, f"{provider} rejected the backend API key. Replace OPENAI_API_KEY on the computer running Nael Teaching Studio and restart its backend. Local commands still work.")
     if status == 429:
         if getattr(error, "code", None) in ("insufficient_quota", "billing_hard_limit_reached"):
             return HTTPException(429, f"{provider} has no available quota. Check its API billing and usage limits; ChatGPT subscription usage is separate. Local commands still work.")

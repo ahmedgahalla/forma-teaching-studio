@@ -28,7 +28,7 @@ export const gumBindingDescriptor = (model: DentalCase) =>
       ? [describe(teeth), describe(teeth.filter(tooth => !['14', '24'].includes(tooth.id)))]
       : [describe(teeth)];
   });
-const invalid = () => new Error('The model files do not match. Reload Forma to try again.');
+const invalid = () => new Error('The model files do not match. Reload the app to try again.');
 // Corruption/staleness check, not a security signature. Works on offline LAN HTTP too.
 export function gumBindingChecksum(bytes: Uint8Array) {
   let hash = 2166136261;

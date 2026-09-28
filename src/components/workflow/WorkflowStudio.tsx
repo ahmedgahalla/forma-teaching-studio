@@ -309,12 +309,12 @@ export default function WorkflowStudio({ active }: { active: boolean }) {
           className="brand"
           href="#"
           onClick={e => e.preventDefault()}
-          aria-label="Forma workflow classroom"
+          aria-label="Nael Teaching Studio workflow classroom"
         >
           <span className="brand-icon">
             <Layers3 size={21} />
           </span>
-          forma
+          Nael
           <span className="brand-divider" />
           <span className="brand-sub">WORKFLOW CLASSROOM</span>
         </a>
