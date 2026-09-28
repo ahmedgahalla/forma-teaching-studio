@@ -90,6 +90,7 @@ export function setupToothStudy() {
     attachments: false,
     grid: false,
     opening: 0,
+    jawOpen: false,
     note: vi.fn(),
     busy: false,
   };
@@ -148,6 +149,8 @@ export function setupToothStudy() {
     workflowId: null,
     stepIndex: 0,
     synthetic: api.model.demo,
+    jawAvailable: api.model.asset === 'claude-atlas-v1',
+    jawOpen: api.jawOpen,
     glossaryId: api.glossaryId,
     selected: api.selected,
     selectedIds: api.selectedIds,

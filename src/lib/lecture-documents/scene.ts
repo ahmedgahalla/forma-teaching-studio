@@ -27,6 +27,7 @@ const setupFields = [
 function validateSetup(raw: unknown, ids: Set<string>): LectureSetup {
   const value = object(raw);
   fields(value, setupFields, [
+    'jawOpen',
     'mechanicsResponse',
     'responseRevealed',
     'predictResponse',

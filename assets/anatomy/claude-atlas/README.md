@@ -137,3 +137,27 @@ Missing teeth retain empty proportional slots. The ordinary model remains 28 tee
 with wisdom teeth can use all 32 diagram positions. SVG drawings are illustrative atlas symbols,
 not projections of a patient's anatomy. Exact path-data parity does not establish rendered pixel
 equivalence; browser and DPR acceptance remain pending.
+
+## Jaw opening and selection glow
+
+Phase 3.26 ports the producer's `web/src/app/model.js` hinge transform and
+`web/src/app/materials.js` selection overlay from the same owner-authorized workspace,
+read on 2026-09-28. Source SHA256 values:
+
+- `model.js`: `37a977e4bcc3c70ab309b5abf5e3976ef0490d72f8fdbd6848db2f35dad7f3bf`.
+- `materials.js`: `8ee4a1972d2fdeddbf807a75769788297a0a40e2feed713fbf2f7b136b712351`.
+
+The bundled metadata supplies the hinge `[0, 39.2, -77.8]`, axis `[1, 0, 0]` and
+14-degree open pose. Forma applies that rigid display transform to the lower teeth,
+gingiva and attached overlays, then applies its existing independent vertical separation.
+Canonical tooth poses, saved mechanics and tissue-deformation inputs remain unchanged.
+The two closed/open poses are deterministic; the producer's 650 ms jaw tween is not ported.
+
+The selection overlay retains the producer's Fresnel additive surface glow: color
+`0x8fc3e0`, base `0.02`, rim `0.6`, front faces, depth test without depth writes,
+polygon offset `(-1, -4)` and render order `10`. It leaves enamel materials intact,
+has no raycast and hides with isolated teeth. It uses shared material resources and
+existing geometry, with no bloom pass. Source and CPU tests do not establish visual
+equivalence on a GPU; browser, theme/projector and DPR acceptance remain outstanding.
+
+No model, metadata, gum-binding payload or teaching-case audit data changed in this port.

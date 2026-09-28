@@ -25,6 +25,8 @@ export function teachingActionMode(
 export function interpreterTeachingContext(context: TeachingContext): TeachingContext {
   const wire = { ...context };
   for (const field of [
+    'jawAvailable',
+    'jawOpen',
     'caseId',
     'caseVariantId',
     'caseExploring',

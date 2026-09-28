@@ -1,16 +1,19 @@
 import {
-  BackSide,
+  AdditiveBlending,
   Box3,
   Color,
+  FrontSide,
+  Mesh,
   ShaderMaterial,
-  Vector2,
   Vector3,
-  type ColorRepresentation,
+  type BufferGeometry,
+  type Group,
 } from 'three';
 import type { DentalCase } from './geometry';
 import type { Transforms } from './model';
 import { toothMatrix } from './analysis';
 import { toothArch } from './appliances';
+import { applyJawMatrix, applyJawPoint } from './jaw-opening';
 
 export function isToothVisible(
   id: string,
@@ -35,13 +38,14 @@ export function displayedToothBounds(
   ids: string[],
   roots: boolean,
   opening: number,
+  jawOpen = false,
 ) {
   const bounds = new Box3(),
     selected = new Set(ids);
   for (const tooth of model.teeth) {
     if (!selected.has(tooth.id)) continue;
     const matrix = toothMatrix(tooth, transforms);
-    if (toothArch(tooth.id) === 'lower') matrix.elements[13] -= opening;
+    if (toothArch(tooth.id) === 'lower') applyJawMatrix(matrix, jawOpen).elements[13] -= opening;
     for (const geometry of [
       tooth.geometry,
       ...(roots && tooth.rootGeometry ? [tooth.rootGeometry] : []),
@@ -64,13 +68,14 @@ export function* displayedToothPoints(
   ids: string[],
   roots: boolean,
   opening: number,
+  jawOpen = false,
 ) {
   const selected = new Set(ids),
     point = new Vector3();
   for (const tooth of model.teeth) {
     if (!selected.has(tooth.id)) continue;
     const matrix = toothMatrix(tooth, transforms);
-    if (toothArch(tooth.id) === 'lower') matrix.elements[13] -= opening;
+    if (toothArch(tooth.id) === 'lower') applyJawMatrix(matrix, jawOpen).elements[13] -= opening;
     for (const geometry of [
       tooth.geometry,
       ...(roots && tooth.rootGeometry ? [tooth.rootGeometry] : []),
@@ -90,50 +95,87 @@ export function* displayedFitPoints(
   roots: boolean,
   opening: number,
   includeGums: boolean,
+  jawOpen = false,
 ) {
-  yield* displayedToothPoints(model, transforms, ids, roots, opening);
+  yield* displayedToothPoints(model, transforms, ids, roots, opening, jawOpen);
   if (!includeGums) return;
   const arches = new Set(ids.map(toothArch)),
     point = new Vector3();
   for (const gum of model.gums) {
     if (gum.arch && !arches.has(gum.arch)) continue;
     const positions = gum.geometry.getAttribute('position');
-    const y = gum.position[1] - (gum.arch === 'lower' ? opening : 0);
     for (let i = 0; i < positions.count; i++) {
       point.fromBufferAttribute(positions, i);
       point.x += gum.position[0];
-      point.y += y;
+      point.y += gum.position[1];
       point.z += gum.position[2];
+      if (gum.arch === 'lower') applyJawPoint(point, jawOpen).y -= opening;
       yield point;
     }
   }
 }
 
-/** A selected-only back-face silhouette; no duplicate geometry or full-screen pass. */
-export function selectionContourMaterial(color: ColorRepresentation) {
+/** Claude Atlas' additive surface glow; the natural enamel material stays untouched. */
+export function selectionGlowMaterial() {
   return new ShaderMaterial({
+    name: 'tooth-selection-glow',
     uniforms: {
-      color: { value: new Color(color) },
-      viewport: { value: new Vector2(1, 1) },
-      thickness: { value: 1.6 },
+      uColor: { value: new Color(0x8fc3e0) },
+      uBase: { value: 0.02 },
+      uRim: { value: 0.6 },
     },
-    side: BackSide,
+    side: FrontSide,
+    transparent: true,
+    blending: AdditiveBlending,
     depthTest: true,
     depthWrite: false,
+    polygonOffset: true,
+    polygonOffsetFactor: -1,
+    polygonOffsetUnits: -4,
     vertexShader: `
-      uniform vec2 viewport;
-      uniform float thickness;
+      varying vec3 vN;
+      varying vec3 vV;
       void main() {
-        vec4 viewPosition = modelViewMatrix * vec4(position, 1.0);
-        vec3 viewNormal = normalize(normalMatrix * normal);
-        vec4 projected = projectionMatrix * viewPosition;
-        vec2 direction = (projectionMatrix * vec4(viewNormal, 0.0)).xy;
-        direction /= max(length(direction), 0.00001);
-        projected.xy += direction * (2.0 * thickness / viewport) * projected.w;
-        gl_Position = projected;
+        vec4 mv = modelViewMatrix * vec4(position, 1.0);
+        vN = normalize(normalMatrix * normal);
+        vV = -mv.xyz;
+        gl_Position = projectionMatrix * mv;
       }`,
-    fragmentShader: 'uniform vec3 color; void main() { gl_FragColor = vec4(color, 1.0); }',
+    fragmentShader: `
+      uniform vec3 uColor;
+      uniform float uBase, uRim;
+      varying vec3 vN;
+      varying vec3 vV;
+      void main() {
+        float f = pow(1.0 - clamp(dot(normalize(vN), normalize(vV)), 0.0, 1.0), 2.0);
+        gl_FragColor = vec4(uColor * (uBase + uRim * f), 1.0);
+        #include <tonemapping_fragment>
+        #include <colorspace_fragment>
+      }`,
   });
+}
+
+/** Shares scene-owned geometry/material; poses come from the tooth group, never copied per frame. */
+export function createSelectionGlow(
+  group: Group,
+  crownGeometry: BufferGeometry,
+  rootGeometry: BufferGeometry | undefined,
+  material: ShaderMaterial,
+) {
+  const add = (geometry: BufferGeometry) => {
+    const mesh = new Mesh(geometry, material);
+    mesh.visible = false;
+    mesh.renderOrder = 10;
+    mesh.raycast = () => {};
+    group.add(mesh);
+    return mesh;
+  };
+  const crown = add(crownGeometry),
+    root = rootGeometry ? add(rootGeometry) : undefined;
+  return (selected: boolean, showRoots: boolean, isolated = false) => {
+    crown.visible = selected && group.visible && !isolated;
+    if (root) root.visible = crown.visible && showRoots;
+  };
 }
 
 export { layoutToothLabels, type ToothLabelAnchor } from './tooth-label-layout';

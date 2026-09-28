@@ -41,6 +41,7 @@ export function applyCaseLoadKinds(
     api.setLabels(false);
     api.setAnatomy({ ...DEFAULT_ANATOMY });
     api.setOpening(0);
+    api.setJawOpen(false);
     api.setLessonId('');
     api.setLessonStep(-1);
     refs.lessonSnapshots.current = [];
@@ -119,6 +120,7 @@ export function applyCaseLoadKinds(
       api.setTraces(false);
       api.setCurveVisible(false);
       api.setOpening(0);
+      api.setJawOpen(false);
       api.setLandmarks([]);
       api.setMeasureMode(false);
       api.setMeasureTo('');
@@ -194,6 +196,7 @@ export function applyCaseLoadKinds(
         api.setCurveVisible(false);
         api.setLandmarks([]);
         api.setOpening(0);
+        api.setJawOpen(false);
         api.setSelectedIds(api.caseDefinition.selectedIds);
         api.setSelected(api.caseDefinition.selectedIds[0]);
         api.setMobilePanel('model');
@@ -215,6 +218,7 @@ export function applyCaseLoadKinds(
           api.setStage(previous.stage);
           api.setStages(previous.stages);
           api.setOpening(previous.opening);
+          api.setJawOpen(previous.jawOpen ?? false);
           api.setAnatomy(saved.anatomy);
           api.setApplianceDisplay(saved.appliance);
           api.setBracketStyle(saved.bracketStyle);

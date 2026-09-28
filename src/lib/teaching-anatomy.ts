@@ -4,6 +4,7 @@ import { anatomicalFrame, type Transforms } from './model';
 import { toothMatrix } from './analysis';
 import { toothArch } from './appliances';
 import { supportsTeachingAnatomy } from './anatomy-capability';
+import { anatomyClipPlanes, anatomyDisplayMatrix } from './teaching-anatomy-display';
 
 export type AnatomyViewState = {
   bone: boolean;
@@ -32,6 +33,7 @@ type Options = {
   selected: string;
   arch?: 'upper' | 'lower' | 'both';
   opening?: number;
+  jawOpen?: boolean;
   roots?: boolean;
   gums?: boolean;
 };
@@ -367,8 +369,7 @@ export function createTeachingAnatomy(model: DentalCase) {
     if (!state || (!state.bone && !state.ligament && !state.cutaway)) return;
     if (!Number.isFinite(state.opacity) || state.opacity < 0 || state.opacity > 1)
       throw new Error('Bone opacity must be between 0 and 1.');
-    const cutaway = anatomyCutawayTooth(model, state, options.selected),
-      opening = options.opening || 0;
+    const cutaway = anatomyCutawayTooth(model, state, options.selected);
     if (state.cutaway && !cutaway) return;
     result.cutawayTooth = cutaway;
     boneMaterial.opacity = state.opacity;
@@ -383,8 +384,11 @@ export function createTeachingAnatomy(model: DentalCase) {
       )
         continue;
       const entry = cached(tooth, !!cutaway),
-        offset = new THREE.Vector3(...tooth.position);
-      if (toothArch(tooth.id) === 'lower') offset.y -= opening;
+        reference = anatomyDisplayMatrix(
+          new THREE.Matrix4().makeTranslation(...tooth.position),
+          toothArch(tooth.id) === 'lower',
+          options,
+        );
       for (const [name, shown, geometries, material] of [
         ['bone', state.bone, entry.bone, boneMaterial],
         ['ligament', state.ligament, entry.ligament, ligamentMaterial],
@@ -393,9 +397,9 @@ export function createTeachingAnatomy(model: DentalCase) {
         geometries.forEach((geometry, i) => {
           const mesh = new THREE.Mesh(geometry, material);
           mesh.name = `${name}-${tooth.id}-${i}`;
-          mesh.position.copy(offset);
+          mesh.applyMatrix4(reference);
           group.add(mesh);
-          result.bounds.union(geometry.boundingBox!.clone().translate(offset));
+          result.bounds.union(geometry.boundingBox!.clone().applyMatrix4(reference));
         });
       }
     }
@@ -405,10 +409,13 @@ export function createTeachingAnatomy(model: DentalCase) {
         positions = root.getAttribute('position'),
         rootBox = new THREE.Box3().setFromBufferAttribute(positions as THREE.BufferAttribute);
       const rootCenter = rootBox.getCenter(new THREE.Vector3()),
-        reference = new THREE.Vector3(...cutaway.position);
-      if (toothArch(cutaway.id) === 'lower') reference.y -= opening;
-      const posed = toothMatrix(cutaway, transforms);
-      if (toothArch(cutaway.id) === 'lower') posed.elements[13] -= opening;
+        lower = toothArch(cutaway.id) === 'lower',
+        reference = anatomyDisplayMatrix(
+          new THREE.Matrix4().makeTranslation(...cutaway.position),
+          lower,
+          options,
+        ),
+        posed = anatomyDisplayMatrix(toothMatrix(cutaway, transforms), lower, options);
       const sourceBounds = rootBox
         .clone()
         .union(
@@ -416,30 +423,9 @@ export function createTeachingAnatomy(model: DentalCase) {
             cutaway.geometry.getAttribute('position') as THREE.BufferAttribute,
           ),
         )
-        .expandByScalar(2.3)
-        .translate(reference);
-      const center = sourceBounds.getCenter(new THREE.Vector3()),
-        half = sourceBounds.getSize(new THREE.Vector3()).multiplyScalar(0.5);
-      // World-space positive half-spaces keep only this socket's gingival fragment.
-      for (const [axis, extent] of [
-        [new THREE.Vector3(1, 0, 0), half.x],
-        [new THREE.Vector3(0, 1, 0), half.y],
-        [new THREE.Vector3(0, 0, 1), half.z],
-      ] as const)
-        for (const sign of [-1, 1]) {
-          const normal = axis.clone().multiplyScalar(sign);
-          result.gumPlanes.push(
-            new THREE.Plane().setFromNormalAndCoplanarPoint(
-              normal,
-              center.clone().addScaledVector(normal, -extent),
-            ),
-          );
-        }
-      const buccalPlane = new THREE.Plane().setFromNormalAndCoplanarPoint(
-        frame.buccal.clone().negate(),
-        reference.clone().addScaledVector(frame.buccal, rootCenter.dot(frame.buccal)),
-      );
-      result.gumPlanes.push(buccalPlane);
+        .expandByScalar(2.3);
+      result.gumPlanes = anatomyClipPlanes(sourceBounds, frame.buccal, rootCenter, reference);
+      sourceBounds.applyMatrix4(reference);
       const envelopes = cached(cutaway, true).profiles,
         profiles = envelopes[0].sections,
         neck = profiles[0];
@@ -460,18 +446,23 @@ export function createTeachingAnatomy(model: DentalCase) {
         label(
           'Gingiva',
           COLORS.gum,
-          fromFrame(frame, neck.x - neck.rx - 1, neck.axial - 0.2, neck.z - 0.5).add(reference),
+          fromFrame(frame, neck.x - neck.rx - 1, neck.axial - 0.2, neck.z - 0.5).applyMatrix4(
+            reference,
+          ),
           'right',
         );
         for (const gum of model.gums.filter(gum => gum.arch === toothArch(cutaway.id))) {
-          const offset = new THREE.Vector3(...gum.position);
-          if (gum.arch === 'lower') offset.y -= opening;
+          const gumMatrix = anatomyDisplayMatrix(
+            new THREE.Matrix4().makeTranslation(...gum.position),
+            gum.arch === 'lower',
+            options,
+          );
           result.bounds.union(
             new THREE.Box3()
               .setFromBufferAttribute(
                 gum.geometry.getAttribute('position') as THREE.BufferAttribute,
               )
-              .translate(offset)
+              .applyMatrix4(gumMatrix)
               .intersect(sourceBounds),
           );
         }
@@ -480,14 +471,18 @@ export function createTeachingAnatomy(model: DentalCase) {
         label(
           'Periodontal ligament',
           COLORS.ligament,
-          fromFrame(frame, middle.x + middle.rx + 0.27, middle.axial, middle.z).add(reference),
+          fromFrame(frame, middle.x + middle.rx + 0.27, middle.axial, middle.z).applyMatrix4(
+            reference,
+          ),
           'right',
         );
       if (state.bone)
         label(
           'Supporting bone',
           COLORS.bone,
-          fromFrame(frame, middle.x + middle.rx + 1.3, middle.axial, middle.z).add(reference),
+          fromFrame(frame, middle.x + middle.rx + 1.3, middle.axial, middle.z).applyMatrix4(
+            reference,
+          ),
           'right',
         );
       result.bounds.union(

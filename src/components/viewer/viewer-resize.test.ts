@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 import { afterEach, expect, it, vi } from 'vitest';
-import { Box3, PerspectiveCamera, Vector2, Vector3, type WebGLRenderer } from 'three';
+import { Box3, PerspectiveCamera, Vector3, type WebGLRenderer } from 'three';
 import type { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js';
 import type { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import { createViewerResize } from './viewer-resize';
@@ -35,8 +35,7 @@ it('resizes actual canvas targets, preserves relative zoom and disposes its obse
   const controls = { target: new Vector3(), maxDistance: 3000 } as OrbitControls;
   const renderer = { setSize: vi.fn() },
     composer = { setSize: vi.fn() };
-  const viewport = new Vector2(),
-    finish = vi.fn();
+  const finish = vi.fn();
   const fit = vi.fn((_direction: Vector3, aspect: number) => {
     expect(finish).toHaveBeenCalled();
     return { distance: 100 / aspect, target: new Vector3() };
@@ -47,14 +46,12 @@ it('resizes actual canvas targets, preserves relative zoom and disposes its obse
     controls,
     renderer as unknown as WebGLRenderer,
     composer as unknown as EffectComposer,
-    viewport,
     finish,
     fit,
   );
   expect(observe).toHaveBeenCalledWith(host);
   sizing.resize();
   expect(camera.position.toArray()).toEqual([0, 100, 0]);
-  expect(viewport.toArray()).toEqual([800, 400]);
   expect(renderer.setSize).toHaveBeenCalledWith(800, 400);
   expect(composer.setSize).toHaveBeenCalledWith(800, 400);
   sizing.resize();
@@ -102,7 +99,6 @@ function framedResize(margin = LECTURE_CAMERA_MARGIN) {
     controls,
     renderer as unknown as WebGLRenderer,
     composer as unknown as EffectComposer,
-    new Vector2(),
     vi.fn(),
     fit,
   );

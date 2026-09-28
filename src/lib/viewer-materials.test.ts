@@ -36,6 +36,15 @@ describe('lecture tissue materials', () => {
       midnight = createDentalMaterials(true, 'midnight');
     for (const key of ['enamel', 'gumMaterial', 'rootMaterial'] as const)
       expect(clinical[key].color.equals(midnight[key].color)).toBe(true);
+    for (const materials of [clinical, midnight]) {
+      expect(materials.selectionMaterial.uniforms.uColor.value.getHex()).toBe(0x8fc3e0);
+      expect(materials.selectionMaterial.uniforms.uBase.value).toBe(0.02);
+      expect(materials.selectionMaterial.uniforms.uRim.value).toBe(0.6);
+    }
+    expect(clinical.selectionMaterial).not.toBe(midnight.selectionMaterial);
+    expect(clinical.selectionMaterial.uniforms.uColor.value).not.toBe(
+      midnight.selectionMaterial.uniforms.uColor.value,
+    );
     const source = new THREE.BufferGeometry().setFromPoints([
       new THREE.Vector3(0, 0, 0),
       new THREE.Vector3(0, 5, 0),

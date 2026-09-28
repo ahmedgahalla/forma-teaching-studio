@@ -132,6 +132,8 @@ export function preflightToothStudy(
   let selectedIds = selected,
     tooth = studied;
   for (const action of actions) {
+    if (action.kind === 'jaw' && tooth)
+      throw new Error('Return to the mouth before opening the jaw.');
     if (action.kind === 'select') selectedIds = action.teeth;
     if (action.kind === 'focus') selectedIds = [action.tooth];
     if (action.kind !== 'tooth-study') continue;

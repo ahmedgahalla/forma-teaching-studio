@@ -1,4 +1,5 @@
 import { validateLessonAction } from './lesson-controls';
+import { validateJawAction } from './jaw';
 import { validatePresentationAction } from './presentation';
 import { mechanicsExample } from '../mechanics-examples/catalog';
 import { getGlossaryEntry } from '../glossary';
@@ -24,6 +25,8 @@ export function validateAction(value: unknown, context: TeachingContext): Teachi
   const action = record(value),
     only = (...names: string[]) => fields(action, ['kind', ...names]);
   switch (action.kind) {
+    case 'jaw':
+      return validateJawAction(action, context);
     case 'mechanics-example': {
       only('id', 'variant');
       const example = mechanicsExample(action.id, action.variant);

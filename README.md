@@ -24,6 +24,8 @@ Run `npm run demo` after setup to build, verify local assets and open Nael Teach
 
 For optional OpenAI commands and explanations, configure the private backend settings and use `npm run start:ai` to start the app and AI backend together. See [local AI setup](backend/README.md#start-the-app-and-local-ai-together), including port 3012 and reconnecting saved profiles. The [Professor Nael pitch](docs/pitch/README.md) records the narrated feature-overview video and its production source.
 
+On the Atlas model, choose **Open jaw / Close jaw** in Explore's **Display** panel or Lecture's **View** menu. You can also type or say “open the jaw” or “close the mouth.” The lower teeth, gum and attached appliances follow Claude's authored hinge; this display change preserves tooth movements and mechanics and supports Undo. Selected teeth keep their enamel shading with Claude's soft surface glow. See [jaw and selection scope](docs/phases/phase-3-demo-path/3.26-jaw-and-selection-glow.md).
+
 In Explore, open **Tools → Mechanics examples** for eight teaching categories with 17 variations: crown pull, counter-couple, axial rotation, inclination, intrusion/extrusion, molar load balance, anchorage and rectangular-wire effects. Ask the displayed prediction question, then choose **Load and calculate**; the existing Predict before reveal option can keep results hidden. These are initial responses in the synthetic engineering model; biology diagrams remain separate qualitative explanations. See [scope, research and verification](docs/phases/phase-3-demo-path/3.15-lecture-mechanics.md).
 
 ## Conversational control and model explanation
@@ -89,7 +91,7 @@ Load **Dental Class I**, **Class II division 1**, **Class II division 2**, or **
 
 ## Interactive university lectures
 
-Version 0.11 improves anatomy contrast, keeps selected teeth in natural enamel with a thin contour, fits the whole selected group, adds a left camera view, and lets you isolate the selection. **Lecture mode** now places professor controls beside the model on wide screens: playback, direct progress seeking, speed, question/reveal, original overlay and anatomy visibility. A screen pointer directs attention without selecting or moving teeth. The same controls work in appliance and anatomy workflows.
+The viewer improves anatomy contrast, keeps selected teeth in natural enamel with a soft surface glow, fits the whole selected group, adds a left camera view, and lets you isolate the selection. **Lecture mode** now places professor controls beside the model on wide screens: playback, direct progress seeking, speed, question/reveal, original overlay and anatomy visibility. A screen pointer directs attention without selecting or moving teeth. The same controls work in appliance and anatomy workflows.
 
 Read the [Professor guide](docs/PROFESSOR_GUIDE.md). The product is a teaching sandbox with optional authored demonstrations. The case library still requires orthodontic educator review.
 

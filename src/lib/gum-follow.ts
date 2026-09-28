@@ -1,7 +1,15 @@
-import { BufferAttribute, Matrix4, Vector3, type BufferGeometry, type Object3D } from 'three';
+import {
+  BufferAttribute,
+  Matrix4,
+  Quaternion,
+  Vector3,
+  type BufferGeometry,
+  type Object3D,
+} from 'three';
 import type { DentalTooth, Gum } from './geometry';
 import { gumInfluences } from './gum-influences';
 import { createGumNormalUpdater } from './gum-normals';
+import { inverseJawPoint, inverseJawQuaternion } from './jaw-opening';
 
 /** Deform only a viewer-owned copy. Poses are the displayed poses, including any response magnification. */
 export function createGumFollower(
@@ -30,7 +38,8 @@ export function createGumFollower(
     moved = new Vector3(),
     unit = new Vector3(1, 1, 1);
   const pose = new Float64Array(7);
-  return (opening: number) => {
+  const rotation = new Quaternion();
+  return (opening: number, jawOpen = false) => {
     let changed = false,
       count = 0,
       atRest = true;
@@ -38,17 +47,23 @@ export function createGumFollower(
       const tooth = teeth[t],
         group = groups.get(tooth.id)!;
       point.copy(group.position);
-      if (gum.arch === 'lower') point.y += opening;
+      rotation.copy(group.quaternion);
+      if (gum.arch === 'lower') {
+        point.y += opening;
+        inverseJawPoint(point, jawOpen);
+        inverseJawQuaternion(rotation, jawOpen);
+      }
       pose[0] = point.x - tooth.position[0];
       pose[1] = point.y - tooth.position[1];
       pose[2] = point.z - tooth.position[2];
-      pose[3] = group.quaternion.x;
-      pose[4] = group.quaternion.y;
-      pose[5] = group.quaternion.z;
-      pose[6] = group.quaternion.w;
+      pose[3] = rotation.x;
+      pose[4] = rotation.y;
+      pose[5] = rotation.z;
+      pose[6] = rotation.w;
       let toothChanged = false;
       for (let c = 0; c < 7; c++) {
         if (Math.abs(pose[c]) < 1e-12) pose[c] = 0;
+        if (c === 6 && Math.abs(pose[c] - 1) < 1e-12) pose[c] = 1;
         if (pose[c] !== previous[t * 7 + c]) toothChanged = true;
         previous[t * 7 + c] = pose[c];
         if (pose[c] !== (c === 6 ? 1 : 0)) atRest = false;
@@ -68,7 +83,7 @@ export function createGumFollower(
         tooth.position[1] + pose[1],
         tooth.position[2] + pose[2],
       );
-      const matrix = matrices[t].compose(point, group.quaternion, unit),
+      const matrix = matrices[t].compose(point, rotation, unit),
         e = matrix.elements;
       const [x, y, z] = tooth.position;
       e[12] -= e[0] * x + e[4] * y + e[8] * z;

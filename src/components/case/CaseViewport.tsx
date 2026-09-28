@@ -101,6 +101,7 @@ export function CaseViewport({
           movementTrail={movementTrail}
           trailProgress={api.stage / api.stages}
           archCurve={api.curve}
+          archCurveArch={api.curveArch}
           gums={api.gums}
           labels={api.labels}
           grid={api.grid}
@@ -110,6 +111,7 @@ export function CaseViewport({
           bracketStyle={api.bracketStyle}
           ligatureColor={api.ligatureColor}
           opening={api.opening}
+          jawOpen={api.jawOpen && !api.toothStudy}
           measureMode={api.measureMode && editing}
           landmarks={api.landmarks}
           onLandmark={point => {

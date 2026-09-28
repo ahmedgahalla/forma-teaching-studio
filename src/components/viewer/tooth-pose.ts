@@ -2,10 +2,11 @@ import { Euler, MathUtils, type Object3D } from 'three';
 import { toothArch } from '@/lib/appliances';
 import type { Pose, Tooth } from '@/lib/model';
 import type { ViewerProps } from './viewer-types';
+import { applyJawPoint, applyJawQuaternion } from '@/lib/jaw-opening';
 
 type PoseDisplay = Pick<
   ViewerProps,
-  'transforms' | 'ghostTransforms' | 'opening' | 'ghost' | 'roots'
+  'transforms' | 'ghostTransforms' | 'opening' | 'ghost' | 'roots' | 'jawOpen'
 >;
 
 /** Reuse rotation scratch space for both displayed and reference poses on every frame. */
@@ -16,10 +17,16 @@ export function createToothPoseUpdater(
   roots: ReadonlyMap<string, Object3D>,
 ) {
   const rotation = new Euler();
-  const setPose = (object: Object3D, tooth: Tooth, pose: Pose | undefined, opening: number) => {
+  const setPose = (
+    object: Object3D,
+    tooth: Tooth,
+    pose: Pose | undefined,
+    opening: number,
+    jawOpen: boolean,
+  ) => {
     object.position.set(
       tooth.position[0] + (pose?.translation[0] ?? 0),
-      tooth.position[1] + (pose?.translation[1] ?? 0) - opening,
+      tooth.position[1] + (pose?.translation[1] ?? 0),
       tooth.position[2] + (pose?.translation[2] ?? 0),
     );
     if (pose) {
@@ -30,14 +37,17 @@ export function createToothPoseUpdater(
       );
       object.quaternion.setFromEuler(rotation);
     } else object.quaternion.identity();
+    applyJawPoint(object.position, jawOpen).y -= opening;
+    applyJawQuaternion(object.quaternion, jawOpen);
   };
   return (tooth: Tooth, display: PoseDisplay) => {
     const group = groups.get(tooth.id)!,
       original = ghosts.get(tooth.id)!;
     const lowerOpening = toothArch(tooth.id) === 'lower' ? display.opening : 0;
-    setPose(group, tooth, display.transforms[tooth.id], lowerOpening);
+    const jawOpen = toothArch(tooth.id) === 'lower' && !!display.jawOpen;
+    setPose(group, tooth, display.transforms[tooth.id], lowerOpening, jawOpen);
     group.updateMatrixWorld(true);
-    setPose(original, tooth, display.ghostTransforms?.[tooth.id], lowerOpening);
+    setPose(original, tooth, display.ghostTransforms?.[tooth.id], lowerOpening, jawOpen);
     original.visible =
       group.visible &&
       display.ghost &&

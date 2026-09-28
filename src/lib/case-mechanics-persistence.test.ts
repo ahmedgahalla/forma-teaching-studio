@@ -119,6 +119,7 @@ function fixture() {
       grid: false,
       stage: 3.5,
       opening: 7.5,
+      jawOpen: false,
       anatomy: { bone: true, opacity: 0.25, cutaway: false, ligament: true },
       magnification: 10,
       forceVectors: true,
@@ -228,6 +229,7 @@ describe('v3 mechanics and lecture case persistence', () => {
       'predictResponse',
       'playbackSpeed',
       'reverse',
+      'jawOpen',
     ] as const)
       delete lecture[key];
     const loaded = await restored(raw);
@@ -239,17 +241,21 @@ describe('v3 mechanics and lecture case persistence', () => {
       predictResponse: false,
       playbackSpeed: 1,
       reverse: false,
+      jawOpen: false,
     });
     expect(loaded.session!.mechanics!.result).toBeNull();
   });
-  it.each(['mechanicsResponse', 'responseRevealed', 'predictResponse', 'reverse'] as const)(
-    'rejects nonboolean response flag %s',
-    async key => {
-      const { raw } = await serialized();
-      Object.assign(raw.session.lectureSetup!, { [key]: 'true' });
-      await expect(restored(raw)).rejects.toThrow(/response playback/);
-    },
-  );
+  it.each([
+    'mechanicsResponse',
+    'responseRevealed',
+    'predictResponse',
+    'reverse',
+    'jawOpen',
+  ] as const)('rejects nonboolean response flag %s', async key => {
+    const { raw } = await serialized();
+    Object.assign(raw.session.lectureSetup!, { [key]: 'true' });
+    await expect(restored(raw)).rejects.toThrow(/response playback/);
+  });
   it.each([0, 0.25, 1.5, 3, NaN, Infinity, null, '1'])(
     'rejects unsupported or nonfinite playback speed %s',
     value => {

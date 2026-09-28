@@ -8,10 +8,11 @@ import type { MovementTrail } from '@/lib/movement-trails';
 import type { Vec3 } from '@/lib/model';
 import type { ViewerProps } from './viewer-types';
 import { createMovementTrailLabel } from './movement-trail-label';
+import { applyJawPoint, applyJawQuaternion } from '@/lib/jaw-opening';
 
 type TrailDisplay = Pick<
   ViewerProps,
-  'movementTrail' | 'trailProgress' | 'selected' | 'roots' | 'opening'
+  'movementTrail' | 'trailProgress' | 'selected' | 'roots' | 'opening' | 'jawOpen'
 >;
 
 function createPath(color: string, root: boolean) {
@@ -46,6 +47,7 @@ function createPath(color: string, root: boolean) {
     cameraPoint = new THREE.Vector3(),
     right = new THREE.Vector3(),
     up = new THREE.Vector3();
+  const inverseRotation = new THREE.Quaternion();
   function restoreEndpoint() {
     if (!positions || lastEnd < 0) return;
     const offset = (lastEnd + 1) * 3;
@@ -88,7 +90,6 @@ function createPath(color: string, root: boolean) {
       localPoint: Vec3,
       tooth: THREE.Object3D,
       segments: number,
-      opening: number,
       camera: THREE.PerspectiveCamera,
       width: number,
       height: number,
@@ -99,14 +100,17 @@ function createPath(color: string, root: boolean) {
       group.visible = cameraPoint.z < -camera.near && height > 0 && width > 0;
       if (!group.visible) return;
       const unitsPerPixel = (-2 * cameraPoint.z) / (camera.projectionMatrix.elements[5] * height);
-      // The tooth matrix already includes lower-arch separation; path samples do not.
-      endpoint.y += opening;
+      // Samples remain in case space; undo this path's rigid jaw display for the live endpoint.
+      group.worldToLocal(endpoint);
+      group.getWorldQuaternion(inverseRotation).invert();
       marker.position.copy(endpoint);
-      marker.quaternion.copy(camera.quaternion);
+      marker.quaternion.copy(inverseRotation).multiply(camera.quaternion);
       marker.scale.setScalar((root ? 6 : 4.5) * unitsPerPixel);
       label.sprite.position.copy(endpoint);
       right.setFromMatrixColumn(camera.matrixWorld, 0);
       up.setFromMatrixColumn(camera.matrixWorld, 1);
+      right.applyQuaternion(inverseRotation);
+      up.applyQuaternion(inverseRotation);
       label.sprite.position.addScaledVector(right, 10 * unitsPerPixel);
       label.sprite.position.addScaledVector(up, (root ? -20 : 20) * unitsPerPixel);
       label.sprite.scale.set(112 * unitsPerPixel, 28 * unitsPerPixel, 1);
@@ -192,11 +196,14 @@ export function createMovementTrailRenderer(camera: THREE.PerspectiveCamera) {
       while (segments < trail.progress.length - 1 && trail.progress[segments] < progress)
         segments++;
       const opening = toothArch(trail.toothId) === 'lower' ? display.opening : 0;
-      group.position.y = -opening;
-      crown.update(trail.crownPoint, tooth, segments, opening, camera, width, height);
+      const jawOpen = toothArch(trail.toothId) === 'lower' && !!display.jawOpen;
+      group.position.set(0, 0, 0);
+      applyJawPoint(group.position, jawOpen).y -= opening;
+      applyJawQuaternion(group.quaternion.identity(), jawOpen);
+      group.updateMatrixWorld(true);
+      crown.update(trail.crownPoint, tooth, segments, camera, width, height);
       root.group.visible = display.roots && !!trail.rootPoint && !!trail.root;
-      if (root.group.visible)
-        root.update(trail.rootPoint!, tooth, segments, opening, camera, width, height);
+      if (root.group.visible) root.update(trail.rootPoint!, tooth, segments, camera, width, height);
     },
     dispose() {
       group.removeFromParent();

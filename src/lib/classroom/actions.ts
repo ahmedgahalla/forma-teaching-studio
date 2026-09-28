@@ -34,6 +34,7 @@ export type TeachingAction =
   | { kind: 'select'; teeth: string[] }
   | { kind: 'view'; view: 'front' | 'right' | 'left' | 'occlusal' | 'perspective' }
   | { kind: 'arch'; arch: 'upper' | 'lower' | 'both' }
+  | { kind: 'jaw'; open: boolean }
   | {
       kind: 'toggle';
       target: 'braces' | 'roots' | 'gums' | 'labels' | 'grid' | 'attachments';

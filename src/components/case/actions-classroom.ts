@@ -87,6 +87,7 @@ export function createClassroomActions(api: CaseStudioApi, refs: CaseRefs) {
     api.setStage(s.stage);
     api.setStages(s.stages);
     api.setOpening(s.opening);
+    api.setJawOpen(s.model.asset === 'claude-atlas-v1' && (s.jawOpen ?? false));
     api.setCheckpoints(saved.checkpoints);
     api.setPlaybackSpeed(saved.speed);
     api.setAnatomy(saved.anatomy);
@@ -150,6 +151,7 @@ export function createClassroomActions(api: CaseStudioApi, refs: CaseRefs) {
     api.setPlaying(false);
     api.setCheckpoints([]);
     api.setOpening(0);
+    api.setJawOpen(false);
     api.setGrid(false);
     api.setLessonId('');
     api.setLessonStep(-1);

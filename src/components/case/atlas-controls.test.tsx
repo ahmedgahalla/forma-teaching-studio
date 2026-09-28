@@ -202,3 +202,27 @@ it('routes atlas tissue display controls through validated teaching actions', as
     'Show roots',
   );
 });
+
+it.each([false, true])(
+  'routes the Explore jaw control through the runtime: open=%s',
+  async jawOpen => {
+    const execute = vi.fn();
+    const api = {
+      model: { asset: 'claude-atlas-v1' },
+      opening: 0,
+      jawOpen,
+      arch: 'both',
+      view: 'front',
+      teaching: { execute },
+    } as unknown as CaseStudioApi;
+    const host = await mount(<AtlasDisplayPanel api={api} />);
+    const label = jawOpen ? 'Close jaw' : 'Open jaw';
+    const buttons = [...host.querySelectorAll('button')].filter(
+      button => button.textContent === label,
+    );
+    expect(buttons).toHaveLength(1);
+    expect(buttons[0].getAttribute('aria-pressed')).toBe(String(jawOpen));
+    await act(async () => buttons[0].click());
+    expect(execute).toHaveBeenCalledExactlyOnceWith([{ kind: 'jaw', open: !jawOpen }], label);
+  },
+);

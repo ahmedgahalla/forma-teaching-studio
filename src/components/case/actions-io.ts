@@ -64,6 +64,7 @@ export function createIoActions(api: CaseStudioApi, refs: CaseRefs) {
     api.setView('perspective');
     api.setArch('both');
     api.setOpening(0);
+    api.setJawOpen(next.asset === 'claude-atlas-v1' && (saved?.lectureSetup?.jawOpen ?? false));
     api.setDirection(next.demo ? 'buccal' : 'x');
     api.setGhost(false);
     api.setRoots(saved?.roots || false);

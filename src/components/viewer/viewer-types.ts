@@ -45,6 +45,7 @@ export type ViewerProps = {
   bracketStyle: 'metal' | 'ceramic';
   ligatureColor: string;
   opening: number;
+  jawOpen?: boolean;
   measureMode: boolean;
   landmarks: Landmark[];
   onLandmark: (landmark: Landmark) => void;
@@ -61,6 +62,7 @@ export type ViewerProps = {
   movementTrail?: MovementTrail | null;
   trailProgress?: number;
   archCurve?: Vec3[];
+  archCurveArch?: 'upper' | 'lower';
   removableRetainer?: boolean;
   isolateSelection?: boolean;
   /** Enlarge the selected tooth while keeping neighboring enamel and roots faintly visible. */

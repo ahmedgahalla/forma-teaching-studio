@@ -1,15 +1,16 @@
-import { afterAll, describe, expect, it } from 'vitest';
+import { afterAll, describe, expect, it, vi } from 'vitest';
 import * as THREE from 'three';
 import type { DentalCase } from './geometry';
 import { toothMatrix } from './analysis';
 import {
   cameraViewDirection,
+  createSelectionGlow,
   displayedFitPoints,
   displayedToothBounds,
   displayedToothPoints,
   isToothVisible,
   layoutToothLabels,
-  selectionContourMaterial,
+  selectionGlowMaterial,
 } from './viewer-presentation';
 import { perspectiveFitDistance } from './camera-fit';
 
@@ -197,14 +198,93 @@ describe('lecture viewer presentation', () => {
     expect(anchors).toEqual(original);
   });
 
-  it('adds depth-tested back-face contours without owning or deforming geometry', () => {
-    const material = selectionContourMaterial('#73d6f1');
-    expect(material.side).toBe(THREE.BackSide);
-    expect(material.depthTest).toBe(true);
-    expect(material.depthWrite).toBe(false);
-    expect(material.uniforms.thickness.value).toBeLessThan(2);
-    const mesh = new THREE.Mesh(crown, material);
+  it('uses the source Fresnel glow on visible surfaces without a silhouette expansion', () => {
+    const material = selectionGlowMaterial();
+    expect(material).toMatchObject({
+      side: THREE.FrontSide,
+      transparent: true,
+      blending: THREE.AdditiveBlending,
+      depthTest: true,
+      depthWrite: false,
+      polygonOffset: true,
+      polygonOffsetFactor: -1,
+      polygonOffsetUnits: -4,
+    });
+    expect(material.uniforms.uColor.value.getHex()).toBe(0x8fc3e0);
+    expect(material.uniforms.uBase.value).toBe(0.02);
+    expect(material.uniforms.uRim.value).toBe(0.6);
+    expect(material.vertexShader).toContain('gl_Position = projectionMatrix * mv;');
+    expect(material.vertexShader).not.toMatch(/thickness|viewport/);
+    expect(material.fragmentShader).toContain('dot(normalize(vN), normalize(vV))');
+    for (const chunk of ['tonemapping_fragment', 'colorspace_fragment'] as const) {
+      expect(material.fragmentShader).toContain(`#include <${chunk}>`);
+      expect(THREE.ShaderChunk[chunk]).toBeTruthy();
+    }
     material.dispose();
-    expect(mesh.geometry).toBe(crown);
+  });
+
+  it('shares immutable surfaces, inherits tooth poses, ignores picking and disposes only the shared material', () => {
+    const group = new THREE.Group(),
+      enamel = new THREE.MeshStandardMaterial({ color: 0xf8f3e8 }),
+      natural = new THREE.Mesh(crown, enamel),
+      material = selectionGlowMaterial();
+    group.add(natural);
+    const positions = crown.getAttribute('position').array.slice();
+    const update = createSelectionGlow(group, crown, root, material);
+    const overlays = group.children.slice(1) as THREE.Mesh[];
+    expect(overlays.map(mesh => mesh.geometry)).toEqual([crown, root]);
+    expect(overlays.every(mesh => mesh.material === material && mesh.renderOrder === 10)).toBe(
+      true,
+    );
+    update(true, true);
+    group.updateMatrixWorld(true);
+    const ray = new THREE.Raycaster(new THREE.Vector3(0, 0, 30), new THREE.Vector3(0, 0, -1));
+    expect(ray.intersectObject(group).every(hit => hit.object === natural)).toBe(true);
+    expect(ray.intersectObject(group).length).toBeGreaterThan(0);
+    group.position.set(2, -12, 4);
+    group.rotation.set(0.2, 0.4, 0.1);
+    group.updateMatrixWorld(true);
+    for (const overlay of overlays)
+      expect(overlay.matrixWorld.equals(natural.matrixWorld)).toBe(true);
+    expect(natural.material).toBe(enamel);
+    expect(enamel.color.getHex()).toBe(0xf8f3e8);
+    expect(crown.getAttribute('position').array).toEqual(positions);
+    const geometryDisposed = vi.fn(),
+      materialDisposed = vi.fn();
+    crown.addEventListener('dispose', geometryDisposed);
+    root.addEventListener('dispose', geometryDisposed);
+    material.addEventListener('dispose', materialDisposed);
+    material.dispose();
+    expect(materialDisposed).toHaveBeenCalledOnce();
+    expect(geometryDisposed).not.toHaveBeenCalled();
+    crown.removeEventListener('dispose', geometryDisposed);
+    root.removeEventListener('dispose', geometryDisposed);
+    enamel.dispose();
+  });
+
+  it('updates each selected tooth independently and suppresses hidden roots, arches and isolation', () => {
+    const material = selectionGlowMaterial(),
+      first = new THREE.Group(),
+      second = new THREE.Group();
+    const a = createSelectionGlow(first, crown, root, material),
+      b = createSelectionGlow(second, crown, undefined, material);
+    expect(first.children.every(mesh => !mesh.visible)).toBe(true);
+    a(true, false);
+    b(true, true);
+    expect(first.children.map(mesh => mesh.visible)).toEqual([true, false]);
+    expect(second.children[0].visible).toBe(true);
+    a(true, true);
+    expect(first.children.map(mesh => mesh.visible)).toEqual([true, true]);
+    a(true, true, true);
+    expect(first.children.every(mesh => !mesh.visible)).toBe(true);
+    first.visible = false;
+    a(true, true);
+    expect(first.children.every(mesh => !mesh.visible)).toBe(true);
+    first.visible = true;
+    a(true, true);
+    b(false, true);
+    expect(first.children.every(mesh => mesh.visible)).toBe(true);
+    expect(second.children[0].visible).toBe(false);
+    material.dispose();
   });
 });

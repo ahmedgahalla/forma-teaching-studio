@@ -33,3 +33,5 @@ The later Phase 3 follow-up [3.15 — Lecture presentation and mechanics](phase-
 [3.24 — Nael Teaching Studio](phase-3-demo-path/3.24-nael-branding.md) follows PR #23 with the owner-requested app name and N favicon, preserving voice commands and saved-state compatibility.
 
 [3.25 — Local AI startup and professor pitch](phase-3-demo-path/3.25-ai-and-pitch.md) follows PR #24 with opt-in local service startup, a bounded same-origin gateway, and a narrated feature overview using labelled model illustrations. Provider choice and live acceptance remain outstanding.
+
+[3.26 — Claude jaw opening and selection glow](phase-3-demo-path/3.26-jaw-and-selection-glow.md) follows PR #25 with the authored lower-jaw hinge and Fresnel selection glow, preserving case-space edits, mechanics and lecture returns. Browser acceptance remains outstanding.

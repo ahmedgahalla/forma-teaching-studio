@@ -3,14 +3,21 @@ import { Focus, Maximize } from 'lucide-react';
 import type { TeachingAction } from '@/lib/lecture';
 import type { ViewName } from '../viewer/Viewer';
 import { useDisclosureMenu } from '../case/useDisclosureMenu';
+import { JawControl, type JawControlProps } from '../case/JawControl';
 
-export type LectureViewControlsProps = {
+export type LectureViewControlsProps = JawControlProps & {
   view: ViewName;
   roots: boolean;
   execute: (actions: TeachingAction[], summary: string) => Promise<void>;
 };
 
-export function LectureViewControls({ view, roots, execute }: LectureViewControlsProps) {
+export function LectureViewControls({
+  view,
+  roots,
+  execute,
+  jawAvailable,
+  jawOpen,
+}: LectureViewControlsProps) {
   const { menuRef, summaryRef } = useDisclosureMenu({ closeOnAction: true });
   return (
     <div className="lecture-view-controls" role="group" aria-label="Lecture model view">
@@ -20,6 +27,7 @@ export function LectureViewControls({ view, roots, execute }: LectureViewControl
           View
         </summary>
         <div className="opening-view-content">
+          <JawControl jawAvailable={jawAvailable} jawOpen={jawOpen} execute={execute} />
           <div className="lecture-view-cameras" role="group" aria-label="Camera views">
             {(['perspective', 'front', 'occlusal', 'right', 'left'] as const).map(camera => (
               <button

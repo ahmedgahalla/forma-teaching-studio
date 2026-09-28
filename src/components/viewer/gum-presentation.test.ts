@@ -35,10 +35,10 @@ function hash(geometry: BufferGeometry) {
     digest.update(Buffer.from(attr.array.buffer, attr.array.byteOffset, attr.array.byteLength));
   return digest.digest('hex');
 }
-function show(transforms: Transforms = {}, opening = 0) {
+function show(transforms: Transforms = {}, opening = 0, jawOpen = false) {
   for (const tooth of model.teeth)
-    setPose(tooth, { transforms, opening, ghost: false, roots: false });
-  gums.update({ ...display, opening });
+    setPose(tooth, { transforms, opening, jawOpen, ghost: false, roots: false });
+  gums.update({ ...display, opening, jawOpen });
 }
 function movedPoint(vertex = neckVertex) {
   const positions = gums.meshes[0].mesh.geometry.getAttribute('position');
@@ -237,4 +237,44 @@ it('follows prepared and magnified mechanics display poses and catches up after 
   expect(position.version).toBe(version);
   gums.update(display);
   expect(movedPoint().length()).toBeCloseTo(small, 5);
+});
+
+it('hinges the lower gum rigidly around source anatomy while preserving canonical following and reset', () => {
+  const lower = gums.meshes[1].mesh,
+    upper = gums.meshes[0].mesh;
+  const transforms: Transforms = { '31': { translation: [0.4, 0.2, 1], rotation: [4, 0, 7] } };
+  show(transforms);
+  const deformed = hash(lower.geometry),
+    upperHash = hash(upper.geometry);
+  lower.updateMatrixWorld(true);
+  const canonical = new Vector3()
+    .fromBufferAttribute(lower.geometry.getAttribute('position'), 321)
+    .applyMatrix4(lower.matrixWorld);
+  const theta = (14 * Math.PI) / 180,
+    y = canonical.y - 39.2,
+    z = canonical.z + 77.8;
+  const expected = new Vector3(
+    canonical.x,
+    39.2 + y * Math.cos(theta) - z * Math.sin(theta) - 8,
+    -77.8 + y * Math.sin(theta) + z * Math.cos(theta),
+  );
+  for (let i = 0; i < 5; i++) {
+    show(transforms, 8, true);
+    lower.updateMatrixWorld(true);
+    const actual = new Vector3()
+      .fromBufferAttribute(lower.geometry.getAttribute('position'), 321)
+      .applyMatrix4(lower.matrixWorld);
+    expect(actual.distanceTo(expected)).toBeLessThan(1e-8);
+    expect(hash(lower.geometry)).toBe(deformed);
+    expect(hash(upper.geometry)).toBe(upperHash);
+    expect(upper.quaternion.toArray()).toEqual([0, 0, 0, 1]);
+    show(transforms);
+    expect(hash(lower.geometry)).toBe(deformed);
+  }
+  show({}, 8, true);
+  expect(hash(lower.geometry)).toBe(hashes[1]);
+  show();
+  expect(lower.position.toArray()).toEqual(model.gums[1].position);
+  expect(lower.quaternion.toArray()).toEqual([0, 0, 0, 1]);
+  expect(model.gums.map(gum => hash(gum.geometry))).toEqual(hashes);
 });
