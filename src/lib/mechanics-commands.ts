@@ -1,4 +1,6 @@
 import { CommandValidationError, parseCommand } from './commands';
+import { advanceBracketContext } from './bracket-command-context';
+import { hasMechanicsActivation } from './mechanics/bracket-wire';
 import type { Vec3 } from './model';
 import type {
   ForceLaw,
@@ -621,28 +623,8 @@ export function advanceMechanicsContext(
   };
   switch (action.type) {
     case 'brackets':
-      present(action.teeth);
-      if (
-        !action.installed &&
-        config.wires.some(item => item.teeth.some(id => action.teeth.includes(id)))
-      )
-        fail('Remove the connected wire before removing its brackets.');
-      action.teeth.forEach(id => {
-        if (action.installed)
-          config.brackets[id] ||= [
-            ...(context.bracketAnchors[id] ||
-              fail(`No synthetic bracket anchor exists for ${id}.`)),
-          ];
-        else delete config.brackets[id];
-      });
-      focus.teeth = [...action.teeth];
-      scene.selectedIds = [...action.teeth];
-      scene.selected = action.teeth[0];
-      break;
     case 'bracket-position':
-      present([action.tooth]);
-      if (!config.brackets[action.tooth]) fail('Install the bracket before moving its attachment.');
-      config.brackets[action.tooth] = [...action.local];
+      advanceBracketContext(scene, action);
       break;
     case 'wire': {
       present(action.teeth);
@@ -732,13 +714,13 @@ export function advanceMechanicsContext(
       context.hasResult = false;
       return;
     case 'solve': {
-      const active =
-        config.wires.some(item => item.expansionMm !== 0 || item.torqueDeg !== 0) ||
-        config.elastics.some(item => item.law.kind === 'spring' || item.law.forceN > 0) ||
-        config.expanders.some(item => item.activationMm !== 0);
+      const active = hasMechanicsActivation(
+        config,
+        Object.entries(context.bracketAnchors).map(([id, bracketLocal]) => ({ id, bracketLocal })),
+      );
       if (!active)
         fail(
-          'Brackets and a passive wire do not create an activated response. Set wire activation, elastic tension or expander activation first.',
+          'Set bracket placement, wire activation, elastic tension or expander activation before calculating a response.',
         );
       context.hasResult = true;
       return;

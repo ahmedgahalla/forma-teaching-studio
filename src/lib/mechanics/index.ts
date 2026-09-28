@@ -4,3 +4,4 @@ export * from './validation';
 export * from './state';
 export * from './solver';
 export * from './beam';
+export { hasBracketWireActivation, hasMechanicsActivation } from './bracket-wire';

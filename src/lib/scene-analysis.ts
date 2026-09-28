@@ -21,6 +21,12 @@ export type SceneAnalysisContext = {
     } | null;
     fixedTeeth: string[];
     bracketTeeth: string[];
+    bracketPlacements?: {
+      tooth: string;
+      slotLocal: Vec3;
+      referenceSlotLocal: Vec3;
+      angleDeg: number;
+    }[];
     wires: {
       teeth: string[];
       material: 'stainless-steel' | 'beta-titanium';
@@ -112,6 +118,14 @@ export function sceneAnalysisContext(input: {
           : null,
       fixedTeeth: [...(config?.fixedTeeth || [])],
       bracketTeeth: Object.keys(config?.brackets || {}),
+      bracketPlacements: Object.entries(config?.brackets || {}).map(([tooth, local]) => ({
+        tooth,
+        slotLocal: [...local] as Vec3,
+        referenceSlotLocal: [
+          ...input.mechanics!.reference.teeth.find(item => item.id === tooth)!.bracketLocal,
+        ] as Vec3,
+        angleDeg: config?.bracketAngles?.[tooth] ?? 0,
+      })),
       wires:
         config?.wires.map(wire => ({
           teeth: [...wire.teeth],

@@ -1,6 +1,7 @@
 'use client';
 import { forwardRef, useEffect, useImperativeHandle, useRef, useState } from 'react';
 import * as THREE from 'three';
+import { createBracketPlacementUpdater } from '@/lib/bracket-placement';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import { TransformControls } from 'three/addons/controls/TransformControls.js';
 import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js';
@@ -40,6 +41,7 @@ import { createCameraMotion } from './camera-motion';
 import { createViewerResize } from './viewer-resize';
 import { TOOTH_STUDY_CAMERA_MARGIN } from '@/lib/tooth-study/camera';
 import { createToothPoseUpdater } from './tooth-pose';
+import { createGumPresentation } from './gum-presentation';
 import { createMovementTrailRenderer } from './movement-trail-renderer';
 import {
   createSelectionFramingKey,
@@ -241,7 +243,7 @@ const Viewer = forwardRef<ViewerHandle, Props>(function Viewer(props, ref) {
       }
       const bracket = kit.bracket(tooth);
       if (bracket) {
-        bracket.userData.basePosition = bracket.position.clone();
+        bracket.userData.updatePlacement = createBracketPlacementUpdater(bracket);
         group.add(bracket);
         brackets.set(tooth.id, bracket);
       }
@@ -277,17 +279,8 @@ const Viewer = forwardRef<ViewerHandle, Props>(function Viewer(props, ref) {
       surfaces: toothStudy.labels,
       anatomy: anatomyLabels.labels,
     });
-    const gumMeshes = props.model.gums.map(gum => {
-      const mesh = new THREE.Mesh(
-        surface(gum.geometry, [0, gum.arch === 'upper' ? -1 : 1, 0], 'gingiva'),
-        gumMaterial,
-      );
-      mesh.position.fromArray(gum.position);
-      mesh.castShadow = true;
-      mesh.receiveShadow = true;
-      scene.add(mesh);
-      return { mesh, gum };
-    });
+    const gumPresentation = createGumPresentation(props.model, groups, gumMaterial, surface, scene);
+    const gumMeshes = gumPresentation.meshes;
     const grid = new THREE.GridHelper(150, 30, palette.gridMajor, palette.gridMinor);
     grid.position.y = -33;
     scene.add(grid);
@@ -777,13 +770,10 @@ const Viewer = forwardRef<ViewerHandle, Props>(function Viewer(props, ref) {
             ? braces && !!p.mechanics.config.brackets[tooth.id]
             : fixed.brackets;
           bracket.children[6].visible = p.mechanics ? true : fixed.ligatures;
-          bracket.position.copy(bracket.userData.basePosition);
-          if (p.mechanics?.config.brackets[tooth.id])
-            bracket.position.add(
-              new THREE.Vector3(...p.mechanics.config.brackets[tooth.id]).sub(
-                bracket.userData.anchor,
-              ),
-            );
+          bracket.userData.updatePlacement(
+            p.mechanics?.config.brackets[tooth.id],
+            p.mechanics?.config.bracketAngles?.[tooth.id],
+          );
         }
         if (attachments.has(tooth.id)) attachments.get(tooth.id)!.visible = p.attachments;
       }
@@ -811,16 +801,7 @@ const Viewer = forwardRef<ViewerHandle, Props>(function Viewer(props, ref) {
           if (!gizmo.object) gizmo.attach(pivot);
         } else if (gizmo.object) gizmo.detach();
       }
-      gumMeshes.forEach(({ mesh, gum }) => {
-        mesh.castShadow = !showRoots && !cutaway;
-        mesh.visible =
-          gums &&
-          (cutaway
-            ? gum.arch === toothArch(cutaway.id)
-            : !p.isolateSelection && (!gum.arch || p.arch === 'both' || gum.arch === p.arch));
-        mesh.position.fromArray(gum.position);
-        if (gum.arch === 'lower') mesh.position.y -= opening;
-      });
+      gumPresentation.update(p, cutaway?.id);
       grid.visible = p.grid && !cutaway;
       const nextWireState = `${fixed.wires}/${p.arch}/${opening}/${cutaway?.id || ''}/${!!p.isolateSelection}`;
       if (lastTransforms !== transforms || wireState !== nextWireState) {
