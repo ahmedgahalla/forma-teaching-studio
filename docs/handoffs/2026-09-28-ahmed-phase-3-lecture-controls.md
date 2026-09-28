@@ -1,6 +1,6 @@
 # Handoff — lecture control parity
 
-**Branch:** `ahmed/phase-3-lecture-controls` · **Base:** draft PR #17 at `22fd450` · **Phase:** [3.18](../phases/phase-3-demo-path/3.18-lecture-controls.md) · **PR:** pending
+**Branch:** `ahmed/phase-3-lecture-controls` · **Base:** draft PR #17 at `22fd450` · **Phase:** [3.18](../phases/phase-3-demo-path/3.18-lecture-controls.md) · **PR:** [#18 (draft)](https://github.com/ahmedgahalla/forma-teaching-studio/pull/18)
 
 The requirements audit identified missing typed/voice entry to the finished sample and missing clickable camera/roots/Fit controls during Lecture. This slice addresses those gaps while preserving the distinction between a temporary question detour and exiting to the original Explore workspace. Repeated entry is now a no-op before interruption/history; a scoped menu anchor keeps the popup within the model column. Final source review found no remaining actionable issue in this slice.
 

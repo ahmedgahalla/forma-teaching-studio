@@ -1,6 +1,6 @@
 # Phase 3 — demo path
 
-**Status:** lecture control parity implemented; automated checks passed; browser acceptance pending · **Current branch:** `ahmed/phase-3-lecture-controls` · **Current PR:** pending (stacked on [#17](https://github.com/ahmedgahalla/forma-teaching-studio/pull/17))
+**Status:** lecture control parity implemented; automated checks passed; browser acceptance pending · **Current branch:** `ahmed/phase-3-lecture-controls` · **Current PR:** [#18 (draft)](https://github.com/ahmedgahalla/forma-teaching-studio/pull/18) (stacked on [#17](https://github.com/ahmedgahalla/forma-teaching-studio/pull/17))
 
 **Goal:** a professor can explore the central model freely or open a finished lecture with notes, questions and model demonstrations, then return from a spontaneous experiment without losing the lecture. Builds on [product direction](../../PRODUCT_DIRECTION.md).
 
