@@ -1,6 +1,6 @@
 # Phase 3 — demo path
 
-**Status:** Chart layout, hover preview and lecture clarity implemented; automated gate passes, browser acceptance pending. **Current branch:** `ahmed/phase-3-chart-lecture-clarity`. **PR:** pending draft. **Base:** [#28 (draft)](https://github.com/ahmedgahalla/forma-teaching-studio/pull/28).
+**Status:** Chart layout, hover preview and lecture clarity implemented; automated gate passes, browser acceptance pending. **Current branch:** `ahmed/phase-3-chart-lecture-clarity`. **PR:** [#29 (draft)](https://github.com/ahmedgahalla/forma-teaching-studio/pull/29). **Base:** [#28 (draft)](https://github.com/ahmedgahalla/forma-teaching-studio/pull/28).
 
 **Goal:** a professor can explore the central model freely or open a finished lecture with notes, questions and model demonstrations, then return from a spontaneous experiment without losing the lecture. Builds on [product direction](../../PRODUCT_DIRECTION.md).
 

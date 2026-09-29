@@ -1,6 +1,6 @@
 # Tooth chart and lecture clarity handoff
 
-Branch: `ahmed/phase-3-chart-lecture-clarity`; base PR #28 at `417c3a2`. Draft PR pending.
+Branch: `ahmed/phase-3-chart-lecture-clarity`; base PR #28 at `417c3a2`. Draft [#29 (draft)](https://github.com/ahmedgahalla/forma-teaching-studio/pull/29) is open; implementation commit `4c89d8b`.
 
 Implemented separate model/chart space with a scrolling workspace, local hover/focus preview and stronger warm 3D/diagram highlights, and clearer lecture entry, review/present labels, visible step count and capability-based guidance. Question detours name the paused lecture/step and retain the existing Return action. Old and new typed/voice presentation labels share the validated runtime actions.
 
