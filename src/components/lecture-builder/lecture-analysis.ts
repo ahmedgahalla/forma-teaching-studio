@@ -6,6 +6,7 @@ const comparisons = {
   start: 'the shared authored starting position',
   translation: 'the authored translation endpoint',
   tip: 'the authored tipping endpoint',
+  finish: 'the authored finished arrangement',
 };
 
 /** Add public lecture context without replacing the actual scene or exposing private notes. */
@@ -24,7 +25,7 @@ export function lectureAnalysisContext(
         `Lecture step ${session.index + 1} of ${document.steps.length}: ${step.title}`,
         session.comparison
           ? `Comparison is active: the displayed model shows ${comparisons[session.comparison]}. The question and answer belong to the lecture step, while the model shows this comparison.`
-          : step.demo
+          : step.demo || step.motion
             ? 'This step has an authored movement demonstration. The supplied tooth transforms describe the current pose; this description does not specify playback progress.'
             : 'This step shows a static authored pose with no animation attached.',
         `Student question: ${step.question}`,

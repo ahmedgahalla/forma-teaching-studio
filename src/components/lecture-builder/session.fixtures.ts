@@ -7,8 +7,7 @@ import { createTeachingRuntime } from '@/lib/teaching-runtime';
 import { createLectureSessionActions, EMPTY_LECTURE_SESSION } from './session';
 import { lectureStepSnapshot } from './scene-bridge';
 
-export function lectureHarness() {
-  const document = createLectureSample();
+export function lectureHarness(document = createLectureSample()) {
   let snapshot = lectureStepSnapshot(document.steps[0], {} as ClassroomSnapshot);
   let session = { ...EMPTY_LECTURE_SESSION };
   let playing = false,
@@ -24,6 +23,9 @@ export function lectureHarness() {
     snapshot = { ...snapshot, [key]: value };
   };
   const api = {
+    get model() {
+      return snapshot.lesson.model;
+    },
     get sandbox() {
       return snapshot.sandbox;
     },
@@ -59,6 +61,7 @@ export function lectureHarness() {
     setToolsOpen: vi.fn(),
     setMobilePanel: vi.fn(),
     setCommandsOpen: vi.fn(),
+    setPanel: vi.fn(),
     note: vi.fn(),
   } as unknown as CaseStudioApi;
   const adapter = (): TeachingAdapter =>

@@ -15,7 +15,7 @@ export function isRedundantLectureOpen(
   try {
     const supplied =
       typeof request === 'string'
-        ? parseLectureOpening(normalizeSpeechCommand(request))
+        ? parseLectureOpening(normalizeSpeechCommand(request), context.presentation.documentId)
         : request.length === 1
           ? request[0]
           : undefined;

@@ -12,6 +12,7 @@ import { createTryState } from '@/lib/try-mode';
 import { lectureStepSnapshot } from './scene-bridge';
 import { availableLectureComparisons, lectureComparisonSnapshot } from './lecture-comparison';
 import { lectureAnalysisContext } from './lecture-analysis';
+import { lectureExploration } from './lecture-exploration';
 
 export type LectureSession = {
   screen: 'explore' | 'lecture';
@@ -132,6 +133,12 @@ export function createLectureSessionActions(
       paused.current = null;
       loadStep({ ...EMPTY_LECTURE_SESSION, documentId: action.id });
     } else if (action.action === 'explore') {
+      const { transforms, mechanics } = lectureExploration(
+        session.comparison ? undefined : document?.steps[session.index],
+        api.model,
+        api.actualShown,
+        api.shown,
+      );
       paused.current = {
         ...api.captureClassroom(),
         lectureDisplay: {
@@ -142,10 +149,10 @@ export function createLectureSessionActions(
           comparison: session.comparison,
         },
       } as PausedLecture;
-      const transforms = structuredClone(api.shown);
       api.setPlaying(false);
       api.setScenario(null);
-      api.setMechanics(null);
+      api.setMechanics(mechanics);
+      if (mechanics) api.setPanel('braces');
       api.setToothStudy(null);
       api.setGlossaryId(null);
       api.setLessonId('');
@@ -154,8 +161,8 @@ export function createLectureSessionActions(
       api.setSandbox(createTryState(transforms, transforms));
       api.setStage(api.stages);
       api.setLecture(false);
-      api.setToolsOpen(false);
-      api.setMobilePanel('model');
+      api.setToolsOpen(!!mechanics);
+      api.setMobilePanel(mechanics ? 'tools' : 'model');
       setSession({ ...session, exploring: true });
     } else if (action.action === 'return') {
       const saved = paused.current as PausedLecture;

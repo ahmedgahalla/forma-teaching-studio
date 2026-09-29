@@ -9,17 +9,19 @@ import { LecturePicker } from './LecturePicker';
 
 it('offers only supported comparison targets for each ready-made lecture', () => {
   expect(createDemoLectures().map(availableLectureComparisons)).toEqual([
+    ['start', 'finish'],
     ['start', 'translation', 'tip'],
     [],
     ['start', 'translation'],
   ]);
 });
 
-it('shows all three demo choices, linked sources and no authoring control', () => {
+it('shows all four demo choices, linked sources and no authoring control', () => {
   const html = renderToStaticMarkup(
-    <LecturePicker lectures={DEMO_LECTURES} currentId={DEMO_LECTURES[2].id} onOpen={() => {}} />,
+    <LecturePicker lectures={DEMO_LECTURES} currentId={DEMO_LECTURES[3].id} onOpen={() => {}} />,
   );
   expect(html).toContain('Translation and tipping');
+  expect(html).toContain('A case from assessment to retention');
   expect(html).toContain('Space closure and anchorage');
   expect(html).toContain('Why teeth move');
   expect(html).toContain('https://pubmed.ncbi.nlm.nih.gov/26823650/');
