@@ -1,9 +1,10 @@
 'use client';
 import { VoiceSettingsFields } from '../teaching/VoiceSettingsFields';
+import { AiConnectionSettings } from '../teaching/AiConnectionSettings';
 import type { CaseStudioApi } from './api';
-import { ArrowRight, ArrowUpRight, Check, CircleHelp, RotateCcw, Upload } from 'lucide-react';
-import { Dialog, Toggle } from './ui';
-import { axisVectors, errorText } from './constants';
+import { ArrowRight, Check, CircleHelp, RotateCcw, Upload } from 'lucide-react';
+import { Dialog } from './ui';
+import { axisVectors } from './constants';
 
 export function DialogsSetup({ api }: { api: CaseStudioApi }) {
   const { modal, setModal } = api;
@@ -166,68 +167,7 @@ export function DialogsSetup({ api }: { api: CaseStudioApi }) {
             </button>
           </div>
           <VoiceSettingsFields />
-          <h3>Command interpretation</h3>
-          <p>
-            Try Mode commands work locally in English without a key. The optional AI service
-            interprets flexible wording. Every action is independently validated before the geometry
-            engine runs.
-          </p>
-          <Toggle
-            label="Use AI command service"
-            value={api.aiEnabled}
-            onChange={() => {
-              if (!api.aiEnabled && !api.apiUrl) {
-                api.note('Connect the service below first.', true);
-                return;
-              }
-              api.setAiEnabled(!api.aiEnabled);
-            }}
-          />
-          <label className="form-label">
-            Service URL
-            <input value={api.apiDraft} onChange={e => api.setApiDraft(e.target.value)} />
-          </label>
-          <button
-            className="button light"
-            disabled={api.busy}
-            onClick={async () => {
-              api.setBusy(true);
-              try {
-                const url = new URL(api.apiDraft);
-                if (!['http:', 'https:'].includes(url.protocol) || url.username || url.password)
-                  throw new Error('Use an http or https URL.');
-                const base = url.href.replace(/\/$/, '');
-                const response = await fetch(`${base}/health`, {
-                  signal: AbortSignal.timeout(5000),
-                });
-                if (!response.ok) throw new Error('Service unavailable.');
-                const result = await response.json();
-                if (!result.ai_enabled)
-                  throw new Error('Service is running but OPENAI_API_KEY is not configured.');
-                api.teaching.setConfig({
-                  url: base,
-                  enabled: true,
-                  provider: result.provider || 'Configured AI provider',
-                });
-                api.note(
-                  'AI service connected. Clear validated classroom and geometric commands execute immediately; manual previews retain Apply and Cancel. Undo restores the whole request.',
-                );
-              } catch (e) {
-                api.note(errorText(e), true);
-              } finally {
-                api.setBusy(false);
-              }
-            }}
-          >
-            Connect service
-            <ArrowUpRight size={15} />
-          </button>
-          <p className="form-note">
-            Command text and minimal scene references go to your configured AI provider. Meshes
-            remain local. Voice uses the browser’s speech service. API keys belong only in the
-            backend environment.
-          </p>
-          <p className={api.statusError ? 'inline-error' : 'form-note'}>{api.status}</p>
+          <AiConnectionSettings config={api.teaching.config} onChange={api.teaching.setConfig} />
           <div className="divider" />
           <button className="text-button" onClick={() => setModal('demo')}>
             <RotateCcw size={16} />

@@ -26,6 +26,16 @@ export type TeachingAdapter = {
   analysisContext?: () => SceneAnalysisContext;
 };
 export type Snapshot = { mode: Mode; scenes: Partial<Record<Mode, unknown>> };
+export const teachingPhaseLabels = {
+  idle: 'Ready',
+  starting: 'Starting microphone…',
+  listening: 'Listening',
+  finishing: 'Finishing speech',
+  analyzing: 'Explaining…',
+  interpreting: 'Understanding…',
+  executing: 'Updating model…',
+  speaking: 'Speaking',
+};
 export const initialRuntime: RuntimeState = {
   phase: 'idle',
   message: 'Hold Space to speak, or type an instruction.',

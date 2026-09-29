@@ -964,3 +964,52 @@ describe('tooth-study narration through the shared speaker', () => {
     expect(scene().toothStudy).toBeUndefined();
   });
 });
+
+describe('AI connection recovery', () => {
+  it('turns off AI-only modes and immediately returns typed commands to local execution', async () => {
+    await act(async () => {
+      teaching.setConfig({ enabled: true, url: 'https://forma.example', provider: 'OpenAI' });
+      teaching.setAnalyzeMode(true);
+    });
+    const fetcher = vi.fn();
+    vi.stubGlobal('fetch', fetcher);
+    await act(async () => {
+      teaching.setConfig({ ...teaching.config, enabled: false });
+    });
+    expect(teaching.analyzeMode).toBe(false);
+    expect(teaching.preferAI).toBe(false);
+    await act(async () => {
+      await teaching.run('show roots');
+    });
+    expect(scene().roots).toBe(true);
+    expect(fetcher).not.toHaveBeenCalled();
+    expect(JSON.parse(localStorage.getItem('forma-command-service')!).enabled).toBe(false);
+  });
+  it.each(['interpret', 'analyze'])(
+    'reports safe recovery for an HTML %s endpoint without scene changes',
+    async route => {
+      await act(async () => {
+        teaching.setConfig({ enabled: true, url: 'https://forma.example' });
+        if (route === 'analyze') teaching.setAnalyzeMode(true);
+        else teaching.setPreferAI(true);
+      });
+      vi.stubGlobal(
+        'fetch',
+        vi.fn().mockResolvedValue({
+          ok: true,
+          status: 200,
+          json: async () => {
+            throw new Error('<html>secret</html>');
+          },
+        }),
+      );
+      await act(async () => {
+        await teaching.run('show roots');
+      });
+      expect(teaching.runtime.error).toBe(true);
+      expect(teaching.runtime.message).toContain('not the Nael AI service');
+      expect(teaching.runtime.message).not.toContain('secret');
+      expect(scene().roots).toBe(false);
+    },
+  );
+});

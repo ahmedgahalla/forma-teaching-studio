@@ -62,8 +62,10 @@ function navigationProps(patch: Partial<LectureNavigationProps> = {}): LectureNa
     mode: 'teach',
     index: 0,
     count: 3,
+    stepTitles: lecture.steps.map(step => step.title),
     exploring: false,
     onMode: vi.fn(),
+    onStep: vi.fn(),
     onPrevious: vi.fn(),
     onNext: vi.fn(),
     onExplore: vi.fn(),
@@ -92,7 +94,8 @@ it('shows the ready-made lecture without creation or editing controls in either 
     expect(container.querySelector('input, textarea, select, [contenteditable]')).toBeNull();
     expect(button('Reveal answer')).toBeDefined();
     expect(button('Show notes')).toBeDefined();
-    expect(container.querySelector('details')).toBeNull();
+    expect(container.querySelector('details')?.open).toBe(false);
+    expect(container.querySelector('summary')?.textContent).toBe('Teaching aids');
     expect(container.textContent).not.toMatch(
       /Create lecture|Add step|Capture|Export|Import|Delete/,
     );
@@ -166,6 +169,7 @@ it('keeps a clear return path during exploration and prevents accidental lecture
   expect(button('Next lecture step').disabled).toBe(true);
   expect(button('Rehearse').disabled).toBe(true);
   expect(button('Teach').disabled).toBe(true);
+  expect(container.querySelector('select')?.disabled).toBe(true);
   await click('Next lecture step');
   await click('Rehearse');
   expect(props.onNext).not.toHaveBeenCalled();
@@ -199,11 +203,11 @@ it('only labels notes as private when the separate audience window is open', asy
 it('uses bounded focus, comparison and tissue-response controls without another playback bar', async () => {
   const props = panelProps({ document: createLectureSample() });
   await render(<LecturePanel {...props} />);
-  await click('Focus teaching teeth');
-  expect(props.onFocus).toHaveBeenCalledOnce();
   const disclosure = container.querySelector('details')!;
   await act(async () => disclosure.querySelector('summary')!.click());
   expect(disclosure.open).toBe(true);
+  await click('Focus teaching teeth');
+  expect(props.onFocus).toHaveBeenCalledOnce();
   await click('Starting arrangement');
   await click('Translation example');
   await click('Tipping example');
@@ -222,4 +226,48 @@ it('uses bounded focus, comparison and tissue-response controls without another 
   expect(props.onBiology).toHaveBeenLastCalledWith('tension');
   expect(props.onHideBiology).toHaveBeenCalledOnce();
   expect(container.textContent).not.toMatch(/Play|Pause|Replay/);
+});
+
+it('offers every named step through one picker and reports progress without a second playback bar', async () => {
+  const props = navigationProps({ index: 1 });
+  await render(<LectureNavigation {...props} />);
+  const picker = container.querySelector<HTMLSelectElement>('[aria-label="Lecture step"]')!;
+  expect([...picker.options].map(option => option.text)).toEqual(['Observe', 'Predict', 'Compare']);
+  expect(picker.value).toBe('1');
+  const progress = container.querySelector('progress')!;
+  expect(progress.value).toBe(2);
+  expect(progress.max).toBe(3);
+  await act(async () => {
+    picker.value = '2';
+    picker.dispatchEvent(new Event('change', { bubbles: true }));
+  });
+  expect(props.onStep).toHaveBeenCalledExactlyOnceWith(2);
+  expect(props.onNext).not.toHaveBeenCalled();
+});
+
+it('reveals active teaching aids and preserves visible notes when controls come from another input', async () => {
+  const props = panelProps({ document: createLectureSample(), notesVisible: true });
+  await render(<LecturePanel {...props} />);
+  expect(container.querySelector('details')?.open).toBe(false);
+  const notes = container.querySelector('.lecture-notes')?.textContent;
+  await render(<LecturePanel {...props} comparison="tip" />);
+  expect(container.querySelector('details')?.open).toBe(true);
+  expect(button('Close comparison')).toBeDefined();
+  expect(container.querySelector('.lecture-notes')?.textContent).toBe(notes);
+  const disclosure = container.querySelector('details')!;
+  await act(async () => disclosure.querySelector('summary')!.click());
+  expect(disclosure.open).toBe(false);
+  expect(button('Close comparison').closest('details')).toBeNull();
+  await click('Close comparison');
+  expect(props.onCloseComparison).toHaveBeenCalledOnce();
+  await render(<LecturePanel {...props} comparison="tip" biology="compression" />);
+  expect(container.querySelector('details')?.open).toBe(true);
+  expect(button('Close biology')).toBeDefined();
+  expect(button('Close comparison')).toBeDefined();
+  await act(async () => disclosure.querySelector('summary')!.click());
+  expect(disclosure.open).toBe(false);
+  expect(button('Close biology').closest('details')).toBeNull();
+  await click('Close biology');
+  expect(props.onHideBiology).toHaveBeenCalledOnce();
+  expect(container.querySelector('.lecture-notes')?.textContent).toBe(notes);
 });

@@ -1,0 +1,59 @@
+.ai-connection-settings {
+  margin-top: 22px;
+  padding: 20px;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background: var(--ui-raised);
+}
+.ai-connection-heading,
+.ai-connection-actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+.ai-connection-heading h3,
+.ai-local-status {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+}
+.ai-connection-heading h3 {
+  margin: 0;
+}
+.ai-connection-heading p {
+  margin: 5px 0 0;
+}
+.ai-local-status {
+  color: var(--muted);
+  font-size: 11px;
+}
+.ai-connection-actions {
+  justify-content: flex-start;
+  margin: 16px 0;
+}
+.ai-connection-advanced {
+  margin: 16px 0;
+}
+.ai-connection-advanced summary {
+  cursor: pointer;
+  font-size: 12px;
+}
+.ai-connection-advanced .form-label {
+  margin-top: 14px;
+}
+.ai-connection-success {
+  color: var(--ui-accent);
+  font-size: 12px;
+}
+.ai-status-button {
+  border: 0;
+  background: none;
+  color: inherit;
+  padding: 0;
+  font: inherit;
+  cursor: pointer;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}

@@ -37,3 +37,5 @@ The later Phase 3 follow-up [3.15 — Lecture presentation and mechanics](phase-
 [3.26 — Claude jaw opening and selection glow](phase-3-demo-path/3.26-jaw-and-selection-glow.md) follows PR #25 with the authored lower-jaw hinge and Fresnel selection glow, preserving case-space edits, mechanics and lecture returns. Browser acceptance remains outstanding.
 
 [3.27 - Case lecture and wire activation verification](phase-3-demo-path/3.27-case-journey.md) follows PR #26 with one continuous case, authored motion, initial/final comparison and a separate calculated wire experiment. Faculty and browser acceptance remain pending.
+
+[3.28 - Clearer UI and AI reliability](phase-3-demo-path/3.28-ui-ai-reliability.md) follows PR #27 with named lecture steps, focused teaching controls and explicit AI reconnection with safe errors. Live provider and browser acceptance remain pending.

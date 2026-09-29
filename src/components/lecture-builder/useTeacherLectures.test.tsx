@@ -154,3 +154,18 @@ it('rejects unavailable catalog IDs and unsupported comparisons before changing 
   expect(harness.snapshot).toBe(snapshot);
   expect(teacher.session.documentId).toBe(ANCHORAGE_LECTURE_ID);
 });
+
+it('routes a named step selection through the validated presentation action and restores that scene', async () => {
+  await act(async () => teacher.openSample());
+  expect(teacher.navigationProps.stepTitles).toEqual(
+    teacher.document!.steps.map(step => step.title),
+  );
+  await act(async () => teacher.navigationProps.onStep(5));
+  expect(harness.api.teaching.execute).toHaveBeenLastCalledWith(
+    [{ kind: 'presentation', action: 'go', index: 5 }],
+    'Update lecture',
+  );
+  expect(teacher.session.index).toBe(5);
+  expect(teacher.session.answerVisible).toBe(false);
+  expect(harness.snapshot.lesson.transforms).toEqual(teacher.document!.steps[5].scene.transforms);
+});

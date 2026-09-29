@@ -89,6 +89,17 @@
   border: 1px solid var(--ui-line);
   background: var(--atlas-surface);
 }
+.app-shell.studio-experience.teaching-studio.atlas-workspace .header-actions .button {
+  min-width: 44px;
+  min-height: 44px;
+  padding-inline: 12px;
+}
+.atlas-workspace
+  :is(.teacher-experience-switch, .atlas-camera-rail, .atlas-inspector-actions)
+  button:hover:not(:disabled) {
+  background: var(--ui-soft);
+  color: var(--ui-text);
+}
 .atlas-workspace .teacher-experience-switch button {
   border-radius: 3px;
 }
@@ -128,7 +139,7 @@
 }
 .atlas-camera-rail button {
   min-width: 48px;
-  min-height: 40px;
+  min-height: 44px;
   padding: 6px 10px;
   border: 0;
   border-right: 1px solid var(--ui-line);

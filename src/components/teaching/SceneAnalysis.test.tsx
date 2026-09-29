@@ -307,23 +307,45 @@ describe('read-only scene analysis controller', () => {
     expect(container.querySelector('[data-testid="roots"]')?.textContent).toBe('false');
   });
 
-  it('handles disabled service without sending a request and keeps ordinary controls available', async () => {
+  it('turns off AI-only modes with the service and runs ordinary typed commands locally', async () => {
+    const fetcher = vi.fn();
+    vi.stubGlobal('fetch', fetcher);
+    await act(async () => {
+      teaching.setPreferAI(true);
+      teaching.setAnalyzeMode(true);
+    });
+    await act(async () => {
+      teaching.setConfig({ enabled: false, url: '' });
+    });
+    expect(teaching.analyzeMode).toBe(false);
+    expect(teaching.preferAI).toBe(false);
+    expect(teaching.analysisError).toBe('');
+    await act(async () => {
+      await teaching.run('show roots');
+    });
+    expect(fetcher).not.toHaveBeenCalled();
+    expect(teaching.runtime.error).toBe(false);
+    expect(container.querySelector('[data-testid="roots"]')?.textContent).toBe('true');
+  });
+
+  it('guards a programmatic Analyze request while disabled and keeps local controls available', async () => {
     const fetcher = vi.fn();
     vi.stubGlobal('fetch', fetcher);
     await act(async () => {
       teaching.setConfig({ enabled: false, url: '' });
+      teaching.setAnalyzeMode(true);
     });
     await act(async () => {
       await teaching.run('Explain the selected tooth.');
     });
     expect(fetcher).not.toHaveBeenCalled();
     expect(teaching.analysisError).toMatch(/connect.*AI service/i);
+    expect(teaching.analysisPending).toBe(false);
+    expect(applied).not.toHaveBeenCalled();
     await act(async () => {
-      teaching.setAnalyzeMode(false);
+      await teaching.runControl('show roots');
     });
-    await act(async () => {
-      await teaching.run('show roots');
-    });
+    expect(fetcher).not.toHaveBeenCalled();
     expect(container.querySelector('[data-testid="roots"]')?.textContent).toBe('true');
   });
 });

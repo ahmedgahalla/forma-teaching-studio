@@ -33,12 +33,9 @@ export function CaseShell({ api, teacher }: { api: CaseStudioApi; teacher: Teach
     setToolsOpen,
     setMobilePanel,
     caseInput,
-    apiUrl,
-    setApiDraft,
     tryActive,
     setPanel,
     teaching,
-    aiEnabled,
     sceneInteraction,
   } = api;
   const audienceSource = useRef<HTMLElement>(null);
@@ -105,10 +102,7 @@ export function CaseShell({ api, teacher }: { api: CaseStudioApi; teacher: Teach
           }}
           onOpenCase={() => caseInput.current?.click()}
           onSaveCase={api.save}
-          onOpenSettings={() => {
-            setApiDraft(apiUrl || 'http://127.0.0.1:8000');
-            setModal('settings');
-          }}
+          onOpenSettings={() => setModal('settings')}
           onOpenGuide={() => setModal('guide')}
           onOpenSelection={() => {
             setLecture(false);
@@ -195,7 +189,14 @@ export function CaseShell({ api, teacher }: { api: CaseStudioApi; teacher: Teach
         />
         <footer className="statusbar">
           <span>Synthetic teaching model · illustrative movement · not for clinical use</span>
-          <span>{aiEnabled ? 'AI interpretation available' : 'Built-in commands'}</span>
+          <button
+            className="ai-status-button"
+            onClick={() => setModal('settings')}
+            title="AI settings. Enabled means configured; provider access is checked when you ask AI."
+          >
+            {teaching.config.enabled ? `${teaching.config.provider || 'AI'} enabled` : 'AI off'} ·
+            Settings
+          </button>
         </footer>
 
         <CaseDialogs api={api} />

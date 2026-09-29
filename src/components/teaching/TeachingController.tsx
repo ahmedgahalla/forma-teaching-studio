@@ -10,6 +10,7 @@ import {
   type CommandServiceConfig as Config,
 } from '@/lib/command-service';
 import { validateSceneAnalysis, type SceneAnalysis } from '@/lib/scene-analysis';
+import { requestTeachingAi } from '@/lib/ai-service-client';
 import {
   Context,
   initialRuntime,
@@ -151,25 +152,18 @@ export function TeachingProvider({ children }: { children: ReactNode }) {
       if (!settings.enabled || !settings.url)
         throw new Error('Connect the AI service in Settings to discuss this model.');
       if (!context) throw new Error('The teaching model is still loading.');
-      const response = await fetch(`${settings.url}/api/analyze-teaching`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ question, context }),
-        signal: AbortSignal.any([controller.signal, AbortSignal.timeout(25000)]),
-      });
-      const value = await response.json();
+      const value = await requestTeachingAi(
+        settings.url,
+        'analyze',
+        { question, context },
+        controller.signal,
+      );
       if (
         controller.signal.aborted ||
         requestedRevision !== revision.current ||
         requestedMode !== modeRef.current
       )
         return;
-      if (!response.ok)
-        throw new Error(
-          typeof value.detail === 'string'
-            ? value.detail
-            : 'The model explanation is unavailable. Try again.',
-        );
       setAnalysis(validateSceneAnalysis(value));
       return report('Model explanation ready. Open Commands to read it.');
     } catch (error) {
@@ -295,23 +289,14 @@ export function TeachingProvider({ children }: { children: ReactNode }) {
         const settings = configRef.current;
         if (!settings.enabled || !settings.url)
           throw new Error(
-            'Use a supported command, or connect the OpenAI service in Settings for flexible wording. Try “show roots” or “start braces workflow”.',
+            'Use a supported command, or connect the AI service in Settings for flexible wording. Try “show roots” or “start braces workflow”.',
           );
-        const wireContext = interpreterTeachingContext(context);
-        const response = await fetch(`${settings.url}/api/interpret-teaching`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ text, context: wireContext }),
-          signal: AbortSignal.any([signal, AbortSignal.timeout(25000)]),
-        });
-        const result = await response.json();
-        if (!response.ok)
-          throw new Error(
-            typeof result.detail === 'string'
-              ? result.detail
-              : 'Interpretation failed. Built-in commands remain available.',
-          );
-        return result;
+        return requestTeachingAi(
+          settings.url,
+          'interpret',
+          { text, context: interpreterTeachingContext(context) },
+          signal,
+        );
       },
       publish: setRuntime,
     });
@@ -419,6 +404,11 @@ export function TeachingProvider({ children }: { children: ReactNode }) {
         },
         setConfig: settings => {
           interact();
+          if (!settings.enabled) {
+            preferAIRef.current = analyzeModeRef.current = false;
+            setPreferAI(false);
+            setAnalyzeMode(false);
+          }
           saveConfig(settings);
         },
         register: (key, adapter) => {
