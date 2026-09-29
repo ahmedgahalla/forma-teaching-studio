@@ -1,5 +1,5 @@
 'use client';
-import type { RefObject } from 'react';
+import { useCallback, useState, type RefObject } from 'react';
 import type { CaseStudioApi } from './api';
 import { OpeningCommandDock } from './OpeningCommandDock';
 import { TeachingCommandBar } from '../teaching/TeachingController';
@@ -27,6 +27,17 @@ export function CaseMain({
 }) {
   const customStep = teacher?.document && !teacher.session.exploring;
   const atlasExplore = !customStep && !api.toothStudy && !api.glossaryId && !api.lecture;
+  const [hoveredTooth, setHoveredTooth] = useState<{
+    id: string;
+    model: CaseStudioApi['model'];
+    arch: CaseStudioApi['arch'];
+  } | null>(null);
+  const onHoverTooth = useCallback(
+    (id: string | null) => setHoveredTooth(id ? { id, model: api.model, arch: api.arch } : null),
+    [api.model, api.arch],
+  );
+  const hoveredToothId =
+    hoveredTooth?.model === api.model && hoveredTooth.arch === api.arch ? hoveredTooth.id : null;
   return (
     <>
       <main className="main-workspace">
@@ -62,11 +73,12 @@ export function CaseMain({
               audienceSource={audienceSource}
               lecturePresentation={!!customStep}
               teachingFocus={!!customStep && teacher!.session.focus}
+              hoveredToothId={atlasExplore ? hoveredToothId : null}
             />
             {atlasExplore && !api.toolsOpen && <AtlasToothInspector api={api} />}
             {!customStep && <CaseLectureOverlay api={api} />}
           </div>
-          {atlasExplore && <AtlasToothChart api={api} />}
+          {atlasExplore && <AtlasToothChart api={api} onHoverTooth={onHoverTooth} />}
           {(!customStep ||
             api.prepared ||
             api.demonstration ||

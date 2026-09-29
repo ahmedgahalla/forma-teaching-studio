@@ -242,3 +242,37 @@ describe('lecture workspace controls through the runtime', () => {
     expect(h.snapshot).toEqual(paused);
   });
 });
+
+it.each(['typed', 'voice', 'ai-preference'] as const)(
+  'keeps the clearer lecture labels local through %s and preserves mode/notes behavior',
+  async input => {
+    const h = setup();
+    await h.open();
+    await h.runtime.submit('next step');
+    await control(h, input, 'Review notes', { kind: 'presentation', action: 'rehearse' });
+    expect(h.session).toMatchObject({
+      mode: 'rehearse',
+      index: 1,
+      notesVisible: true,
+      answerVisible: false,
+    });
+    await control(h, input, 'Hide presenter notes', { kind: 'presentation', action: 'hide-notes' });
+    expect(h.session.notesVisible).toBe(false);
+    await control(h, input, 'Show presenter notes', { kind: 'presentation', action: 'notes' });
+    expect(h.session.notesVisible).toBe(true);
+    await h.runtime.submit('reveal answer');
+    h.api.setStage(5);
+    const before = h.adapter().capture();
+    await control(h, input, 'Present', { kind: 'presentation', action: 'teach' });
+    expect(h.session).toMatchObject({
+      mode: 'teach',
+      index: 1,
+      notesVisible: false,
+      answerVisible: false,
+    });
+    expect(h.snapshot.lesson.stage).toBe(0);
+    await h.runtime.submit('undo');
+    expect(h.adapter().capture()).toEqual(before);
+    expect(h.interpret).not.toHaveBeenCalled();
+  },
+);

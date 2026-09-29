@@ -116,13 +116,13 @@ export function* displayedFitPoints(
 }
 
 /** Claude Atlas' additive surface glow; the natural enamel material stays untouched. */
-export function selectionGlowMaterial() {
+export function selectionGlowMaterial(hover = false) {
   return new ShaderMaterial({
-    name: 'tooth-selection-glow',
+    name: hover ? 'tooth-hover-glow' : 'tooth-selection-glow',
     uniforms: {
-      uColor: { value: new Color(0x8fc3e0) },
-      uBase: { value: 0.02 },
-      uRim: { value: 0.6 },
+      uColor: { value: new Color(hover ? 0xffe7b0 : 0xffd27f) },
+      uBase: { value: hover ? 0.11 : 0.2 },
+      uRim: { value: hover ? 0.75 : 1.15 },
     },
     side: FrontSide,
     transparent: true,
@@ -161,6 +161,7 @@ export function createSelectionGlow(
   crownGeometry: BufferGeometry,
   rootGeometry: BufferGeometry | undefined,
   material: ShaderMaterial,
+  hoverMaterial = material,
 ) {
   const add = (geometry: BufferGeometry) => {
     const mesh = new Mesh(geometry, material);
@@ -172,9 +173,41 @@ export function createSelectionGlow(
   };
   const crown = add(crownGeometry),
     root = rootGeometry ? add(rootGeometry) : undefined;
-  return (selected: boolean, showRoots: boolean, isolated = false) => {
-    crown.visible = selected && group.visible && !isolated;
-    if (root) root.visible = crown.visible && showRoots;
+  return (selected: boolean, showRoots: boolean, isolated = false, hovered = false) => {
+    crown.material = selected ? material : hoverMaterial;
+    crown.visible = (selected || hovered) && group.visible && !isolated;
+    if (root) {
+      root.material = crown.material;
+      root.visible = crown.visible && showRoots;
+    }
+  };
+}
+
+/** One pair of scene-owned materials serves every tooth; source geometry stays borrowed. */
+export function createSelectionGlows(teeth: DentalCase['teeth'], groups: Map<string, Group>) {
+  const selected = selectionGlowMaterial(),
+    hovered = selectionGlowMaterial(true),
+    glows = new Map<string, ReturnType<typeof createSelectionGlow>>();
+  for (const tooth of teeth)
+    glows.set(
+      tooth.id,
+      createSelectionGlow(
+        groups.get(tooth.id)!,
+        tooth.geometry,
+        tooth.rootGeometry,
+        selected,
+        hovered,
+      ),
+    );
+  return {
+    update(id: string, active: boolean, roots: boolean, isolated = false, preview = false) {
+      glows.get(id)?.(active, roots, isolated, preview);
+    },
+    dispose() {
+      selected.dispose();
+      hovered.dispose();
+      glows.clear();
+    },
   };
 }
 

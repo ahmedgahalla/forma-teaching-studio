@@ -192,7 +192,9 @@ function command(source: string, currentId?: string): PresentationAction | undef
     'show answer': 'reveal',
     'hide answer': 'hide-answer',
     'show notes': 'notes',
+    'show presenter notes': 'notes',
     'hide notes': 'hide-notes',
+    'hide presenter notes': 'hide-notes',
     'focus teaching tooth': 'focus-tooth',
     'show surrounding teeth': 'show-context',
     'hide biology': 'hide-biology',
@@ -201,6 +203,8 @@ function command(source: string, currentId?: string): PresentationAction | undef
     'teach lecture': 'teach',
     'rehearse lecture': 'rehearse',
     teach: 'teach',
+    present: 'teach',
+    'review notes': 'rehearse',
     rehearse: 'rehearse',
     'exit lecture': 'exit',
     'end lecture': 'exit',
@@ -222,7 +226,7 @@ export function parsePresentationPlan(
   try {
     const parts = source.split(/\s+(?:and then|and|then)\s+|[;,]\s*|\.\s+/);
     if (parts.some(part => /^prepare (?:the )?lecture$/.test(part)))
-      throw new Error('Lecture editing is unavailable. Use Rehearse or Teach.');
+      throw new Error('Lecture editing is unavailable. Use Review notes or Present.');
     const control = (part: string) => command(part, context.presentation?.documentId);
     const action = control(source);
     const opensLecture = parts.some(part => control(part)?.action === 'open');

@@ -19,11 +19,13 @@ export function CaseViewport({
   audienceSource,
   lecturePresentation,
   teachingFocus,
+  hoveredToothId,
 }: {
   api: CaseStudioApi;
   audienceSource?: RefObject<HTMLElement | null>;
   lecturePresentation?: boolean;
   teachingFocus?: boolean;
+  hoveredToothId?: string | null;
 }) {
   const { viewer, sceneInteraction } = api;
   const movementTrail = useMovementTrail(api);
@@ -39,6 +41,7 @@ export function CaseViewport({
       >
         <Viewer
           teachingFocus={teachingFocus}
+          hoveredToothId={hoveredToothId}
           toothStudy={api.toothStudy}
           onReferenceInteraction={api.teaching.referenceInteraction}
           mechanics={

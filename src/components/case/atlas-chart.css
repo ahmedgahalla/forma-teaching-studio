@@ -1,14 +1,17 @@
 /* Claude's two-row crown/root diagram, adapted to Forma's theme and selection. */
 .atlas-odontogram {
+  --atlas-chart-selected: #ffd27f;
+  --atlas-chart-hover: #ffe7b0;
   align-self: center;
-  flex-shrink: 0;
+  flex: 0 0 auto;
+  min-width: 0;
   box-sizing: border-box;
   width: min(600px, 100%);
-  margin-top: 9px;
+  margin-top: 12px;
   padding: 8px 12px 6px;
   border: 1px solid var(--ui-line);
   border-radius: 6px;
-  background: var(--atlas-surface);
+  background: var(--ui-panel);
 }
 .atlas-chart-grid {
   display: grid;
@@ -87,20 +90,36 @@
   letter-spacing: -0.02em;
   white-space: nowrap;
 }
-.atlas-chart-tooth:hover .atlas-chart-crown,
-.atlas-chart-tooth:focus-visible .atlas-chart-crown {
-  fill: color-mix(in srgb, var(--ui-text) 28%, transparent);
-  stroke: var(--ui-text);
+button.atlas-chart-tooth:not([data-off]):not([aria-pressed='true']):is(:hover, :focus-visible) {
+  color: var(--atlas-chart-hover);
+  background: color-mix(in srgb, var(--atlas-chart-hover) 12%, transparent);
+}
+button.atlas-chart-tooth:not([data-off]):not([aria-pressed='true']):is(:hover, :focus-visible) svg {
+  filter: drop-shadow(0 0 4px var(--atlas-chart-hover));
+}
+button.atlas-chart-tooth:not([data-off]):not([aria-pressed='true']):is(:hover, :focus-visible)
+  .atlas-chart-crown {
+  fill: color-mix(in srgb, var(--atlas-chart-hover) 40%, var(--ui-panel));
+  stroke: var(--atlas-chart-hover);
+}
+button.atlas-chart-tooth:not([data-off]):not([aria-pressed='true']):is(:hover, :focus-visible)
+  .atlas-chart-root {
+  stroke: var(--atlas-chart-hover);
 }
 .atlas-chart-tooth[aria-pressed='true'] {
-  color: var(--ui-accent);
+  color: var(--atlas-chart-selected);
+  background: color-mix(in srgb, var(--atlas-chart-selected) 16%, transparent);
+  box-shadow: inset 0 0 0 1px var(--atlas-chart-selected);
+}
+.atlas-chart-tooth[aria-pressed='true'] svg {
+  filter: drop-shadow(0 0 3px var(--atlas-chart-selected));
 }
 .atlas-chart-tooth[aria-pressed='true'] .atlas-chart-crown {
-  fill: var(--ui-accent);
-  stroke: var(--ui-accent);
+  fill: var(--atlas-chart-selected);
+  stroke: var(--atlas-chart-selected);
 }
 .atlas-chart-tooth[aria-pressed='true'] .atlas-chart-root {
-  stroke: var(--ui-accent);
+  stroke: var(--atlas-chart-selected);
 }
 .atlas-chart-tooth[data-off] {
   opacity: 0.4;
@@ -110,11 +129,13 @@
   text-underline-offset: 2px;
 }
 .atlas-chart-tooth:focus-visible {
-  outline: 2px solid var(--ui-accent);
+  outline: 2px solid var(--atlas-chart-hover);
   outline-offset: 0;
 }
 .atlas-chart-foot {
   display: flex;
+  flex-wrap: wrap;
+  align-items: center;
   justify-content: space-between;
   gap: 8px;
   margin-top: 3px;
@@ -124,6 +145,10 @@
 .atlas-chart-foot > :last-child {
   color: var(--ui-text);
   font-family: 'IBM Plex Mono', monospace;
+}
+:root[data-forma-theme='clinical'] .atlas-odontogram {
+  --atlas-chart-selected: #875500;
+  --atlas-chart-hover: #704300;
 }
 @media (max-width: 640px) {
   .atlas-odontogram {

@@ -3,6 +3,7 @@ import { useEffect, useId, useRef } from 'react';
 import type { LectureDocument } from '@/lib/lecture-documents';
 import type { BiologyView } from '@/lib/teaching-biology';
 import { RemodelingDiagram } from './RemodelingDiagram';
+import { LectureStepGuide } from './LectureStepGuide';
 import type { LectureComparison } from '@/lib/classroom/presentation';
 import { LECTURE_COMPARISON_LABELS } from './comparison-labels';
 import { availableLectureComparisons } from './lecture-comparison';
@@ -51,8 +52,35 @@ export function LecturePanel({
   }, [comparison, biology]);
   const step = document.steps[index];
   const comparisons = availableLectureComparisons(document);
+  const notes = step.notes && (
+    <>
+      <button
+        type="button"
+        onClick={onNotes}
+        aria-expanded={notesVisible}
+        aria-controls={`${fieldId}-shown-notes`}
+      >
+        {notesVisible ? 'Hide presenter notes' : 'Show presenter notes'}
+      </button>
+      {notesVisible && (
+        <div id={`${fieldId}-shown-notes`} className="lecture-notes">
+          <span className="lecture-eyebrow">
+            {audienceOpen ? 'PRESENTER NOTES · NOT IN AUDIENCE WINDOW' : 'VISIBLE ON THIS SCREEN'}
+          </span>
+          <p>{step.notes}</p>
+        </div>
+      )}
+    </>
+  );
   return (
     <aside className="lecture-panel" data-mode={mode} aria-label="Lecture step">
+      <LectureStepGuide
+        step={step}
+        mode={mode}
+        comparison={comparison}
+        last={index === document.steps.length - 1}
+      />
+      {mode === 'rehearse' && notes}
       {(step.question || step.answer) && (
         <section className="lecture-prompt" aria-label="Class discussion">
           <span className="lecture-eyebrow">Discuss with students</span>
@@ -77,28 +105,7 @@ export function LecturePanel({
           )}
         </section>
       )}
-      {step.notes && (
-        <>
-          <button
-            type="button"
-            onClick={onNotes}
-            aria-expanded={notesVisible}
-            aria-controls={`${fieldId}-shown-notes`}
-          >
-            {notesVisible ? 'Hide notes' : 'Show notes'}
-          </button>
-          {notesVisible && (
-            <div id={`${fieldId}-shown-notes`} className="lecture-notes">
-              <span className="lecture-eyebrow">
-                {audienceOpen
-                  ? 'PRESENTER NOTES · NOT IN AUDIENCE WINDOW'
-                  : 'VISIBLE ON THIS SCREEN'}
-              </span>
-              <p>{step.notes}</p>
-            </div>
-          )}
-        </>
-      )}
+      {mode === 'teach' && notes}
       <details ref={aidsRef} className="lecture-disclosure lecture-teaching-aids">
         <summary>Teaching aids</summary>
         <div className="lecture-aids-content">
@@ -141,11 +148,6 @@ export function LecturePanel({
       )}
       {biology !== 'off' && (
         <RemodelingDiagram view={biology} onViewChange={onBiology} onClose={onHideBiology} />
-      )}
-      {mode === 'rehearse' && (
-        <p className="lecture-muted">
-          Rehearse this ready-made lecture, then choose Teach when you are ready.
-        </p>
       )}
     </aside>
   );
