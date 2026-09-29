@@ -1,6 +1,6 @@
 # User-controlled lecture view handoff
 
-Branch: `ahmed/phase-3-user-controlled-view`; base PR #30 at `3106cea`. Draft PR pending.
+Branch: `ahmed/phase-3-user-controlled-view`; base PR #30 at `3106cea`. Draft [#31 (draft)](https://github.com/ahmedgahalla/forma-teaching-studio/pull/31) is open; implementation commit `40c29ca`.
 
 Preserve the learner's selected view and exact camera pose through same-lecture Next/Previous/jumps/restart; a different lecture retains its prepared opening view. Keep occlusal arch visibility, comparison labels and exact return/history boundaries consistent. Viewer must not replace the held pose with an automatic authored refit, while explicit Fit/focus and real resize remain functional. Current camera name is visible on the view control. Final review and automated gate pass: 3,112 frontend tests in 177 files, 659 backend tests, typecheck, zero-warning lint, formatting, file limits (568 files), production build and offline demo assets. Twenty-two frontend tests added, none removed; contributors frozen before the final run. The local frontend build is refreshed; existing 3012/8002 listeners confirmed.
 

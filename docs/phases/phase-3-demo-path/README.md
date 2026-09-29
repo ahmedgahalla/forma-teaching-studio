@@ -1,6 +1,6 @@
 # Phase 3 — demo path
 
-**Status:** User-controlled lecture view implemented; automated gate passes, browser acceptance and requested video capture pending. **Current branch:** `ahmed/phase-3-user-controlled-view`. **PR:** Pending draft creation. **Base:** [#30 (draft)](https://github.com/ahmedgahalla/forma-teaching-studio/pull/30).
+**Status:** User-controlled lecture view implemented; automated gate passes, browser acceptance and requested video capture pending. **Current branch:** `ahmed/phase-3-user-controlled-view`. **PR:** [#31 (draft)](https://github.com/ahmedgahalla/forma-teaching-studio/pull/31). **Base:** [#30 (draft)](https://github.com/ahmedgahalla/forma-teaching-studio/pull/30).
 
 **Goal:** explore the central model freely or follow a finished learning walkthrough with minimal text, then return from an experiment without losing the current step. The latest owner request removes the visible professor/student split. Builds on [product direction](../../PRODUCT_DIRECTION.md).
 
