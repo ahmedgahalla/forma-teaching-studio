@@ -19,13 +19,14 @@ export type DemoLecture = {
 export const DEMO_LECTURES: readonly DemoLecture[] = [
   {
     id: FEATURED_LECTURE_ID,
-    title: 'A case from assessment to retention',
+    title: 'Appliances and tooth movement',
     summary:
-      'Follow one narrow upper arch through appliances, a wire experiment and authored finishing stages.',
-    duration: '7-9 min',
+      'Follow one illustrative case through appliances, an optional TAD example and authored finishing stages.',
+    duration: '8–10 min',
     objectives: [
       'Explain the sequence: assess, expand, reassess, align, finish and retain.',
       'Distinguish appliance placement, initial elastic response and authored progress.',
+      'Explore a separate schematic TAD-and-elastic anchorage example.',
       'Compare the same starting and finished arrangement; faculty review pending.',
     ],
     sources: CASE_JOURNEY_SOURCES,

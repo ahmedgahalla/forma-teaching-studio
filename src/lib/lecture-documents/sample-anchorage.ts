@@ -102,7 +102,7 @@ export function createAnchorageLecture(): LectureDocument {
         ].join('\n\n'),
         question: 'Is every posterior movement automatically a failure?',
         answer:
-          'No. Whether movement is wanted depends on the treatment objective and reference. Here, the two allocations are deliberately chosen examples for comparison.',
+          'Desired movement depends on the treatment objective and reference; these two authored examples deliberately allocate space use differently.',
         scene: scene('shared-space-use', 1),
       },
       {
@@ -116,7 +116,7 @@ export function createAnchorageLecture(): LectureDocument {
         ].join('\n\n'),
         question: 'What is missing if a report only says “the space closed”?',
         answer:
-          'It omits how anterior and posterior teeth changed relative to a reference. A clinical explanation also needs the objective, appliance mechanics and biological context; the authored paths alone cannot supply those.',
+          'A smaller gap cannot explain anchorage by itself; anterior and posterior movement, treatment objectives, appliance mechanics and biological context also matter.',
         scene: scene('shared-space-use', 1),
       },
     ],

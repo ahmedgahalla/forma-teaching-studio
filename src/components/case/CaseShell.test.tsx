@@ -4,7 +4,6 @@ import { createRoot, type Root } from 'react-dom/client';
 import { afterEach, beforeEach, expect, it, vi } from 'vitest';
 import type { CaseStudioApi } from './api';
 import type { TeacherLectures } from '../lecture-builder/useTeacherLectures';
-import type { LectureComparison } from '@/lib/classroom/presentation';
 import { CaseShell } from './CaseShell';
 import { DEMO_LECTURES } from '@/lib/lecture-documents';
 
@@ -17,9 +16,6 @@ const calls = vi.hoisted(() => ({
   importCase: vi.fn(),
   modal: vi.fn(),
   scene: vi.fn(),
-  audience: vi.fn(),
-  audienceOpen: vi.fn(),
-  audienceClose: vi.fn(),
 }));
 vi.mock('./CaseMain', async () => {
   const { useEffect } = await import('react');
@@ -40,26 +36,9 @@ vi.mock('./CaseSidebar', () => ({ CaseSidebar: () => <aside data-testid="sidebar
 vi.mock('./CaseDialogs', () => ({ CaseDialogs: () => null }));
 vi.mock('./StudioExperience', () => ({ MobileStudioDock: () => null }));
 vi.mock('../try/PreviewDecisionBar', () => ({ PreviewDecisionBar: () => null }));
-vi.mock('../lecture-builder/LecturePanel', () => ({
-  LecturePanel: () => <aside data-testid="lecture-panel">Sample lecture</aside>,
-}));
 vi.mock('../lecture-builder/LectureNavigation', () => ({
   LectureNavigation: () => <nav aria-label="Lecture controls" />,
 }));
-vi.mock('../lecture-audience/useAudienceWindow', () => ({
-  useAudienceWindow: (options: unknown) => {
-    calls.audience(options);
-    return {
-      status: 'closed',
-      error: '',
-      isOpen: false,
-      open: calls.audienceOpen,
-      close: calls.audienceClose,
-      portal: <div data-testid="public-projection">Public model projection</div>,
-    };
-  },
-}));
-
 type Screen = 'explore' | 'lecture';
 function Harness({
   initialScreen = 'lecture',
@@ -67,21 +46,12 @@ function Harness({
   busy = false,
   error = '',
   exploring = false,
-  comparison = null,
-  model = {},
 }: {
   initialScreen?: Screen;
   mode?: 'rehearse' | 'teach';
   busy?: boolean;
   error?: string;
   exploring?: boolean;
-  comparison?: LectureComparison | null;
-  model?: Partial<
-    Pick<
-      CaseStudioApi,
-      'mechanics' | 'responseRevealed' | 'magnification' | 'forceVectors' | 'opening' | 'sandbox'
-    >
-  >;
 }) {
   const [screen, setScreen] = useState<Screen>(initialScreen);
   const [lecture, setLecture] = useState(mode === 'teach');
@@ -110,7 +80,6 @@ function Harness({
     sceneInteraction: calls.scene,
     save: calls.save,
     importCase: calls.importCase,
-    ...model,
   } as unknown as CaseStudioApi;
   const teacher = {
     catalog: DEMO_LECTURES,
@@ -122,7 +91,6 @@ function Harness({
       index: 0,
       answerVisible: false,
       biology: 'off',
-      comparison,
     },
     active: screen !== 'explore',
     error: '',
@@ -201,7 +169,9 @@ it('opens the ready lecture directly without remounting the shared model', async
   const model = byTestId('model-workspace');
   await click('Lecture');
   expect(calls.openSample).toHaveBeenCalledOnce();
-  expect(container.querySelectorAll('[data-testid="lecture-panel"]')).toHaveLength(1);
+  expect(container.querySelectorAll('[aria-label="Lecture controls"]')).toHaveLength(1);
+  expect(byTestId('tools')).toBeNull();
+  expect(byTestId('sidebar')).toBeNull();
   expect(findButton('Tools')).toBeUndefined();
   expect(findButton('Create lecture')).toBeUndefined();
   expect(byTestId('model-workspace')).toBe(model);
@@ -232,7 +202,8 @@ it('keeps experience tabs available in Teach while hiding editing and case-file 
   expect(findButton('Save case')).toBeUndefined();
   expect(findButton('Selection')).toBeUndefined();
   expect(findButton('Layers')).toBeUndefined();
-  expect(byTestId('lecture-panel')).not.toBeNull();
+  expect(byTestId('tools')).toBeNull();
+  expect(byTestId('sidebar')).toBeNull();
   await click('Explore');
   expect(calls.exit).toHaveBeenCalledOnce();
   expect(findButton('Explore')?.getAttribute('aria-pressed')).toBe('true');
@@ -257,92 +228,27 @@ it('preserves case opening, saving and the busy import guard in Explore', async 
   expect(calls.importCase).toHaveBeenCalledExactlyOnceWith(file);
 });
 
-it('passes only audience-safe content and keeps projection events outside the editing shell', async () => {
-  await render({ exploring: true });
-  const options = calls.audience.mock.lastCall![0];
-  expect(options.active).toBe(true);
-  expect(options.content).toEqual({
-    lectureTitle: 'Lecture',
-    stepTitle: 'Discussion · Predict',
-    question: 'What moves?',
-    answer: null,
-    biology: undefined,
-    modelCaption: null,
-    vectorLegend: false,
-    separation: null,
-  });
-  expect(options.content).not.toHaveProperty('notes');
-  await click('Open audience window');
-  expect(calls.audienceOpen).toHaveBeenCalledOnce();
-  const projection = byTestId('public-projection')!;
-  expect(container.querySelector('.app-shell')!.contains(projection)).toBe(false);
-  calls.scene.mockClear();
-  await act(async () => projection.dispatchEvent(new MouseEvent('click', { bubbles: true })));
-  expect(calls.scene).not.toHaveBeenCalled();
-  await click('Explore');
-  expect(calls.audience.mock.lastCall![0].active).toBe(false);
-  expect(findButton('Open audience window')).toBeUndefined();
-});
-
-it('shares only revealed mechanics scale and public display qualifications during a question', async () => {
-  const mechanics = {
-    result: { diagnostics: { maxDisplacementMm: 0.0123, maxRotationDeg: 0.025 } },
-    config: { privateName: 'SECRET APPLIANCE' },
-  } as unknown as NonNullable<CaseStudioApi['mechanics']>;
-  const model = { mechanics, magnification: 50, forceVectors: true, opening: 12 };
-  await render({ exploring: true, model });
-  expect(calls.audience.mock.lastCall![0].content).toMatchObject({
-    modelCaption: 'Predict first · calculated response hidden',
-    vectorLegend: false,
-    separation: 12,
-  });
-  await render({ exploring: true, model: { ...model, responseRevealed: true } });
-  const content = calls.audience.mock.lastCall![0].content;
-  expect(content.modelCaption).toBe(
-    'Actual maximum: 0.0123 mm · 0.025° · visualization exaggerated 50×',
-  );
-  expect(content.vectorLegend).toBe(true);
-  expect(JSON.stringify(content)).not.toMatch(/PRIVATE|SECRET|diagnostics|config/);
-  await render({
-    exploring: true,
-    model: {
-      ...model,
-      responseRevealed: true,
-      sandbox: { pending: {} } as CaseStudioApi['sandbox'],
-      opening: 0,
-    },
-  });
-  expect(calls.audience.mock.lastCall![0].content).toMatchObject({
-    modelCaption: null,
-    vectorLegend: false,
-    separation: null,
-  });
-});
-
-it.each([
-  ['start', 'Starting arrangement'],
-  ['translation', 'Translation example'],
-  ['tip', 'Tipping example'],
-] as const)(
-  'labels the public %s comparison instead of the paused lecture scene',
-  async (comparison, label) => {
-    await render({ comparison });
-    expect(calls.audience.mock.lastCall![0].content.stepTitle).toBe(`Comparison · ${label}`);
-    await render({ comparison, exploring: true });
-    expect(calls.audience.mock.lastCall![0].content.stepTitle).toBe('Discussion · Predict');
-    await render();
-    expect(calls.audience.mock.lastCall![0].content.stepTitle).toBe('Predict');
+it.each(['teach', 'rehearse'] as const)(
+  'keeps a single learner workspace without audience or role controls in legacy %s state',
+  async mode => {
+    await render({ mode });
+    expect(findButton('Open audience window')).toBeUndefined();
+    expect(findButton('Present')).toBeUndefined();
+    expect(findButton('Review notes')).toBeUndefined();
+    expect(byTestId('public-projection')).toBeNull();
+    expect(byTestId('tools')).toBeNull();
+    expect(byTestId('sidebar')).toBeNull();
+    expect(container.querySelectorAll('main')).toHaveLength(1);
   },
 );
 
-it('names the paused lecture and step during exploration without exposing presenter notes to the audience', async () => {
+it('names the paused lecture and step during exploration', async () => {
   await render({ exploring: true });
   const context = container.querySelector('.lecture-exploration-context');
   expect(context?.textContent).toContain('Lecture paused · Step 1');
   expect(context?.textContent).toContain('Lecture · Predict');
   expect(context?.textContent).toContain('Return to lecture restores this step and its view');
   expect(context?.getAttribute('role')).toBe('status');
-  expect(calls.audience.mock.lastCall![0].content).not.toHaveProperty('notes');
   await render({ exploring: false });
   expect(container.querySelector('.lecture-exploration-context')).toBeNull();
 });

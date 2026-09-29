@@ -10,6 +10,8 @@ import {
   type Group,
 } from 'three';
 import type { DentalCase } from './geometry';
+import type { MechanicsExperiment } from './mechanics/types';
+import { displayedTadPoints } from './mechanics-tad-view';
 import type { Transforms } from './model';
 import { toothMatrix } from './analysis';
 import { toothArch } from './appliances';
@@ -87,7 +89,7 @@ export function* displayedToothPoints(
   }
 }
 
-/** Include visible gingiva so tighter crown framing cannot crop it or place it behind captions. */
+/** Fit visible gingiva and TADs as well as the crowns, keeping hardware inside the camera. */
 export function* displayedFitPoints(
   model: DentalCase,
   transforms: Transforms,
@@ -96,8 +98,10 @@ export function* displayedFitPoints(
   opening: number,
   includeGums: boolean,
   jawOpen = false,
+  mechanics?: MechanicsExperiment | null,
 ) {
   yield* displayedToothPoints(model, transforms, ids, roots, opening, jawOpen);
+  if (mechanics) yield* displayedTadPoints(mechanics, ids, opening, jawOpen);
   if (!includeGums) return;
   const arches = new Set(ids.map(toothArch)),
     point = new Vector3();

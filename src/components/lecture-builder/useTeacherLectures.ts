@@ -43,12 +43,10 @@ export function useTeacherLectures(api: CaseStudioApi, refs: CaseRefs) {
     },
     exit: () => send({ kind: 'presentation', action: 'exit' }),
     navigationProps: {
-      mode: session.mode,
       index: session.index,
       count: document?.steps.length ?? 0,
       stepTitles: document?.steps.map(step => step.title) ?? [],
       exploring: session.exploring,
-      onMode: (mode: 'rehearse' | 'teach') => send({ kind: 'presentation', action: mode }),
       onStep: (index: number) => send({ kind: 'presentation', action: 'go', index }),
       onPrevious: () => send({ kind: 'presentation', action: 'previous' }),
       onNext: () => send({ kind: 'presentation', action: 'next' }),
@@ -59,9 +57,7 @@ export function useTeacherLectures(api: CaseStudioApi, refs: CaseRefs) {
       ? {
           document,
           index: session.index,
-          mode: session.mode,
-          answerVisible: session.answerVisible,
-          notesVisible: session.notesVisible,
+          hasResponse: !!api.mechanics?.result,
           focus: session.focus,
           comparison: session.comparison,
           biology: session.biology,
@@ -72,13 +68,6 @@ export function useTeacherLectures(api: CaseStudioApi, refs: CaseRefs) {
           onCloseComparison: () => send({ kind: 'presentation', action: 'close-comparison' }),
           onBiology: (view: BiologyView) => send({ kind: 'presentation', action: 'biology', view }),
           onHideBiology: () => send({ kind: 'presentation', action: 'hide-biology' }),
-          onReveal: () =>
-            send({
-              kind: 'presentation',
-              action: session.answerVisible ? 'hide-answer' : 'reveal',
-            }),
-          onNotes: () =>
-            send({ kind: 'presentation', action: session.notesVisible ? 'hide-notes' : 'notes' }),
         }
       : null,
   };

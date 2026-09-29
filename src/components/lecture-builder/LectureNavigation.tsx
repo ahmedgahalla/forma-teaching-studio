@@ -2,12 +2,10 @@
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 
 export type LectureNavigationProps = {
-  mode: 'rehearse' | 'teach';
   index: number;
   count: number;
   stepTitles: readonly string[];
   exploring: boolean;
-  onMode: (mode: 'rehearse' | 'teach') => void;
   onStep: (index: number) => void;
   onPrevious: () => void;
   onNext: () => void;
@@ -16,12 +14,10 @@ export type LectureNavigationProps = {
 };
 
 export function LectureNavigation({
-  mode,
   index,
   count,
   stepTitles,
   exploring,
-  onMode,
   onStep,
   onPrevious,
   onNext,
@@ -30,24 +26,6 @@ export function LectureNavigation({
 }: LectureNavigationProps) {
   return (
     <nav className="lecture-navigation" aria-label="Lecture controls">
-      <div className="lecture-mode-switch" aria-label="Lecture view" role="group">
-        {(['rehearse', 'teach'] as const).map(value => (
-          <button
-            key={value}
-            type="button"
-            aria-pressed={mode === value}
-            disabled={exploring}
-            title={
-              value === 'rehearse'
-                ? 'Review this step from its prepared start with presenter notes.'
-                : 'Present this step from its prepared start with notes and answer hidden.'
-            }
-            onClick={() => onMode(value)}
-          >
-            {value === 'rehearse' ? 'Review notes' : 'Present'}
-          </button>
-        ))}
-      </div>
       <div className="lecture-step-navigation">
         <button
           type="button"
@@ -96,7 +74,7 @@ export function LectureNavigation({
         </button>
       ) : (
         <button type="button" className="lecture-explore" onClick={onExplore}>
-          Explore this question
+          Explore this step
         </button>
       )}
       <progress

@@ -11,8 +11,9 @@ import type { BiologyView } from '@/lib/teaching-biology';
 import { createTryState } from '@/lib/try-mode';
 import { lectureStepSnapshot } from './scene-bridge';
 import { availableLectureComparisons, lectureComparisonSnapshot } from './lecture-comparison';
-import { lectureAnalysisContext } from './lecture-analysis';
+import { lectureAnalysisContext, lectureNarration } from './lecture-analysis';
 import { lectureExploration } from './lecture-exploration';
+import { isLectureCalculation } from './lecture-mechanics';
 
 export type LectureSession = {
   screen: 'explore' | 'lecture';
@@ -262,6 +263,7 @@ export function createLectureSessionActions(
       if (
         doc &&
         !state.exploring &&
+        !isLectureCalculation(actions, doc?.steps[state.index], state.comparison) &&
         actions.some(
           a =>
             [
@@ -281,18 +283,14 @@ export function createLectureSessionActions(
             (a.kind === 'dental' && !['play', 'pause', 'undo', 'redo'].includes(a.command.type)),
         )
       )
-        throw new Error('Choose Explore this question before changing this lecture model.');
+        throw new Error('Choose Explore this step before changing this lecture model.');
       adapter.preflight(actions, from);
     },
     apply: (action, signal) =>
       action.kind === 'presentation' ? apply(action) : adapter.apply(action, signal),
     narration: target =>
       document && !session.exploring
-        ? target === 'answer'
-          ? session.answerVisible
-            ? document.steps[session.index].answer
-            : 'The answer is hidden. Reveal it when students are ready.'
-          : document.steps[session.index].notes || document.steps[session.index].title
+        ? lectureNarration(document, session)
         : adapter.narration(target),
   });
   return { decorate, apply, preflight, loadStep };

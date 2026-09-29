@@ -158,6 +158,7 @@ function command(source: string, currentId?: string): PresentationAction | undef
     tension: 'show tension',
     'close biology': 'hide biology',
     'focus teaching teeth': 'focus teaching tooth',
+    'focus on these teeth': 'focus teaching tooth',
     'show full model': 'show surrounding teeth',
   };
   source = labels[source] ?? source;
@@ -226,7 +227,9 @@ export function parsePresentationPlan(
   try {
     const parts = source.split(/\s+(?:and then|and|then)\s+|[;,]\s*|\.\s+/);
     if (parts.some(part => /^prepare (?:the )?lecture$/.test(part)))
-      throw new Error('Lecture editing is unavailable. Use Review notes or Present.');
+      throw new Error(
+        'Lecture editing is unavailable. Choose a walkthrough and use Next to move through its steps.',
+      );
     const control = (part: string) => command(part, context.presentation?.documentId);
     const action = control(source);
     const opensLecture = parts.some(part => control(part)?.action === 'open');

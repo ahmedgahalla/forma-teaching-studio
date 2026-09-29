@@ -44,9 +44,9 @@ afterAll(() => {
 });
 
 describe('one continuous authored case lecture', () => {
-  it('validates all fourteen steps on the actual model with independent restart data', () => {
+  it('validates all seventeen steps on the actual model with independent restart data', () => {
     const original = createCaseJourneyLecture();
-    expect(original.steps).toHaveLength(14);
+    expect(original.steps).toHaveLength(17);
     expect(validateLectureDocument(JSON.parse(JSON.stringify(original)))).toEqual(original);
     const edited = createCaseJourneyLecture();
     edited.steps[0].scene.transforms['11'].translation[0] = 60;

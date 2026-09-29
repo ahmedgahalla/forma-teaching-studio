@@ -17,8 +17,7 @@ export function LecturePicker({ lectures, currentId, onOpen, disabled = false }:
       <summary ref={summaryRef}>Choose lecture</summary>
       <div className="lecture-picker-list" aria-label="Demo lectures">
         <p className="lecture-muted lecture-picker-help">
-          Choose a prepared case or topic. Review notes, then Present. Advance through its steps
-          with Next.
+          Choose a case or topic, then follow the model through each step.
         </p>
         {lectures.map(item => (
           <button

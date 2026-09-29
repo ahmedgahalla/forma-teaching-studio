@@ -90,7 +90,7 @@ describe('presentation command parity and precedence', () => {
       const parsed = parseTeachingPlan(text, state);
       expect(parsed).toMatchObject({
         actions: [],
-        clarification: expect.stringMatching(/Review notes or Present/),
+        clarification: expect.stringMatching(/Choose a walkthrough/),
       });
       expect(preserveLocalPlan(parsed)).toBe(true);
       expect(parseLocalVoicePlan(text, state, preflight)).toBeUndefined();

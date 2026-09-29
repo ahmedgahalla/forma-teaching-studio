@@ -5,6 +5,7 @@ import { createMechanicsExperiment, transitionMechanics } from '../mechanics/sta
 import type { WireSection } from '../mechanics/types';
 import { emptyPose, type Transforms } from '../model';
 import type { LectureScene } from './types';
+import { tadLearningScenes } from './sample-tad-learning';
 
 const upper = ['17', '16', '15', '14', '13', '12', '11', '21', '22', '23', '24', '25', '26', '27'];
 const all = [...upper, ...upper.map(id => `${Number(id[0]) === 1 ? 4 : 3}${id[1]}`)];
@@ -128,7 +129,7 @@ export function caseJourneyScenes() {
     scenes.review.setup.view = 'perspective';
     scenes.review.setup.gums = false;
     for (const key of ['expansion', 'reassess'] as const) scenes[key].applianceDisplay.progress = 1;
-    return scenes;
+    return { ...scenes, ...tadLearningScenes(scenes.passiveWire) };
   } finally {
     // Fallback scene preparation owns its geometry; the loaded Atlas is shared.
     if (!asset) {

@@ -36,26 +36,31 @@ describe('lecture scene explanation facts', () => {
       const facts = lectureAnalysisContext(context, document, session);
       expect(facts.lesson?.title).toBe(document.title);
       expect(facts.lesson?.explanation).toContain(document.steps[index].title);
-      expect(facts.lesson?.explanation).toContain(document.steps[index].question);
+      expect(facts.lesson?.explanation).toContain(document.steps[index].answer);
       expect(facts.lesson?.explanation).toContain('static authored pose');
       expect(JSON.stringify(facts)).not.toContain('OLD_PREPARED_ANSWER');
       expect(context.lesson?.title).toBe('Old prepared case');
     },
   );
 
-  it('omits hidden answers and all private notes, even with notes visible', () => {
+  it('uses the same visible takeaway for either legacy mode and omits reference notes', () => {
     const { document, context, session } = fixture();
-    document.steps[0].answer = 'PRIVATE_UNREVEALED_ANSWER';
-    document.steps[0].notes = 'PRIVATE_PRESENTER_NOTES';
-    const facts = lectureAnalysisContext(context, document, { ...session, notesVisible: true });
-    expect(facts.lesson?.explanation).toContain('answer is hidden');
-    expect(JSON.stringify(facts)).not.toMatch(/PRIVATE_|OLD_PREPARED/);
-    const revealed = lectureAnalysisContext(context, document, { ...session, answerVisible: true });
-    expect(revealed.lesson?.explanation).toContain(
-      'Revealed lecture answer: PRIVATE_UNREVEALED_ANSWER',
-    );
-    expect(JSON.stringify(revealed)).not.toContain('PRIVATE_PRESENTER_NOTES');
-    expect(revealed.lesson?.explanation).not.toContain('answer is hidden');
+    document.steps[0].answer = 'VISIBLE_LEARNER_TAKEAWAY';
+    document.steps[0].notes = 'PRIVATE_REFERENCE_NOTES';
+    for (const mode of ['teach', 'rehearse'] as const) {
+      for (const answerVisible of [false, true]) {
+        const facts = lectureAnalysisContext(context, document, {
+          ...session,
+          mode,
+          answerVisible,
+          notesVisible: true,
+        });
+        expect(facts.lesson?.explanation).toContain(
+          'Visible step takeaway: VISIBLE_LEARNER_TAKEAWAY',
+        );
+        expect(JSON.stringify(facts)).not.toMatch(/PRIVATE_|OLD_PREPARED|answer is hidden/);
+      }
+    }
   });
 
   it.each([
@@ -70,8 +75,8 @@ describe('lecture scene explanation facts', () => {
       const facts = lectureAnalysisContext(context, document, { ...session, comparison });
       expect(facts.lesson?.explanation).toContain(`displayed model shows the ${label}`);
       expect(facts.lesson?.explanation).toContain(document.steps[1].title);
-      expect(facts.lesson?.explanation).toContain(document.steps[1].question);
-      expect(facts.lesson?.explanation).toContain('question and answer belong to the lecture step');
+      expect(facts.lesson?.explanation).not.toContain(document.steps[1].answer);
+      expect(facts.lesson?.explanation).toContain('takeaway belongs to the walkthrough step');
       expect(facts.lesson?.explanation).not.toContain(
         'This step has an authored movement demonstration',
       );
@@ -93,13 +98,13 @@ describe('lecture scene explanation facts', () => {
     expect(facts.lesson?.explanation).toContain('does not specify playback progress');
   });
 
-  it('describes a cumulative motion step as authored movement while keeping its answer hidden', () => {
+  it('describes a cumulative motion step as authored movement with the learner takeaway', () => {
     const { document, context, session } = fixture();
     document.steps[0].motion = { from: {} };
     const facts = lectureAnalysisContext(context, document, session);
     expect(facts.lesson?.explanation).toContain('authored movement demonstration');
     expect(facts.lesson?.explanation).not.toContain('static authored pose');
-    expect(facts.lesson?.explanation).not.toContain(document.steps[0].answer);
+    expect(facts.lesson?.explanation).toContain(document.steps[0].answer);
   });
 
   it('leaves Explore and absent-lecture context unchanged', () => {
@@ -129,7 +134,7 @@ describe('lecture scene explanation facts', () => {
   });
 });
 
-it('uses the current session reveal state in the real adapter decorator', () => {
+it('keeps the visible takeaway stable across legacy reveal commands in the real adapter decorator', () => {
   const { document, context, session: initialSession } = fixture(1);
   let session = initialSession;
   const api = { sandbox: { pending: null }, note: vi.fn() } as unknown as CaseStudioApi;
@@ -149,11 +154,11 @@ it('uses the current session reveal state in the real adapter decorator', () => 
       { current: null },
     );
   const read = () => actions().decorate(base).analysisContext!();
-  expect(read().lesson?.explanation).not.toContain(document.steps[1].answer);
+  expect(read().lesson?.explanation).toContain(document.steps[1].answer);
   actions().apply({ kind: 'presentation', action: 'reveal' });
   expect(read().lesson?.explanation).toContain(document.steps[1].answer);
   actions().apply({ kind: 'presentation', action: 'hide-answer' });
-  expect(read().lesson?.explanation).not.toContain(document.steps[1].answer);
+  expect(read().lesson?.explanation).toContain(document.steps[1].answer);
   session = { ...session, exploring: true };
   expect(read()).toBe(context);
   expect(actions().decorate({} as TeachingAdapter).analysisContext).toBeUndefined();

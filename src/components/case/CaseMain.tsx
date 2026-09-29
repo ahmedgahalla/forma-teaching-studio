@@ -1,5 +1,5 @@
 'use client';
-import { useCallback, useState, type RefObject } from 'react';
+import { useCallback, useState } from 'react';
 import type { CaseStudioApi } from './api';
 import { OpeningCommandDock } from './OpeningCommandDock';
 import { TeachingCommandBar } from '../teaching/TeachingController';
@@ -15,17 +15,17 @@ import { LectureViewControls } from '../lecture-builder/LectureViewControls';
 import { AtlasToothChart } from './AtlasToothChart';
 import { AtlasToothInspector } from './AtlasToothInspector';
 import { supportsJawOpening } from '@/lib/classroom/jaw';
+import { TeacherWorkspace } from '../lecture-builder/TeacherWorkspace';
+import { canRunLectureMechanics } from '../lecture-builder/lecture-mechanics';
 
-export function CaseMain({
-  api,
-  teacher,
-  audienceSource,
-}: {
-  api: CaseStudioApi;
-  teacher?: TeacherLectures;
-  audienceSource?: RefObject<HTMLElement | null>;
-}) {
+export function CaseMain({ api, teacher }: { api: CaseStudioApi; teacher?: TeacherLectures }) {
   const customStep = teacher?.document && !teacher.session.exploring;
+  const canCalculate =
+    !!customStep &&
+    canRunLectureMechanics(
+      teacher.document!.steps[teacher.session.index],
+      teacher.session.comparison,
+    );
   const atlasExplore = !customStep && !api.toothStudy && !api.glossaryId && !api.lecture;
   const [hoveredTooth, setHoveredTooth] = useState<{
     id: string;
@@ -40,7 +40,7 @@ export function CaseMain({
     hoveredTooth?.model === api.model && hoveredTooth.arch === api.arch ? hoveredTooth.id : null;
   return (
     <>
-      <main className="main-workspace">
+      <main className="main-workspace" data-lecture-walkthrough={customStep || undefined}>
         <div className="workspace-scene">
           {customStep ? (
             <div className="teacher-step-heading">
@@ -66,11 +66,10 @@ export function CaseMain({
           )}
           {!customStep && <CaseArchToolbar api={api} />}
           <div
-            className={`lecture-stage${api.toothStudy ? ' tooth-study-workspace' : ''}${api.glossaryId ? ' definition-workspace' : ''}${atlasExplore ? ' atlas-explore-stage' : ''}`}
+            className={`lecture-stage${api.toothStudy ? ' tooth-study-workspace' : ''}${api.glossaryId ? ' definition-workspace' : ''}${atlasExplore ? ' atlas-explore-stage' : ''}${customStep ? ' learning-model-stage' : ''}`}
           >
             <CaseViewport
               api={api}
-              audienceSource={audienceSource}
               lecturePresentation={!!customStep}
               teachingFocus={!!customStep && teacher!.session.focus}
               hoveredToothId={atlasExplore ? hoveredToothId : null}
@@ -83,9 +82,17 @@ export function CaseMain({
             api.prepared ||
             api.demonstration ||
             api.moved > 0 ||
-            api.sandbox.pending) && (
-            <CaseStageDock api={api} hideExplore={!!customStep} authored={!!customStep} />
+            api.sandbox.pending ||
+            api.mechanics?.result ||
+            canCalculate) && (
+            <CaseStageDock
+              api={api}
+              hideExplore={!!customStep}
+              authored={!!customStep}
+              canCalculate={canCalculate}
+            />
           )}
+          {customStep && <TeacherWorkspace teacher={teacher} />}
         </div>
         <OpeningCommandDock
           open={api.commandsOpen}
@@ -120,7 +127,7 @@ export function CaseMain({
             showUndo={false}
             suggestions={
               customStep
-                ? ['next step', 'show roots', 'reveal answer', 'show notes']
+                ? ['next step', 'show roots', 'fit model', 'explore this step']
                 : api.sandbox.pending
                   ? ['apply preview', 'discard preview']
                   : api.prepared
@@ -155,7 +162,7 @@ export function CaseMain({
             }
             placeholder={
               customStep
-                ? 'Try “next step”, “show notes” or “reveal answer”'
+                ? 'Try “next step”, “show roots” or “fit model”'
                 : api.prepared
                   ? 'Try “show roots, then reveal answer”'
                   : 'Try “select upper front six, then move them buccally 1 mm”'

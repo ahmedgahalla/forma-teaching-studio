@@ -24,6 +24,22 @@ const action = { kind: 'mechanics-example' as const, id: 'crown-pull' as const, 
 const plan = { actions: [action], summary: 'Example', clarification: null };
 
 describe('local mechanics example command contract', () => {
+  it('keeps previous anchorage names equivalent to the visible TAD example', () => {
+    const earlier = parseTeachingPlan(
+      'show mechanics example reciprocal and fixed anchorage ideal fixed anchor',
+      context,
+    );
+    const current = parseTeachingPlan(
+      'show mechanics example tooth anchorage vs TAD TAD and elastic',
+      context,
+    );
+    expect(current.clarification).toBeNull();
+    expect(current.actions).toEqual([
+      { kind: 'mechanics-example', id: 'anchorage', variant: 'fixed' },
+    ]);
+    expect(earlier.actions).toEqual(current.actions);
+  });
+
   it('accepts the spoken counter couple without punctuation', () => {
     expect(
       parseTeachingPlan(

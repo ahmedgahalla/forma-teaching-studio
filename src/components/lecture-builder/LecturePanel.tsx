@@ -1,22 +1,16 @@
 'use client';
-import { useEffect, useId, useRef } from 'react';
 import type { LectureDocument } from '@/lib/lecture-documents';
 import type { BiologyView } from '@/lib/teaching-biology';
+import type { LectureComparison } from '@/lib/classroom/presentation';
 import { RemodelingDiagram } from './RemodelingDiagram';
 import { LectureStepGuide } from './LectureStepGuide';
-import type { LectureComparison } from '@/lib/classroom/presentation';
 import { LECTURE_COMPARISON_LABELS } from './comparison-labels';
 import { availableLectureComparisons } from './lecture-comparison';
 
 export type LecturePanelProps = {
   document: LectureDocument;
   index: number;
-  mode: 'rehearse' | 'teach';
-  answerVisible: boolean;
-  notesVisible: boolean;
-  onReveal: () => void;
-  onNotes: () => void;
-  audienceOpen?: boolean;
+  hasResponse?: boolean;
   focus: boolean;
   onFocus: () => void;
   comparison: LectureComparison | null;
@@ -30,12 +24,7 @@ export type LecturePanelProps = {
 export function LecturePanel({
   document,
   index,
-  mode,
-  answerVisible,
-  notesVisible,
-  onReveal,
-  onNotes,
-  audienceOpen = false,
+  hasResponse = false,
   focus,
   onFocus,
   comparison,
@@ -45,72 +34,24 @@ export function LecturePanel({
   onBiology,
   onHideBiology,
 }: LecturePanelProps) {
-  const fieldId = useId();
-  const aidsRef = useRef<HTMLDetailsElement>(null);
-  useEffect(() => {
-    if ((comparison !== null || biology !== 'off') && aidsRef.current) aidsRef.current.open = true;
-  }, [comparison, biology]);
   const step = document.steps[index];
   const comparisons = availableLectureComparisons(document);
-  const notes = step.notes && (
-    <>
-      <button
-        type="button"
-        onClick={onNotes}
-        aria-expanded={notesVisible}
-        aria-controls={`${fieldId}-shown-notes`}
-      >
-        {notesVisible ? 'Hide presenter notes' : 'Show presenter notes'}
-      </button>
-      {notesVisible && (
-        <div id={`${fieldId}-shown-notes`} className="lecture-notes">
-          <span className="lecture-eyebrow">
-            {audienceOpen ? 'PRESENTER NOTES · NOT IN AUDIENCE WINDOW' : 'VISIBLE ON THIS SCREEN'}
-          </span>
-          <p>{step.notes}</p>
-        </div>
-      )}
-    </>
-  );
   return (
-    <aside className="lecture-panel" data-mode={mode} aria-label="Lecture step">
-      <LectureStepGuide
-        step={step}
-        mode={mode}
-        comparison={comparison}
-        last={index === document.steps.length - 1}
-      />
-      {mode === 'rehearse' && notes}
-      {(step.question || step.answer) && (
-        <section className="lecture-prompt" aria-label="Class discussion">
-          <span className="lecture-eyebrow">Discuss with students</span>
-          {step.question && <p className="lecture-question">{step.question}</p>}
-          {step.answer && (
-            <>
-              <button
-                type="button"
-                className="lecture-primary"
-                onClick={onReveal}
-                aria-expanded={answerVisible}
-                aria-controls={`${fieldId}-revealed-answer`}
-              >
-                {answerVisible ? 'Hide answer' : 'Reveal answer'}
-              </button>
-              {answerVisible && (
-                <p id={`${fieldId}-revealed-answer`} className="lecture-answer">
-                  {step.answer}
-                </p>
-              )}
-            </>
-          )}
-        </section>
-      )}
-      {mode === 'teach' && notes}
-      <details ref={aidsRef} className="lecture-disclosure lecture-teaching-aids">
-        <summary>Teaching aids</summary>
+    <section className="lecture-panel" aria-label="Step explanation">
+      <div className="lecture-caption">
+        {!comparison && step.answer && <p className="lecture-takeaway">{step.answer}</p>}
+        <LectureStepGuide
+          step={step}
+          comparison={comparison}
+          hasResponse={hasResponse}
+          last={index === document.steps.length - 1}
+        />
+      </div>
+      <details className="lecture-disclosure lecture-model-options">
+        <summary>Inspect and compare</summary>
         <div className="lecture-aids-content">
           <button type="button" aria-pressed={focus} onClick={onFocus}>
-            {focus ? 'Show surrounding teeth' : 'Focus teaching teeth'}
+            {focus ? 'Show surrounding teeth' : 'Focus on these teeth'}
           </button>
           {comparisons.length > 0 && (
             <div
@@ -118,7 +59,6 @@ export function LecturePanel({
               role="group"
               aria-label="Comparison arrangement"
             >
-              <span className="lecture-eyebrow">Compare arrangements</span>
               {comparisons.map(target => (
                 <button
                   key={target}
@@ -129,9 +69,6 @@ export function LecturePanel({
                   {LECTURE_COMPARISON_LABELS[target]}
                 </button>
               ))}
-              <p className="lecture-muted">
-                Compare from the same viewpoint. Close comparison to return to your paused lecture.
-              </p>
             </div>
           )}
           {biology === 'off' && (
@@ -142,13 +79,17 @@ export function LecturePanel({
         </div>
       </details>
       {comparison && (
-        <button type="button" className="lecture-primary" onClick={onCloseComparison}>
+        <button
+          type="button"
+          className="lecture-primary lecture-comparison-return"
+          onClick={onCloseComparison}
+        >
           Close comparison
         </button>
       )}
       {biology !== 'off' && (
         <RemodelingDiagram view={biology} onViewChange={onBiology} onClose={onHideBiology} />
       )}
-    </aside>
+    </section>
   );
 }

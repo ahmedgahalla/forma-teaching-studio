@@ -3,19 +3,20 @@ import { validateLectureDocument } from './documents';
 import { caseJourneyScenes } from './sample-case-journey-scenes';
 import { CASE_JOURNEY_SOURCES } from './sample-case-journey-sources';
 import type { LectureDocument } from './types';
+import { tadLearningSteps } from './sample-tad-learning';
 
 const source = (index: number) => {
   const item = CASE_JOURNEY_SOURCES[index];
   return `Source: ${item.title}. ${item.url}`;
 };
 
-/** One continuous synthetic case, with authored checkpoints and a separate wire experiment. */
+/** Synthetic case with authored checkpoints and initial wire/TAD response experiments. */
 export function createCaseJourneyLecture(): LectureDocument {
   const scenes = caseJourneyScenes();
   return validateLectureDocument({
     version: 1,
     id: FEATURED_LECTURE_ID,
-    title: 'One case: expansion, alignment and retention',
+    title: 'Appliances and tooth movement',
     updatedAt: '2026-09-29T00:00:00.000Z',
     steps: [
       {
@@ -31,7 +32,7 @@ export function createCaseJourneyLecture(): LectureDocument {
         ].join('\n\n'),
         question: 'What must we establish before choosing an appliance?',
         answer:
-          'The source of the transverse discrepancy, available space, growth status, oral health and function. A digital view of tooth positions alone cannot establish these.',
+          'Narrow upper teeth and uneven incisors form the starting arrangement for this illustrative case.',
         scene: scenes.assess,
         comparison: 'start',
       },
@@ -46,7 +47,7 @@ export function createCaseJourneyLecture(): LectureDocument {
         ].join('\n\n'),
         question: 'Why address the transverse relationship before final alignment here?',
         answer:
-          'The case assumes upper transverse deficiency. The plan first addresses that relationship, reassesses, then aligns and finishes the teeth.',
+          'This example separates expansion, alignment, finishing and retention; real treatment choices depend on assessment.',
         scene: scenes.objectives,
       },
       {
@@ -59,8 +60,7 @@ export function createCaseJourneyLecture(): LectureDocument {
           'Choose Next to see how the expander connects to these attachments.',
         ].join('\n\n'),
         question: 'Has adding an attachment changed the transverse relationship?',
-        answer:
-          'No. An attachment connects an appliance to teeth; its placement alone is not the planned correction.',
+        answer: 'Bands provide attachment points; placing them does not move the teeth.',
         scene: scenes.bands,
       },
       {
@@ -74,7 +74,7 @@ export function createCaseJourneyLecture(): LectureDocument {
         ].join('\n\n'),
         question: 'What is the difference between placement and activation?',
         answer:
-          'Placement establishes the appliance connection. Activation changes its mechanical state; progress and tissue health then need monitoring.',
+          'The expander connects to the posterior bands before any activation is illustrated.',
         scene: scenes.expander,
       },
       {
@@ -89,7 +89,7 @@ export function createCaseJourneyLecture(): LectureDocument {
         ].join('\n\n'),
         question: 'Does a wider dental arch prove skeletal expansion?',
         answer:
-          'No. Dental displacement and inclination are different from skeletal expansion. Tooth positions alone do not establish sutural change.',
+          'This authored stage widens the upper dental arch; it does not establish skeletal expansion.',
         scene: scenes.expansion,
         motion: { from: structuredClone(scenes.expander.transforms) },
       },
@@ -103,8 +103,7 @@ export function createCaseJourneyLecture(): LectureDocument {
           'Choose Next to begin the bracket portion of this illustrated sequence.',
         ].join('\n\n'),
         question: 'Why include a hold and reassessment stage?',
-        answer:
-          'To maintain the achieved relationship while the clinician reassesses progress and readiness for the next stage.',
+        answer: 'The illustrated expansion stage pauses for reassessment before alignment.',
         scene: scenes.reassess,
       },
       {
@@ -118,7 +117,7 @@ export function createCaseJourneyLecture(): LectureDocument {
         ].join('\n\n'),
         question: 'Are visible brackets enough to demonstrate an active force system?',
         answer:
-          'No. The wire and its engagement with the attachments matter. Brackets alone do not establish the intended corrective load.',
+          'Brackets connect the wire to the teeth; their position and angle affect that relationship.',
         scene: scenes.brackets,
       },
       {
@@ -132,8 +131,7 @@ export function createCaseJourneyLecture(): LectureDocument {
           source(3),
         ].join('\n\n'),
         question: 'Why should this prepared passive configuration remain still?',
-        answer:
-          'It has no authored width activation. The wire is present, but this prepared input does not impose that displacement.',
+        answer: 'This passive wire is visible but has no width activation in the prepared model.',
         scene: scenes.passiveWire,
       },
       {
@@ -142,17 +140,18 @@ export function createCaseJourneyLecture(): LectureDocument {
         notes: [
           'Suggested pacing: about 55 seconds.',
           'The prepared wire now has width activation. Ask for a prediction before revealing a calculated response. The scene supplies inputs; opening this step does not run a calculation.',
-          'Choose Explore this question, then Show what happens. Inspect the calculated tooth response and force display, and compare with zero activation if useful. Choose Return to lecture to resume the prepared lecture.',
+          'Choose Calculate response below the model, then use Play to replay the initial response. To change the inputs, choose Explore this step and use Return to lecture when finished.',
           'This is a bounded initial elastic experiment with virtual supports. Width activation here is a software comparison, not a clinical archwire prescription. It does not calculate biological remodeling or the later alignment checkpoint.',
         ].join('\n\n'),
         question: 'Will this calculation tell us the eventual treatment result?',
         answer:
-          'No. It shows the initial elastic response to the prepared input under the model assumptions. The later case stages are separately authored.',
+          'Activation produces a bounded initial elastic response in this model, not the eventual treatment result.',
         scene: scenes.activeWire,
       },
+      ...tadLearningSteps(scenes),
       {
         id: 'review-alignment-progress',
-        title: '10. Follow alignment progress',
+        title: '13. Follow alignment progress',
         notes: [
           'Suggested pacing: about 30 seconds.',
           'Return to the case story. Press Play to move from the previous case pose to the authored alignment checkpoint, with braces visible.',
@@ -161,13 +160,13 @@ export function createCaseJourneyLecture(): LectureDocument {
         ].join('\n\n'),
         question: 'What should we compare as alignment progresses?',
         answer:
-          'Tooth position and orientation, available space and relationships to neighboring and opposing teeth. An aligned crown alone does not describe the whole tooth.',
+          'Follow the upper incisors through an authored alignment stage, independent of the earlier mechanics calculation.',
         scene: scenes.alignment,
         motion: { from: structuredClone(scenes.activeWire.transforms) },
       },
       {
         id: 'refine-the-finish',
-        title: '11. Refine the finish',
+        title: '14. Refine the finish',
         notes: [
           'Suggested pacing: about 25 seconds.',
           'From the upper front view, press Play to complete the remaining authored lateral-incisor displacement and rotations. Keep attention on the two incisors while the braces remain visible.',
@@ -175,14 +174,13 @@ export function createCaseJourneyLecture(): LectureDocument {
           'This stage completes the remaining displacement and rotations. Choose Next to inspect the static review configuration and discuss completion criteria.',
         ].join('\n\n'),
         question: 'What changes in this last alignment transition?',
-        answer:
-          'The lateral incisors complete their remaining displacement and rotations toward the authored finishing endpoint. Position and orientation are distinct observations.',
+        answer: 'Small changes in position and rotation complete this authored finishing stage.',
         scene: scenes.finishing,
         motion: { from: structuredClone(scenes.alignment.transforms) },
       },
       {
         id: 'review-before-removal',
-        title: '12. Review before removal',
+        title: '15. Review before removal',
         notes: [
           'Suggested pacing: about 40 seconds.',
           'Keep both arches still and inspect the prepared passive rectangular upper wire. Rotate the model and ask what else needs assessment before appliance removal.',
@@ -192,12 +190,12 @@ export function createCaseJourneyLecture(): LectureDocument {
         ].join('\n\n'),
         question: 'Do straight-looking crowns and a rectangular wire establish a completed result?',
         answer:
-          'No. Wire engagement and torque expression need assessment, alongside oral health, function and relationships within and between the arches.',
+          'Finishing involves more than straight-looking crowns; wire engagement, oral health and tooth relationships still need assessment.',
         scene: scenes.review,
       },
       {
         id: 'remove-and-compare',
-        title: '13. Remove appliances and compare',
+        title: '16. Remove appliances and compare',
         notes: [
           'Suggested pacing: about 25 seconds.',
           'The active appliances are removed while the authored finishing pose is retained. Compare this endpoint with the original case arrangement.',
@@ -206,13 +204,13 @@ export function createCaseJourneyLecture(): LectureDocument {
         ].join('\n\n'),
         question: 'Which separate objectives did the case illustrate?',
         answer:
-          'An illustrated transverse change, anterior alignment and finishing, with reassessment between stages. These are authored teaching checkpoints.',
+          'The appliances disappear while the authored finishing position remains available for comparison.',
         scene: scenes.debond,
         comparison: 'finish',
       },
       {
         id: 'retain-and-monitor',
-        title: '14. Retain and monitor',
+        title: '17. Retain and monitor',
         notes: [
           'Suggested pacing: about 25 seconds.',
           'Inspect the illustrative bonded lingual retainer from the upper occlusal view and ask why it appears after active appliances have been removed.',
@@ -223,7 +221,7 @@ export function createCaseJourneyLecture(): LectureDocument {
         ].join('\n\n'),
         question: 'Why does the case continue after braces are removed?',
         answer:
-          'Maintaining the result needs retention and monitoring because teeth can change position after active treatment.',
+          'A bonded anterior retainer illustrates retention; maintaining the entire result requires an individually assessed retention plan.',
         scene: scenes.retention,
       },
     ],

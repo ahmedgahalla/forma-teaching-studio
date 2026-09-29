@@ -54,7 +54,8 @@ it('opens one ready-made lecture in Teach and leaves a repeated Lecture click at
   });
   const document = teacher.document;
   expect(document?.id).toBe(FEATURED_LECTURE_ID);
-  expect(document?.steps).toHaveLength(14);
+  expect(teacher.navigationProps.count).toBe(document?.steps.length);
+  expect(document?.steps.map(step => step.id)).toContain('test-tad-response');
   await act(async () => teacher.navigationProps.onNext());
   expect(teacher.session.index).toBe(1);
   const execute = harness.api.teaching.execute;
@@ -125,7 +126,12 @@ it('loads authored biology on navigation, preserves a question detour, and clear
   expect(teacher.session.biology).toBe('compression');
   await act(async () => teacher.navigationProps.onNext());
   expect(teacher.session.biology).toBe('tension');
-  await act(async () => teacher.panelProps?.onReveal());
+  await act(async () => {
+    await harness.api.teaching.execute(
+      [{ kind: 'presentation', action: 'reveal' }],
+      'Reveal answer',
+    );
+  });
   await act(async () => teacher.navigationProps.onExplore());
   await act(async () => teacher.navigationProps.onReturn());
   expect(teacher.session).toMatchObject({ biology: 'tension', answerVisible: true });

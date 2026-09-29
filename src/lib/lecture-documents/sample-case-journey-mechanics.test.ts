@@ -1,11 +1,20 @@
 import { readFileSync } from 'node:fs';
-import { Mesh, TubeGeometry, ExtrudeGeometry, Vector3, type CatmullRomCurve3 } from 'three';
+import {
+  Box3,
+  Sphere,
+  Mesh,
+  TubeGeometry,
+  ExtrudeGeometry,
+  Vector3,
+  type CatmullRomCurve3,
+  type BufferAttribute,
+} from 'three';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { afterAll, beforeAll, expect, it, vi } from 'vitest';
 import { getTeachingAssetCase } from '../anatomy-assets';
 import { dentalCaseFromAtlas } from '../atlas-assets';
 import type { DentalCase } from '../geometry';
-import { findSurfaceIntersections } from '../analysis';
+import { findSurfaceIntersections, toothMatrix } from '../analysis';
 import { interpolateTransforms } from '../planning';
 import { solveMechanics, transitionMechanics, validateMechanicsExperiment } from '../mechanics';
 import { rotateLocal } from '../mechanics/state';
@@ -169,4 +178,92 @@ it('shows bands, then the actual expander assembly, and finally only upper reten
   } finally {
     kit.dispose();
   }
+});
+
+it('stages a fixed schematic TAD, passive connection and active elastic on one unchanged reference', () => {
+  const { passiveWire, tadPlacement, tadConnection, tadResponse } = caseJourneyScenes();
+  const stages = [tadPlacement, tadConnection, tadResponse];
+  for (const scene of stages) {
+    expect(scene.transforms).toEqual(passiveWire.transforms);
+    expect(scene.mechanics!.reference).toEqual(passiveWire.mechanics!.reference);
+    expect(scene.mechanics!.config.tads).toEqual(tadPlacement.mechanics!.config.tads);
+    expect(scene.mechanics!.result).toBeNull();
+    expect(scene.mechanics!.applied).toBeNull();
+    expect(scene.setup.arch).toBe('upper');
+    expect(scene.setup.selectedIds).toEqual(['13', '14', '15', '16', '17']);
+    expect(scene.setup.gums).toBe(false);
+    expect(scene.roots).toBe(false);
+    expect(validateMechanicsExperiment(scene.mechanics!, atlas).config).toEqual(
+      scene.mechanics!.config,
+    );
+  }
+  expect(tadPlacement.mechanics!.config.elastics).toEqual([]);
+  expect(tadConnection.mechanics!.config.elastics).toEqual([
+    {
+      id: 'case-optional-elastic',
+      from: { kind: 'tooth', tooth: '13', local: passiveWire.mechanics!.config.brackets['13'] },
+      to: { kind: 'tad', id: 'case-optional-anchor' },
+      law: { kind: 'constant', forceN: 0 },
+    },
+  ]);
+  expect(tadResponse.mechanics!.config.elastics[0].law).toEqual({ kind: 'constant', forceN: 0.2 });
+  expect(solveMechanics(tadPlacement.mechanics!).diagnostics.maxDisplacementMm).toBe(0);
+  expect(solveMechanics(tadConnection.mechanics!).diagnostics.maxDisplacementMm).toBe(0);
+  expect(() => transitionMechanics(tadConnection.mechanics!, { type: 'solve' })).toThrow(
+    /activation/,
+  );
+});
+
+it('keeps the schematic TAD head and body outside the visible Atlas tooth crowns', () => {
+  const scene = caseJourneyScenes().tadPlacement;
+  const experiment = scene.mechanics!;
+  const head = new Vector3(...experiment.config.tads[0].position);
+  const posterior = experiment.reference.teeth.find(tooth => tooth.id === '16')!;
+  const buccal = new Vector3(...posterior.buccal).normalize();
+  // The renderer's head is <=0.9 mm radius; its body extends 5 mm inward.
+  const bounds = atlas.teeth.map(tooth => ({
+    id: tooth.id,
+    box: new Box3()
+      .setFromBufferAttribute(tooth.geometry.getAttribute('position') as BufferAttribute)
+      .applyMatrix4(toothMatrix(tooth, scene.transforms)),
+  }));
+  for (let depth = 0; depth <= 5; depth += 0.25) {
+    const envelope = new Sphere(
+      head.clone().addScaledVector(buccal, -depth),
+      depth === 0 ? 0.9 : 0.4,
+    );
+    for (const tooth of bounds)
+      expect(tooth.box.intersectsSphere(envelope), `${tooth.id} at ${depth}`).toBe(false);
+  }
+});
+
+it('calculates a bounded TAD response with fixed anchorage and a clear sampled Atlas crown path', () => {
+  const scene = caseJourneyScenes().tadResponse;
+  const experiment = scene.mechanics!;
+  const unchanged = structuredClone(experiment);
+  const result = solveMechanics(experiment);
+  expect(result.diagnostics.maxDisplacementMm).toBeGreaterThan(1e-5);
+  expect(result.diagnostics.maxDisplacementMm).toBeLessThan(0.1);
+  expect(result.tads[0].position).toEqual(experiment.config.tads[0].position);
+  expect(Math.hypot(...result.tads[0].reactionN)).toBeCloseTo(0.2, 9);
+  expect(result.elastics[0].forceN).toBe(0.2);
+  expect(
+    result.teeth
+      .filter(tooth => Number(tooth.id[0]) > 2)
+      .every(tooth => tooth.displacementMm.every(value => value === 0)),
+  ).toBe(true);
+  const previous = new Set(
+    findSurfaceIntersections(atlas, experiment.reference.transforms).map(
+      pair => `${pair.a}/${pair.b}`,
+    ),
+  );
+  for (let sample = 1; sample <= 8; sample++) {
+    const pairs = findSurfaceIntersections(
+      atlas,
+      interpolateTransforms(experiment.reference.transforms, result.transforms, sample / 8),
+    );
+    expect(pairs.filter(pair => !previous.has(`${pair.a}/${pair.b}`))).toEqual([]);
+  }
+  expect(experiment).toEqual(unchanged);
+  expect(solveMechanics(experiment)).toEqual(result);
 });

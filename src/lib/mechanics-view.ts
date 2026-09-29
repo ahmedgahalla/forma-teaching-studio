@@ -4,6 +4,7 @@ import type { Transforms, Vec3 } from './model';
 import type { MechanicsEndpoint, MechanicsExperiment } from './mechanics/types';
 import { toothMatrix } from './analysis';
 import { toothArch } from './appliances';
+import { createTadScrews, nearestTadTooth } from './mechanics-tad-view';
 import { applyJawDirection, applyJawPoint, applyJawQuaternion } from './jaw-opening';
 
 type Display = {
@@ -34,6 +35,7 @@ export function createMechanicsVisuals(model: DentalCase) {
     roughness: 0.3,
   });
   const elasticMaterial = new THREE.MeshStandardMaterial({ color: '#eac283', roughness: 0.45 });
+  const tadScrews = createTadScrews(metal, anchorMaterial);
   const forceColor = new THREE.Color('#e9a149'),
     momentColor = new THREE.Color('#b998e8');
   const geometries: THREE.BufferGeometry[] = [],
@@ -94,13 +96,7 @@ export function createMechanicsVisuals(model: DentalCase) {
         id,
         config.brackets[id] || reference.teeth.find(tooth => tooth.id === id)!.bracketLocal,
       );
-    const nearest = (point: Vec3) =>
-      reference.teeth.reduce((best, tooth) =>
-        new THREE.Vector3(...tooth.position).distanceToSquared(new THREE.Vector3(...point)) <
-        new THREE.Vector3(...best.position).distanceToSquared(new THREE.Vector3(...point))
-          ? tooth
-          : best,
-      );
+    const nearest = (point: Vec3) => nearestTadTooth(point, reference.teeth);
     const tadPosition = (id: string) => {
       const tad = config.tads.find(item => item.id === id)!;
       const point = new THREE.Vector3(...tad.position);
@@ -139,27 +135,14 @@ export function createMechanicsVisuals(model: DentalCase) {
         );
       }
     }
+    let tadIndex = 0;
     for (const tad of config.tads) {
       const tooth = nearest(tad.position);
       if (!display.visible(tooth.id)) continue;
       const position = tadPosition(tad.id),
         direction = new THREE.Vector3(...tooth.buccal).normalize();
       applyJawDirection(direction, display.jawOpen && toothArch(tooth.id) === 'lower');
-      const shaft = mesh(
-        new THREE.CylinderGeometry(0.32, 0.18, 3, 12),
-        metal,
-        position.clone().addScaledVector(direction, -1.5),
-      );
-      shaft.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), direction);
-      mesh(new THREE.SphereGeometry(0.62, 16, 10), anchorMaterial, position);
-      for (let i = 1; i <= 5; i++) {
-        const ring = mesh(
-          new THREE.TorusGeometry(0.28 - i * 0.016, 0.065, 5, 12),
-          metal,
-          position.clone().addScaledVector(direction, -i * 0.45),
-        );
-        ring.quaternion.setFromUnitVectors(new THREE.Vector3(0, 0, 1), direction);
-      }
+      tadScrews.place(tadIndex++, tad.id, position, direction, group);
     }
     for (const elastic of config.elastics)
       if (endpointVisible(elastic.from) && endpointVisible(elastic.to)) {
@@ -250,6 +233,7 @@ export function createMechanicsVisuals(model: DentalCase) {
     update,
     dispose: () => {
       clear();
+      tadScrews.dispose();
       [metal, titanium, anchorMaterial, elasticMaterial].forEach(material => material.dispose());
     },
   };

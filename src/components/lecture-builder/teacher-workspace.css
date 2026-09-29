@@ -32,7 +32,7 @@
   flex-shrink: 0;
 }
 .teacher-presentation-toolbar > .lecture-navigation {
-  flex: 1 1 560px;
+  flex: 1 1 460px;
 }
 .teacher-step-heading {
   position: relative;
@@ -113,15 +113,6 @@
   outline: 2px solid var(--ui-accent);
   outline-offset: 2px;
 }
-.app-shell[data-teacher-screen='lecture'] .workspace > .lecture-panel {
-  margin: 12px 18px 12px 0;
-  max-height: calc(100% - 24px);
-  min-width: 0;
-}
-.app-shell[data-teacher-screen='lecture'][data-teacher-mode='teach'] .lecture-panel {
-  width: min(320px, 23vw);
-  flex-basis: min(320px, 23vw);
-}
 [data-lecture-presentation='true'] .viewport-selection,
 [data-lecture-presentation='true'] .orientation,
 [data-lecture-presentation='true'] .viewport-hint,
@@ -135,31 +126,12 @@
   color: var(--ui-error);
 }
 @media (max-width: 1050px) {
-  .app-shell.studio-experience.teaching-studio[data-teacher-screen='lecture']:has(
-      > .workspace > .lecture-panel
-    ) {
+  .app-shell.studio-experience.teaching-studio:has(.workspace-scene > .lecture-panel) {
     --workspace-bottom: 0px;
     padding-bottom: 0;
   }
-  .app-shell[data-teacher-screen='lecture']:has(> .workspace > .lecture-panel)
-    > .mobile-studio-dock {
-    display: none;
-  }
   .teacher-experience-switch button {
     padding: 6px 12px;
-  }
-  .app-shell[data-teacher-screen='lecture'] .workspace {
-    flex-wrap: wrap;
-    overflow: auto;
-  }
-  .app-shell.studio-experience.teaching-studio[data-teacher-screen='lecture'] .main-workspace {
-    min-height: 52dvh;
-  }
-  .app-shell[data-teacher-screen='lecture'] .workspace > .lecture-panel {
-    flex-basis: calc(100% - 24px);
-    width: auto;
-    margin: 0 12px 12px;
-    max-height: 42dvh;
   }
 }
 @media (max-width: 560px) {
@@ -196,4 +168,53 @@
 }
 .lecture-exploration-context strong {
   color: var(--ui-text);
+}
+
+/* The model owns its minimum; explanations and controls follow in separate flow rows. */
+.app-shell.studio-experience.teaching-studio.atlas-workspace
+  .workspace-scene
+  > .learning-model-stage {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  grid-template-rows: minmax(0, 1fr);
+  flex: 1 0 0px;
+  min-height: 290px;
+  min-width: 0;
+}
+.app-shell.studio-experience.teaching-studio.atlas-workspace
+  .main-workspace[data-lecture-walkthrough]
+  .workspace-scene
+  > .learning-model-stage
+  > section.viewport.voice-viewport {
+  min-height: 0;
+  min-width: 0;
+  height: auto;
+  margin: 0;
+}
+.lecture-calculation {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  flex-shrink: 0;
+  gap: 10px;
+  margin-top: 8px;
+  padding: 8px 10px;
+  border: 1px solid var(--ui-line);
+  border-radius: 8px;
+  background: var(--ui-panel);
+}
+.lecture-calculation button {
+  min-height: 44px;
+  padding: 8px 14px;
+  border: 1px solid var(--ui-accent);
+  border-radius: 6px;
+  background: var(--ui-accent);
+  color: var(--ui-accent-text);
+  font: inherit;
+  font-size: 13px;
+  font-weight: 600;
+}
+.lecture-calculation > span {
+  color: var(--ui-muted);
+  font-size: 12px;
 }

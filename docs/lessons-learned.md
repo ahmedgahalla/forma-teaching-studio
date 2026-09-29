@@ -344,3 +344,10 @@ Numbers 17–19 were checked against the current lessons and the parallel Phase 
 - **Root cause:** the combined gate started before all parallel review follow-ups were frozen, allowing the test runner to see two source revisions.
 - **Prevention:** collect a final file-freeze acknowledgement from every contributor before the gate. Any subsequent code/test edit requires the affected tests and final acceptance run to use the same frozen revision. Do not classify a mixed-revision run as passing.
 - **Status:** noted. **Count:** 1
+
+## 48. Visible hardware must participate in camera fitting
+
+- **Mistake caught during review:** [3.30 TAD review](reviews/from-builder/2026-09-29-learning-appliances.md) reproduced an offset screw outside the viewport at wide aspect ratios, although anatomy and appliance-clearance tests passed.
+- **Root cause:** the camera fit used tooth and gum points only; a schematic anchor can extend beyond those bounds, especially with roots hidden.
+- **Prevention:** include visible appliance envelopes using the same ownership, isolation and jaw transforms as rendering. Project actual appliance mesh vertices through the production camera fit across wide, ordinary and narrow aspect ratios. Retain browser acceptance for appearance and occlusion.
+- **Status:** automated. **Count:** 1

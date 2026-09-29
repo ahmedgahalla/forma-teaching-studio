@@ -76,7 +76,7 @@ export function createLectureSample(): LectureDocument {
           'If the class needs another look, scrub back to the start and play again. Choose Next to compare a different geometric path from the same starting position.',
         ].join('\n\n'),
         question: translation.question,
-        answer: translation.answer,
+        answer: 'Translation gives every point the same displacement without changing orientation.',
         scene: scene('translation'),
         demo: { caseId: definition.id, variantId: translation.id },
       },
@@ -91,7 +91,8 @@ export function createLectureSample(): LectureDocument {
           'The pivot here is the displayed crown centre; this is an authored geometric illustration. Choose Next to summarise the comparison with the tipping endpoint held still.',
         ].join('\n\n'),
         question: tipping.question,
-        answer: tipping.answer,
+        answer:
+          'Tipping rotates the tooth about the displayed crown-centre pivot; crown and root points follow different arcs.',
         scene: scene('tip'),
         demo: { caseId: definition.id, variantId: tipping.id },
       },
@@ -106,7 +107,7 @@ export function createLectureSample(): LectureDocument {
         ].join('\n\n'),
         question: 'What distinguishes the two paths when you follow both crown and root?',
         answer:
-          'In translation, every point receives the same displacement and orientation stays unchanged. In this tipping example, the tooth rotates about the displayed crown-centre pivot and crown and root points follow different arcs.',
+          'Translation preserves orientation; this authored tipping path changes orientation around a crown-centre pivot, so crown and root follow different arcs.',
         scene: scene('tip', 1),
       },
     ],
