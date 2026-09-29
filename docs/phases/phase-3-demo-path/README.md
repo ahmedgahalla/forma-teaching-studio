@@ -1,6 +1,6 @@
 # Phase 3 — demo path
 
-**Status:** Case-based lecture and wire reset fix implemented; automated checks pass, with faculty/browser acceptance pending. **Current branch:** `ahmed/phase-3-case-journey`. **PR:** pending. **Base:** [#26 (draft)](https://github.com/ahmedgahalla/forma-teaching-studio/pull/26).
+**Status:** Case-based lecture and wire reset fix implemented; automated checks pass, with faculty/browser acceptance pending. **Current branch:** `ahmed/phase-3-case-journey`. **PR:** [#27 (draft)](https://github.com/ahmedgahalla/forma-teaching-studio/pull/27). **Base:** [#26 (draft)](https://github.com/ahmedgahalla/forma-teaching-studio/pull/26).
 
 **Goal:** a professor can explore the central model freely or open a finished lecture with notes, questions and model demonstrations, then return from a spontaneous experiment without losing the lecture. Builds on [product direction](../../PRODUCT_DIRECTION.md).
 
