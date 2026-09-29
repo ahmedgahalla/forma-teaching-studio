@@ -27,4 +27,8 @@ export const CASE_JOURNEY_SOURCES = [
     title: 'AAO: fixed, removable and combined retention',
     url: 'https://aaoinfo.org/whats-trending/what-are-dental-retainers/',
   },
+  {
+    title: 'British Orthodontic Society: Orthodontic mini-implants (TADs)',
+    url: 'https://bos.org.uk/orthodontic-mini-implants-tads/',
+  },
 ] as const;

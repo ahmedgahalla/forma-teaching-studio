@@ -141,7 +141,7 @@ describe('lecture focus, comparison and biology through the shared runtime', () 
     await h.open();
     const action = { kind: 'mechanics-example', id: 'crown-pull', variant: 'buccal' } as const;
     // Adapter guard runs before catalogue validation; no recipe is applied in this test.
-    expect(() => h.adapter().preflight([action])).toThrow(/Explore this question/);
+    expect(() => h.adapter().preflight([action])).toThrow(/Explore this step/);
     await h.runtime.submit('explore this question');
     expect(() => h.adapter().preflight([action])).not.toThrow();
   });

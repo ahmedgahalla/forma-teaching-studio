@@ -21,7 +21,7 @@ it('shows all four demo choices, linked sources and no authoring control', () =>
     <LecturePicker lectures={DEMO_LECTURES} currentId={DEMO_LECTURES[3].id} onOpen={() => {}} />,
   );
   expect(html).toContain('Translation and tipping');
-  expect(html).toContain('A case from assessment to retention');
+  expect(html).toContain('Appliances and tooth movement');
   expect(html).toContain('Space closure and anchorage');
   expect(html).toContain('Why teeth move');
   expect(html).toContain('https://pubmed.ncbi.nlm.nih.gov/26823650/');

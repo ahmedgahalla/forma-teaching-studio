@@ -430,6 +430,7 @@ const Viewer = forwardRef<ViewerHandle, Props>(function Viewer(props, ref) {
             live.current.opening,
             !selectedOnly && live.current.gums && !live.current.isolateSelection,
             live.current.jawOpen,
+            live.current.braces ? live.current.mechanics : null,
           );
     const visibleBounds = (selectedOnly = false) => {
       const bounds = displayedToothBounds(
@@ -440,7 +441,6 @@ const Viewer = forwardRef<ViewerHandle, Props>(function Viewer(props, ref) {
         live.current.opening,
         live.current.jawOpen,
       );
-      // Exact visible tooth/gum points drive ordinary framing; cutaway uses support bounds.
       if (cutawayTooth()) bounds.union(anatomyKit.bounds);
       return bounds;
     };

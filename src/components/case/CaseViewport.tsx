@@ -1,5 +1,4 @@
 'use client';
-import type { RefObject } from 'react';
 import type { CaseStudioApi } from './api';
 import { Vector3 } from 'three';
 import type { Vec3 } from '@/lib/model';
@@ -16,13 +15,11 @@ import { useMovementTrail } from './useMovementTrail';
 
 export function CaseViewport({
   api,
-  audienceSource,
   lecturePresentation,
   teachingFocus,
   hoveredToothId,
 }: {
   api: CaseStudioApi;
-  audienceSource?: RefObject<HTMLElement | null>;
   lecturePresentation?: boolean;
   teachingFocus?: boolean;
   hoveredToothId?: string | null;
@@ -33,7 +30,6 @@ export function CaseViewport({
   return (
     <>
       <section
-        ref={audienceSource}
         data-lecture-presentation={lecturePresentation || undefined}
         {...VOICE_VIEWPORT_PROPS.case}
         onPointerDownCapture={sceneInteraction}

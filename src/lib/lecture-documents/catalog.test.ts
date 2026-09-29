@@ -11,13 +11,18 @@ describe('ready-made demo lecture pack', () => {
     const documents = createDemoLectures();
     expect(documents.map(item => item.id)).toEqual(DEMO_LECTURES.map(item => item.id));
     expect(new Set(documents.map(item => item.id)).size).toBe(4);
-    expect(documents.map(item => item.steps.length)).toEqual([14, 4, 6, 6]);
+    expect(documents.map(item => item.steps.length)).toEqual([17, 4, 6, 6]);
     expect(documents[1]).toEqual(createLectureSample());
     for (const document of documents) {
       expect(validateLectureDocument(JSON.parse(JSON.stringify(document)))).toEqual(document);
       for (const step of document.steps) {
-        expect(step.notes).toMatch(/Suggested pacing: about \d+ seconds/);
-        expect(step.notes).toMatch(/ask/i);
+        expect(step.answer.split(/\s+/).length).toBeLessThanOrEqual(30);
+        expect(step.answer).not.toMatch(/ask students|professor|presenter|reveal answer/i);
+        expect(step.answer).not.toMatch(/^(Yes|No)[.:]/);
+        if (document.id !== documents[0].id) {
+          expect(step.notes).toMatch(/Suggested pacing: about \d+ seconds/);
+          expect(step.notes).toMatch(/ask/i);
+        }
         expect(step.question).toMatch(/\?$/);
         expect(step.answer.trim().length).toBeGreaterThan(30);
       }

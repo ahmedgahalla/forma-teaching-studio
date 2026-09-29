@@ -89,3 +89,44 @@ it.each([
   expect(getComputedStyle(stage).minHeight).toBe(allocated.minHeight);
   expect(getComputedStyle(stage).flexShrink).toBe('0');
 });
+
+it.each([
+  [1440, 900],
+  [390, 700],
+  [840, 360],
+])('keeps the learner explanation below its allocated model at %s by %s', (width, height) => {
+  host = document.createElement('div');
+  host.className =
+    'app-shell studio-experience teaching-studio lecture-opening atlas-workspace lecture-mode';
+  host.innerHTML = `<main class="main-workspace" data-lecture-walkthrough="true"><div class="workspace-scene">
+      <div class="lecture-stage learning-model-stage"><section class="viewport voice-viewport"></section></div>
+      <section class="classroom-stage-bar">Playback</section>
+      <section class="lecture-panel"><p class="lecture-takeaway">One short explanation.</p></section>
+    </div></main>`;
+  document.body.append(host);
+  sheet = document.createElement('style');
+  const voice = readFileSync('src/components/teaching/VoiceHud.css', 'utf8').split('@container')[0];
+  sheet.textContent = voice;
+  document.head.append(sheet);
+  const voiceMinimum = parseFloat(getComputedStyle(host.querySelector('.viewport')!).minHeight);
+  sheet.textContent = [
+    voice,
+    ...styles.map(file => readFileSync(file, 'utf8')),
+    readFileSync('src/components/lecture-builder/lecture-builder.css', 'utf8'),
+    readFileSync('src/components/lecture-builder/teacher-workspace.css', 'utf8'),
+  ].join('\n');
+  sheet.textContent = activeRules(sheet.sheet!.cssRules, width, height);
+  const stage = host.querySelector('.learning-model-stage')!;
+  const caption = host.querySelector('.lecture-panel')!;
+  expect(parseFloat(getComputedStyle(stage).minHeight)).toBeGreaterThanOrEqual(voiceMinimum);
+  expect(
+    parseFloat(getComputedStyle(host.querySelector('.viewport')!).minHeight),
+  ).toBeLessThanOrEqual(parseFloat(getComputedStyle(stage).minHeight));
+  expect(getComputedStyle(stage).flexShrink).toBe('0');
+  expect(getComputedStyle(caption).flexShrink).toBe('0');
+  expect(getComputedStyle(host.querySelector('.workspace-scene')!).overflow).toBe('auto');
+  expect(stage.nextElementSibling?.nextElementSibling).toBe(caption);
+  expect(caption.parentElement).toBe(stage.parentElement);
+  expect(host.querySelector('aside')).toBeNull();
+  if (width <= 1050) expect(getComputedStyle(host).paddingBottom).toBe('0px');
+});

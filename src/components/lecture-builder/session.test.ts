@@ -118,7 +118,7 @@ describe('teacher lecture journey through the shared runtime', () => {
     await h.open();
     await h.runtime.submit('rehearse lecture');
     expect(h.session.notesVisible).toBe(true);
-    expect(h.adapter().narration('step')).toBe(h.document.steps[0].notes);
+    expect(h.adapter().narration('step')).toBe(h.document.steps[0].answer);
     await h.runtime.submit('go to step 4');
     expect(h.session.index).toBe(3);
     expect(h.session.answerVisible).toBe(false);
@@ -149,7 +149,7 @@ describe('teacher lecture journey through the shared runtime', () => {
     await h.open();
     await h.runtime.submit('teach lecture');
     const study = [{ kind: 'tooth-study', action: 'open', tooth: '46' }] as const;
-    expect(() => h.adapter().preflight([...study])).toThrow(/Explore this question/);
+    expect(() => h.adapter().preflight([...study])).toThrow(/Explore this step/);
     await h.runtime.submit('explore a question');
     expect(() => h.adapter().preflight([...study])).not.toThrow();
   });
@@ -158,9 +158,9 @@ describe('teacher lecture journey through the shared runtime', () => {
     const h = setup();
     await h.open();
     const attachments = [{ kind: 'attachment' as const, action: 'add' as const, teeth: ['11'] }];
-    expect(() => h.adapter().preflight([...attachments])).toThrow(/Explore this question/);
+    expect(() => h.adapter().preflight([...attachments])).toThrow(/Explore this step/);
     expect(() => h.adapter().preflight([{ kind: 'lecture', enabled: false }])).toThrow(
-      /Explore this question/,
+      /Explore this step/,
     );
     await h.runtime.submit('explore a question');
     expect(() => h.adapter().preflight([...attachments])).not.toThrow();

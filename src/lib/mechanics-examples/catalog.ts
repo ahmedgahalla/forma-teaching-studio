@@ -61,12 +61,12 @@ export const MECHANICS_EXAMPLES = [
   },
   {
     id: 'anchorage',
-    title: 'Reciprocal and fixed anchorage',
+    title: 'Tooth anchorage vs TAD',
     question: 'Where does the equal opposite reaction go?',
     target: '13 and 16',
     variants: [
       { id: 'reciprocal', label: 'Tooth anchorage' },
-      { id: 'fixed', label: 'Ideal fixed anchor' },
+      { id: 'fixed', label: 'TAD and elastic' },
     ],
   },
   {

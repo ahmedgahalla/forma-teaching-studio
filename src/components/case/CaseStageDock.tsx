@@ -7,11 +7,33 @@ export function CaseStageDock({
   api,
   hideExplore = false,
   authored = false,
+  canCalculate = false,
 }: {
   api: CaseStudioApi;
   hideExplore?: boolean;
   authored?: boolean;
+  canCalculate?: boolean;
 }) {
+  if (canCalculate && api.mechanics && !api.mechanics.result) {
+    const busy = api.teaching.runtime.phase !== 'idle';
+    return (
+      <div className="lecture-calculation" aria-live="polite">
+        <button
+          type="button"
+          disabled={busy}
+          onClick={() =>
+            void api.teaching.execute(
+              [{ kind: 'mechanics', action: { type: 'solve' } }],
+              'Calculate response',
+            )
+          }
+        >
+          {busy ? 'Calculating response...' : 'Calculate response'}
+        </button>
+        <span>Initial elastic response</span>
+      </div>
+    );
+  }
   return (
     <>
       {(api.prepared ||

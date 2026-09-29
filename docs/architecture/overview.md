@@ -52,6 +52,12 @@ Phase 3.19 adds `viewer/public-overlays.ts`, a canvas-keyed feed with separate r
 
 `lib/mechanics-examples/` holds eight recipe categories/17 variations; a local-only catalog action validates the current source and invokes the existing worker/response checks atomically. `lib/teaching-biology.ts` and `lecture-builder/RemodelingDiagram.tsx` supply separate qualitative tissue illustrations, not solver-derived stresses. Viewer helpers own faded focus materials and reusable pose scratch space. Fonts and the favicon are local assets; `check-demo.mjs` verifies the static export contains the required demo files.
 
+## Single learner workspace (Phase 3.30)
+
+The earlier audience-projection description above records the retained standalone utilities. Normal Lecture now uses one learner view and no longer mounts the audience launcher or capture hook. CaseMain places the short LecturePanel below the full-width model and its single control bar; CaseShell hides editing side panels until an explicit exploration detour. Legacy presentation action names remain compatible.
+
+`lecture-mechanics.ts` permits only a single solve action on an activated authored mechanics step outside comparisons; normal runtime preflight still applies. Calculate response runs the existing worker and produces the standard result/playback state, with whole-request cancellation and history. Narration and analysis use the same visible takeaway, while comparison context omits the paused step's takeaway. `sample-tad-learning.ts` supplies optional TAD/elastic stages as data; `mechanics-tad-view.ts` owns shared screw geometry and pooled meshes.
+
 ## The mechanics worker
 
 `src/workers/mechanics.worker.ts` (10 lines) wraps `solveMechanics`. It is **not** bundled by Next: `scripts/build-mechanics-worker.mjs` (runs automatically as `predev`/`prebuild`) esbuilds it to `public/workers/mechanics.js` (gitignored). `src/lib/mechanics-client.ts` spawns a fresh `Worker('/workers/mechanics.js?v=1')` per request (20 s timeout; AbortSignal terminates the worker so Stop really cancels).

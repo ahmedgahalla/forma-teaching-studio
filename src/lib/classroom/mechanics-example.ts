@@ -56,7 +56,9 @@ export function parseMechanicsExamplePlan(
   try {
     const name = source
       .replace(/^(?:load|show|open) (?:the )?mechanics example\s*/, '')
-      .replace(/-/g, ' ');
+      .replace(/-/g, ' ')
+      .replace(/^reciprocal and fixed anchorage/, 'tooth anchorage vs tad')
+      .replace(/ideal fixed anchor$/, 'tad and elastic');
     for (const example of MECHANICS_EXAMPLES) {
       for (const variant of example.variants) {
         const title = example.title.toLowerCase().replace(/-/g, ' '),

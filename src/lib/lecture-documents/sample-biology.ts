@@ -48,7 +48,7 @@ export function createBiologyLecture(): LectureDocument {
         ].join('\n\n'),
         question: 'Which cell activity is illustrated at the compressed-side bone surface?',
         answer:
-          'Osteoclast-mediated bone resorption. The enlarged vignette illustrates a local process, not a computed pressure map for this model.',
+          'Osteoclasts resorb bone in this compression-side illustration; the enlarged vignette is not a computed pressure map for the model.',
         scene: scene(),
         biology: 'compression',
       },
@@ -63,7 +63,7 @@ export function createBiologyLecture(): LectureDocument {
         ].join('\n\n'),
         question: 'Which cells are associated with the new bone shown here?',
         answer:
-          'Osteoblasts are associated with bone formation. This tension vignette illustrates one local response; it does not predict where or how much bone this model would form.',
+          'Osteoblasts form bone in this tension-side illustration; this local example does not predict where or how much bone the model would form.',
         scene: scene(),
         biology: 'tension',
       },
@@ -79,7 +79,7 @@ export function createBiologyLecture(): LectureDocument {
         ].join('\n\n'),
         question: 'Can these two colors be read as an exact stress distribution around this root?',
         answer:
-          'No. They are separate local examples. Real tissue responses vary around the root and over time; these illustrations are not a computed stress distribution.',
+          'These separate compression–tension illustrations are not a computed stress distribution; real tissue responses vary around the root and over time.',
         scene: scene(),
         biology: 'overview',
       },

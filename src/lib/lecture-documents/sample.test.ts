@@ -61,7 +61,6 @@ describe('the built-in translation and tipping lecture', () => {
       expect(step.scene.setup.stage).toBe(0);
       expect(step.scene.applianceDisplay).toEqual(variant.appliance);
       expect(step.question).toBe(variant.question);
-      expect(step.answer).toBe(variant.answer);
       expect(step.notes).toContain(variant.description);
       expect(step.notes).toContain(variant.answer);
     }

@@ -50,7 +50,10 @@ function teacher({
   return {
     document: {
       title: 'Translation vs tipping: follow the crown and root',
-      steps: [{ title: 'Predict: position or orientation?' }, { title: 'Translation' }],
+      steps: [
+        { title: 'Predict: position or orientation?', scene: {} },
+        { title: 'Translation', scene: {} },
+      ],
     },
     session: { mode, index, comparison, exploring, focus: true },
   } as unknown as TeacherLectures;

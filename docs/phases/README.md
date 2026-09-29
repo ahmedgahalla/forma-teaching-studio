@@ -41,3 +41,5 @@ The later Phase 3 follow-up [3.15 — Lecture presentation and mechanics](phase-
 [3.28 - Clearer UI and AI reliability](phase-3-demo-path/3.28-ui-ai-reliability.md) follows PR #27 with named lecture steps, focused teaching controls and explicit AI reconnection with safe errors. Live OpenRouter command/explanation checks pass; browser acceptance remains pending.
 
 [3.29 - Tooth chart and lecture clarity](phase-3-demo-path/3.29-chart-hover-lecture-clarity.md) follows PR #28 with separate model/chart layout, transient tooth previews, stronger warm selection glow and clearer review/present guidance. Browser acceptance remains pending.
+
+[3.30 - Model-focused learning and TAD appliances](phase-3-demo-path/3.30-learning-appliances.md) follows PR #29 with a single learner view, short captions, optional TAD/elastic stages and guarded calculation in place. The owner's latest request supersedes the earlier role-specific lecture interface; browser and faculty acceptance remain pending.

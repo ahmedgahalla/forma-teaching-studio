@@ -1,5 +1,4 @@
 'use client';
-import { useRef } from 'react';
 import type { CaseStudioApi } from './api';
 import type { TeacherLectures } from '../lecture-builder/useTeacherLectures';
 import { CaseTopbar } from './CaseTopbar';
@@ -9,12 +8,7 @@ import { CaseInspector } from './CaseInspector';
 import { CaseDialogs } from './CaseDialogs';
 import { MobileStudioDock } from './StudioExperience';
 import { PreviewDecisionBar } from '../try/PreviewDecisionBar';
-import { TeacherWorkspace } from '../lecture-builder/TeacherWorkspace';
 import { LectureNavigation } from '../lecture-builder/LectureNavigation';
-import { lectureStepTitle } from '../lecture-builder/comparison-labels';
-import { AudienceLauncher } from '../lecture-audience/AudienceLauncher';
-import { useAudienceWindow } from '../lecture-audience/useAudienceWindow';
-import { mechanicsResponseCaption } from '@/lib/mechanics-presentation';
 import '../lecture-builder/lecture-builder.css';
 import '../lecture-builder/teacher-workspace.css';
 import './atlas-workspace.css';
@@ -38,34 +32,8 @@ export function CaseShell({ api, teacher }: { api: CaseStudioApi; teacher: Teach
     teaching,
     sceneInteraction,
   } = api;
-  const audienceSource = useRef<HTMLElement>(null);
   const step = teacher.document?.steps[teacher.session.index];
-  const audience = useAudienceWindow({
-    active: teacher.active && active,
-    source: audienceSource,
-    content: {
-      lectureTitle: teacher.document?.title || '',
-      stepTitle: teacher.session.exploring
-        ? `Discussion · ${step?.title || 'Explore the model'}`
-        : lectureStepTitle(step?.title || '', teacher.session.comparison),
-      question: step?.question || '',
-      answer: teacher.session.answerVisible ? step?.answer || null : null,
-      biology: teacher.session.biology === 'off' ? undefined : teacher.session.biology,
-      modelCaption:
-        api.mechanics?.result && !sandbox.pending
-          ? api.responseRevealed
-            ? mechanicsResponseCaption(api.mechanics.result.diagnostics, api.magnification)
-            : 'Predict first · calculated response hidden'
-          : null,
-      vectorLegend: !!(
-        api.mechanics?.result &&
-        !sandbox.pending &&
-        api.forceVectors &&
-        api.responseRevealed
-      ),
-      separation: api.opening > 0 ? api.opening : null,
-    },
-  });
+  const walkthrough = teacher.active && !teacher.session.exploring;
   const teacherError = teaching.runtime.error ? teaching.runtime.message : '';
   return (
     <>
@@ -124,12 +92,6 @@ export function CaseShell({ api, teacher }: { api: CaseStudioApi; teacher: Teach
               disabled={teacher.session.exploring}
             />
             <LectureNavigation {...teacher.navigationProps} />
-            <AudienceLauncher
-              status={audience.status}
-              error={audience.error}
-              onOpen={audience.open}
-              onClose={audience.close}
-            />
             {teacher.session.exploring && (
               <p className="lecture-exploration-context" role="status">
                 <strong>Lecture paused · Step {teacher.session.index + 1}</strong>
@@ -170,32 +132,23 @@ export function CaseShell({ api, teacher }: { api: CaseStudioApi; teacher: Teach
           onChange={e => api.importCase(e.target.files?.[0])}
         />
         <div className="workspace">
-          <CaseSidebar api={api} />
+          {!walkthrough && <CaseSidebar api={api} />}
 
-          <CaseMain
-            api={api}
-            teacher={teacher.active ? teacher : undefined}
-            audienceSource={audienceSource}
-          />
+          <CaseMain api={api} teacher={teacher.active ? teacher : undefined} />
 
-          {teacher.panelProps &&
-          !teacher.session.exploring &&
-          !toolsOpen &&
-          mobilePanel !== 'tools' ? (
-            <TeacherWorkspace teacher={teacher} audienceOpen={audience.isOpen} />
-          ) : (
-            <CaseInspector api={api} />
-          )}
+          {!walkthrough && <CaseInspector api={api} />}
         </div>
-        <MobileStudioDock
-          activePanel={mobilePanel}
-          onChange={next => {
-            if (next !== 'model') setLecture(false);
-            setMobilePanel(next);
-            setToolsOpen(next === 'tools');
-          }}
-          onStop={teaching.cancel}
-        />
+        {!walkthrough && (
+          <MobileStudioDock
+            activePanel={mobilePanel}
+            onChange={next => {
+              if (next !== 'model') setLecture(false);
+              setMobilePanel(next);
+              setToolsOpen(next === 'tools');
+            }}
+            onStop={teaching.cancel}
+          />
+        )}
         <footer className="statusbar">
           <span>Synthetic teaching model · illustrative movement · not for clinical use</span>
           <button
@@ -210,7 +163,6 @@ export function CaseShell({ api, teacher }: { api: CaseStudioApi; teacher: Teach
 
         <CaseDialogs api={api} />
       </div>
-      {audience.portal}
     </>
   );
 }
