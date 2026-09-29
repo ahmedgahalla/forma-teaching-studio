@@ -62,6 +62,7 @@ describe('lecture scene explanation facts', () => {
     ['start', 'shared authored starting position'],
     ['translation', 'authored translation endpoint'],
     ['tip', 'authored tipping endpoint'],
+    ['finish', 'authored finished arrangement'],
   ] as const)(
     'describes the displayed %s comparison separately from the current step',
     (comparison, label) => {
@@ -90,6 +91,15 @@ describe('lecture scene explanation facts', () => {
     expect(facts.result).toBe(context.result);
     expect(facts.teeth).toBe(context.teeth);
     expect(facts.lesson?.explanation).toContain('does not specify playback progress');
+  });
+
+  it('describes a cumulative motion step as authored movement while keeping its answer hidden', () => {
+    const { document, context, session } = fixture();
+    document.steps[0].motion = { from: {} };
+    const facts = lectureAnalysisContext(context, document, session);
+    expect(facts.lesson?.explanation).toContain('authored movement demonstration');
+    expect(facts.lesson?.explanation).not.toContain('static authored pose');
+    expect(facts.lesson?.explanation).not.toContain(document.steps[0].answer);
   });
 
   it('leaves Explore and absent-lecture context unchanged', () => {

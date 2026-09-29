@@ -1,7 +1,7 @@
 import type { TeachingAction } from './actions';
 import { fields, oneOf, type TeachingContext, type TeachingPlan } from './types';
 import { validateTeachingPlan } from './plan-validate';
-import { SAMPLE_LECTURE_ID } from '../lecture-documents/constants';
+import { FEATURED_LECTURE_ID, SAMPLE_LECTURE_ID } from '../lecture-documents/constants';
 
 const controls = [
   'rehearse',
@@ -22,7 +22,7 @@ const controls = [
   'close-comparison',
   'fit-view',
 ] as const;
-export const COMPARISON_TARGETS = ['start', 'translation', 'tip'] as const;
+export const COMPARISON_TARGETS = ['start', 'translation', 'tip', 'finish'] as const;
 export type LectureComparison = (typeof COMPARISON_TARGETS)[number];
 export type PresentationAction =
   | { kind: 'presentation'; action: 'open'; id: string }
@@ -134,18 +134,24 @@ export function advancePresentation(context: TeachingContext, action: TeachingAc
   return true;
 }
 
-export function parseLectureOpening(source: string): PresentationAction | undefined {
-  if (/^(?:lecture|open lecture|open sample lecture|start sample lecture)$/.test(source))
+export function parseLectureOpening(
+  source: string,
+  currentId?: string,
+): PresentationAction | undefined {
+  if (/^(?:lecture|open lecture)$/.test(source))
+    return { kind: 'presentation', action: 'open', id: currentId ?? FEATURED_LECTURE_ID };
+  if (/^(?:open sample lecture|start sample lecture)$/.test(source))
     return { kind: 'presentation', action: 'open', id: SAMPLE_LECTURE_ID };
 }
 
-function command(source: string): PresentationAction | undefined {
-  const opening = parseLectureOpening(source);
+function command(source: string, currentId?: string): PresentationAction | undefined {
+  const opening = parseLectureOpening(source, currentId);
   if (opening) return opening;
   const labels: Record<string, string> = {
     'starting arrangement': 'compare start',
     'translation example': 'compare translation',
     'tipping example': 'compare tipping',
+    'finished arrangement': 'compare finish',
     'explain tissue response': 'show biology',
     both: 'show biology',
     compression: 'show compression',
@@ -155,12 +161,13 @@ function command(source: string): PresentationAction | undefined {
     'show full model': 'show surrounding teeth',
   };
   source = labels[source] ?? source;
-  const comparison = /^compare (start|translation|tipping)$/.exec(source);
+  const comparison = /^compare (start|translation|tipping|finish)$/.exec(source);
   if (comparison)
     return {
       kind: 'presentation',
       action: 'compare',
-      target: comparison[1] === 'tipping' ? 'tip' : (comparison[1] as 'start' | 'translation'),
+      target:
+        comparison[1] === 'tipping' ? 'tip' : (comparison[1] as 'start' | 'translation' | 'finish'),
     };
   const biology = /^show (biology|compression|tension)$/.exec(source);
   if (biology)
@@ -216,11 +223,12 @@ export function parsePresentationPlan(
     const parts = source.split(/\s+(?:and then|and|then)\s+|[;,]\s*|\.\s+/);
     if (parts.some(part => /^prepare (?:the )?lecture$/.test(part)))
       throw new Error('Lecture editing is unavailable. Use Rehearse or Teach.');
-    const action = command(source);
-    const opensLecture = parts.some(part => command(part)?.action === 'open');
+    const control = (part: string) => command(part, context.presentation?.documentId);
+    const action = control(source);
+    const opensLecture = parts.some(part => control(part)?.action === 'open');
     if (!context.presentation && !opensLecture) return;
     if (!action) {
-      if (parts.some(part => command(part)))
+      if (parts.some(part => control(part)))
         throw new Error('Use one lecture control as a separate request, then change the scene.');
       return;
     }

@@ -4,7 +4,8 @@ import type { CaseRefs, CaseStudioApi } from '../case/api';
 import type { ClassroomSnapshot } from '../case/types';
 import type { LectureComparison, PresentationAction } from '@/lib/classroom/presentation';
 import type { BiologyView } from '@/lib/teaching-biology';
-import { createDemoLectures, DEMO_LECTURES, SAMPLE_LECTURE_ID } from '@/lib/lecture-documents';
+import { createDemoLectures, DEMO_LECTURES } from '@/lib/lecture-documents';
+import { FEATURED_LECTURE_ID } from '@/lib/lecture-documents/constants';
 import { createLectureSessionActions, EMPTY_LECTURE_SESSION } from './session';
 
 export function useTeacherLectures(api: CaseStudioApi, refs: CaseRefs) {
@@ -38,7 +39,7 @@ export function useTeacherLectures(api: CaseStudioApi, refs: CaseRefs) {
     catalog: DEMO_LECTURES,
     openLecture: (id: string) => send({ kind: 'presentation', action: 'open', id }),
     openSample: () => {
-      if (!document) send({ kind: 'presentation', action: 'open', id: SAMPLE_LECTURE_ID });
+      if (!document) send({ kind: 'presentation', action: 'open', id: FEATURED_LECTURE_ID });
     },
     exit: () => send({ kind: 'presentation', action: 'exit' }),
     navigationProps: {

@@ -4,6 +4,7 @@ export const LECTURE_COMPARISON_LABELS = {
   start: 'Starting arrangement',
   translation: 'Translation example',
   tip: 'Tipping example',
+  finish: 'Finished arrangement',
 } as const;
 
 export function lectureStepTitle(title: string, comparison?: LectureComparison | null) {

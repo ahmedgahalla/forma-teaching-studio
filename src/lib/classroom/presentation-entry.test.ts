@@ -4,7 +4,7 @@ import { validateTeachingPlan } from './plan-validate';
 import { teachingActionMode } from './context';
 import { DEMO_IDS, type TeachingContext } from './types';
 import { parseLocalVoicePlan, preserveLocalPlan } from '../teaching-runtime-local';
-import { SAMPLE_LECTURE_ID } from '../lecture-documents/constants';
+import { FEATURED_LECTURE_ID, SAMPLE_LECTURE_ID } from '../lecture-documents/constants';
 import { isPresentationDisplay, type PresentationAction } from './presentation';
 
 const context: TeachingContext = {
@@ -30,7 +30,11 @@ const active: TeachingContext = {
     exploring: false,
   },
 };
-const opening: PresentationAction = { kind: 'presentation', action: 'open', id: SAMPLE_LECTURE_ID };
+const opening: PresentationAction = {
+  kind: 'presentation',
+  action: 'open',
+  id: FEATURED_LECTURE_ID,
+};
 const fit: PresentationAction = { kind: 'presentation', action: 'fit-view' };
 const validate = (action: PresentationAction, state = context) =>
   validateTeachingPlan({ actions: [action], summary: 'Control', clarification: null }, state, {
@@ -43,9 +47,13 @@ describe('ready-made lecture entry and workspace controls', () => {
     text => {
       const plan = parseTeachingPlan(text, context),
         preflight = vi.fn();
-      expect(plan.actions).toEqual(validate(opening).actions);
-      expect(parseLocalVoicePlan(text, context, preflight)?.actions).toEqual([opening]);
-      expect(preflight).toHaveBeenCalledWith([opening]);
+      const expected = {
+        ...opening,
+        id: text.includes('sample') ? SAMPLE_LECTURE_ID : FEATURED_LECTURE_ID,
+      };
+      expect(plan.actions).toEqual(validate(expected).actions);
+      expect(parseLocalVoicePlan(text, context, preflight)?.actions).toEqual([expected]);
+      expect(preflight).toHaveBeenCalledWith([expected]);
       expect(preserveLocalPlan(plan)).toBe(true);
     },
   );
@@ -100,7 +108,9 @@ describe('ready-made lecture entry and workspace controls', () => {
       presentation: { ...active.presentation!, exploring: true },
     };
     const original = structuredClone(state);
-    expect(parseTeachingPlan('Lecture', state).actions).toEqual([opening]);
+    expect(parseTeachingPlan('Lecture', state).actions).toEqual([
+      { ...opening, id: SAMPLE_LECTURE_ID },
+    ]);
     expect(state).toEqual(original);
   });
 

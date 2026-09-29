@@ -101,7 +101,7 @@ describe('lecture workspace controls through the runtime', () => {
       const h = setup();
       h.changeScene({ ...h.snapshot, camera });
       const original = h.snapshot;
-      await control(h, input, 'Lecture', {
+      await control(h, input, 'open sample lecture', {
         kind: 'presentation',
         action: 'open',
         id: h.document.id,

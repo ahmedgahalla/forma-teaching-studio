@@ -7,6 +7,7 @@ import { useTeacherLectures, type TeacherLectures } from './useTeacherLectures';
 import { lectureHarness } from './session.fixtures';
 import { ANCHORAGE_LECTURE_ID } from '@/lib/lecture-documents/sample-anchorage';
 import { BIOLOGY_LECTURE_ID } from '@/lib/lecture-documents/sample-biology';
+import { FEATURED_LECTURE_ID } from '@/lib/lecture-documents/constants';
 
 let root: Root, container: HTMLDivElement, teacher: TeacherLectures;
 let harness: ReturnType<typeof lectureHarness>;
@@ -52,7 +53,8 @@ it('opens one ready-made lecture in Teach and leaves a repeated Lecture click at
     notesVisible: false,
   });
   const document = teacher.document;
-  expect(document?.steps).toHaveLength(4);
+  expect(document?.id).toBe(FEATURED_LECTURE_ID);
+  expect(document?.steps).toHaveLength(14);
   await act(async () => teacher.navigationProps.onNext());
   expect(teacher.session.index).toBe(1);
   const execute = harness.api.teaching.execute;

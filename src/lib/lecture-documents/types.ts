@@ -33,6 +33,9 @@ export type LectureStep = {
   answer: string;
   scene: LectureScene;
   demo?: { caseId: string; variantId: string };
+  /** An authored path from these poses to scene.transforms, independent of mechanics. */
+  motion?: { from: Transforms };
+  comparison?: 'start' | 'finish';
   biology?: BiologyView;
 };
 

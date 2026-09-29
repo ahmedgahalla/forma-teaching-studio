@@ -283,9 +283,10 @@ Numbers 17–19 were checked against the current lessons and the parallel Phase 
 ## 38. Recalculation must consider the proposed activation
 
 - **Mistake caught during integration:** [3.22 review](reviews/from-builder/2026-09-28-gums-and-bracket-placement.md) reproduced a neutral bracket reset followed by an invalid passive solve, rolling back the whole request. The editor also rounded unchanged coordinates during an angle-only edit.
+- **Repeat:** [3.27 wire audit](reviews/from-builder/2026-09-29-case-journey.md) reproduced the same rollback when resetting wire width to zero. Actual-Atlas DOM/runtime regression coverage now protects both editors. Shared-rule promotion is proposed in that inbox item for the required joint AGENTS.md review.
 - **Root cause:** the editor decided to recalculate from the old result and rebuilt all values from formatted text, rather than evaluating the proposed configuration and preserving untouched committed fields.
-- **Prevention:** share activation eligibility with the state machine, evaluate the proposed configuration against immutable reference slots, and append Solve only when activation remains. Keep exact untouched fields. DOM tests use a real solved bracket-only experiment and cover reset, remaining independent activations and precision.
-- **Status:** automated · **Count:** 1
+- **Prevention:** share activation eligibility with the state machine, evaluate the proposed configuration against immutable reference slots, and append Solve only when activation remains. Apply this to every activation editor, including wire width/twist, and keep exact untouched fields. DOM tests use a real solved bracket-only experiment and cover reset, remaining independent activations and precision.
+- **Status:** automated · **Count:** 2
 
 ## 39. Deformation needs one consistent rest frame
 

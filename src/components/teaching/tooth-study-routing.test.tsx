@@ -4,7 +4,7 @@ import { createRoot, type Root } from 'react-dom/client';
 import { afterEach, beforeEach, expect, it, vi } from 'vitest';
 import { TeachingProvider, useTeaching, useTeachingAdapter } from './TeachingController';
 import type { ToothStudyContext } from '@/lib/tooth-study/types';
-import { SAMPLE_LECTURE_ID } from '@/lib/lecture-documents/constants';
+import { FEATURED_LECTURE_ID } from '@/lib/lecture-documents/constants';
 
 type CaseScene = {
   selected: string;
@@ -216,7 +216,7 @@ it('preflights lecture entry in the case adapter before leaving a workflow and r
   await enterWorkflow();
   const beforeCase = scene('case'),
     beforeWorkflow = scene('workflow');
-  const open = { kind: 'presentation', action: 'open', id: SAMPLE_LECTURE_ID };
+  const open = { kind: 'presentation', action: 'open', id: FEATURED_LECTURE_ID };
   const preflightMode: string[] = [];
   casePreflight.mockImplementationOnce(() => {
     preflightMode.push(teaching.mode);
@@ -234,7 +234,7 @@ it('preflights lecture entry in the case adapter before leaving a workflow and r
   expect(teaching.runtime.error).toBe(false);
   expect(teaching.mode).toBe('case');
   expect(caseApply).toHaveBeenCalledExactlyOnceWith(open);
-  expect(scene('case')).toEqual({ ...beforeCase, lectureId: SAMPLE_LECTURE_ID });
+  expect(scene('case')).toEqual({ ...beforeCase, lectureId: FEATURED_LECTURE_ID });
   expect(scene('workflow')).toEqual(beforeWorkflow);
   expect(workflowApply).toHaveBeenCalledTimes(2);
   await act(async () => teaching.run('undo'));
@@ -243,6 +243,6 @@ it('preflights lecture entry in the case adapter before leaving a workflow and r
   expect(scene('workflow')).toEqual(beforeWorkflow);
   await act(async () => teaching.run('redo'));
   expect(teaching.mode).toBe('case');
-  expect(scene('case')).toEqual({ ...beforeCase, lectureId: SAMPLE_LECTURE_ID });
+  expect(scene('case')).toEqual({ ...beforeCase, lectureId: FEATURED_LECTURE_ID });
   expect(fetch).not.toHaveBeenCalled();
 });

@@ -44,7 +44,7 @@ function validateSetup(raw: unknown, ids: Set<string>): LectureSetup {
   return structuredClone(setup);
 }
 
-function validateTransforms(raw: unknown, ids: Set<string>): Transforms {
+export function validateLectureTransforms(raw: unknown, ids: Set<string>): Transforms {
   const value = object(raw),
     result: Transforms = {};
   for (const [id, pose] of Object.entries(value)) {
@@ -81,7 +81,7 @@ export function validateLectureScene(raw: unknown): LectureScene {
     throw new Error('Use a six-digit lecture ligature colour.');
   const scene: LectureScene = {
     source,
-    transforms: validateTransforms(value.transforms, ids),
+    transforms: validateLectureTransforms(value.transforms, ids),
     setup: validateSetup(value.setup, ids),
     roots: boolean(value.roots),
     braces: boolean(value.braces),

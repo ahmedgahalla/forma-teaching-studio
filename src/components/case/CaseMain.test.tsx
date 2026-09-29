@@ -113,6 +113,15 @@ it('uses the existing Explore heading during a question detour without duplicati
   }
 });
 
+it('shows one playback bar for authored cumulative movement and hides it in held comparisons', async () => {
+  const value = { ...api(), moved: 1 };
+  await render({ api: value, teacher: teacher() });
+  expect(container.querySelectorAll('[data-testid="playback"]')).toHaveLength(1);
+  await render({ api: { ...value, moved: 0 }, teacher: teacher({ comparison: 'finish' }) });
+  expect(container.querySelectorAll('[data-testid="playback"]')).toHaveLength(0);
+  expect(container.querySelector('h1')?.textContent).toBe('Comparison · Finished arrangement');
+});
+
 it('bounds the lecture popup to its full heading instead of inheriting the narrow-screen View offset', async () => {
   container.className = 'app-shell studio-experience teaching-studio lecture-opening';
   await render({ api: api(), teacher: teacher() });

@@ -7,12 +7,12 @@ import { createAnchorageLecture } from './sample-anchorage';
 import { createBiologyLecture } from './sample-biology';
 
 describe('ready-made demo lecture pack', () => {
-  it('has three distinct validated documents and preserves the original four-step sample', () => {
+  it('has four distinct validated documents and preserves the original four-step sample', () => {
     const documents = createDemoLectures();
     expect(documents.map(item => item.id)).toEqual(DEMO_LECTURES.map(item => item.id));
-    expect(new Set(documents.map(item => item.id)).size).toBe(3);
-    expect(documents.map(item => item.steps.length)).toEqual([4, 6, 6]);
-    expect(documents[0]).toEqual(createLectureSample());
+    expect(new Set(documents.map(item => item.id)).size).toBe(4);
+    expect(documents.map(item => item.steps.length)).toEqual([14, 4, 6, 6]);
+    expect(documents[1]).toEqual(createLectureSample());
     for (const document of documents) {
       expect(validateLectureDocument(JSON.parse(JSON.stringify(document)))).toEqual(document);
       for (const step of document.steps) {

@@ -1,12 +1,14 @@
 import type { ClassroomSnapshot } from '../case/types';
 import type { LectureStep } from '@/lib/lecture-documents';
-import { lectureSceneModel, validateLectureScene } from '@/lib/lecture-documents';
+import { lectureSceneModel } from '@/lib/lecture-documents';
+import { validateLectureStep } from '@/lib/lecture-documents/documents';
 import { createTryState } from '@/lib/try-mode';
 import { getTeachingCase, sampleCaseDemonstration } from '@/lib/teaching-cases';
 
 /** Build an absolute scene. Loading the same step twice cannot accumulate movement. */
-export function lectureStepSnapshot(step: LectureStep, base: ClassroomSnapshot): ClassroomSnapshot {
-  const scene = validateLectureScene(step.scene),
+export function lectureStepSnapshot(raw: LectureStep, base: ClassroomSnapshot): ClassroomSnapshot {
+  const step = validateLectureStep(raw);
+  const scene = step.scene,
     model = lectureSceneModel(scene);
   const setup = scene.setup;
   const definition = step.demo ? getTeachingCase(step.demo.caseId) : null;
@@ -16,6 +18,7 @@ export function lectureStepSnapshot(step: LectureStep, base: ClassroomSnapshot):
     ? sampleCaseDemonstration(step.demo.caseId, step.demo.variantId, 0)
     : structuredClone(scene.transforms);
   const selectedIds = [...setup.selectedIds];
+  const original = step.motion ? structuredClone(step.motion.from) : transforms;
   const prior = {
     camera: setup.camera,
     selected: selectedIds[0],
@@ -63,7 +66,7 @@ export function lectureStepSnapshot(step: LectureStep, base: ClassroomSnapshot):
     applianceDisplay: variant?.appliance ?? scene.applianceDisplay,
     workflowOrigin: null,
     returnWorkspace: null,
-    sandbox: { ...createTryState(transforms, transforms), active: !step.demo },
+    sandbox: { ...createTryState(transforms, original), active: !step.demo },
     comparisonName: null,
     traces: false,
     curveVisible: false,
@@ -84,7 +87,7 @@ export function lectureStepSnapshot(step: LectureStep, base: ClassroomSnapshot):
       gums: setup.gums,
       labels: setup.labels,
       grid: setup.grid,
-      stage: step.demo ? 0 : 10,
+      stage: step.demo || step.motion ? 0 : 10,
       stages: 10,
       opening: setup.opening,
       jawOpen: model.asset === 'claude-atlas-v1' && (setup.jawOpen ?? false),

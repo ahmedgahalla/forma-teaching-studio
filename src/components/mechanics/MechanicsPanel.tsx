@@ -12,6 +12,7 @@ import { MATERIAL_PRESETS, MECHANICS_SOURCES, SUPPORT_PRESETS } from '@/lib/mech
 import { hasMechanicsMovement, MECHANICS_DISPLAY_SCALES } from '@/lib/mechanics-presentation';
 import type { DentalTooth } from '@/lib/geometry';
 import { BracketPlacementPanel } from './BracketPlacementPanel';
+import { WireActivationControl } from './WireActivationControl';
 
 const WIRE_OPTIONS: { label: string; section: WireSection }[] = [
   { label: 'Round · 0.014 in', section: { shape: 'round', diameterMm: 0.014 * 25.4 } },
@@ -72,9 +73,7 @@ export default function MechanicsPanel(p: Props) {
     setNewWire(false);
   }, [p.focus.wireId]);
   const tad = config.tads.find(item => item.id === p.focus.tadId) || config.tads.at(-1);
-  const [expansion, setExpansion] = useState('0.5'),
-    [twist, setTwist] = useState('0'),
-    [tension, setTension] = useState('1');
+  const [tension, setTension] = useState('1');
   const [elasticLaw, setElasticLaw] = useState<'constant' | 'spring'>('constant'),
     [elasticStiffness, setElasticStiffness] = useState('0.1'),
     [restLength, setRestLength] = useState('10');
@@ -84,14 +83,6 @@ export default function MechanicsPanel(p: Props) {
   const [activation, setActivation] = useState('0.5'),
     [stiffness, setStiffness] = useState('20'),
     [palate, setPalate] = useState('100');
-  useEffect(() => {
-    if (wire) {
-      // eslint-disable-next-line react-hooks/set-state-in-effect -- syncing local edit state from committed props; deriving would lose in-progress edits
-      setExpansion(String(wire.expansionMm));
-      setTwist(String(wire.torqueDeg));
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- intentional dep subset: the effect must not re-run on the excluded values
-  }, [wire?.id, wire?.expansionMm, wire?.torqueDeg]);
   const expander = config.expanders[0];
   useEffect(() => {
     if (expander) {
@@ -269,50 +260,11 @@ export default function MechanicsPanel(p: Props) {
           </button>
           {wire && (
             <>
-              <div className="mechanics-number-grid">
-                <label>
-                  Total width activation (mm)
-                  <input
-                    aria-label="Wire width activation in millimetres"
-                    type="number"
-                    min="-2"
-                    max="2"
-                    step="0.1"
-                    value={expansion}
-                    onChange={event => setExpansion(event.target.value)}
-                  />
-                </label>
-                <label>
-                  Relative end twist (°)
-                  <input
-                    aria-label="Wire end twist in degrees"
-                    type="number"
-                    min="-20"
-                    max="20"
-                    step="1"
-                    value={twist}
-                    onChange={event => setTwist(event.target.value)}
-                  />
-                </label>
-              </div>
-              <button
-                className="mechanics-wide"
-                onClick={() =>
-                  perform(
-                    [
-                      {
-                        type: 'wire-activation',
-                        id: wire.id,
-                        expansionMm: Number(expansion),
-                        torqueDeg: Number(twist),
-                      },
-                    ],
-                    'Replace wire activation from the unloaded reference',
-                  )
-                }
-              >
-                Set activation
-              </button>
+              <WireActivationControl
+                experiment={p.experiment}
+                wire={wire}
+                onActions={p.onActions}
+              />
               <button
                 className="mechanics-wide"
                 onClick={() =>

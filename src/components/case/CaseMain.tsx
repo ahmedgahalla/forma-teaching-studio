@@ -67,8 +67,12 @@ export function CaseMain({
             {!customStep && <CaseLectureOverlay api={api} />}
           </div>
           {atlasExplore && <AtlasToothChart api={api} />}
-          {(!customStep || api.prepared || api.demonstration || api.sandbox.pending) && (
-            <CaseStageDock api={api} hideExplore={!!customStep} />
+          {(!customStep ||
+            api.prepared ||
+            api.demonstration ||
+            api.moved > 0 ||
+            api.sandbox.pending) && (
+            <CaseStageDock api={api} hideExplore={!!customStep} authored={!!customStep} />
           )}
         </div>
         <OpeningCommandDock

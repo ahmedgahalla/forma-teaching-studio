@@ -6,9 +6,11 @@ import { hasMechanicsMovement } from '@/lib/mechanics-presentation';
 export function CaseStageDock({
   api,
   hideExplore = false,
+  authored = false,
 }: {
   api: CaseStudioApi;
   hideExplore?: boolean;
+  authored?: boolean;
 }) {
   return (
     <>
@@ -23,7 +25,7 @@ export function CaseStageDock({
               ? api.mechanics.result
                 ? 'Calculated initial response'
                 : 'Appliance setup · calculate to see a response'
-              : api.prepared
+              : api.prepared || authored
                 ? 'Authored demonstration'
                 : api.sandbox.pending
                   ? 'Geometric preview'
