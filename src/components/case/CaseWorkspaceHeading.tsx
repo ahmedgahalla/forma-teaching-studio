@@ -31,10 +31,10 @@ export function CaseWorkspaceHeading({ api }: { api: HeadingApi }) {
             {api.prepared
               ? 'Case library'
               : api.tryActive
-                ? 'Try Mode'
+                ? 'Explore'
                 : api.currentLesson
                   ? 'Prepared lesson'
-                  : 'Case editor'}{' '}
+                  : 'Explore'}{' '}
             <ChevronRight size={12} />
             <span>
               {api.prepared ? (
@@ -43,11 +43,11 @@ export function CaseWorkspaceHeading({ api }: { api: HeadingApi }) {
                 api.scenario ? (
                   'Case variation'
                 ) : (
-                  'No lesson required'
+                  'Free exploration'
                 )
               ) : (
-                <button onClick={() => api.sendTry({ type: 'enter' }, 'Return to Try Mode')}>
-                  Return to Try Mode
+                <button onClick={() => api.sendTry({ type: 'enter' }, 'Return to Explore')}>
+                  Return to Explore
                 </button>
               )}
             </span>

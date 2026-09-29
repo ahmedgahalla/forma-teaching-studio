@@ -62,7 +62,6 @@ import {
   useModelState,
   useMovementInputs,
   useSelectionState,
-  useServiceDraft,
   useStagePlayback,
 } from './case/state';
 
@@ -185,7 +184,6 @@ function CaseStudio({ active }: { active: boolean }) {
     setChecking,
   } = useMeasureState();
   const contactTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const { apiDraft, setApiDraft } = useServiceDraft();
   const { attachments, setAttachments, attachmentDraft, setAttachmentDraft } = useAttachmentState();
   const { tool, setTool, dragPreview, setDragPreview } = useManipulationTool();
   const { lessonId, setLessonId, lessonStep, setLessonStep } = useLessonState();
@@ -217,9 +215,6 @@ function CaseStudio({ active }: { active: boolean }) {
   const dentalArrangement = DENTAL_ARRANGEMENTS.find(
     item => model.name === `${item.title} · synthetic teaching arrangement`,
   );
-  const apiUrl = teaching.config.url,
-    aiEnabled = teaching.config.enabled;
-  const setAiEnabled = (enabled: boolean) => teaching.setConfig({ ...teaching.config, enabled });
   const pendingCamera = useRef<ViewerCamera | null>(null);
   const pendingView = useRef<ViewName | null>(null);
   const viewer = useRef<ViewerHandle>(null),
@@ -522,8 +517,6 @@ function CaseStudio({ active }: { active: boolean }) {
     setMAxis,
     oAxis,
     setOAxis,
-    apiDraft,
-    setApiDraft,
     teaching,
     active,
     viewer,
@@ -540,8 +533,6 @@ function CaseStudio({ active }: { active: boolean }) {
     pathAudit,
     caseStart,
     dentalArrangement,
-    apiUrl,
-    aiEnabled,
     tooth,
     pose,
     ids,
@@ -565,7 +556,6 @@ function CaseStudio({ active }: { active: boolean }) {
     spans,
     actualCalibration,
     canRestoreWorkspace,
-    setAiEnabled,
     pointDistance,
     distanceTo,
     highlightedContacts,

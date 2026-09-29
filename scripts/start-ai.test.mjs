@@ -77,6 +77,23 @@ describe('local AI launcher with mocked files and child processes', () => {
     expect(children[1].kill).toHaveBeenCalledOnce();
   });
 
+  it('disables Uvicorn colors so Windows ignored stdout cannot hide the successful bind', async () => {
+    await import('./start-ai.mjs');
+    const [, args, backend] = mocks.spawn.mock.calls[0];
+    expect(backend.stdio).toEqual(['ignore', 'ignore', 'pipe']);
+    // Uvicorn checks stdout for colors; Windows NUL may be treated as a TTY.
+    const address = 'http://127.0.0.1:8002';
+    const renderedAddress = args.includes('--no-use-colors')
+      ? address
+      : `\u001b[1m${address}\u001b[0m`;
+    children[0].stderr.emit(
+      'data',
+      Buffer.from(`INFO: Uvicorn running on ${renderedAddress} (Press CTRL+C to quit)`),
+    );
+    expect(mocks.spawn).toHaveBeenCalledTimes(2);
+    expect(vi.getTimerCount()).toBe(0);
+  });
+
   it('retains explicit environment overrides only in the backend and publishes a safe provider label', async () => {
     vi.stubEnv('OPENAI_API_KEY', 'inherited-fixture-key');
     vi.stubEnv('OPENAI_BASE_URL', 'https://openrouter.ai/api/v1');

@@ -121,15 +121,15 @@ These are fixed-reference-axis geometric previews. Tip and torque angles are not
 
 Errors have the form `{"detail": "Human-readable error"}`. The frontend displays them without applying an invalid plan. All endpoints use these status mappings:
 
-| HTTP status | Meaning                                                                                     |
-| ----------- | ------------------------------------------------------------------------------------------- |
-| `422`       | Invalid request, ambiguity, or a provider action that fails independent semantic validation |
-| `503`       | No server key, or the provider rejected the configured key with upstream `401`              |
-| `402`       | Provider reports that API credits are needed                                                |
-| `429`       | Provider quota exhausted or temporary rate limiting; the message distinguishes these cases  |
-| `502`       | Other provider failure, timeout, or malformed provider output                               |
+| HTTP status | Meaning                                                                                                           |
+| ----------- | ----------------------------------------------------------------------------------------------------------------- |
+| `422`       | Invalid request, ambiguity, or a provider action that fails independent semantic validation                       |
+| `503`       | No server key, rejected key (`401`), denied model access (`403`), or missing model/API endpoint (`404`)           |
+| `402`       | Provider reports that API credits are needed                                                                      |
+| `429`       | Provider quota/spend/usage limit reached, or temporary rate limiting; the message distinguishes these cases       |
+| `502`       | Rejected model/request settings (`400`), connection failure, timeout, other provider failure, or malformed output |
 
-Provider messages are fixed, actionable text selected from status and allowlisted error codes. Upstream exception text, request URLs, bodies and credentials are not returned. The classroom controller automatically executes clear validated requests after frontend preflight, with Stop and whole-request Undo; explicit `preview` commands and manual numeric controls retain preview/apply behavior. Schema validity alone does not establish correct interpretation or clinical validity.
+Provider messages are fixed, actionable text selected from status and allowlisted error codes. Both command interpretation and scene explanations distinguish unavailable model access, unsupported model/request settings, connection failures and timeouts. The quota branch includes `insufficient_quota`, `billing_hard_limit_reached`, `organization_spend_limit_exceeded`, `project_spend_limit_exceeded` and `organization_usage_limit_exceeded`; these direct the user to API billing and usage limits instead of suggesting a brief wait. Only temporary rate-limit responses suggest waiting and retrying. Upstream exception text, request URLs, bodies and credentials are not returned. The classroom controller automatically executes clear validated requests after frontend preflight, with Stop and whole-request Undo; explicit `preview` commands and manual numeric controls retain preview/apply behavior. Schema validity alone does not establish correct interpretation or clinical validity.
 
 ## Data flow
 
@@ -272,6 +272,7 @@ Run `python -m pytest test_phone_bridge.py -q` to verify authentication, route r
 
 ## Official API references
 
+- [OpenAI API error codes](https://developers.openai.com/api/docs/guides/error-codes): distinguish authentication, model access, account limits and temporary rate limits.
 - [OpenAI Structured Outputs](https://developers.openai.com/api/docs/guides/structured-outputs): Python `responses.parse` and schema requirements.
 - [GPT-4.1 mini model](https://developers.openai.com/api/docs/models/gpt-4.1-mini): Responses and structured-output support.
 - [OpenRouter Responses API](https://openrouter.ai/docs/api_reference/responses/overview): the compatible provider interface used by the OpenRouter configuration.

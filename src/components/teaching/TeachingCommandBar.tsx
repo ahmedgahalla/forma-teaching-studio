@@ -2,6 +2,7 @@
 import { useEffect, useRef, useState, type RefObject } from 'react';
 import { ArrowRight, Mic, Sparkles, Square, Undo2 } from 'lucide-react';
 import { useTeaching } from './TeachingController';
+import { teachingPhaseLabels } from './teaching-context';
 
 export function TeachingCommandBar({
   label = 'Dental command',
@@ -121,7 +122,7 @@ export function TeachingCommandBar({
           </button>
         )}
         <span className={`teaching-phase ${phase}`} role="status">
-          {phase === 'idle' ? 'Ready' : phase}
+          {teachingPhaseLabels[phase]}
         </span>
         <button onClick={() => setExamples(!examples)}>Examples</button>
         <button

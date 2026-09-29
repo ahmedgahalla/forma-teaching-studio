@@ -1,5 +1,5 @@
 'use client';
-import { useId } from 'react';
+import { useEffect, useId, useRef } from 'react';
 import type { LectureDocument } from '@/lib/lecture-documents';
 import type { BiologyView } from '@/lib/teaching-biology';
 import { RemodelingDiagram } from './RemodelingDiagram';
@@ -45,27 +45,37 @@ export function LecturePanel({
   onHideBiology,
 }: LecturePanelProps) {
   const fieldId = useId();
+  const aidsRef = useRef<HTMLDetailsElement>(null);
+  useEffect(() => {
+    if ((comparison !== null || biology !== 'off') && aidsRef.current) aidsRef.current.open = true;
+  }, [comparison, biology]);
   const step = document.steps[index];
   const comparisons = availableLectureComparisons(document);
   return (
     <aside className="lecture-panel" data-mode={mode} aria-label="Lecture step">
-      {step.question && <p className="lecture-question">{step.question}</p>}
-      {step.answer && (
-        <>
-          <button
-            type="button"
-            onClick={onReveal}
-            aria-expanded={answerVisible}
-            aria-controls={`${fieldId}-revealed-answer`}
-          >
-            {answerVisible ? 'Hide answer' : 'Reveal answer'}
-          </button>
-          {answerVisible && (
-            <p id={`${fieldId}-revealed-answer`} className="lecture-answer">
-              {step.answer}
-            </p>
+      {(step.question || step.answer) && (
+        <section className="lecture-prompt" aria-label="Class discussion">
+          <span className="lecture-eyebrow">Discuss with students</span>
+          {step.question && <p className="lecture-question">{step.question}</p>}
+          {step.answer && (
+            <>
+              <button
+                type="button"
+                className="lecture-primary"
+                onClick={onReveal}
+                aria-expanded={answerVisible}
+                aria-controls={`${fieldId}-revealed-answer`}
+              >
+                {answerVisible ? 'Hide answer' : 'Reveal answer'}
+              </button>
+              {answerVisible && (
+                <p id={`${fieldId}-revealed-answer`} className="lecture-answer">
+                  {step.answer}
+                </p>
+              )}
+            </>
           )}
-        </>
+        </section>
       )}
       {step.notes && (
         <>
@@ -89,44 +99,47 @@ export function LecturePanel({
           )}
         </>
       )}
-      <button type="button" aria-pressed={focus} onClick={onFocus}>
-        {focus ? 'Show surrounding teeth' : 'Focus teaching teeth'}
-      </button>
-      {comparisons.length > 0 && (
-        <details className="lecture-disclosure">
-          <summary>Compare arrangements{comparison ? ' · shown' : ''}</summary>
-          <div
-            className="lecture-comparison-options"
-            role="group"
-            aria-label="Comparison arrangement"
-          >
-            {comparisons.map(target => (
-              <button
-                key={target}
-                type="button"
-                aria-pressed={comparison === target}
-                onClick={() => onCompare(target)}
-              >
-                {LECTURE_COMPARISON_LABELS[target]}
-              </button>
-            ))}
-            {comparison && (
-              <button type="button" onClick={onCloseComparison}>
-                Close comparison
-              </button>
-            )}
-          </div>
-          <p className="lecture-muted">
-            Show each authored arrangement from the same viewpoint. Close comparison to return to
-            your paused lecture.
-          </p>
-        </details>
-      )}
-      {biology === 'off' ? (
-        <button type="button" onClick={() => onBiology('overview')}>
-          Explain tissue response
+      <details ref={aidsRef} className="lecture-disclosure lecture-teaching-aids">
+        <summary>Teaching aids</summary>
+        <div className="lecture-aids-content">
+          <button type="button" aria-pressed={focus} onClick={onFocus}>
+            {focus ? 'Show surrounding teeth' : 'Focus teaching teeth'}
+          </button>
+          {comparisons.length > 0 && (
+            <div
+              className="lecture-comparison-options"
+              role="group"
+              aria-label="Comparison arrangement"
+            >
+              <span className="lecture-eyebrow">Compare arrangements</span>
+              {comparisons.map(target => (
+                <button
+                  key={target}
+                  type="button"
+                  aria-pressed={comparison === target}
+                  onClick={() => onCompare(target)}
+                >
+                  {LECTURE_COMPARISON_LABELS[target]}
+                </button>
+              ))}
+              <p className="lecture-muted">
+                Compare from the same viewpoint. Close comparison to return to your paused lecture.
+              </p>
+            </div>
+          )}
+          {biology === 'off' && (
+            <button type="button" onClick={() => onBiology('overview')}>
+              Explain tissue response
+            </button>
+          )}
+        </div>
+      </details>
+      {comparison && (
+        <button type="button" className="lecture-primary" onClick={onCloseComparison}>
+          Close comparison
         </button>
-      ) : (
+      )}
+      {biology !== 'off' && (
         <RemodelingDiagram view={biology} onViewChange={onBiology} onClose={onHideBiology} />
       )}
       {mode === 'rehearse' && (

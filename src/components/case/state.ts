@@ -289,8 +289,3 @@ export function useCalibrationInputs() {
   const [oAxis, setOAxis] = useState('-Y');
   return { bAxis, setBAxis, mAxis, setMAxis, oAxis, setOAxis };
 }
-
-export function useServiceDraft() {
-  const [apiDraft, setApiDraft] = useState('http://127.0.0.1:8000');
-  return { apiDraft, setApiDraft };
-}

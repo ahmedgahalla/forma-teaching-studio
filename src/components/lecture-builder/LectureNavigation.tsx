@@ -1,11 +1,14 @@
 'use client';
+import { ChevronLeft, ChevronRight } from 'lucide-react';
 
 export type LectureNavigationProps = {
   mode: 'rehearse' | 'teach';
   index: number;
   count: number;
+  stepTitles: readonly string[];
   exploring: boolean;
   onMode: (mode: 'rehearse' | 'teach') => void;
+  onStep: (index: number) => void;
   onPrevious: () => void;
   onNext: () => void;
   onExplore: () => void;
@@ -16,8 +19,10 @@ export function LectureNavigation({
   mode,
   index,
   count,
+  stepTitles,
   exploring,
   onMode,
+  onStep,
   onPrevious,
   onNext,
   onExplore,
@@ -45,18 +50,34 @@ export function LectureNavigation({
           disabled={index <= 0 || exploring}
           onClick={onPrevious}
         >
-          Previous
+          <ChevronLeft size={16} aria-hidden="true" />
         </button>
-        <span aria-live="polite">
-          {index + 1} / {count}
-        </span>
+        <label className="lecture-step-picker">
+          <span className="lecture-step-count" aria-live="polite">
+            Step {index + 1} of {count}
+          </span>
+          <select
+            aria-label="Lecture step"
+            value={index}
+            disabled={exploring}
+            onChange={event => onStep(Number(event.target.value))}
+          >
+            {stepTitles.map((title, stepIndex) => (
+              <option key={stepIndex} value={stepIndex}>
+                {title}
+              </option>
+            ))}
+          </select>
+        </label>
         <button
           type="button"
+          className="lecture-primary"
           aria-label="Next lecture step"
           disabled={index >= count - 1 || exploring}
           onClick={onNext}
         >
-          Next
+          <span>Next</span>
+          <ChevronRight size={16} aria-hidden="true" />
         </button>
       </div>
       {exploring ? (
@@ -64,10 +85,16 @@ export function LectureNavigation({
           Return to lecture
         </button>
       ) : (
-        <button type="button" onClick={onExplore}>
+        <button type="button" className="lecture-explore" onClick={onExplore}>
           Explore this question
         </button>
       )}
+      <progress
+        className="lecture-progress"
+        aria-label="Lecture progress"
+        max={count}
+        value={index + 1}
+      />
     </nav>
   );
 }

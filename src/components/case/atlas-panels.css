@@ -68,7 +68,7 @@
   background: transparent;
   color: var(--ui-muted);
   font-size: 13px;
-  min-height: 40px;
+  min-height: 44px;
 }
 .atlas-segment button[aria-pressed='true'] {
   color: var(--ui-text);
@@ -79,7 +79,7 @@
   align-items: center;
   justify-content: space-between;
   width: 100%;
-  min-height: 40px;
+  min-height: 44px;
   border: 0;
   padding: 6px 0;
   background: transparent;
@@ -152,7 +152,7 @@
   border-top: 1px solid var(--ui-line);
 }
 .atlas-inspector-actions button {
-  min-height: 40px;
+  min-height: 44px;
   padding: 7px 10px;
   border: 1px solid var(--ui-line);
   border-radius: 5px;
@@ -168,7 +168,7 @@
   position: relative;
 }
 .atlas-workspace .lecture-picker summary {
-  min-height: 40px;
+  min-height: 44px;
   padding: 8px 12px;
   border: 1px solid var(--ui-line);
   border-radius: 6px;
@@ -198,6 +198,7 @@
   text-align: left;
   background: transparent;
 }
+.atlas-workspace .lecture-picker-list > button:hover:not(:disabled),
 .atlas-workspace .lecture-picker-list > button[aria-pressed='true'] {
   background: var(--ui-soft);
 }

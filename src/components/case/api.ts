@@ -23,7 +23,6 @@ import type {
   useModelState,
   useMovementInputs,
   useSelectionState,
-  useServiceDraft,
   useStagePlayback,
 } from './state';
 import type { useTeaching } from '../teaching/TeachingController';
@@ -58,7 +57,6 @@ type StateBundle = ReturnType<typeof useExplanationState> &
   ReturnType<typeof useCommandState> &
   ReturnType<typeof useCaseFiles> &
   ReturnType<typeof useMeasureState> &
-  ReturnType<typeof useServiceDraft> &
   ReturnType<typeof useAttachmentState> &
   ReturnType<typeof useManipulationTool> &
   ReturnType<typeof useLessonState> &
@@ -100,8 +98,6 @@ export interface CaseStudioApi extends StateBundle {
   pathAudit: ReturnType<typeof casePathAudit> | null;
   caseStart: Transforms | undefined;
   dentalArrangement: (typeof DENTAL_ARRANGEMENTS)[number] | undefined;
-  apiUrl: string;
-  aiEnabled: boolean;
   tooth: DentalCase['teeth'][number];
   pose: Pose;
   ids: string[];
@@ -164,7 +160,6 @@ export interface CaseStudioApi extends StateBundle {
   chooseTool: (next: 'orbit' | 'translate' | 'rotate') => void;
   exportShown: () => void;
   exportSequence: () => Promise<void>;
-  setAiEnabled: (enabled: boolean) => void;
   sceneInteraction: (event: { target: EventTarget }) => void;
   // analysis-tab derivations that stay host-computed for now
   pointDistance: number | null;

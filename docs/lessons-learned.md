@@ -322,3 +322,17 @@ Numbers 17–19 were checked against the current lessons and the parallel Phase 
 - **Root cause:** spreading Windows `process.env` into a plain object discards its case-insensitive lookup semantics; a case-sensitive prefix check also misses differently cased secrets.
 - **Prevention:** canonicalize provider variable names when merging Windows settings, with inherited values taking precedence, and filter frontend provider variables case-insensitively. Test mixed-case inherited configuration and the child environments with dummy values.
 - **Status:** automated · **Count:** 1
+
+## 45. Backend reachability is not provider verification
+
+- **Mistake found during diagnosis:** [3.28 review](reviews/from-builder/2026-09-29-ui-ai-reliability.md) found the demo checkout lacked private AI configuration, while Settings described key presence as a connected service and the footer implied interpretation was available.
+- **Root cause:** repository files travel across worktrees but ignored environment files do not; a successful health response only confirms local reachability and configuration, not model access, credentials or credits.
+- **Prevention:** inspect only configuration presence/provider classification in the actual serving checkout, preserve the owner's provider choice, offer explicit reconnection and distinguish configured status from a successful provider request. Connection and safe-error tests cover missing keys, wrong services, cancellation and billing/configuration failures. Copy private settings only with authorization; do not claim live acceptance from a health-only check.
+- **Status:** automated (connection/error boundaries); live acceptance remains manual. **Count:** 1
+
+## 46. Machine-read startup logs must disable terminal colour
+
+- **Mistake found during live setup:** [3.28 startup review](reviews/from-builder/2026-09-29-ui-ai-reliability.md) found Uvicorn had bound successfully but the launcher timed out because ANSI codes interrupted its exact readiness string.
+- **Root cause:** Uvicorn auto-detects colour from stdout; the Windows ignored stdout handle produced coloured stderr even though stderr was piped. The mocked readiness tests supplied only plain output.
+- **Prevention:** explicitly request `--no-use-colors` for the launcher-owned Uvicorn process. Cover the coloured/plain output contract and preserve readiness based on the successful bind rather than merely application startup. Do not print captured backend stderr to diagnose it; use fixed event flags.
+- **Status:** automated. **Count:** 1

@@ -9,7 +9,7 @@
   display: block;
 }
 .teacher-experience-switch button {
-  min-height: 38px;
+  min-height: 44px;
   padding: 6px 20px;
   border: 0;
   border-radius: 8px;
@@ -27,12 +27,12 @@
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: 12px;
-  margin: 8px 18px 0;
+  gap: 8px;
+  margin: 6px 18px 0;
   flex-shrink: 0;
 }
 .teacher-presentation-toolbar > .lecture-navigation {
-  flex: 1;
+  flex: 1 1 560px;
 }
 .teacher-step-heading {
   position: relative;

@@ -65,6 +65,7 @@ const service = spawn(
     '--port',
     String(backendPort),
     '--no-access-log',
+    '--no-use-colors',
   ],
   {
     cwd: backend,
