@@ -6,11 +6,23 @@ import { createTryState } from '@/lib/try-mode';
 import { getTeachingCase, sampleCaseDemonstration } from '@/lib/teaching-cases';
 
 /** Build an absolute scene. Loading the same step twice cannot accumulate movement. */
-export function lectureStepSnapshot(raw: LectureStep, base: ClassroomSnapshot): ClassroomSnapshot {
+export function lectureStepSnapshot(
+  raw: LectureStep,
+  base: ClassroomSnapshot,
+  preserveView = false,
+): ClassroomSnapshot {
   const step = validateLectureStep(raw);
   const scene = step.scene,
     model = lectureSceneModel(scene);
-  const setup = scene.setup;
+  const view = preserveView ? (base.camera?.view ?? base.lesson.view) : scene.setup.view;
+  const setup = preserveView
+    ? {
+        ...scene.setup,
+        view,
+        camera: structuredClone(base.camera),
+        arch: view === 'occlusal' ? base.lesson.arch : scene.setup.arch,
+      }
+    : scene.setup;
   const definition = step.demo ? getTeachingCase(step.demo.caseId) : null;
   const variant = definition?.variants.find(item => item.id === step.demo?.variantId);
   if (step.demo && !variant) throw new Error('This demonstration is no longer available.');

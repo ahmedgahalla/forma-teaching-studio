@@ -58,6 +58,8 @@ The earlier audience-projection description above records the retained standalon
 
 `lecture-mechanics.ts` permits only a single solve action on an activated authored mechanics step outside comparisons; normal runtime preflight still applies. Calculate response runs the existing worker and produces the standard result/playback state, with whole-request cancellation and history. Narration and analysis use the same visible takeaway, while comparison context omits the paused step's takeaway. `sample-tad-learning.ts` supplies optional TAD/elastic stages as data; `mechanics-tad-view.ts` owns shared screw geometry and pooled meshes.
 
+Phase 3.31 distinguishes same-lecture navigation from a fresh lecture opening. The scene bridge can hold the captured camera and matching named view while loading absolute authored poses; occlusal navigation also keeps the visible arch. Viewer suppresses automatic preset refits during the learner walkthrough while retaining explicit camera/focus actions and normal resize adaptation. Comparison snapshots keep their camera and label in agreement.
+
 ## The mechanics worker
 
 `src/workers/mechanics.worker.ts` (10 lines) wraps `solveMechanics`. It is **not** bundled by Next: `scripts/build-mechanics-worker.mjs` (runs automatically as `predev`/`prebuild`) esbuilds it to `public/workers/mechanics.js` (gitignored). `src/lib/mechanics-client.ts` spawns a fresh `Worker('/workers/mechanics.js?v=1')` per request (20 s timeout; AbortSignal terminates the worker so Stop really cancels).

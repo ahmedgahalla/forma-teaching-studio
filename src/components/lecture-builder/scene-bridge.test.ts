@@ -189,3 +189,30 @@ describe('absolute lecture step restoration', () => {
     expect(base.teeth[0].attachment).toBeUndefined();
   });
 });
+
+it('retains only the current viewing frame when loading an authored tooth study', () => {
+  const scene = fixtureScene();
+  scene.toothStudy = { tooth: '11', view: 'lingual' };
+  const before = snapshot();
+  before.camera = {
+    ...before.camera!,
+    view: 'occlusal',
+    position: [4, 90, 10],
+    target: [3, 2, 1],
+  };
+  before.lesson.view = 'front';
+  const step = createLectureStep(scene);
+  const restored = lectureStepSnapshot(step, before, true);
+  expect(restored.lesson).toMatchObject({ view: 'occlusal', arch: 'lower', camera: before.camera });
+  expect(restored.toothStudy!.prior).toMatchObject({
+    view: 'occlusal',
+    arch: 'lower',
+    camera: before.camera,
+  });
+  expect(restored.lesson.transforms).toEqual(scene.transforms);
+  expect(restored.anatomy).toEqual(scene.setup.anatomy);
+  expect(restored.toothStudy).toMatchObject({ tooth: '11', view: 'lingual' });
+  restored.camera!.position[0] = 99;
+  expect(before.camera.position).toEqual([4, 90, 10]);
+  expect(step.scene).toEqual(scene);
+});

@@ -2,12 +2,16 @@ import { vi } from 'vitest';
 import type { CaseStudioApi, CaseRefs } from '../case/api';
 import type { ClassroomSnapshot } from '../case/types';
 import type { TeachingAdapter } from '../teaching/TeachingController';
-import { createLectureSample } from '@/lib/lecture-documents';
+import { createLectureSample, type LectureDocument } from '@/lib/lecture-documents';
 import { createTeachingRuntime } from '@/lib/teaching-runtime';
 import { createLectureSessionActions, EMPTY_LECTURE_SESSION } from './session';
 import { lectureStepSnapshot } from './scene-bridge';
 
-export function lectureHarness(document = createLectureSample()) {
+export function lectureHarness(
+  document = createLectureSample(),
+  additionalDocuments: LectureDocument[] = [],
+) {
+  const getDocument = (id: string) => [document, ...additionalDocuments].find(doc => doc.id === id);
   let snapshot = lectureStepSnapshot(document.steps[0], {} as ClassroomSnapshot);
   let session = { ...EMPTY_LECTURE_SESSION };
   let playing = false,
@@ -72,8 +76,8 @@ export function lectureHarness(document = createLectureSample()) {
       value => {
         session = value;
       },
-      id => (id === document.id ? document : undefined),
-      session.documentId ? document : undefined,
+      getDocument,
+      getDocument(session.documentId ?? ''),
       original,
       paused,
       comparison,
@@ -100,6 +104,11 @@ export function lectureHarness(document = createLectureSample()) {
       restore: value => api.restoreClassroom(value as ClassroomSnapshot),
       preflight: () => {},
       apply: action => {
+        if (action.kind === 'view') {
+          const camera = snapshot.camera ? { ...snapshot.camera, view: action.view } : null;
+          set('camera', camera);
+          set('lesson', { ...snapshot.lesson, view: action.view, camera });
+        }
         if (action.kind === 'toggle')
           set('lesson', { ...snapshot.lesson, [action.target]: action.visible });
         return true;

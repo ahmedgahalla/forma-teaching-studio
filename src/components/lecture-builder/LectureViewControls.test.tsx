@@ -88,6 +88,11 @@ it.each([
   'runs %s through the same action as typing and recognized speech',
   async (label, view) => {
     await render({ view });
+    const currentLabel = view === 'perspective' ? label : `${label} view`;
+    expect(container.querySelector('summary')?.textContent?.trim()).toBe(currentLabel);
+    expect(container.querySelector('summary')?.getAttribute('aria-label')).toBe(
+      `Lecture view controls: ${currentLabel}`,
+    );
     expect(button(label).getAttribute('aria-pressed')).toBe('true');
     expect(
       container.querySelectorAll('[aria-label="Camera views"] [aria-pressed="true"]'),

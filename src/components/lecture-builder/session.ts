@@ -77,8 +77,8 @@ export function createLectureSessionActions(
     const doc = next.documentId ? getDocument(next.documentId) : undefined;
     const step = doc?.steps[next.index];
     if (!step) throw new Error('Choose an available lecture step.');
-    const snapshot = lectureStepSnapshot(step, api.captureClassroom());
-    restore(snapshot);
+    const preserveView = next.documentId === session.documentId;
+    restore(lectureStepSnapshot(step, api.captureClassroom(), preserveView));
     comparison.current = null;
     api.setLecture(true);
     setSession({

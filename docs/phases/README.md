@@ -43,3 +43,5 @@ The later Phase 3 follow-up [3.15 — Lecture presentation and mechanics](phase-
 [3.29 - Tooth chart and lecture clarity](phase-3-demo-path/3.29-chart-hover-lecture-clarity.md) follows PR #28 with separate model/chart layout, transient tooth previews, stronger warm selection glow and clearer review/present guidance. Browser acceptance remains pending.
 
 [3.30 - Model-focused learning and TAD appliances](phase-3-demo-path/3.30-learning-appliances.md) follows PR #29 with a single learner view, short captions, optional TAD/elastic stages and guarded calculation in place. The owner's latest request supersedes the earlier role-specific lecture interface; browser and faculty acceptance remain pending.
+
+[3.31 - User-controlled lecture view](phase-3-demo-path/3.31-user-controlled-view.md) follows PR #30 with camera continuity through steps and a sixty-second unedited recording rundown. Browser verification and actual video capture remain blocked.
