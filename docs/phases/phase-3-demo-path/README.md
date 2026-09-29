@@ -1,6 +1,6 @@
 # Phase 3 — demo path
 
-**Status:** UI and AI reliability implemented; automated checks pass, with provider configuration and browser acceptance pending. **Current branch:** `ahmed/phase-3-ui-ai-reliability`. **PR:** pending (draft). **Base:** [#27 (draft)](https://github.com/ahmedgahalla/forma-teaching-studio/pull/27).
+**Status:** UI and AI reliability implemented; automated checks pass, with provider configuration and browser acceptance pending. **Current branch:** `ahmed/phase-3-ui-ai-reliability`. **PR:** [#28 (draft)](https://github.com/ahmedgahalla/forma-teaching-studio/pull/28). **Base:** [#27 (draft)](https://github.com/ahmedgahalla/forma-teaching-studio/pull/27).
 
 **Goal:** a professor can explore the central model freely or open a finished lecture with notes, questions and model demonstrations, then return from a spontaneous experiment without losing the lecture. Builds on [product direction](../../PRODUCT_DIRECTION.md).
 

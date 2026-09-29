@@ -1,6 +1,6 @@
 # UI and AI reliability handoff
 
-Branch: `ahmed/phase-3-ui-ai-reliability`; base PR #27 at `9763e73`.
+Branch: `ahmed/phase-3-ui-ai-reliability`; base PR #27 at `9763e73`. Draft [#28 (draft)](https://github.com/ahmedgahalla/forma-teaching-studio/pull/28) is open; implementation commit `4c88ea9`.
 
 Implemented clearer lecture step/navigation and teaching-aid hierarchy, Atlas control refinements, explicit same-app AI reconnect, advanced backend configuration and shared safe cancellable request handling. Backend provider failures now distinguish configuration, permission, connection and quota cases. No solver, clinical content or model assets changed.
 
