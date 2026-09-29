@@ -5,6 +5,7 @@ import { toothMatrix } from './analysis';
 import {
   cameraViewDirection,
   createSelectionGlow,
+  createSelectionGlows,
   displayedFitPoints,
   displayedToothBounds,
   displayedToothPoints,
@@ -210,9 +211,9 @@ describe('lecture viewer presentation', () => {
       polygonOffsetFactor: -1,
       polygonOffsetUnits: -4,
     });
-    expect(material.uniforms.uColor.value.getHex()).toBe(0x8fc3e0);
-    expect(material.uniforms.uBase.value).toBe(0.02);
-    expect(material.uniforms.uRim.value).toBe(0.6);
+    expect(material.uniforms.uColor.value.getHex()).toBe(0xffd27f);
+    expect(material.uniforms.uBase.value).toBe(0.2);
+    expect(material.uniforms.uRim.value).toBe(1.15);
     expect(material.vertexShader).toContain('gl_Position = projectionMatrix * mv;');
     expect(material.vertexShader).not.toMatch(/thickness|viewport/);
     expect(material.fragmentShader).toContain('dot(normalize(vN), normalize(vV))');
@@ -286,5 +287,69 @@ describe('lecture viewer presentation', () => {
     expect(first.children.every(mesh => mesh.visible)).toBe(true);
     expect(second.children[0].visible).toBe(false);
     material.dispose();
+  });
+});
+
+describe('chart preview and persistent selection glows', () => {
+  it('keeps front-facing hover visible and selected highlights stronger without an opaque fill', () => {
+    const selected = selectionGlowMaterial(),
+      hover = selectionGlowMaterial(true);
+    expect(hover.uniforms.uColor.value.getHex()).toBe(0xffe7b0);
+    expect(hover.uniforms.uBase.value).toBeGreaterThan(0.1);
+    expect(selected.uniforms.uBase.value).toBeGreaterThan(hover.uniforms.uBase.value);
+    expect(selected.uniforms.uRim.value).toBeGreaterThan(hover.uniforms.uRim.value);
+    expect(hover.blending).toBe(THREE.AdditiveBlending);
+    expect(hover.depthWrite).toBe(false);
+    selected.dispose();
+    hover.dispose();
+  });
+
+  it('previews another tooth without changing selection, geometry or material ownership', () => {
+    const first = new THREE.Group(),
+      second = new THREE.Group();
+    const groups = new Map([
+      ['11', first],
+      ['21', second],
+    ]);
+    const teeth = model.teeth.slice(0, 1).map(tooth => ({ ...tooth, id: '11' }));
+    teeth.push({ ...teeth[0], id: '21' });
+    const positions = crown.getAttribute('position').array.slice();
+    const glows = createSelectionGlows(teeth, groups);
+    const a = first.children as THREE.Mesh<THREE.BufferGeometry, THREE.ShaderMaterial>[];
+    const b = second.children as THREE.Mesh<THREE.BufferGeometry, THREE.ShaderMaterial>[];
+    glows.update('11', true, true, false, false);
+    glows.update('21', false, false, false, true);
+    const selectedMaterial = a[0].material,
+      hoverMaterial = b[0].material;
+    expect(selectedMaterial.name).toBe('tooth-selection-glow');
+    expect(hoverMaterial.name).toBe('tooth-hover-glow');
+    expect(selectedMaterial).not.toBe(hoverMaterial);
+    expect(a.map(mesh => mesh.visible)).toEqual([true, true]);
+    expect(b.map(mesh => mesh.visible)).toEqual([true, false]);
+    glows.update('21', true, true, false, true);
+    expect(b[0].material).toBe(selectedMaterial);
+    glows.update('21', false, true, false, false);
+    expect(b.every(mesh => !mesh.visible)).toBe(true);
+    expect(a.every(mesh => mesh.visible)).toBe(true);
+    second.visible = false;
+    glows.update('21', false, true, false, true);
+    expect(b.every(mesh => !mesh.visible)).toBe(true);
+    second.visible = true;
+    glows.update('21', false, true, true, true);
+    expect(b.every(mesh => !mesh.visible)).toBe(true);
+    const selectedDisposed = vi.fn(),
+      hoverDisposed = vi.fn(),
+      geometryDisposed = vi.fn();
+    selectedMaterial.addEventListener('dispose', selectedDisposed);
+    hoverMaterial.addEventListener('dispose', hoverDisposed);
+    crown.addEventListener('dispose', geometryDisposed);
+    root.addEventListener('dispose', geometryDisposed);
+    glows.dispose();
+    expect(selectedDisposed).toHaveBeenCalledOnce();
+    expect(hoverDisposed).toHaveBeenCalledOnce();
+    expect(geometryDisposed).not.toHaveBeenCalled();
+    expect(crown.getAttribute('position').array).toEqual(positions);
+    crown.removeEventListener('dispose', geometryDisposed);
+    root.removeEventListener('dispose', geometryDisposed);
   });
 });

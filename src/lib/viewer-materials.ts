@@ -1,6 +1,5 @@
 import * as THREE from 'three';
 import { dentalStagePalette, type DentalStageTheme } from './dental-surface';
-import { selectionGlowMaterial } from './viewer-presentation';
 import { createAtlasMaterials } from './atlas-materials';
 import { preserveMaterialProgram, type DentalFarAO } from './atlas-shader';
 
@@ -28,7 +27,6 @@ export function createDentalMaterials(demo: boolean, theme: DentalStageTheme, fa
     enamel,
     lockedMaterial,
     contactMaterial,
-    selectionMaterial: selectionGlowMaterial(),
     rootMaterial:
       atlas?.rootMaterial ??
       new THREE.MeshStandardMaterial({

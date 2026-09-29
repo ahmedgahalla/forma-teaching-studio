@@ -39,3 +39,5 @@ The later Phase 3 follow-up [3.15 — Lecture presentation and mechanics](phase-
 [3.27 - Case lecture and wire activation verification](phase-3-demo-path/3.27-case-journey.md) follows PR #26 with one continuous case, authored motion, initial/final comparison and a separate calculated wire experiment. Faculty and browser acceptance remain pending.
 
 [3.28 - Clearer UI and AI reliability](phase-3-demo-path/3.28-ui-ai-reliability.md) follows PR #27 with named lecture steps, focused teaching controls and explicit AI reconnection with safe errors. Live OpenRouter command/explanation checks pass; browser acceptance remains pending.
+
+[3.29 - Tooth chart and lecture clarity](phase-3-demo-path/3.29-chart-hover-lecture-clarity.md) follows PR #28 with separate model/chart layout, transient tooth previews, stronger warm selection glow and clearer review/present guidance. Browser acceptance remains pending.

@@ -37,9 +37,14 @@ export function LectureNavigation({
             type="button"
             aria-pressed={mode === value}
             disabled={exploring}
+            title={
+              value === 'rehearse'
+                ? 'Review this step from its prepared start with presenter notes.'
+                : 'Present this step from its prepared start with notes and answer hidden.'
+            }
             onClick={() => onMode(value)}
           >
-            {value === 'rehearse' ? 'Rehearse' : 'Teach'}
+            {value === 'rehearse' ? 'Review notes' : 'Present'}
           </button>
         ))}
       </div>
@@ -81,7 +86,12 @@ export function LectureNavigation({
         </button>
       </div>
       {exploring ? (
-        <button type="button" className="lecture-primary" onClick={onReturn}>
+        <button
+          type="button"
+          className="lecture-primary"
+          title={`Restore step ${index + 1} with its paused view`}
+          onClick={onReturn}
+        >
           Return to lecture
         </button>
       ) : (

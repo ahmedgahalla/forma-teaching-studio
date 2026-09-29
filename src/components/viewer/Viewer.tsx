@@ -29,7 +29,7 @@ import { createRemovableRetainer } from '@/lib/removable-retainer';
 import { useStudioTheme } from '../shared/StudioTheme';
 import {
   cameraViewDirection,
-  createSelectionGlow,
+  createSelectionGlows,
   displayedToothBounds,
   displayedFitPoints,
   isToothVisible,
@@ -164,7 +164,6 @@ const Viewer = forwardRef<ViewerHandle, Props>(function Viewer(props, ref) {
     controls.maxDistance = 3000;
     const {
       enamel,
-      selectionMaterial,
       lockedMaterial,
       contactMaterial,
       rootMaterial,
@@ -203,8 +202,7 @@ const Viewer = forwardRef<ViewerHandle, Props>(function Viewer(props, ref) {
       brackets = new Map<string, THREE.Group>(),
       attachments = new Map<string, THREE.Mesh>(),
       ghosts = new Map<string, THREE.Mesh>(),
-      rootGhosts = new Map<string, THREE.Mesh>(),
-      selectionGlows = new Map<string, ReturnType<typeof createSelectionGlow>>();
+      rootGhosts = new Map<string, THREE.Mesh>();
     for (const tooth of props.model.teeth) {
       const group = new THREE.Group();
       group.position.fromArray(tooth.position);
@@ -232,10 +230,6 @@ const Viewer = forwardRef<ViewerHandle, Props>(function Viewer(props, ref) {
         scene.add(originalRoot);
         rootGhosts.set(tooth.id, originalRoot);
       }
-      selectionGlows.set(
-        tooth.id,
-        createSelectionGlow(group, tooth.geometry, tooth.rootGeometry, selectionMaterial),
-      );
       const bracket = kit.bracket(tooth);
       if (bracket) {
         bracket.userData.updatePlacement = createBracketPlacementUpdater(bracket);
@@ -262,6 +256,7 @@ const Viewer = forwardRef<ViewerHandle, Props>(function Viewer(props, ref) {
       scene.add(ghost);
       ghosts.set(tooth.id, ghost);
     }
+    const selectionGlows = createSelectionGlows(props.model.teeth, groups);
     const toothLabels = createToothLabelPresentation(
       props.model,
       groups,
@@ -750,10 +745,12 @@ const Viewer = forwardRef<ViewerHandle, Props>(function Viewer(props, ref) {
               : enamel,
           faded,
         );
-        selectionGlows.get(tooth.id)!(
+        selectionGlows.update(
+          tooth.id,
           selectedIds.includes(tooth.id) || (!!cutaway && tooth.id === p.selected),
           showRoots,
           p.isolateSelection,
+          p.hoveredToothId === tooth.id,
         );
         const root = roots.get(tooth.id);
         if (root) focusMaterials.apply(root, rootMaterial, faded);
@@ -1073,6 +1070,7 @@ const Viewer = forwardRef<ViewerHandle, Props>(function Viewer(props, ref) {
       removableKit.dispose();
       kit.dispose();
       focusMaterials.dispose();
+      selectionGlows.dispose();
       stage.dispose();
       ao.dispose();
       scenePass.dispose();
@@ -1085,7 +1083,6 @@ const Viewer = forwardRef<ViewerHandle, Props>(function Viewer(props, ref) {
       toothLabels.dispose();
       [
         enamel,
-        selectionMaterial,
         lockedMaterial,
         contactMaterial,
         rootMaterial,

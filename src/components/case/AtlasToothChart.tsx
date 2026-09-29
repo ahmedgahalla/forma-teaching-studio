@@ -1,5 +1,5 @@
 'use client';
-import type { CSSProperties } from 'react';
+import { useEffect, type CSSProperties } from 'react';
 import { orderedArchIds, toothArch } from '@/lib/appliances';
 import { ATLAS_DIAGRAM_HEIGHT, ATLAS_TOOTH_DIAGRAMS } from '@/lib/atlas-tooth-diagram';
 import type { CaseStudioApi } from './api';
@@ -41,7 +41,24 @@ function ToothSymbol({ id }: { id: string }) {
   );
 }
 
-export function AtlasToothChart({ api }: { api: ChartApi }) {
+export function AtlasToothChart({
+  api,
+  onHoverTooth,
+}: {
+  api: ChartApi;
+  onHoverTooth?: (id: string | null) => void;
+}) {
+  const inventory = api.ids.join(',');
+  useEffect(() => {
+    const clear = () => onHoverTooth?.(null);
+    window.addEventListener('blur', clear);
+    return () => {
+      window.removeEventListener('blur', clear);
+      clear();
+    };
+  }, [onHoverTooth, api.arch, inventory]);
+  const preview = (id: string) =>
+    onHoverTooth?.(api.arch === 'both' || api.arch === toothArch(id) ? id : null);
   const hasWisdomTeeth = api.ids.some(id => id.endsWith('8'));
   const slots = Object.keys(ATLAS_TOOTH_DIAGRAMS).filter(id => hasWisdomTeeth || !id.endsWith('8'));
   const width = (id: string) => ({ '--tooth-width': ATLAS_TOOTH_DIAGRAMS[id].md }) as CSSProperties;
@@ -73,7 +90,11 @@ export function AtlasToothChart({ api }: { api: ChartApi }) {
                           type="button"
                           aria-label={`Select tooth ${id}`}
                           aria-pressed={api.selectedIds.includes(id)}
-                          title={`Tooth ${id}${api.sandbox.lockedIds.includes(id) ? ' · locked' : ''}`}
+                          title={`Tooth ${id}${api.sandbox.lockedIds.includes(id) ? ' · locked' : ''}${api.arch !== 'both' && api.arch !== arch ? ` · click to show ${arch} arch` : ''}`}
+                          onMouseEnter={() => preview(id)}
+                          onMouseLeave={() => onHoverTooth?.(null)}
+                          onFocus={() => preview(id)}
+                          onBlur={() => onHoverTooth?.(null)}
                           data-moved={api.toothMoved(id) || undefined}
                           data-off={(api.arch !== 'both' && api.arch !== arch) || undefined}
                           onClick={event => {
@@ -116,6 +137,7 @@ export function AtlasToothChart({ api }: { api: ChartApi }) {
               ? `${api.selectedIds.length} teeth selected`
               : 'Dental chart · click a tooth'}
         </span>
+        <span>Hover to preview · click to select</span>
         <span>FDI</span>
       </div>
     </div>

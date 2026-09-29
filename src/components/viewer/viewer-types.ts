@@ -34,6 +34,8 @@ export type ViewerProps = {
   transforms: Transforms;
   selected: string;
   selectedIds: string[];
+  /** Display-only preview from the tooth chart; never part of selection or history. */
+  hoveredToothId?: string | null;
   onSelect: (id: string, additive: boolean) => void;
   ghost: boolean;
   gums: boolean;

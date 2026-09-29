@@ -182,3 +182,18 @@
     margin: 6px 10px 0;
   }
 }
+
+.lecture-exploration-context {
+  display: flex;
+  flex: 1 0 100%;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 3px 10px;
+  margin: 0;
+  padding: 5px 0;
+  color: var(--ui-muted);
+  font-size: 12px;
+}
+.lecture-exploration-context strong {
+  color: var(--ui-text);
+}

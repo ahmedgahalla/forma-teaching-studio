@@ -334,3 +334,15 @@ it.each([
     expect(calls.audience.mock.lastCall![0].content.stepTitle).toBe('Predict');
   },
 );
+
+it('names the paused lecture and step during exploration without exposing presenter notes to the audience', async () => {
+  await render({ exploring: true });
+  const context = container.querySelector('.lecture-exploration-context');
+  expect(context?.textContent).toContain('Lecture paused · Step 1');
+  expect(context?.textContent).toContain('Lecture · Predict');
+  expect(context?.textContent).toContain('Return to lecture restores this step and its view');
+  expect(context?.getAttribute('role')).toBe('status');
+  expect(calls.audience.mock.lastCall![0].content).not.toHaveProperty('notes');
+  await render({ exploring: false });
+  expect(container.querySelector('.lecture-exploration-context')).toBeNull();
+});

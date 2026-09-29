@@ -130,6 +130,15 @@ export function CaseShell({ api, teacher }: { api: CaseStudioApi; teacher: Teach
               onOpen={audience.open}
               onClose={audience.close}
             />
+            {teacher.session.exploring && (
+              <p className="lecture-exploration-context" role="status">
+                <strong>Lecture paused · Step {teacher.session.index + 1}</strong>
+                <span>
+                  {teacher.document.title} · {step?.title}
+                </span>
+                <span>Return to lecture restores this step and its view.</span>
+              </p>
+            )}
           </div>
         )}
         {teacherError && (

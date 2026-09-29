@@ -9,7 +9,11 @@ import { CaseMain } from './CaseMain';
 
 vi.mock('./OpeningCommandDock', () => ({ OpeningCommandDock: () => null }));
 vi.mock('../teaching/TeachingController', () => ({ TeachingCommandBar: () => null }));
-vi.mock('./CaseViewport', () => ({ CaseViewport: () => <section data-testid="model" /> }));
+vi.mock('./CaseViewport', () => ({
+  CaseViewport: ({ hoveredToothId }: { hoveredToothId?: string | null }) => (
+    <section data-testid="model" data-hovered-tooth={hoveredToothId ?? ''} />
+  ),
+}));
 vi.mock('./CaseLectureOverlay', () => ({ CaseLectureOverlay: () => null }));
 vi.mock('./CaseStageDock', () => ({ CaseStageDock: () => <div data-testid="playback" /> }));
 
@@ -158,4 +162,50 @@ it('bounds the lecture popup to its full heading instead of inheriting the narro
     scoped.remove();
     inherited.remove();
   }
+});
+
+it('keeps the chart outside the model stage and previews hover without selecting or recording an action', async () => {
+  const value = { ...api(), selectTooth: vi.fn(), setArch: vi.fn(), setCamera: vi.fn() };
+  await render({ api: value });
+  const model = container.querySelector<HTMLElement>('[data-testid="model"]')!;
+  const chart = container.querySelector<HTMLElement>('.atlas-odontogram')!;
+  expect(chart.parentElement).toBe(model.parentElement!.parentElement);
+  expect(model.parentElement!.contains(chart)).toBe(false);
+  expect(model.parentElement!.nextElementSibling).toBe(chart);
+  const tooth = chart.querySelector<HTMLButtonElement>('[aria-label="Select tooth 11"]')!;
+  await act(async () => tooth.dispatchEvent(new MouseEvent('mouseover', { bubbles: true })));
+  expect(model.dataset.hoveredTooth).toBe('11');
+  expect(value.selectTooth).not.toHaveBeenCalled();
+  expect(value.setArch).not.toHaveBeenCalled();
+  expect(execute).not.toHaveBeenCalled();
+  await act(async () => tooth.dispatchEvent(new MouseEvent('mouseout', { bubbles: true })));
+  expect(model.dataset.hoveredTooth).toBe('');
+  await act(async () => tooth.focus());
+  expect(model.dataset.hoveredTooth).toBe('11');
+  await render({ api: value, teacher: teacher() });
+  expect(container.querySelector('.atlas-odontogram')).toBeNull();
+  expect(model.dataset.hoveredTooth).toBe('');
+  await render({ api: value });
+  expect(model.dataset.hoveredTooth).toBe('');
+});
+
+it('does not carry a chart hover into another model or hidden arch with the same tooth IDs', async () => {
+  const value = api();
+  await render({ api: value });
+  const hover = async () => {
+    const tooth = container.querySelector<HTMLButtonElement>('[aria-label="Select tooth 11"]')!;
+    await act(async () => tooth.dispatchEvent(new MouseEvent('mouseover', { bubbles: true })));
+  };
+  await hover();
+  const model = container.querySelector<HTMLElement>('[data-testid="model"]')!;
+  expect(model.dataset.hoveredTooth).toBe('11');
+  await render({ api: { ...value, model: { ...value.model } } });
+  expect(model.dataset.hoveredTooth).toBe('');
+  await hover();
+  expect(model.dataset.hoveredTooth).toBe('11');
+  await render({ api: { ...value, arch: 'lower' } });
+  expect(model.dataset.hoveredTooth).toBe('');
+  await hover();
+  expect(model.dataset.hoveredTooth).toBe('');
+  expect(execute).not.toHaveBeenCalled();
 });

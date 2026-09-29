@@ -43,12 +43,16 @@ describe('presentation command parity and precedence', () => {
     ['show the answer', 'reveal'],
     ['hide answer', 'hide-answer'],
     ['show notes', 'notes'],
+    ['Show presenter notes', 'notes'],
     ['hide the notes', 'hide-notes'],
+    ['Hide presenter notes', 'hide-notes'],
     ['restart lecture', 'restart'],
     ['teach lecture', 'teach'],
     ['rehearse lecture', 'rehearse'],
     ['Rehearse', 'rehearse'],
     ['Teach', 'teach'],
+    ['Present', 'teach'],
+    ['Review notes', 'rehearse'],
     ['exit lecture', 'exit'],
     ['end lecture', 'exit'],
     ['exit lecture mode', 'exit'],
@@ -62,7 +66,7 @@ describe('presentation command parity and precedence', () => {
     expect(preserveLocalPlan(typed)).toBe(true);
   });
 
-  it.each(['Explore this question', 'Rehearse', 'Teach'])(
+  it.each(['Explore this question', 'Rehearse', 'Teach', 'Review notes', 'Present'])(
     'does not activate a presentation from the standalone command without a lecture: %s',
     text => {
       const original = structuredClone(withoutLecture),
@@ -86,7 +90,7 @@ describe('presentation command parity and precedence', () => {
       const parsed = parseTeachingPlan(text, state);
       expect(parsed).toMatchObject({
         actions: [],
-        clarification: expect.stringMatching(/Rehearse or Teach/),
+        clarification: expect.stringMatching(/Review notes or Present/),
       });
       expect(preserveLocalPlan(parsed)).toBe(true);
       expect(parseLocalVoicePlan(text, state, preflight)).toBeUndefined();

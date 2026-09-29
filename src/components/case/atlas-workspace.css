@@ -110,7 +110,8 @@
   padding: 0 18px 8px;
 }
 .atlas-workspace .workspace-scene {
-  overflow: visible;
+  min-width: 0;
+  overflow: auto;
 }
 .atlas-workspace .workspace-heading {
   align-items: center;
@@ -159,21 +160,30 @@
   border-radius: 6px;
   box-shadow: none;
 }
+/* Reserve the voice viewport's full minimum before the chart takes its own row. */
+.studio-experience.teaching-studio.atlas-workspace .workspace-scene > .atlas-explore-stage {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  grid-template-rows: minmax(0, 1fr);
+  flex: 1 0 0px;
+  min-height: 290px;
+  min-width: 0;
+  gap: 12px;
+}
 .studio-experience.teaching-studio.atlas-workspace
   .workspace-scene
   > .atlas-explore-stage:has(.atlas-tooth-inspector) {
-  display: grid;
   grid-template-columns: minmax(0, 1fr) 230px;
-  grid-template-rows: minmax(220px, 1fr) auto;
-  gap: 12px;
 }
-.atlas-explore-stage > .viewport {
+.app-shell.studio-experience.teaching-studio.atlas-workspace
+  .workspace-scene
+  > .atlas-explore-stage
+  > section.viewport.voice-viewport {
   grid-column: 1;
   grid-row: 1;
   min-width: 0;
-}
-.atlas-explore-stage > .lecture-console {
-  grid-column: 1 / -1;
+  min-height: 0;
+  height: auto;
 }
 .atlas-explore-stage .viewport-selection,
 .atlas-explore-stage .orientation,
@@ -205,8 +215,7 @@
   .studio-experience.teaching-studio.atlas-workspace
     .workspace-scene
     > .atlas-explore-stage:has(.atlas-tooth-inspector) {
-    display: flex;
-    flex-direction: column;
+    grid-template-columns: minmax(0, 1fr);
   }
   .atlas-explore-stage > .atlas-tooth-inspector {
     display: none;

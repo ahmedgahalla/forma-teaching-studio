@@ -312,9 +312,10 @@ Numbers 17–19 were checked against the current lessons and the parallel Phase 
 ## 42. Component replacements must account for later responsive overrides
 
 - **Mistake caught during review:** [3.23 source review](reviews/from-builder/2026-09-28-atlas-tooth-diagram.md) found the old workspace stylesheet's narrow-screen chart padding overrode the new component's mobile spacing.
+- **Repeat:** [3.29 layout review](reviews/from-builder/2026-09-29-chart-lecture-clarity.md) found the voice viewport minimum exceeded the space allocated by its parent stage, while visible overflow let it paint into the following chart. The parent now owns the minimum and the child fits it; scrolling preserves separate sibling space. A shared-rule promotion is proposed in the inbox for joint agreement.
 - **Root cause:** the parent stylesheet imports the component stylesheet first, then adds responsive rules targeting the same component.
 - **Prevention:** search all selectors for a replaced component and check their import/source order at each affected breakpoint. Keep the chart's spacing in its own stylesheet and remove its obsolete parent override. Browser acceptance remains necessary for final appearance.
-- **Status:** noted · **Count:** 1
+- **Status:** noted · **Count:** 2
 
 ## 43. Windows environment casing must survive configuration merging
 
@@ -336,3 +337,10 @@ Numbers 17–19 were checked against the current lessons and the parallel Phase 
 - **Root cause:** Uvicorn auto-detects colour from stdout; the Windows ignored stdout handle produced coloured stderr even though stderr was piped. The mocked readiness tests supplied only plain output.
 - **Prevention:** explicitly request `--no-use-colors` for the launcher-owned Uvicorn process. Cover the coloured/plain output contract and preserve readiness based on the successful bind rather than merely application startup. Do not print captured backend stderr to diagnose it; use fixed event flags.
 - **Status:** automated. **Count:** 1
+
+## 47. Freeze source and tests before the final combined gate
+
+- **Mistake caught during verification:** the first full [3.29 run](phases/phase-3-demo-path/3.29-chart-hover-lecture-clarity.md) loaded the old lecture clarification with the updated test expectation while the final copy correction was being saved. Four assertions failed despite the fresh focused run passing.
+- **Root cause:** the combined gate started before all parallel review follow-ups were frozen, allowing the test runner to see two source revisions.
+- **Prevention:** collect a final file-freeze acknowledgement from every contributor before the gate. Any subsequent code/test edit requires the affected tests and final acceptance run to use the same frozen revision. Do not classify a mixed-revision run as passing.
+- **Status:** noted. **Count:** 1

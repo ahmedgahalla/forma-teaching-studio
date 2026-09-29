@@ -14,8 +14,12 @@ export function LecturePicker({ lectures, currentId, onOpen, disabled = false }:
   const { menuRef, summaryRef } = useDisclosureMenu({ closeOnAction: true });
   return (
     <details ref={menuRef} className="lecture-picker">
-      <summary ref={summaryRef}>Demo lectures</summary>
+      <summary ref={summaryRef}>Choose lecture</summary>
       <div className="lecture-picker-list" aria-label="Demo lectures">
+        <p className="lecture-muted lecture-picker-help">
+          Choose a prepared case or topic. Review notes, then Present. Advance through its steps
+          with Next.
+        </p>
         {lectures.map(item => (
           <button
             key={item.id}
@@ -26,7 +30,9 @@ export function LecturePicker({ lectures, currentId, onOpen, disabled = false }:
           >
             <strong>{item.title}</strong>
             <span>{item.summary}</span>
-            <small>Suggested pacing · {item.duration}</small>
+            <small>
+              {currentId === item.id ? 'Current lecture · ' : ''}Suggested pacing · {item.duration}
+            </small>
           </button>
         ))}
         {disabled && <p className="lecture-muted">Return to the lecture to choose another demo.</p>}

@@ -7,6 +7,9 @@ import type { TeacherLectures } from './useTeacherLectures';
 import { LectureNavigation, type LectureNavigationProps } from './LectureNavigation';
 import { LecturePanel, type LecturePanelProps } from './LecturePanel';
 import { TeacherWorkspace } from './TeacherWorkspace';
+import { LecturePicker } from './LecturePicker';
+import { DEMO_LECTURES } from '@/lib/lecture-documents';
+import { createCaseJourneyLecture } from '@/lib/lecture-documents/sample-case-journey';
 
 let root: Root, container: HTMLDivElement;
 const lecture = {
@@ -93,7 +96,7 @@ it('shows the ready-made lecture without creation or editing controls in either 
     expect(container.textContent).not.toMatch(/STEP 1/);
     expect(container.querySelector('input, textarea, select, [contenteditable]')).toBeNull();
     expect(button('Reveal answer')).toBeDefined();
-    expect(button('Show notes')).toBeDefined();
+    expect(button('Show presenter notes')).toBeDefined();
     expect(container.querySelector('details')?.open).toBe(false);
     expect(container.querySelector('summary')?.textContent).toBe('Teaching aids');
     expect(container.textContent).not.toMatch(
@@ -109,7 +112,7 @@ it('keeps answers and notes hidden until the presenter requests them', async () 
   expect(container.textContent).not.toContain(lecture.steps[0].answer);
   expect(container.textContent).not.toContain(lecture.steps[0].notes);
   await click('Reveal answer');
-  await click('Show notes');
+  await click('Show presenter notes');
   expect(props.onReveal).toHaveBeenCalledOnce();
   expect(props.onNotes).toHaveBeenCalledOnce();
   await render(<LecturePanel {...props} answerVisible notesVisible />);
@@ -118,9 +121,9 @@ it('keeps answers and notes hidden until the presenter requests them', async () 
     'VISIBLE ON THIS SCREEN',
   );
   expect(button('Hide answer').getAttribute('aria-expanded')).toBe('true');
-  expect(button('Hide notes').getAttribute('aria-expanded')).toBe('true');
+  expect(button('Hide presenter notes').getAttribute('aria-expanded')).toBe('true');
   await click('Hide answer');
-  await click('Hide notes');
+  await click('Hide presenter notes');
   expect(props.onReveal).toHaveBeenCalledTimes(2);
   expect(props.onNotes).toHaveBeenCalledTimes(2);
 });
@@ -141,16 +144,16 @@ it('renders the current rehearsal notes read-only and hides absent optional cont
   expect(container.querySelector('.lecture-question, .lecture-answer, .lecture-notes')).toBeNull();
 });
 
-it('provides only Rehearse and Teach with bounded step navigation and separate playback', async () => {
+it('labels the existing views Review notes and Present with bounded navigation and separate playback', async () => {
   const props = navigationProps();
   await render(<LectureNavigation {...props} />);
   const modes = container.querySelector('[aria-label="Lecture view"]');
-  expect(modes?.textContent).toBe('RehearseTeach');
+  expect(modes?.textContent).toBe('Review notesPresent');
   expect(container.textContent).not.toMatch(/Prepare|My lectures|Create|Play|Pause|Replay/);
   expect(button('Previous lecture step').disabled).toBe(true);
   await click('Previous lecture step');
   expect(props.onPrevious).not.toHaveBeenCalled();
-  await click('Rehearse');
+  await click('Review notes');
   await click('Next lecture step');
   await click('Explore this question');
   expect(props.onMode).toHaveBeenCalledExactlyOnceWith('rehearse');
@@ -167,11 +170,11 @@ it('keeps a clear return path during exploration and prevents accidental lecture
   await render(<LectureNavigation {...props} />);
   expect(button('Previous lecture step').disabled).toBe(true);
   expect(button('Next lecture step').disabled).toBe(true);
-  expect(button('Rehearse').disabled).toBe(true);
-  expect(button('Teach').disabled).toBe(true);
+  expect(button('Review notes').disabled).toBe(true);
+  expect(button('Present').disabled).toBe(true);
   expect(container.querySelector('select')?.disabled).toBe(true);
   await click('Next lecture step');
-  await click('Rehearse');
+  await click('Review notes');
   expect(props.onNext).not.toHaveBeenCalled();
   expect(props.onMode).not.toHaveBeenCalled();
   await click('Return to lecture');
@@ -270,4 +273,92 @@ it('reveals active teaching aids and preserves visible notes when controls come 
   await click('Close biology');
   expect(props.onHideBiology).toHaveBeenCalledOnce();
   expect(container.querySelector('.lecture-notes')?.textContent).toBe(notes);
+});
+
+it('puts presenter notes first in Review notes and the student question first in Present', async () => {
+  await render(<LecturePanel {...panelProps({ mode: 'rehearse', notesVisible: true })} />);
+  let notes = container.querySelector('.lecture-notes')!;
+  let prompt = container.querySelector('.lecture-prompt')!;
+  expect(notes.compareDocumentPosition(prompt) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+  expect(container.querySelector('.lecture-step-guide')?.textContent).toContain(
+    'Present resets this step',
+  );
+  await render(<LecturePanel {...panelProps({ mode: 'teach', notesVisible: true })} />);
+  notes = container.querySelector('.lecture-notes')!;
+  prompt = container.querySelector('.lecture-prompt')!;
+  expect(prompt.compareDocumentPosition(notes) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+  expect(container.querySelector('.lecture-answer')).toBeNull();
+});
+
+it('gives capability-based guidance for inspection, authored movement, active wire and final steps', async () => {
+  const document = createCaseJourneyLecture();
+  for (const index of [0, 2, 3, 7, 11]) {
+    await render(<LecturePanel {...panelProps({ document, index })} />);
+    const guide = container.querySelector('.lecture-step-guide')!;
+    expect(guide.textContent).toContain('Inspection step');
+    expect(guide.textContent).not.toMatch(/Play|Show what happens/);
+    expect(guide.textContent).toContain('Then choose Next');
+  }
+  for (const index of [4, 9, 10]) {
+    await render(<LecturePanel {...panelProps({ document, index })} />);
+    expect(container.querySelector('.lecture-step-guide')!.textContent).toContain(
+      'press Play below the model',
+    );
+    expect(container.querySelector('button[aria-label="Play demonstration"]')).toBeNull();
+  }
+  await render(<LecturePanel {...panelProps({ document, index: 8 })} />);
+  let guide = container.querySelector('.lecture-step-guide')!;
+  expect(guide.textContent).toContain('Interactive experiment');
+  expect(guide.textContent).toContain('Return to lecture resumes this step');
+  expect(guide.textContent).toContain(
+    'Explore this question, open Commands and run “show what happens”',
+  );
+  expect(container.querySelector('.lecture-answer')).toBeNull();
+  await render(<LecturePanel {...panelProps({ document, index: 13 })} />);
+  guide = container.querySelector('.lecture-step-guide')!;
+  expect(guide.textContent).toContain('final step');
+  expect(guide.textContent).not.toContain('Then choose Next');
+});
+
+it('explains the temporary comparison instead of telling a presenter to play its source step', async () => {
+  const document = createCaseJourneyLecture();
+  await render(<LecturePanel {...panelProps({ document, index: 4, comparison: 'finish' })} />);
+  const guide = container.querySelector('.lecture-step-guide')!;
+  expect(guide.textContent).toContain('Comparison view');
+  expect(guide.textContent).toContain('Close comparison restores this step');
+  expect(guide.textContent).not.toContain('Play');
+});
+
+it('makes lecture selection explicit and keeps the current lecture and return path clear', async () => {
+  const onOpen = vi.fn();
+  await render(
+    <LecturePicker lectures={DEMO_LECTURES} currentId={DEMO_LECTURES[0].id} onOpen={onOpen} />,
+  );
+  expect(container.querySelector('summary')?.textContent).toBe('Choose lecture');
+  const menu = container.querySelector('details')!;
+  await act(async () => menu.querySelector('summary')!.click());
+  expect(menu.open).toBe(true);
+  expect(container.querySelector('.lecture-picker-help')?.textContent).toContain(
+    'Review notes, then Present',
+  );
+  expect(container.querySelector('[aria-pressed="true"]')?.textContent).toContain(
+    'Current lecture',
+  );
+  await act(async () =>
+    container.querySelectorAll<HTMLButtonElement>('.lecture-picker-list > button')[1].click(),
+  );
+  expect(onOpen).toHaveBeenCalledExactlyOnceWith(DEMO_LECTURES[1].id);
+  expect(menu.open).toBe(false);
+  await render(
+    <LecturePicker
+      lectures={DEMO_LECTURES}
+      currentId={DEMO_LECTURES[0].id}
+      onOpen={onOpen}
+      disabled
+    />,
+  );
+  expect(container.textContent).toContain('Return to the lecture to choose another demo');
+  expect(
+    [...container.querySelectorAll<HTMLButtonElement>('button')].every(node => node.disabled),
+  ).toBe(true);
 });
