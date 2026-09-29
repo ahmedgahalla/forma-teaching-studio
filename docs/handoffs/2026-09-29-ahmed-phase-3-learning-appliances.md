@@ -1,6 +1,6 @@
 # Learner walkthrough and TAD handoff
 
-Branch: `ahmed/phase-3-learning-appliances`; base PR #29 at `34d70d2`. Draft PR pending.
+Branch: `ahmed/phase-3-learning-appliances`; base PR #29 at `34d70d2`. Draft [#30 (draft)](https://github.com/ahmedgahalla/forma-teaching-studio/pull/30) is open; implementation commit `6ae2a02`.
 
 Implemented one model-focused learning view, short always-visible takeaways, compact navigation and optional inspection/comparison. Removed the normal role split and audience launch. Narration and AI context match the visible takeaway. The seventeen-step case adds an optional TAD, passive elastic and calculated response; activated lecture steps calculate through the existing validated runtime and retain cancellation/history. Pooled TAD geometry and camera fitting keep the screw recognizable and in-frame by source/projection evidence.
 

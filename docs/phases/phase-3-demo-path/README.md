@@ -1,6 +1,6 @@
 # Phase 3 — demo path
 
-**Status:** Model-focused learner view and optional TAD sequence implemented; automated gate passes, browser acceptance pending. **Current branch:** `ahmed/phase-3-learning-appliances`. **PR:** Pending draft creation. **Base:** [#29 (draft)](https://github.com/ahmedgahalla/forma-teaching-studio/pull/29).
+**Status:** Model-focused learner view and optional TAD sequence implemented; automated gate passes, browser acceptance pending. **Current branch:** `ahmed/phase-3-learning-appliances`. **PR:** [#30 (draft)](https://github.com/ahmedgahalla/forma-teaching-studio/pull/30). **Base:** [#29 (draft)](https://github.com/ahmedgahalla/forma-teaching-studio/pull/29).
 
 **Goal:** explore the central model freely or follow a finished learning walkthrough with minimal text, then return from an experiment without losing the current step. The latest owner request removes the visible professor/student split. Builds on [product direction](../../PRODUCT_DIRECTION.md).
 
