@@ -1,12 +1,12 @@
 # Phase 3 — demo path
 
-**Status:** UI and AI reliability implemented; automated checks pass, with provider configuration and browser acceptance pending. **Current branch:** `ahmed/phase-3-ui-ai-reliability`. **PR:** [#28 (draft)](https://github.com/ahmedgahalla/forma-teaching-studio/pull/28). **Base:** [#27 (draft)](https://github.com/ahmedgahalla/forma-teaching-studio/pull/27).
+**Status:** UI and AI reliability implemented; automated checks pass, with live OpenRouter verification passed and browser acceptance pending. **Current branch:** `ahmed/phase-3-ui-ai-reliability`. **PR:** [#28 (draft)](https://github.com/ahmedgahalla/forma-teaching-studio/pull/28). **Base:** [#27 (draft)](https://github.com/ahmedgahalla/forma-teaching-studio/pull/27).
 
 **Goal:** a professor can explore the central model freely or open a finished lecture with notes, questions and model demonstrations, then return from a spontaneous experiment without losing the lecture. Builds on [product direction](../../PRODUCT_DIRECTION.md).
 
 ## Current implementation
 
-- [3.28 - Clearer UI and AI reliability](3.28-ui-ai-reliability.md): named lecture steps, grouped teaching aids and explicit AI reconnection with safe provider errors. Live provider and browser acceptance remain pending.
+- [3.28 - Clearer UI and AI reliability](3.28-ui-ai-reliability.md): named lecture steps, grouped teaching aids and explicit AI reconnection with safe provider errors. Live OpenRouter command/explanation checks pass; browser acceptance remains pending.
 
 - [3.27 - Case lecture and wire verification](3.27-case-journey.md): one continuous fourteen-step case, with a separate wire-response experiment, exact initial/finished comparison and the zero-activation reset fix. Depends on PR #26; faculty and browser acceptance remain pending.
 
@@ -45,6 +45,6 @@ See [acceptance evidence and rehearsal](3.19-acceptance.md) for the requirement-
 
 The owner's latest request supersedes the earlier teacher-authoring scope: provide our own finished sample and remove lecture creation. **3.9 remains the consolidated first vertical slice** of the [Explore/Lecture proposal](https://github.com/ahmedgahalla/forma-teaching-studio/pull/12), retaining its runner, return and input work. Proposed 3.10–3.14 are not duplicate outstanding milestones; editing and persistence are deliberately excluded. Former browser lecture saves are untouched because the revised feature does not access them.
 
-The original sample's four suggested allocations total **205 seconds (3 minutes 25 seconds), not yet measured**; the new anchorage and biology lectures each suggest 4–5 minutes. The earlier [3.9 verification record](3.9-teacher-lectures.md#acceptance-and-verification) recorded 2,383 passing tests and a BVH timeout; [3.15](3.15-lecture-mechanics.md#verification-and-acceptance) records the later timing fixes and full passing run. The current [3.28 verification](3.28-ui-ai-reliability.md#verification) passes 3,045 frontend tests, 659 backend tests and the remaining automated local checks. Real browser access is blocked by security policy; no browser, DPR 1/2, microphone or projector acceptance is claimed.
+The original sample's four suggested allocations total **205 seconds (3 minutes 25 seconds), not yet measured**; the new anchorage and biology lectures each suggest 4–5 minutes. The earlier [3.9 verification record](3.9-teacher-lectures.md#acceptance-and-verification) recorded 2,383 passing tests and a BVH timeout; [3.15](3.15-lecture-mechanics.md#verification-and-acceptance) records the later timing fixes and full passing run. The current [3.28 verification](3.28-ui-ai-reliability.md#verification) passes 3,046 frontend tests, 659 backend tests and the remaining automated local checks. Real browser access is blocked by security policy; no browser, DPR 1/2, microphone or projector acceptance is claimed.
 
 The owner subsequently authorized the presentation, local-asset, audience and biology improvements plus researched mechanics; those changes are recorded in 3.15. Educator review and real-device rehearsal remain outstanding. Authoring and arbitrary generated animation remain excluded.
