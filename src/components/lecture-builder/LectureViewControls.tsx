@@ -18,13 +18,19 @@ export function LectureViewControls({
   jawAvailable,
   jawOpen,
 }: LectureViewControlsProps) {
+  const viewLabel =
+    view === 'perspective' ? '3D view' : `${view[0].toUpperCase()}${view.slice(1)} view`;
   const { menuRef, summaryRef } = useDisclosureMenu({ closeOnAction: true });
   return (
     <div className="lecture-view-controls" role="group" aria-label="Lecture model view">
       <details ref={menuRef} className="opening-view-menu">
-        <summary ref={summaryRef} aria-label="Lecture view controls" title="Camera and roots">
+        <summary
+          ref={summaryRef}
+          aria-label={`Lecture view controls: ${viewLabel}`}
+          title="Change camera or roots. Your view stays between steps."
+        >
           <Focus size={16} />
-          View
+          {viewLabel}
         </summary>
         <div className="opening-view-content">
           <JawControl jawAvailable={jawAvailable} jawOpen={jawOpen} execute={execute} />
@@ -59,7 +65,7 @@ export function LectureViewControls({
       <button
         type="button"
         aria-label="Fit model"
-        title="Fit the visible anatomy"
+        title="Fit visible teeth and appliances"
         onClick={() => void execute([{ kind: 'presentation', action: 'fit-view' }], 'Fit model')}
       >
         <Maximize size={16} />

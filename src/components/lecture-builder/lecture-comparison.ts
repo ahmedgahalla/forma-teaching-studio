@@ -32,9 +32,10 @@ export function lectureComparisonSnapshot(
     return lectureStepSnapshot(
       {
         ...held,
-        scene: { ...held.scene, setup: { ...held.scene.setup, camera: base.camera, jawOpen } },
+        scene: { ...held.scene, setup: { ...held.scene.setup, jawOpen } },
       },
       base,
+      true,
     );
   }
   if (!availableLectureComparisons(document).includes(target))
@@ -44,7 +45,7 @@ export function lectureComparisonSnapshot(
     item => item.demo?.caseId === 'movement-types' && item.demo.variantId === variantId,
   );
   if (!step) throw new Error('This lecture does not include that movement comparison.');
-  const snapshot = lectureStepSnapshot(
+  return lectureStepSnapshot(
     {
       ...step,
       demo: undefined,
@@ -55,10 +56,9 @@ export function lectureComparisonSnapshot(
           variantId,
           target === 'start' ? 0 : 1,
         ),
-        setup: { ...step.scene.setup, camera: base.camera },
       },
     },
     base,
+    true,
   );
-  return { ...snapshot, camera: base.camera };
 }

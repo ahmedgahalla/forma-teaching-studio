@@ -69,6 +69,8 @@ export type ViewerProps = {
   isolateSelection?: boolean;
   /** Enlarge the selected tooth while keeping neighboring enamel and roots faintly visible. */
   teachingFocus?: boolean;
+  /** Keep the current camera through authored changes; explicit view/focus controls still work. */
+  preserveCamera?: boolean;
   mechanics?: MechanicsExperiment | null;
   mechanicsForces?: boolean;
   mechanicsRevealed?: boolean;

@@ -19,7 +19,7 @@ import type { MechanicsExperiment } from '@/lib/mechanics/types';
 import { createAttachmentGeometry } from '@/lib/attachments';
 import { createApplianceKit, orderedArchIds, toothArch } from '@/lib/appliances';
 import { LECTURE_CAMERA_MARGIN, perspectiveFitFrame } from '@/lib/camera-fit';
-import { sameViewerGeometry } from '@/lib/viewer-model';
+import { canRestoreViewerCamera, createViewerAutoFit } from './viewer-camera-policy';
 import { createWorkflowAppliances, workflowFixedVisibility } from '@/lib/workflow-appliances';
 import { anatomyCutawayTooth, createTeachingAnatomy } from '@/lib/teaching-anatomy';
 import { createRenderBarrier } from '@/lib/render-barrier';
@@ -325,7 +325,8 @@ const Viewer = forwardRef<ViewerHandle, Props>(function Viewer(props, ref) {
         new THREE.LineDashedMaterial({ color: palette.curve, dashSize: 1, gapSize: 0.7 }),
       );
     scene.add(curveLine);
-    let lastCurve: Vec3[] | undefined;
+    let lastCurve: Vec3[] | undefined,
+      lastCurveJaw = live.current.jawOpen;
     const updateStageTheme = () => {
       if (renderedTheme === liveTheme.current) return;
       renderedTheme = liveTheme.current;
@@ -355,7 +356,9 @@ const Viewer = forwardRef<ViewerHandle, Props>(function Viewer(props, ref) {
       colors.needsUpdate = true;
     };
     const previousCamera = savedCamera.current,
-      restoreCamera = previousCamera && sameViewerGeometry(previousCamera.model, props.model);
+      restoreCamera =
+        previousCamera &&
+        canRestoreViewerCamera(previousCamera.model, props.model, live.current.preserveCamera);
     let currentView: ViewName = restoreCamera ? previousCamera.view : 'perspective',
       snapshotRequested = false,
       disposed = false,
@@ -668,18 +671,16 @@ const Viewer = forwardRef<ViewerHandle, Props>(function Viewer(props, ref) {
       removableState = '',
       lastTransforms: Transforms | undefined,
       lastWorkflowTransforms: Transforms | undefined,
-      lastRemovableTransforms: Transforms | undefined,
-      lastArch = live.current.arch,
-      lastRoots = live.current.roots,
-      lastGums = live.current.gums,
-      lastOpening = live.current.opening,
-      lastJaw = live.current.jawOpen;
+      lastRemovableTransforms: Transforms | undefined;
     let anatomyState = '',
-      lastAnatomyTransforms: Transforms | undefined,
-      lastAnatomyFit = props.model.demo
+      lastAnatomyTransforms: Transforms | undefined;
+    const shouldAutoFit = createViewerAutoFit(
+      live.current,
+      props.model.demo
         ? `${live.current.anatomy?.bone}/${live.current.anatomy?.ligament}/${cutawayTooth()?.id || ''}`
-        : '';
-    let lastIsolation = isolationKey();
+        : '',
+      isolationKey(),
+    );
     const updateToothPose = createToothPoseUpdater(groups, ghosts, rootGhosts, roots);
     function render() {
       if (graphicsLost) return;
@@ -768,10 +769,11 @@ const Viewer = forwardRef<ViewerHandle, Props>(function Viewer(props, ref) {
         if (attachments.has(tooth.id)) attachments.get(tooth.id)!.visible = p.attachments;
       }
       curveLine.visible = !!p.archCurve?.length && !cutaway && !p.isolateSelection;
-      if (lastCurve !== p.archCurve || lastJaw !== jawOpen) {
+      if (lastCurve !== p.archCurve || lastCurveJaw !== jawOpen) {
         curveGeometry.setFromPoints(jawCurvePoints(p.archCurve, p.archCurveArch === 'lower', p));
         curveLine.computeLineDistances();
         lastCurve = p.archCurve;
+        lastCurveJaw = jawOpen;
       }
       gumMaterial.opacity = showRoots && !cutaway ? 0.22 : 1;
       gumMaterial.depthWrite = !showRoots || !!cutaway;
@@ -926,25 +928,7 @@ const Viewer = forwardRef<ViewerHandle, Props>(function Viewer(props, ref) {
       const anatomyFit = props.model.demo
         ? `${p.anatomy?.bone}/${p.anatomy?.ligament}/${cutaway?.id || ''}`
         : '';
-      const isolated = isolationKey();
-      if (
-        lastArch !== p.arch ||
-        lastRoots !== showRoots ||
-        lastGums !== gums ||
-        lastOpening !== opening ||
-        lastJaw !== jawOpen ||
-        lastAnatomyFit !== anatomyFit ||
-        lastIsolation !== isolated
-      ) {
-        fit(currentView, !!cutaway);
-        lastArch = p.arch;
-        lastRoots = showRoots;
-        lastGums = gums;
-        lastOpening = opening;
-        lastJaw = jawOpen;
-        lastAnatomyFit = anatomyFit;
-        lastIsolation = isolated;
-      }
+      if (shouldAutoFit(p, anatomyFit, isolationKey())) fit(currentView, !!cutaway);
       toothStudy.prepare(p.toothStudy, transforms, opening, !!pendingCamera || restoringSavedStudy);
       restoringSavedStudy = false;
       if (pendingCamera) {

@@ -37,6 +37,7 @@ export function CaseViewport({
       >
         <Viewer
           teachingFocus={teachingFocus}
+          preserveCamera={lecturePresentation}
           hoveredToothId={hoveredToothId}
           toothStudy={api.toothStudy}
           onReferenceInteraction={api.teaching.referenceInteraction}

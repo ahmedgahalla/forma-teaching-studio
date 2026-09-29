@@ -1,10 +1,12 @@
 # Phase 3 — demo path
 
-**Status:** Model-focused learner view and optional TAD sequence implemented; automated gate passes, browser acceptance pending. **Current branch:** `ahmed/phase-3-learning-appliances`. **PR:** [#30 (draft)](https://github.com/ahmedgahalla/forma-teaching-studio/pull/30). **Base:** [#29 (draft)](https://github.com/ahmedgahalla/forma-teaching-studio/pull/29).
+**Status:** User-controlled lecture view implemented; automated gate passes, browser acceptance and requested video capture pending. **Current branch:** `ahmed/phase-3-user-controlled-view`. **PR:** Pending draft creation. **Base:** [#30 (draft)](https://github.com/ahmedgahalla/forma-teaching-studio/pull/30).
 
 **Goal:** explore the central model freely or follow a finished learning walkthrough with minimal text, then return from an experiment without losing the current step. The latest owner request removes the visible professor/student split. Builds on [product direction](../../PRODUCT_DIRECTION.md).
 
 ## Current implementation
+
+- [3.31 - User-controlled lecture view](3.31-user-controlled-view.md): preserve the chosen camera across steps, with explicit Fit/focus and accurate view labels. A sixty-second continuous recording rundown is prepared; actual capture is blocked.
 
 - [3.30 - Model-focused learning and TAD appliances](3.30-learning-appliances.md): one learner workspace, short takeaways, optional anchor/elastic/response stages and direct guarded calculation. This supersedes the earlier review/present interface. Browser acceptance remains pending.
 
@@ -41,7 +43,7 @@
 - [3.9 — Ready-made lecture and free exploration](3.9-teacher-lectures.md): Lecture opens the fixed four-step translation/tipping sample directly in Teach. Rehearse exposes notes; questions precede answers; navigation and playback are deterministic; a question detour preserves the paused lecture and independent Explore workspace. There is no lecture authoring, local lecture library, import/export or saving.
 - [3.2 — Lecture-ready opening](3.2-lecture-ready-opening.md): collapsed editing and commands, grouped controls, full-width model and preserved preview decisions. Dependency: [PR #13](https://github.com/ahmedgahalla/forma-teaching-studio/pull/13).
 
-The current branch follows draft PR #29 at `34d70d2` and retains the earlier [Phase 4](../phase-4-voice-lecture-assistant/README.md) voice, glossary, tooth-study and presentation work. The stacked PR does not trigger the current main-targeted CI workflow; it is not represented as CI-green or merged.
+The current branch follows draft PR #30 at `3106cea` and retains the earlier [Phase 4](../phase-4-voice-lecture-assistant/README.md) voice, glossary, tooth-study and presentation work. The stacked PR does not trigger the current main-targeted CI workflow; it is not represented as CI-green or merged.
 
 ## Scope decision and remaining acceptance
 
@@ -49,6 +51,6 @@ See [acceptance evidence and rehearsal](3.19-acceptance.md) for the requirement-
 
 The owner's latest request supersedes the earlier teacher-authoring scope: provide our own finished sample and remove lecture creation. **3.9 remains the consolidated first vertical slice** of the [Explore/Lecture proposal](https://github.com/ahmedgahalla/forma-teaching-studio/pull/12), retaining its runner, return and input work. Proposed 3.10–3.14 are not duplicate outstanding milestones; editing and persistence are deliberately excluded. Former browser lecture saves are untouched because the revised feature does not access them.
 
-The original sample's four suggested allocations total **205 seconds (3 minutes 25 seconds), not yet measured**; the new anchorage and biology lectures each suggest 4–5 minutes. The earlier [3.9 verification record](3.9-teacher-lectures.md#acceptance-and-verification) recorded 2,383 passing tests and a BVH timeout; [3.15](3.15-lecture-mechanics.md#verification-and-acceptance) records the later timing fixes and full passing run. The previous [3.29 verification](3.29-chart-hover-lecture-clarity.md#verification) passed 3,073 frontend tests, 659 backend tests and the remaining automated local checks. Current results are recorded in [3.30](3.30-learning-appliances.md#verification). Real browser access is blocked by security policy; no browser, DPR 1/2, microphone or projector acceptance is claimed.
+The original sample's four suggested allocations total **205 seconds (3 minutes 25 seconds), not yet measured**; the new anchorage and biology lectures each suggest 4–5 minutes. The earlier [3.9 verification record](3.9-teacher-lectures.md#acceptance-and-verification) recorded 2,383 passing tests and a BVH timeout; [3.15](3.15-lecture-mechanics.md#verification-and-acceptance) records the later timing fixes and full passing run. The previous [3.29 verification](3.29-chart-hover-lecture-clarity.md#verification) passed 3,073 frontend tests, 659 backend tests and the remaining automated local checks. The [3.30 gate](3.30-learning-appliances.md#verification) passed 3,090 frontend and 659 backend tests. Current work and results are recorded in [3.31](3.31-user-controlled-view.md#implementation-and-verification). Real browser access is blocked by security policy; no browser, DPR 1/2, microphone or projector acceptance is claimed.
 
 The owner subsequently authorized the presentation, local-asset, audience and biology improvements plus researched mechanics; those changes are recorded in 3.15. Educator review and real-device rehearsal remain outstanding. Authoring and arbitrary generated animation remain excluded.
